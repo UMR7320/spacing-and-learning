@@ -13864,7 +13864,6 @@ var $author$project$View$radio = F3(
 						]))
 				]));
 	});
-var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$View$button = F2(
 	function (message, txt) {
 		return A2(
@@ -13934,7 +13933,7 @@ var $author$project$Experiment$Meaning$view = F4(
 							_List_fromArray(
 								[
 									$rtfeldman$elm_css$Html$Styled$text(
-									_Utils_eq(state.userAnswer, trial.definition) ? trial.feedbackCorrect : trial.feedbackIncorrect)
+									(!_Utils_eq(state.userAnswer, trial.definition)) ? trial.feedbackCorrect : trial.feedbackIncorrect)
 								])),
 							A2(
 							$rtfeldman$elm_css$Html$Styled$div,
@@ -14146,61 +14145,45 @@ var $author$project$Main$viewExperiment = function (model) {
 						$author$project$Main$UserClickedFeedbackButton,
 						$author$project$Main$UserClickedNextTrialButton);
 				case 'Translation':
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 170, column: 21},
-							end: {line: 170, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 				case 'Synonym':
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 173, column: 21},
-							end: {line: 173, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 				case 'ClosedChoiceSpelling':
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 176, column: 21},
-							end: {line: 176, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 				case 'ScrabbleSpelling':
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 179, column: 21},
-							end: {line: 179, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 				case 'FreeWritingSpelling':
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 182, column: 21},
-							end: {line: 182, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 				case 'ClosedChoiceTextCompletion':
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 185, column: 21},
-							end: {line: 185, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 				case 'ClosedChoiceTextAndAudioUnderstanding':
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 188, column: 21},
-							end: {line: 188, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 				default:
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 191, column: 21},
-							end: {line: 191, column: 31}
-						})('I didn\'t create this part yet');
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
+						]);
 			}
 	}
 };
@@ -15371,7 +15354,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37671" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38651" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

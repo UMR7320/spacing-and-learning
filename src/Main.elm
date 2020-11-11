@@ -167,28 +167,27 @@ viewExperiment model =
                         UserClickedNextTrialButton
 
                 E.Translation ->
-                    Debug.todo "I didn't create this part yet"
 
                 E.Synonym ->
-                    Debug.todo "I didn't create this part yet"
+                    [ text "I didn't create this part yet" ]
 
                 E.ClosedChoiceSpelling ->
-                    Debug.todo "I didn't create this part yet"
+                    [ text "I didn't create this part yet" ]
 
                 E.ScrabbleSpelling ->
-                    Debug.todo "I didn't create this part yet"
+                    [ text "I didn't create this part yet" ]
 
                 E.FreeWritingSpelling ->
-                    Debug.todo "I didn't create this part yet"
+                    [ text "I didn't create this part yet" ]
 
                 E.ClosedChoiceTextCompletion ->
-                    Debug.todo "I didn't create this part yet"
+                    [ text "I didn't create this part yet" ]
 
                 E.ClosedChoiceTextAndAudioUnderstanding ->
-                    Debug.todo "I didn't create this part yet"
+                    [ text "I didn't create this part yet" ]
 
                 E.FreeWritingTextCompletion ->
-                    Debug.todo "I didn't create this part yet"
+                    [ text "I didn't create this part yet" ]
 
 
 
@@ -207,6 +206,10 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        currentState =
+            Meaning.getState model.experiment
+    in
     case msg of
         BrowserChangedUrl url ->
             ( { model | route = Route.fromUrl url }
@@ -248,11 +251,7 @@ update msg model =
             ( { model | experiment = E.Failure reason }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            let
-                currentState =
-                    Meaning.getState model.experiment
-            in
-            ( { model | experiment = Meaning.updateState { currentState | userAnswer = newChoice } model.experiment }
+            ( { model | experiment = model.experiment |> Meaning.updateState { currentState | userAnswer = newChoice } }
             , Cmd.none
             )
 

@@ -39,7 +39,7 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                 True ->
                     [ h4 []
                         [ text <|
-                            if state.userAnswer == trial.definition then
+                            if state.userAnswer /= trial.definition then
                                 trial.feedbackCorrect
 
                             else
