@@ -3,11 +3,13 @@ module Main exposing (main)
 import Browser
 import Browser.Navigation as Nav
 import Data
+import Experiment.Experiment as E
+import Experiment.Meaning as Meaning exposing (..)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (attribute, class, disabled, href)
 import Html.Styled.Events exposing (onClick)
 import Http
-import RemoteData exposing (RemoteData)
+import RemoteData exposing (RemoteData, WebData)
 import Route exposing (Route(..))
 import Url exposing (Url)
 import Url.Builder
@@ -25,16 +27,8 @@ type alias Flags =
 type alias Model =
     { key : Nav.Key
     , route : Route.Route
-    , package : RemoteData Http.Error Data.Package
+    , experiment : E.Experiment Meaning.Trial Meaning.State
     }
-
-
-type Msg
-    = -- Message naming conventions: https://youtu.be/w6OVDBqergc
-      BrowserChangedUrl Url
-    | UserClickedLink Browser.UrlRequest
-    | UserClickedPackageButton
-    | ServerRespondedWithPackage (Result Http.Error Data.Package)
 
 
 main : Program Flags Model Msg
@@ -57,9 +51,9 @@ project : { description : String, title : String, url : String }
 project =
     { title = "Apprentissage et espacement"
     , description = """
-        Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglais. 
+        Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. 
       """
-    , url = Url.Builder.absolute [ "run" ] []
+    , url = Url.Builder.absolute [ "start" ] []
     }
 
 
@@ -73,40 +67,22 @@ view model =
 body : Model -> List (Html Msg)
 body model =
     [ View.header
-        [ navIn "Home" "/"
-        , navIn "Demo" "/demo"
-        , navOut "Le Laboratoire" "https://bcl.cnrs.fr/"
-        , navOut "L'équipe" "https://twitter.com/CedricSoulas"
-        , navOut "Github" "https://github.com/cedricss/elm-batteries"
+        [ navIn "L'expérience" "/start"
+        , navOut "BCL" "https://bcl.cnrs.fr/"
+        , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
         ]
     , View.container <|
         case model.route of
-            ApiDemo ->
-                viewDemo model
-
-            Home ->
-                viewHome model
+            ExperimentStart ->
+                viewExperiment model
 
             NotFound ->
                 View.notFound
     ]
 
 
-viewHome : Model -> List (Html Msg)
-viewHome model =
-    [ h1 [] [ text project.title ]
-    , p
-        [ class "max-w-2xl text-xl mb-4" ]
-        [ text project.description ]
-    , ul
-        [ class "text-xl" ]
-        [ li [] [ a [ href project.url ] [ text "Commencer l'expérience ›" ] ]
-        ]
-    ]
-
-
-viewDemo : Model -> List (Html Msg)
-viewDemo model =
+viewExperiment : Model -> List (Html Msg)
+viewExperiment model =
     let
         content attributes =
             ul <|
@@ -120,73 +96,113 @@ viewDemo model =
         item key value =
             li [] (View.keyValue key value)
 
-        fetchButton =
+        startButton =
             button
-                [ class "w-56"
-                , attribute "data-action" "fetch-package"
-                , onClick UserClickedPackageButton
+                [ class "w-64"
+                , attribute "data-action" "start-experiment"
+                , onClick UserClickedStartExperimentButton
                 ]
-                [ text "Fetch package.json" ]
+                [ text "Commencer l'expérience" ]
     in
-    [ h1 [] [ text "Demo" ]
-    , h2 [] [ text "Serverless Lambda function on Netlify" ]
-    , p
-        [ class "max-w-xl text-xl mb-8" ]
-        [ text "The demo function has a faux 500ms delay to simulate a slower connection and illustrate the loading state. "
-        , a
-            [ href "https://github.com/cedricss/elm-batteries/blob/master/functions/demo/demo.js#L5" ]
-            [ text "Learn more ›" ]
-        ]
-    , div [] <|
-        case model.package of
-            RemoteData.Success p ->
-                [ fetchButton
-                , content
-                    [ attribute "data-result" "success"
-                    , class "bg-gray-300"
-                    ]
-                    [ item "name" p.name
-                    , item "url" p.url
-                    , item "author" p.author
-                    , item "license" p.license
-                    ]
-                ]
+    case model.experiment of
+        E.NotAsked ->
+            [ h1 [] [ text "Apprentissage et Espacement" ]
 
-            RemoteData.NotAsked ->
-                [ fetchButton
-                , content
-                    [ attribute "data-result" "not-asked"
-                    , class "bg-white"
-                    ]
-                    []
+            --    , h2 [] [ text "Serverless Lambda function on Netlify" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
                 ]
+            , div [] [ startButton ]
+            ]
 
-            RemoteData.Loading ->
-                [ button
-                    [ class "w-56 cursor-wait"
-                    , disabled True
-                    ]
+        E.Loading ->
+            [ h1 [] [ text "Apprentissage et Espacement" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
+                ]
+            , div []
+                [ button [ class "w-56 cursor-wait", disabled True ]
                     [ text "Loading..." ]
-                , content
-                    [ attribute "data-result" "loading"
-                    , class "bg-gray-500"
-                    ]
-                    []
                 ]
+            ]
 
-            RemoteData.Failure _ ->
-                [ fetchButton
-                , content
-                    [ attribute "data-result" "error"
-                    , class "bg-red-500 p-12 text-white text-center"
-                    ]
-                    [ li [] [ text "Oops! Something went wrong..." ] ]
+        E.Failure reason ->
+            [ h1 [] [ text "Apprentissage et Espacement" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
                 ]
-    ]
+            , content
+                [ attribute "data-result" "error"
+                , class "bg-red-500 p-12 text-white text-center"
+                ]
+                [ li [] [ text (buildErrorMessage reason) ] ]
+            ]
+
+        (E.Ready ( block, step )) as exp ->
+            case block of
+                E.Meaning input output ->
+                    let
+                        trial =
+                            Meaning.getTrial_ exp
+                    in
+                    Meaning.view
+                        exp
+                        [ View.radio
+                            trial.option1
+                            (output.userAnswer == trial.option1)
+                            (UserClickedRadioButton trial.option1)
+                        , View.radio
+                            trial.option2
+                            (output.userAnswer == trial.option2)
+                            (UserClickedRadioButton trial.option2)
+                        , View.radio
+                            trial.option3
+                            (output.userAnswer == trial.option3)
+                            (UserClickedRadioButton trial.option3)
+                        ]
+                        UserClickedFeedbackButton
+                        UserClickedNextTrialButton
+
+                E.Translation ->
+                    Debug.todo "I didn't create this part yet"
+
+                E.Synonym ->
+                    Debug.todo "I didn't create this part yet"
+
+                E.ClosedChoiceSpelling ->
+                    Debug.todo "I didn't create this part yet"
+
+                E.ScrabbleSpelling ->
+                    Debug.todo "I didn't create this part yet"
+
+                E.FreeWritingSpelling ->
+                    Debug.todo "I didn't create this part yet"
+
+                E.ClosedChoiceTextCompletion ->
+                    Debug.todo "I didn't create this part yet"
+
+                E.ClosedChoiceTextAndAudioUnderstanding ->
+                    Debug.todo "I didn't create this part yet"
+
+                E.FreeWritingTextCompletion ->
+                    Debug.todo "I didn't create this part yet"
 
 
 
 -- UPDATE
+
+
+type Msg
+    = BrowserChangedUrl Url
+    | UserClickedLink Browser.UrlRequest
+    | UserClickedStartExperimentButton
+    | ServerRespondedWithMeaningInput (Result Http.Error (List Meaning.Trial))
+    | UserClickedRadioButton String
+    | UserClickedFeedbackButton
+    | UserClickedNextTrialButton
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -209,21 +225,42 @@ update msg model =
                     , Nav.load url
                     )
 
-        UserClickedPackageButton ->
-            ( { model | package = RemoteData.Loading }
+        UserClickedStartExperimentButton ->
+            ( { model | experiment = E.Loading }
             , Http.get
-                { url = "/.netlify/functions/demo"
+                { url =
+                    buildQuery
+                        { app = apps.spacing
+                        , base = "input"
+                        , view_ = "Meaning"
+                        }
                 , expect =
                     Http.expectJson
-                        ServerRespondedWithPackage
-                        Data.packageDecoder
+                        ServerRespondedWithMeaningInput
+                        Meaning.decodeMeaningInput
                 }
             )
 
-        ServerRespondedWithPackage result ->
-            ( { model | package = RemoteData.fromResult result }
+        ServerRespondedWithMeaningInput (Result.Ok data) ->
+            ( { model | experiment = E.Ready ( E.Meaning data Meaning.initState, E.MainLoop 0 False ) }, Cmd.none )
+
+        ServerRespondedWithMeaningInput (Result.Err reason) ->
+            ( { model | experiment = E.Failure reason }, Cmd.none )
+
+        UserClickedRadioButton newChoice ->
+            let
+                currentState =
+                    Meaning.getState model.experiment
+            in
+            ( { model | experiment = Meaning.updateState { currentState | userAnswer = newChoice } model.experiment }
             , Cmd.none
             )
+
+        UserClickedFeedbackButton ->
+            ( { model | experiment = model.experiment |> E.toggleFeedback }, Cmd.none )
+
+        UserClickedNextTrialButton ->
+            ( { model | experiment = model.experiment |> E.nextTrial |> E.toggleFeedback }, Cmd.none )
 
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -234,7 +271,7 @@ init flags url key =
     in
     ( { key = key
       , route = route
-      , package = RemoteData.NotAsked
+      , experiment = E.NotAsked
       }
     , Cmd.none
     )
@@ -243,3 +280,49 @@ init flags url key =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
+buildErrorMessage : Http.Error -> String
+buildErrorMessage httpError =
+    case httpError of
+        Http.BadUrl message ->
+            message
+
+        Http.Timeout ->
+            "Server is taking too long to respond. Please try again later."
+
+        Http.NetworkError ->
+            "Unable to reach server."
+
+        Http.BadStatus statusCode ->
+            "Request failed with status code: " ++ String.fromInt statusCode
+
+        Http.BadBody message ->
+            message
+
+
+buildQuery : AirtableQueryParameters -> String
+buildQuery { app, base, view_ } =
+    Url.Builder.absolute
+        [ ".netlify"
+        , "functions"
+        , "api"
+        ]
+        [ Url.Builder.string "app" app
+        , Url.Builder.string "base" base
+        , Url.Builder.string "view" view_
+        ]
+
+
+apps : { spacing : String, sleep : String }
+apps =
+    { spacing = "appvKOc8FH0j48Hw1"
+    , sleep = "appTEVHZLw3jNa7fU"
+    }
+
+
+type alias AirtableQueryParameters =
+    { app : String
+    , base : String
+    , view_ : String
+    }

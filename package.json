@@ -12,7 +12,10 @@
   ],
   "private": true,
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "airtable": "^0.10.1",
+    "dotenv": "^8.2.0"
+  },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^2.3.0",
     "autoprefixer": "^9.8.5",

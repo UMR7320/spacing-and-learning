@@ -5,11 +5,24 @@ module View exposing
     , navIn
     , navOut
     , notFound
+    , radio
+    , button
     )
 
 import Css
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (attribute, class, css, href, target)
+import Html.Styled.Attributes
+    exposing
+        ( attribute
+        , checked
+        , class
+        , css
+        , href
+        , name
+        , target
+        , type_
+        )
+import Html.Styled.Events exposing (onClick)
 
 
 theme : { headerHeight : Css.Rem }
@@ -41,7 +54,7 @@ header items =
                     []
                 , p
                     [ class "font-bold uppercase text-sm text-gray-800" ]
-                    [ text "Hello" ]
+                    [ text "Apprentissage et Espacement" ]
                 ]
             , ul
                 [ attribute "data-test" "menu"
@@ -117,3 +130,34 @@ keyValue key value =
         [ attribute "data-value" key ]
         [ text value ]
     ]
+
+
+radio : String -> Bool -> msg -> Html msg
+radio value isChecked msg =
+    label
+        [ class "block text-gray-70 font-medium" ]
+        [ div
+            [ class "border-solid border-2 border-grey-600 px-4 py-4"
+            , class "hover:border-4 hover:font-black"
+            , class "focus:bg-blue-400"
+            ]
+            [ input
+                [ type_ "radio"
+                , checked isChecked
+                , name "definition-choice"
+                , onClick msg
+                ]
+                []
+            , span [ class "pl-4 " ] [ text value ]
+            ]
+        ]
+
+
+button : msg -> String -> Html msg
+button message txt  =
+    Html.Styled.button
+        [ class "w-64"
+        , attribute "data-action" "start-experiment"
+        , onClick message
+        ]
+        [ text txt ]
