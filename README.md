@@ -5,10 +5,9 @@ A psychological experiment to better understand the learning of new syntaxic pat
 ```bash
 npm run dev
 npm run test:watch
-npm run cypress:open
-```
 
-Learn more on [Elm Batteries Documentation ›](https://github.com/cedricss/elm-batteries#table-of-contents)
+```  
+
 
 ## Author
 
