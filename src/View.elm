@@ -1,23 +1,27 @@
 module View exposing
-    ( container
+    ( button
+    , container
     , header
     , keyValue
     , navIn
     , navOut
     , notFound
     , radio
-    , button
     )
 
 import Css
+import Experiment.Experiment as E
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
     exposing
         ( attribute
+        , autofocus
         , checked
         , class
+        , classList
         , css
         , href
+        , id
         , name
         , target
         , type_
@@ -132,20 +136,44 @@ keyValue key value =
     ]
 
 
-radio : String -> Bool -> msg -> Html msg
-radio value isChecked msg =
+radio : String -> Bool -> Bool -> Bool -> msg -> Html msg
+radio value isChecked isCorrect feedbackMode msg =
     label
-        [ class "block text-gray-70 font-medium" ]
+        [ class "group block text-gray-70 font-medium ", id value ]
         [ div
-            [ class "border-solid border-2 border-grey-600 px-4 py-4"
-            , class "hover:border-4 hover:font-black"
-            , class "focus:bg-blue-400"
+            [ class
+                ("border-solid border-2 px-4 py-4 mb-1 "
+                    ++ (case ( feedbackMode, isChecked, isCorrect ) of
+                            ( True, True, False ) ->
+                                "border-red-500 line-through"
+
+                            ( True, True, True ) ->
+                                "border-green-500"
+
+                            ( False, True, _ ) ->
+                                "border-indigo-600"
+
+                            ( False, False, _ ) ->
+                                "border-grey-500"
+
+                            ( True, False, _ ) ->
+                                "border-grey-500"
+                       )
+                )
+            , if feedbackMode == False then
+                class "group-hover:border-indigo-600 hover:underline cursor-pointer"
+
+              else
+                class ""
+            , class "active:border-indigo-400"
             ]
             [ input
                 [ type_ "radio"
                 , checked isChecked
                 , name "definition-choice"
                 , onClick msg
+                , Html.Styled.Attributes.disabled feedbackMode
+                , autofocus isCorrect
                 ]
                 []
             , span [ class "pl-4 " ] [ text value ]
@@ -153,11 +181,17 @@ radio value isChecked msg =
         ]
 
 
-button : msg -> String -> Html msg
-button message txt  =
+button : { message : msg, txt : String, isDisabled : Bool } -> Html msg
+button { message, txt, isDisabled } =
     Html.Styled.button
-        [ class "w-64"
-        , attribute "data-action" "start-experiment"
+        [ class "max-w-xl w-full mt-6"
         , onClick message
+        , Html.Styled.Attributes.disabled isDisabled
+        , class <|
+            if isDisabled then
+                "invisible"
+
+            else
+                "visible"
         ]
         [ text txt ]
