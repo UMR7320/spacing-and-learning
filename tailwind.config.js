@@ -5,6 +5,6 @@ module.exports = {
   theme: {
     extend: {},
   },
-  variants: {},
+  variants: { borderColor: ['responsive', 'group-hover', 'group-focus', 'active'] },
   plugins: [],
 };

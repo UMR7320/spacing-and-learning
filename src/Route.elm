@@ -10,6 +10,8 @@ import Url.Parser as Parser exposing ((</>), Parser, map, oneOf, s, top)
 type Route
     = ExperimentStart
       --| Home
+    | Meaning
+    | Translation
     | NotFound
 
 
@@ -20,6 +22,8 @@ parser =
 
         --, map Home (s "index.html")
         , map ExperimentStart (s "start")
+        , map Meaning (s "meaning")
+        , map Translation (s "translation")
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)

@@ -2,65 +2,123 @@ module Experiment.Meaning exposing (..)
 
 import Array
 import Browser
+import Css exposing (visibility)
 import Data exposing (decodeRecords)
 import Experiment.Experiment as E exposing (..)
-import Html.Styled exposing (Html, div, fieldset, h1, h2, h4, input, label, p, span, text)
-import Html.Styled.Attributes exposing (checked, class, for, id, type_)
+import Html.Styled
+    exposing
+        ( Html
+        , div
+        , fieldset
+        , h1
+        , h2
+        , h3
+        , h4
+        , h5
+        , h6
+        , input
+        , label
+        , p
+        , span
+        , text
+        )
+import Html.Styled.Attributes exposing (checked, class, disabled, for, id, type_)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
+import Progressbar
 import Url exposing (Url)
+import Url.Builder
 import View
 
 
-view : Experiment Trial State -> List (Html msg) -> msg -> msg -> List (Html msg)
+view : Experiment Trial State -> List (Html msg) -> msg -> msg -> Html msg
 view exp options toggleFeedbackMsg nextTrialMsg =
     let
         trial =
             getTrial_ exp
 
+        trials =
+            getTrials exp
+
+        trialN =
+            getTrialNumber exp
+
+        pct =
+            (toFloat trialN / toFloat (List.length trials)) * 100
+
         state =
-            getState exp
+            getState exp |> Maybe.withDefault initState
+
+        viewFeedback isVisible =
+            p
+                [ class
+                    ("font-medium py-4 w-full"
+                        ++ " "
+                        ++ (if isVisible then
+                                "visible"
+
+                            else
+                                "invisible"
+                           )
+                    )
+                ]
+                (if state.userAnswer == trial.definition then
+                    [ text "✔️ Correct Answer ! " ]
+
+                 else
+                    [ text "❌ The correct definition is : "
+                    , span [ class "font-medium italic" ] [ text trial.definition ]
+                    ]
+                )
+
+        viewQuestion =
+            h3 []
+                [ p []
+                    [ text <| String.fromInt (trialN + 1) ++ ". " ++ "Choose the best definition for the word : "
+                    , span [ class "italic" ] [ text trial.writtenWord ]
+                    ]
+                ]
     in
     case getStep exp of
         E.MainLoop _ showFeedback ->
-            case showFeedback of
-                False ->
-                    [ h2 [] [ text <| trial.question ]
+            div [ class "flex flex-wrap items-center" ]
+                [ div [ class "mr-8" ]
+                    [ Progressbar.progressBar pct
+                    , viewQuestion
                     , div
-                        [ class "py-10 max-w-xl" ]
+                        [ class "pt-6 max-w-xl ", disabled showFeedback ]
                         [ fieldset
                             []
                             options
                         ]
-                    , View.button toggleFeedbackMsg "Is it correct?"
-                    ]
+                    , View.button <|
+                        if not showFeedback then
+                            { message = toggleFeedbackMsg
+                            , txt = "Is it correct?"
+                            , isDisabled = String.isEmpty state.userAnswer
+                            }
 
-                True ->
-                    [ h4 []
-                        [ text <|
-                            if state.userAnswer /= trial.definition then
-                                trial.feedbackCorrect
-
-                            else
-                                trial.feedbackIncorrect
-                        ]
-                    , div
-                        [ class "py-3 max-w-xl" ]
-                        []
-                    , View.button nextTrialMsg "Next"
+                        else
+                            { message = nextTrialMsg
+                            , txt = "Next "
+                            , isDisabled = False
+                            }
+                    , div [ class "mt-4 max-w-xl w-full" ] [ viewFeedback showFeedback ]
                     ]
+                ]
 
         E.End ->
-            [ h1 [] [ text "Merci de votre participation !🎉" ]
-            , p
-                [ class "max-w-xl text-xl mb-8" ]
-                [ text "Vous trouverez dans l'e-mail que vous avez reçu les liens pour la suite de l'expérience."
+            div []
+                [ h1 [] [ text "Merci de votre participation !🎉" ]
+                , p
+                    [ class "max-w-xl text-xl mb-8" ]
+                    [ text "Vous trouverez dans l'e-mail que vous avez reçu les liens pour la suite de l'expérience."
+                    ]
                 ]
-            ]
 
         _ ->
-            [ text "Todo : Intro, Pause or Training" ]
+            div [] [ text "Todo : Intro, Pause or Training" ]
 
 
 getTrial : Int -> List input -> input -> input
@@ -77,6 +135,8 @@ getTrial trial trials_ default =
             x
 
 
+
+{--
 getState : Experiment Trial State -> State
 getState exp =
     case exp of
@@ -85,6 +145,7 @@ getState exp =
 
         _ ->
             initState
+--}
 
 
 getTrial_ : Experiment Trial State -> Trial
@@ -112,8 +173,48 @@ getStep exp =
             End
 
 
+getTrialNumber : Experiment Trial State -> Int
+getTrialNumber exp =
+    case exp of
+        Ready ( _, E.MainLoop trialN _ ) ->
+            trialN
+
+        _ ->
+            0
+
+
+getTrials : Experiment Trial State -> List Trial
+getTrials exp =
+    case exp of
+        Ready ( Meaning trials state, _ ) ->
+            trials
+
+        _ ->
+            []
+
+
+getFeedbackStatus : Step -> Bool
+getFeedbackStatus step =
+    case step of
+        MainLoop _ feedback ->
+            feedback
+
+        _ ->
+            False
+
+
 updateState : State -> Experiment Trial State -> Experiment Trial State
 updateState newState experiment =
+    case experiment of
+        Ready ( Meaning trials state, step ) ->
+            Ready ( Meaning trials newState, step )
+
+        _ ->
+            Failure (Http.BadBody "I tried to update the state of the 'Meaning' part of the experiment but I ran into an unexpected case.")
+
+
+updateState_ : State -> Experiment Trial State -> Experiment Trial State
+updateState_ newState experiment =
     case experiment of
         Ready ( Meaning trials state, step ) ->
             Ready ( Meaning trials newState, step )
@@ -140,6 +241,11 @@ decodeMeaningInput =
     decodeRecords decoder
 
 
+getTrialsFromServer : (Result Http.Error (List Trial) -> msg) -> Cmd msg
+getTrialsFromServer callbackMsg =
+    E.getTrialsFromServer_ "Meaning" callbackMsg decodeMeaningInput
+
+
 type alias Trial =
     { uid : String
     , writtenWord : String
@@ -162,7 +268,7 @@ type alias State =
 
 initState : State
 initState =
-    State "DefaultTrialUID" "DefaultUserUID" "DefaultUserAnswer"
+    State "DefaultTrialUID" "DefaultUserUID" ""
 
 
 defaultTrial : Trial
