@@ -1,4 +1,4 @@
-module Data exposing ( decodeRecords)
+module Data exposing (decodeRecords)
 
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (optional, required)

@@ -1,26 +1,11 @@
-module Experiment.Experiment exposing
-    ( Answer(..)
-    , Block(..)
-    , Correctness(..)
-    ,  Experiment(..)
-       --, MeaningInput
-
-    , Step(..)
-    , TranslationInput
-    , apps
-    , buildQuery
-    , getState
-    , getTrialsFromServer_
-    , nextTrial
-    , resetAnswerState
-    , toggleFeedback
-    )
-
---import Experiment.Meaning exposing (MeaningInput, MeaningOutput)
+module Experiment.Experiment exposing (..)
 
 import Array
+import Css exposing (end)
+import Html exposing (a)
 import Http
 import Json.Decode as Decode
+import RemoteData exposing (WebData)
 import Url.Builder
 
 
@@ -51,75 +36,180 @@ type alias AirtableQueryParameters =
     }
 
 
-nextTrial : Experiment a b -> Experiment a b
+nextTrial : Experiment -> Experiment
 nextTrial experiment =
     case experiment of
-        Ready ( (Meaning trials state) as block, MainLoop trialNumber feedback ) ->
-            if trialNumber >= List.length trials - 1 then
-                Ready ( block, End )
+        DoingMeaning (MainLoop trials state ntrial feedback) ->
+            if ntrial >= List.length trials - 1 then
+                DoingMeaning End
 
             else
-                Ready ( block, MainLoop (trialNumber + 1) feedback )
+                DoingMeaning (MainLoop trials state (ntrial + 1) feedback)
+
+        DoingTranslation (MainLoop trials state ntrial feedback) ->
+            if ntrial >= List.length trials - 1 then
+                DoingTranslation End
+
+            else
+                DoingTranslation (MainLoop trials state (ntrial + 1) feedback)
 
         _ ->
             Failure
-                (Http.BadBody "I tried to go to next trial but ended into an unexpected case. Please report this error message if you see it.")
+                (Http.BadBody
+                    """
+            I tried to go to next trial but I ended into an ignored case.
+            Please report this error. If you have access to the source code, update the Experiment.nextTrial function to take this case in account. 
+            """
+                )
 
 
-toggleFeedback : Experiment a b -> Experiment a b
-toggleFeedback experiment =
-    case experiment of
-        Ready ( (Meaning trials state) as block, MainLoop trialNumber feedback ) ->
-            Ready ( block, MainLoop trialNumber (not feedback) )
-
-        Ready ( currentBlock, End ) ->
-            Ready ( currentBlock, End )
-
-        _ ->
-            Failure
-                (Http.BadBody "I tried to toggle feedback but ended into an unexpected case. Please report this error message if you see it.")
-
-
-getTrial_ : Experiment trial state -> Maybe trial
-getTrial_ exp =
+toggleFeedback : Experiment -> Experiment
+toggleFeedback exp =
     case exp of
-        Ready ( Meaning trials state, MainLoop ntrial _ ) ->
-            Array.get ntrial (Array.fromList trials)
+        DoingMeaning (MainLoop trials state ntrial feedback) ->
+            DoingMeaning (MainLoop trials state ntrial (not feedback))
+
+        DoingTranslation (MainLoop trials state ntrial feedback) ->
+            DoingTranslation (MainLoop trials state ntrial (not feedback))
 
         _ ->
-            Nothing
+            Failure (Http.BadBody <| errorMessage "toggle feedback" "Experiment.toggleFeedback")
 
 
-resetAnswerState : Experiment trial { b | userAnswer : String } -> Experiment trial { b | userAnswer : String }
-resetAnswerState experiment =
-    case experiment of
-        Ready ( (Meaning trials state) as block, MainLoop trialNumber feedback ) ->
-            Ready ( Meaning trials { state | userAnswer = "" }, MainLoop trialNumber feedback )
+errorMessage : String -> String -> String
+errorMessage action functioname =
+    String.concat
+        [ "I tried to "
+        , action
+        , "but I ended into an ignored case. Please report this error or update the "
+        , functioname
+        , " to take in account this case"
+        ]
 
-        Ready ( currentBlock, End ) ->
-            Ready ( currentBlock, End )
+
+
+{--MainLoop ({ isfeedback } as params) ->
+            let
+                togglefeedback =
+                    MainLoop { params | isfeedback = not isfeedback }
+            in
+            { exp | step = togglefeedback }
 
         _ ->
-            Failure
-                (Http.BadBody "I tried to reset answer but ended into an unexpected case. Please report this error message if you see it.")
+            exp--}
 
 
-toBlockAndStep : ( Block a b, Step ) -> Experiment a b -> Experiment a b
-toBlockAndStep ( newBlock, newStep ) experiment =
-    case experiment of
-        Ready ( prevBlock, prevStep ) ->
-            Ready ( newBlock, newStep )
+getTrialnumber : Step a b c d e f -> TrialNumber
+getTrialnumber step =
+    case step of
+        MainLoop trials state trialn _ ->
+            trialn
 
         _ ->
-            Failure (Http.BadBody "I tried to change the current block or step and I ended into an unexpected case. Please report the error if you see it.")
+            9999
 
 
-type Step
-    = Intro
-    | Training
+type Step mainTrainingTrials mainTrainingState mainTrials mainState instructions end
+    = Intro instructions
+    | Training mainTrainingTrials mainTrainingState Trialn IsFeedback
     | Pause
-    | MainLoop TrialNumber ToggleFeedback
+    | MainLoop mainTrials mainState Trialn IsFeedback
     | End
+
+
+
+{--case ( step, trials ) of
+        ( MainLoop ({ trialn, isfeedback } as params), MeaningTrials trials_ ) ->
+            if trialn >= List.length trials_ - 1 then
+                { exp | step = End }
+
+            else
+                { exp | step = MainLoop { params | trialn = trialn + 1 } }
+
+        _ ->
+            exp--}
+
+
+getFeedbackStatus : Step b c d e f g -> ToggleFeedback
+getFeedbackStatus step =
+    case step of
+        MainLoop _ _ _ isfeedback ->
+            isfeedback
+
+        _ ->
+            False
+
+
+type Experiment
+    = NotStarted
+    | Loading
+    | DoingMeaning (Step (List ()) () (List TrialMeaning) StateMeaning String String)
+    | DoingTranslation (Step (List ()) () (List TranslationInput) TranslationOutput String String)
+    | Done
+    | Failure Http.Error
+
+
+updateState : StateType -> Experiment -> Experiment
+updateState newState exp =
+    case ( newState, exp ) of
+        ( MeaningState newState_, DoingMeaning (MainLoop trials prevstate ntrial feedback) ) ->
+            DoingMeaning (MainLoop trials newState_ ntrial feedback)
+
+        ( TranslationState newState_, DoingTranslation (MainLoop trials prevstate ntrial feedback) ) ->
+            DoingTranslation (MainLoop trials newState_ ntrial feedback)
+
+        _ ->
+            Failure (Http.BadBody <| errorMessage "update the state of the experiment" "Experiment.updateState")
+
+
+getState : Experiment -> StateType
+getState experiment =
+    case experiment of
+        DoingMeaning (MainLoop trials state ntrial feedback) ->
+            MeaningState state
+
+        DoingTranslation (MainLoop trials state ntrial feedback) ->
+            TranslationState state
+
+        _ ->
+            DummyType
+
+
+type alias Trialn =
+    Int
+
+
+type alias IsFeedback =
+    Bool
+
+
+
+--updateState : state -> { exp | state : state } -> { exp | state : state }
+--getState : { exp | state : state } -> state
+--getState { state } =
+--  state
+
+
+type StateType
+    = MeaningState StateMeaning
+    | TranslationState TranslationOutput
+    | DummyType
+
+
+type TrialType
+    = MeaningTrials (List TrialMeaning)
+    | TranslationTrials (List TranslationInput)
+    | DummyTrial ()
+
+
+convert : TrialType -> List TrialMeaning
+convert trialType =
+    case trialType of
+        MeaningTrials tr ->
+            tr
+
+        _ ->
+            [ defaultTrial ]
 
 
 type Answer
@@ -140,33 +230,9 @@ type alias TrialNumber =
     Int
 
 
-type Experiment trial state
-    = NotAsked
-    | Loading
-    | Ready ( Block trial state, Step )
-    | Failure Http.Error
-
-
-type Block trial state
-    = Meaning (List trial) state
-    | Translation
-    | Synonym
-    | ClosedChoiceSpelling
-    | ScrabbleSpelling
-    | FreeWritingSpelling
-    | ClosedChoiceTextCompletion
-    | ClosedChoiceTextAndAudioUnderstanding
-    | FreeWritingTextCompletion
-
-
-getState : Experiment trial state -> Maybe state
-getState exp =
-    case exp of
-        Ready ( Meaning trials state, step ) ->
-            Just state
-
-        _ ->
-            Nothing
+initState : StateMeaning
+initState =
+    StateMeaning "DefaultTrialUID" "DefaultUserUID" ""
 
 
 type UID
@@ -189,6 +255,21 @@ getTrialsFromServer_ tableName callbackMsg decoder =
         }
 
 
+defaultTrial : TrialMeaning
+defaultTrial =
+    { uid = "MISSING"
+    , writtenWord = "MISSING"
+    , definition = "MISSING"
+    , question = "MISSING"
+    , option1 = "MISSING"
+    , option2 = "MISSING"
+    , option3 = "MISSING"
+    , option4 = "DEFAULT"
+    , feedbackCorrect = "MISSING"
+    , feedbackIncorrect = "MISSING"
+    }
+
+
 
 -- Translation
 
@@ -196,14 +277,65 @@ getTrialsFromServer_ tableName callbackMsg decoder =
 type alias TranslationInput =
     { uid : String
     , question : String
-    , option1 : String
-    , option2 : String
+    , translation1 : String
+    , translation2 : String
+    , distractor1 : String
+    , distractor2 : String
+    , distractor3 : String
+    , distractor4 : String
     , word : String
     }
 
 
+defaultTranslationTrial : TranslationInput
+defaultTranslationTrial =
+    { uid = ""
+    , question = "String"
+    , translation1 = "String"
+    , translation2 = "String"
+    , distractor1 = ""
+    , distractor2 = ""
+    , distractor3 = ""
+    , distractor4 = ""
+    , word = "String"
+    }
+
+
 type alias TranslationOutput =
-    { inputUid : UID
-    , userUID : UID
+    { inputUid : String
+    , userUID : String
+    , userAnswer : String
+    }
+
+
+initTranslationState : TranslationOutput
+initTranslationState =
+    { inputUid = ""
+    , userUID = ""
+    , userAnswer = ""
+    }
+
+
+
+--MEANING
+
+
+type alias TrialMeaning =
+    { uid : String
+    , writtenWord : String
+    , definition : String
+    , question : String
+    , option1 : String
+    , option2 : String
+    , option3 : String
+    , option4 : String
+    , feedbackCorrect : String
+    , feedbackIncorrect : String
+    }
+
+
+type alias StateMeaning =
+    { inputUid : String
+    , userUID : String
     , userAnswer : String
     }

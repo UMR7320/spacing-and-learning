@@ -10855,17 +10855,34 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$application = _Browser_application;
-var $author$project$Experiment$Experiment$NotAsked = {$: 'NotAsked'};
+var $author$project$Experiment$Experiment$NotStarted = {$: 'NotStarted'};
 var $author$project$Main$ServerRespondedWithMeaningInput = function (a) {
 	return {$: 'ServerRespondedWithMeaningInput', a: a};
 };
 var $author$project$Main$ServerRespondedWithTranslationTrials = function (a) {
 	return {$: 'ServerRespondedWithTranslationTrials', a: a};
 };
-var $author$project$Experiment$Meaning$Trial = F9(
-	function (uid, writtenWord, definition, question, option1, option2, option3, feedbackCorrect, feedbackIncorrect) {
-		return {definition: definition, feedbackCorrect: feedbackCorrect, feedbackIncorrect: feedbackIncorrect, option1: option1, option2: option2, option3: option3, question: question, uid: uid, writtenWord: writtenWord};
-	});
+var $author$project$Experiment$Experiment$TrialMeaning = function (uid) {
+	return function (writtenWord) {
+		return function (definition) {
+			return function (question) {
+				return function (option1) {
+					return function (option2) {
+						return function (option3) {
+							return function (option4) {
+								return function (feedbackCorrect) {
+									return function (feedbackIncorrect) {
+										return {definition: definition, feedbackCorrect: feedbackCorrect, feedbackIncorrect: feedbackIncorrect, option1: option1, option2: option2, option3: option3, option4: option4, question: question, uid: uid, writtenWord: writtenWord};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var $author$project$Data$decodeRecords = function (xs) {
 	var decode = function (fieldsDecoder) {
 		return A2($elm$json$Json$Decode$field, 'records', fieldsDecoder);
@@ -10939,36 +10956,41 @@ var $author$project$Experiment$Meaning$decodeMeaningInput = function () {
 			$elm$json$Json$Decode$string,
 			A4(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-				'Distractor_3_Meaning',
+				'Distractor_4_Meaning',
 				$elm$json$Json$Decode$string,
-				'MISSING',
+				'Missing',
 				A4(
 					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-					'Distractor_2_Meaning',
+					'Distractor_3_Meaning',
 					$elm$json$Json$Decode$string,
 					'MISSING',
 					A4(
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-						'Distractor_1_Meaning',
+						'Distractor_2_Meaning',
 						$elm$json$Json$Decode$string,
 						'MISSING',
-						A3(
-							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'Question_Meaning',
+						A4(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+							'Distractor_1_Meaning',
 							$elm$json$Json$Decode$string,
+							'MISSING',
 							A3(
 								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'Definition',
+								'Question_Meaning',
 								$elm$json$Json$Decode$string,
 								A3(
 									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-									'Word_Text',
+									'Definition',
 									$elm$json$Json$Decode$string,
 									A3(
 										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-										'UID',
+										'Word_Text',
 										$elm$json$Json$Decode$string,
-										$elm$json$Json$Decode$succeed($author$project$Experiment$Meaning$Trial))))))))));
+										A3(
+											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+											'UID',
+											$elm$json$Json$Decode$string,
+											$elm$json$Json$Decode$succeed($author$project$Experiment$Experiment$TrialMeaning)))))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
 var $author$project$Experiment$Experiment$apps = {sleep: 'appTEVHZLw3jNa7fU', spacing: 'appvKOc8FH0j48Hw1'};
@@ -11278,11 +11300,58 @@ var $author$project$Experiment$Experiment$getTrialsFromServer_ = F3(
 var $author$project$Experiment$Meaning$getTrialsFromServer = function (callbackMsg) {
 	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Meaning', callbackMsg, $author$project$Experiment$Meaning$decodeMeaningInput);
 };
-var $author$project$Experiment$Translation$Trial = {};
-var $author$project$Experiment$Translation$decodeTrials = $author$project$Data$decodeRecords(
-	$elm$json$Json$Decode$succeed($author$project$Experiment$Translation$Trial));
+var $author$project$Experiment$Experiment$TranslationInput = F9(
+	function (uid, question, translation1, translation2, distractor1, distractor2, distractor3, distractor4, word) {
+		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, distractor4: distractor4, question: question, translation1: translation1, translation2: translation2, uid: uid, word: word};
+	});
+var $author$project$Experiment$Translation$decodeTranslationInput = function () {
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'Word_Text',
+		$elm$json$Json$Decode$string,
+		'MISSING',
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'Distractor_4_Translation',
+			$elm$json$Json$Decode$string,
+			'missing distractor',
+			A4(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+				'Distractor_3_Translation',
+				$elm$json$Json$Decode$string,
+				'missing distractor',
+				A4(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+					'Distractor_2_Translation',
+					$elm$json$Json$Decode$string,
+					'Missing distractor',
+					A4(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+						'Distractor_1_Translation',
+						$elm$json$Json$Decode$string,
+						'Missing distractor',
+						A4(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+							'Translation_2',
+							$elm$json$Json$Decode$string,
+							'MISSING_TRANS_2',
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'Translation_1',
+								$elm$json$Json$Decode$string,
+								A3(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+									'Question_Translation',
+									$elm$json$Json$Decode$string,
+									A3(
+										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+										'UID',
+										$elm$json$Json$Decode$string,
+										$elm$json$Json$Decode$succeed($author$project$Experiment$Experiment$TranslationInput))))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
 var $author$project$Experiment$Translation$getTrialsFromServer = function (msgHandler) {
-	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Translation', msgHandler, $author$project$Experiment$Translation$decodeTrials);
+	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Translation', msgHandler, $author$project$Experiment$Translation$decodeTranslationInput);
 };
 var $author$project$Main$fetchData = function (route) {
 	switch (route.$) {
@@ -11524,7 +11593,7 @@ var $author$project$Main$init = F3(
 	function (flags, url, key) {
 		var route = $author$project$Route$fromUrl(url);
 		return _Utils_Tuple2(
-			{experiment: $author$project$Experiment$Experiment$NotAsked, key: key, route: route, translation: $author$project$Experiment$Experiment$NotAsked},
+			{key: key, meaningTask: $author$project$Experiment$Experiment$NotStarted, route: route, translationTask: $author$project$Experiment$Experiment$NotStarted},
 			$author$project$Main$fetchData(route));
 	});
 var $elm$core$Platform$Sub$batch = _Platform_batch;
@@ -11532,62 +11601,105 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
+var $author$project$Experiment$Experiment$DoingMeaning = function (a) {
+	return {$: 'DoingMeaning', a: a};
+};
+var $author$project$Experiment$Experiment$DoingTranslation = function (a) {
+	return {$: 'DoingTranslation', a: a};
+};
 var $author$project$Experiment$Experiment$Failure = function (a) {
 	return {$: 'Failure', a: a};
 };
 var $author$project$Experiment$Experiment$Loading = {$: 'Loading'};
-var $author$project$Experiment$Experiment$MainLoop = F2(
-	function (a, b) {
-		return {$: 'MainLoop', a: a, b: b};
+var $author$project$Experiment$Experiment$MainLoop = F4(
+	function (a, b, c, d) {
+		return {$: 'MainLoop', a: a, b: b, c: c, d: d};
 	});
-var $author$project$Experiment$Experiment$Meaning = F2(
-	function (a, b) {
-		return {$: 'Meaning', a: a, b: b};
-	});
-var $author$project$Experiment$Experiment$Ready = function (a) {
-	return {$: 'Ready', a: a};
+var $author$project$Experiment$Experiment$MeaningState = function (a) {
+	return {$: 'MeaningState', a: a};
 };
-var $author$project$Experiment$Experiment$getState = function (exp) {
-	if ((exp.$ === 'Ready') && (exp.a.a.$ === 'Meaning')) {
-		var _v1 = exp.a;
-		var _v2 = _v1.a;
-		var trials = _v2.a;
-		var state = _v2.b;
-		var step = _v1.b;
-		return $elm$core$Maybe$Just(state);
-	} else {
-		return $elm$core$Maybe$Nothing;
+var $author$project$Experiment$Experiment$TranslationState = function (a) {
+	return {$: 'TranslationState', a: a};
+};
+var $author$project$Experiment$Experiment$DummyType = {$: 'DummyType'};
+var $author$project$Experiment$Experiment$getState = function (experiment) {
+	_v0$2:
+	while (true) {
+		switch (experiment.$) {
+			case 'DoingMeaning':
+				if (experiment.a.$ === 'MainLoop') {
+					var _v1 = experiment.a;
+					var trials = _v1.a;
+					var state = _v1.b;
+					var ntrial = _v1.c;
+					var feedback = _v1.d;
+					return $author$project$Experiment$Experiment$MeaningState(state);
+				} else {
+					break _v0$2;
+				}
+			case 'DoingTranslation':
+				if (experiment.a.$ === 'MainLoop') {
+					var _v2 = experiment.a;
+					var trials = _v2.a;
+					var state = _v2.b;
+					var ntrial = _v2.c;
+					var feedback = _v2.d;
+					return $author$project$Experiment$Experiment$TranslationState(state);
+				} else {
+					break _v0$2;
+				}
+			default:
+				break _v0$2;
+		}
 	}
+	return $author$project$Experiment$Experiment$DummyType;
 };
-var $author$project$Experiment$Meaning$State = F3(
+var $author$project$Experiment$Experiment$StateMeaning = F3(
 	function (inputUid, userUID, userAnswer) {
 		return {inputUid: inputUid, userAnswer: userAnswer, userUID: userUID};
 	});
-var $author$project$Experiment$Meaning$initState = A3($author$project$Experiment$Meaning$State, 'DefaultTrialUID', 'DefaultUserUID', '');
-var $author$project$Experiment$Translation$State = {};
-var $author$project$Experiment$Translation$initState = $author$project$Experiment$Translation$State;
+var $author$project$Experiment$Meaning$initState = A3($author$project$Experiment$Experiment$StateMeaning, 'DefaultTrialUID', 'DefaultUserUID', '');
+var $author$project$Experiment$Experiment$initTranslationState = {inputUid: '', userAnswer: '', userUID: ''};
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $author$project$Experiment$Experiment$End = {$: 'End'};
 var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
-	if (((experiment.$ === 'Ready') && (experiment.a.a.$ === 'Meaning')) && (experiment.a.b.$ === 'MainLoop')) {
-		var _v1 = experiment.a;
-		var block = _v1.a;
-		var trials = block.a;
-		var state = block.b;
-		var _v2 = _v1.b;
-		var trialNumber = _v2.a;
-		var feedback = _v2.b;
-		return (_Utils_cmp(
-			trialNumber,
-			$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$Ready(
-			_Utils_Tuple2(block, $author$project$Experiment$Experiment$End)) : $author$project$Experiment$Experiment$Ready(
-			_Utils_Tuple2(
-				block,
-				A2($author$project$Experiment$Experiment$MainLoop, trialNumber + 1, feedback)));
-	} else {
-		return $author$project$Experiment$Experiment$Failure(
-			$elm$http$Http$BadBody('I tried to go to next trial but ended into an unexpected case. Please report this error message if you see it.'));
+	_v0$2:
+	while (true) {
+		switch (experiment.$) {
+			case 'DoingMeaning':
+				if (experiment.a.$ === 'MainLoop') {
+					var _v1 = experiment.a;
+					var trials = _v1.a;
+					var state = _v1.b;
+					var ntrial = _v1.c;
+					var feedback = _v1.d;
+					return (_Utils_cmp(
+						ntrial,
+						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingMeaning($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingMeaning(
+						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
+				} else {
+					break _v0$2;
+				}
+			case 'DoingTranslation':
+				if (experiment.a.$ === 'MainLoop') {
+					var _v2 = experiment.a;
+					var trials = _v2.a;
+					var state = _v2.b;
+					var ntrial = _v2.c;
+					var feedback = _v2.d;
+					return (_Utils_cmp(
+						ntrial,
+						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingTranslation($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingTranslation(
+						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
+				} else {
+					break _v0$2;
+				}
+			default:
+				break _v0$2;
+		}
 	}
+	return $author$project$Experiment$Experiment$Failure(
+		$elm$http$Http$BadBody('\n            I tried to go to next trial but I ended into an ignored case.\n            Please report this error. If you have access to the source code, update the Experiment.nextTrial function to take this case in account. \n            '));
 };
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $elm$url$Url$addPort = F2(
@@ -11634,66 +11746,111 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
-var $author$project$Experiment$Experiment$toggleFeedback = function (experiment) {
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$Experiment$Experiment$errorMessage = F2(
+	function (action, functioname) {
+		return $elm$core$String$concat(
+			_List_fromArray(
+				['I tried to ', action, 'but I ended into an ignored case. Please report this error or update the ', functioname, ' to take in account this case']));
+	});
+var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
 	_v0$2:
 	while (true) {
-		if (experiment.$ === 'Ready') {
-			switch (experiment.a.b.$) {
-				case 'MainLoop':
-					if (experiment.a.a.$ === 'Meaning') {
-						var _v1 = experiment.a;
-						var block = _v1.a;
-						var trials = block.a;
-						var state = block.b;
-						var _v2 = _v1.b;
-						var trialNumber = _v2.a;
-						var feedback = _v2.b;
-						return $author$project$Experiment$Experiment$Ready(
-							_Utils_Tuple2(
-								block,
-								A2($author$project$Experiment$Experiment$MainLoop, trialNumber, !feedback)));
-					} else {
-						break _v0$2;
-					}
-				case 'End':
-					var _v3 = experiment.a;
-					var currentBlock = _v3.a;
-					var _v4 = _v3.b;
-					return $author$project$Experiment$Experiment$Ready(
-						_Utils_Tuple2(currentBlock, $author$project$Experiment$Experiment$End));
-				default:
+		switch (exp.$) {
+			case 'DoingMeaning':
+				if (exp.a.$ === 'MainLoop') {
+					var _v1 = exp.a;
+					var trials = _v1.a;
+					var state = _v1.b;
+					var ntrial = _v1.c;
+					var feedback = _v1.d;
+					return $author$project$Experiment$Experiment$DoingMeaning(
+						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
+				} else {
 					break _v0$2;
-			}
-		} else {
-			break _v0$2;
+				}
+			case 'DoingTranslation':
+				if (exp.a.$ === 'MainLoop') {
+					var _v2 = exp.a;
+					var trials = _v2.a;
+					var state = _v2.b;
+					var ntrial = _v2.c;
+					var feedback = _v2.d;
+					return $author$project$Experiment$Experiment$DoingTranslation(
+						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
+				} else {
+					break _v0$2;
+				}
+			default:
+				break _v0$2;
 		}
 	}
 	return $author$project$Experiment$Experiment$Failure(
-		$elm$http$Http$BadBody('I tried to toggle feedback but ended into an unexpected case. Please report this error message if you see it.'));
+		$elm$http$Http$BadBody(
+			A2($author$project$Experiment$Experiment$errorMessage, 'toggle feedback', 'Experiment.toggleFeedback')));
 };
-var $author$project$Experiment$Meaning$updateState = F2(
-	function (newState, experiment) {
-		if ((experiment.$ === 'Ready') && (experiment.a.a.$ === 'Meaning')) {
-			var _v1 = experiment.a;
-			var _v2 = _v1.a;
-			var trials = _v2.a;
-			var state = _v2.b;
-			var step = _v1.b;
-			return $author$project$Experiment$Experiment$Ready(
-				_Utils_Tuple2(
-					A2($author$project$Experiment$Experiment$Meaning, trials, newState),
-					step));
-		} else {
-			return $author$project$Experiment$Experiment$Failure(
-				$elm$http$Http$BadBody('I tried to update the state of the \'Meaning\' part of the experiment but I ran into an unexpected case.'));
+var $author$project$Experiment$Experiment$updateState = F2(
+	function (newState, exp) {
+		var _v0 = _Utils_Tuple2(newState, exp);
+		_v0$2:
+		while (true) {
+			switch (_v0.a.$) {
+				case 'MeaningState':
+					if ((_v0.b.$ === 'DoingMeaning') && (_v0.b.a.$ === 'MainLoop')) {
+						var newState_ = _v0.a.a;
+						var _v1 = _v0.b.a;
+						var trials = _v1.a;
+						var prevstate = _v1.b;
+						var ntrial = _v1.c;
+						var feedback = _v1.d;
+						return $author$project$Experiment$Experiment$DoingMeaning(
+							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
+					} else {
+						break _v0$2;
+					}
+				case 'TranslationState':
+					if ((_v0.b.$ === 'DoingTranslation') && (_v0.b.a.$ === 'MainLoop')) {
+						var newState_ = _v0.a.a;
+						var _v2 = _v0.b.a;
+						var trials = _v2.a;
+						var prevstate = _v2.b;
+						var ntrial = _v2.c;
+						var feedback = _v2.d;
+						return $author$project$Experiment$Experiment$DoingTranslation(
+							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
+					} else {
+						break _v0$2;
+					}
+				default:
+					break _v0$2;
+			}
 		}
+		return $author$project$Experiment$Experiment$Failure(
+			$elm$http$Http$BadBody(
+				A2($author$project$Experiment$Experiment$errorMessage, 'update the state of the experiment', 'Experiment.updateState')));
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var currentMeaningState = A2(
-			$elm$core$Maybe$withDefault,
-			$author$project$Experiment$Meaning$initState,
-			$author$project$Experiment$Experiment$getState(model.experiment));
+		var currentTranslationState = function () {
+			var _v3 = $author$project$Experiment$Experiment$getState(model.translationTask);
+			if (_v3.$ === 'TranslationState') {
+				var x = _v3.a;
+				return x;
+			} else {
+				return $author$project$Experiment$Experiment$initTranslationState;
+			}
+		}();
+		var currentMeaningState = function () {
+			var _v2 = $author$project$Experiment$Experiment$getState(model.meaningTask);
+			if (_v2.$ === 'MeaningState') {
+				var x = _v2.a;
+				return x;
+			} else {
+				return $author$project$Experiment$Meaning$initState;
+			}
+		}();
 		switch (msg.$) {
 			case 'BrowserChangedUrl':
 				var url = msg.a;
@@ -11724,7 +11881,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{experiment: $author$project$Experiment$Experiment$Loading}),
+						{meaningTask: $author$project$Experiment$Experiment$Loading}),
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
@@ -11738,6 +11895,24 @@ var $author$project$Main$update = F2(
 									_List_Nil)),
 								$author$project$Experiment$Meaning$getTrialsFromServer($author$project$Main$ServerRespondedWithMeaningInput)
 							])));
+			case 'UserClickedStartTranslationButton':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{meaningTask: $author$project$Experiment$Experiment$Loading}),
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								model.key,
+								A2(
+									$elm$url$Url$Builder$absolute,
+									_List_fromArray(
+										['translation']),
+									_List_Nil)),
+								$author$project$Experiment$Translation$getTrialsFromServer($author$project$Main$ServerRespondedWithTranslationTrials)
+							])));
 			case 'ServerRespondedWithTranslationTrials':
 				if (msg.a.$ === 'Err') {
 					var reason = msg.a.a;
@@ -11745,7 +11920,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								experiment: $author$project$Experiment$Experiment$Failure(reason)
+								translationTask: $author$project$Experiment$Experiment$Failure(reason)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -11754,10 +11929,8 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								translation: $author$project$Experiment$Experiment$Ready(
-									_Utils_Tuple2(
-										A2($author$project$Experiment$Experiment$Meaning, data, $author$project$Experiment$Translation$initState),
-										A2($author$project$Experiment$Experiment$MainLoop, 0, false)))
+								translationTask: $author$project$Experiment$Experiment$DoingTranslation(
+									A4($author$project$Experiment$Experiment$MainLoop, data, $author$project$Experiment$Experiment$initTranslationState, 0, false))
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -11768,10 +11941,8 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								experiment: $author$project$Experiment$Experiment$Ready(
-									_Utils_Tuple2(
-										A2($author$project$Experiment$Experiment$Meaning, data, $author$project$Experiment$Meaning$initState),
-										A2($author$project$Experiment$Experiment$MainLoop, 0, false)))
+								meaningTask: $author$project$Experiment$Experiment$DoingMeaning(
+									A4($author$project$Experiment$Experiment$MainLoop, data, $author$project$Experiment$Meaning$initState, 0, false))
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -11780,7 +11951,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								experiment: $author$project$Experiment$Experiment$Failure(reason)
+								meaningTask: $author$project$Experiment$Experiment$Failure(reason)
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -11790,12 +11961,28 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							experiment: A2(
-								$author$project$Experiment$Meaning$updateState,
-								_Utils_update(
-									currentMeaningState,
-									{userAnswer: newChoice}),
-								model.experiment)
+							meaningTask: A2(
+								$author$project$Experiment$Experiment$updateState,
+								$author$project$Experiment$Experiment$MeaningState(
+									_Utils_update(
+										currentMeaningState,
+										{userAnswer: newChoice})),
+								model.meaningTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedRadioButtonInTranslation':
+				var newChoice = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							translationTask: A2(
+								$author$project$Experiment$Experiment$updateState,
+								$author$project$Experiment$Experiment$TranslationState(
+									_Utils_update(
+										currentMeaningState,
+										{userAnswer: newChoice})),
+								model.translationTask)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'UserClickedFeedbackButtonInMeaning':
@@ -11803,7 +11990,30 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							experiment: $author$project$Experiment$Experiment$toggleFeedback(model.experiment)
+							meaningTask: $author$project$Experiment$Experiment$toggleFeedback(model.meaningTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedFeedbackButtonInTranslation':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							translationTask: $author$project$Experiment$Experiment$toggleFeedback(model.translationTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedNextTrialButtonInMeaning':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							meaningTask: $author$project$Experiment$Experiment$nextTrial(
+								A2(
+									$author$project$Experiment$Experiment$updateState,
+									$author$project$Experiment$Experiment$MeaningState(
+										_Utils_update(
+											currentMeaningState,
+											{userAnswer: ''})),
+									$author$project$Experiment$Experiment$toggleFeedback(model.meaningTask)))
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
@@ -11811,13 +12021,14 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							experiment: $author$project$Experiment$Experiment$nextTrial(
+							translationTask: $author$project$Experiment$Experiment$nextTrial(
 								A2(
-									$author$project$Experiment$Meaning$updateState,
-									_Utils_update(
-										currentMeaningState,
-										{userAnswer: ''}),
-									$author$project$Experiment$Experiment$toggleFeedback(model.experiment)))
+									$author$project$Experiment$Experiment$updateState,
+									$author$project$Experiment$Experiment$TranslationState(
+										_Utils_update(
+											currentTranslationState,
+											{userAnswer: ''})),
+									$author$project$Experiment$Experiment$toggleFeedback(model.translationTask)))
 						}),
 					$elm$core$Platform$Cmd$none);
 		}
@@ -13821,13 +14032,26 @@ var $author$project$Main$startButton = A2(
 	$rtfeldman$elm_css$Html$Styled$button,
 	_List_fromArray(
 		[
-			$rtfeldman$elm_css$Html$Styled$Attributes$class('w-64'),
+			$rtfeldman$elm_css$Html$Styled$Attributes$class('w-64 mb-8'),
 			A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-action', 'start-experiment'),
 			$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$UserClickedStartExperimentButton)
 		]),
 	_List_fromArray(
 		[
-			$rtfeldman$elm_css$Html$Styled$text('Commencer l\'expérience')
+			$rtfeldman$elm_css$Html$Styled$text('Commencer meaning')
+		]));
+var $author$project$Main$UserClickedStartTranslationButton = {$: 'UserClickedStartTranslationButton'};
+var $author$project$Main$startTranslation = A2(
+	$rtfeldman$elm_css$Html$Styled$button,
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$Attributes$class('w-64'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-action', 'start-translation'),
+			$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$UserClickedStartTranslationButton)
+		]),
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$text('Commencer translation')
 		]));
 var $author$project$Main$UserClickedFeedbackButtonInMeaning = {$: 'UserClickedFeedbackButtonInMeaning'};
 var $author$project$Main$UserClickedNextTrialButtonInMeaning = {$: 'UserClickedNextTrialButtonInMeaning'};
@@ -13851,6 +14075,7 @@ var $author$project$Main$buildErrorMessage = function (httpError) {
 			return message;
 	}
 };
+var $author$project$Experiment$Experiment$defaultTrial = {definition: 'MISSING', feedbackCorrect: 'MISSING', feedbackIncorrect: 'MISSING', option1: 'MISSING', option2: 'MISSING', option3: 'MISSING', option4: 'DEFAULT', question: 'MISSING', uid: 'MISSING', writtenWord: 'MISSING'};
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty = F2(
 	function (key, bool) {
@@ -13860,37 +14085,6 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty = F2(
 			$elm$json$Json$Encode$bool(bool));
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$disabled = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('disabled');
-var $author$project$Experiment$Meaning$getFeedbackStatus = function (step) {
-	if (step.$ === 'MainLoop') {
-		var feedback = step.b;
-		return feedback;
-	} else {
-		return false;
-	}
-};
-var $author$project$Experiment$Meaning$defaultTrial = {definition: 'MISSING', feedbackCorrect: 'MISSING', feedbackIncorrect: 'MISSING', option1: 'MISSING', option2: 'MISSING', option3: 'MISSING', question: 'MISSING', uid: 'MISSING', writtenWord: 'MISSING'};
-var $author$project$Experiment$Meaning$getTrial_ = function (exp) {
-	if (((exp.$ === 'Ready') && (exp.a.a.$ === 'Meaning')) && (exp.a.b.$ === 'MainLoop')) {
-		var _v1 = exp.a;
-		var _v2 = _v1.a;
-		var trials = _v2.a;
-		var state = _v2.b;
-		var _v3 = _v1.b;
-		var ntrial = _v3.a;
-		var _v4 = A2(
-			$elm$core$Array$get,
-			ntrial,
-			$elm$core$Array$fromList(trials));
-		if (_v4.$ === 'Just') {
-			var x = _v4.a;
-			return x;
-		} else {
-			return $author$project$Experiment$Meaning$defaultTrial;
-		}
-	} else {
-		return $author$project$Experiment$Meaning$defaultTrial;
-	}
-};
 var $rtfeldman$elm_css$Html$Styled$span = $rtfeldman$elm_css$Html$Styled$node('span');
 var $author$project$View$keyValue = F2(
 	function (key, value) {
@@ -14011,40 +14205,9 @@ var $author$project$View$button = function (_v0) {
 				$rtfeldman$elm_css$Html$Styled$text(txt)
 			]));
 };
+var $author$project$Experiment$Experiment$defaultTranslationTrial = {distractor1: '', distractor2: '', distractor3: '', distractor4: '', question: 'String', translation1: 'String', translation2: 'String', uid: '', word: 'String'};
+var $author$project$Experiment$Meaning$defaultTrial = {definition: 'MISSING', feedbackCorrect: 'MISSING', feedbackIncorrect: 'MISSING', option1: 'MISSING', option2: 'MISSING', option3: 'MISSING', option4: 'Default', question: 'MISSING', uid: 'MISSING', writtenWord: 'MISSING'};
 var $rtfeldman$elm_css$Html$Styled$fieldset = $rtfeldman$elm_css$Html$Styled$node('fieldset');
-var $author$project$Experiment$Meaning$getStep = function (exp) {
-	if ((exp.$ === 'Ready') && (exp.a.a.$ === 'Meaning')) {
-		var _v1 = exp.a;
-		var _v2 = _v1.a;
-		var trials = _v2.a;
-		var state = _v2.b;
-		var step = _v1.b;
-		return step;
-	} else {
-		return $author$project$Experiment$Experiment$End;
-	}
-};
-var $author$project$Experiment$Meaning$getTrialNumber = function (exp) {
-	if ((exp.$ === 'Ready') && (exp.a.b.$ === 'MainLoop')) {
-		var _v1 = exp.a;
-		var _v2 = _v1.b;
-		var trialN = _v2.a;
-		return trialN;
-	} else {
-		return 0;
-	}
-};
-var $author$project$Experiment$Meaning$getTrials = function (exp) {
-	if ((exp.$ === 'Ready') && (exp.a.a.$ === 'Meaning')) {
-		var _v1 = exp.a;
-		var _v2 = _v1.a;
-		var trials = _v2.a;
-		var state = _v2.b;
-		return trials;
-	} else {
-		return _List_Nil;
-	}
-};
 var $rtfeldman$elm_css$Html$Styled$h3 = $rtfeldman$elm_css$Html$Styled$node('h3');
 var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
 var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
@@ -14081,148 +14244,276 @@ var $author$project$Progressbar$progressBar = function (percentage) {
 };
 var $author$project$Experiment$Meaning$view = F4(
 	function (exp, options, toggleFeedbackMsg, nextTrialMsg) {
-		var trials = $author$project$Experiment$Meaning$getTrials(exp);
-		var trialN = $author$project$Experiment$Meaning$getTrialNumber(exp);
-		var trial = $author$project$Experiment$Meaning$getTrial_(exp);
-		var viewQuestion = A2(
-			$rtfeldman$elm_css$Html$Styled$h3,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(
-							$elm$core$String$fromInt(trialN + 1) + ('. ' + 'Choose the best definition for the word : ')),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$span,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
-								]),
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text(trial.writtenWord)
-								]))
-						]))
-				]));
-		var state = A2(
-			$elm$core$Maybe$withDefault,
-			$author$project$Experiment$Meaning$initState,
-			$author$project$Experiment$Experiment$getState(exp));
-		var viewFeedback = function (isVisible) {
-			return A2(
-				$rtfeldman$elm_css$Html$Styled$p,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class(
-						'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
-					]),
-				_Utils_eq(state.userAnswer, trial.definition) ? _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('✔️ Correct Answer ! ')
-					]) : _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('❌ The correct definition is : '),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$span,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('font-medium italic')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text(trial.definition)
-							]))
-					]));
-		};
-		var pct = (trialN / $elm$core$List$length(trials)) * 100;
-		var _v0 = $author$project$Experiment$Meaning$getStep(exp);
-		switch (_v0.$) {
-			case 'MainLoop':
-				var showFeedback = _v0.b;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
-								]),
-							_List_fromArray(
-								[
-									$author$project$Progressbar$progressBar(pct),
-									viewQuestion,
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
+		_v0$3:
+		while (true) {
+			switch (exp.$) {
+				case 'DoingMeaning':
+					switch (exp.a.$) {
+						case 'MainLoop':
+							var _v1 = exp.a;
+							var trials = _v1.a;
+							var state = _v1.b;
+							var trialn = _v1.c;
+							var isfeedback = _v1.d;
+							var trial = A2(
+								$elm$core$Maybe$withDefault,
+								$author$project$Experiment$Meaning$defaultTrial,
+								A2(
+									$elm$core$Array$get,
+									trialn,
+									$elm$core$Array$fromList(trials)));
+							var viewFeedback = function (isVisible) {
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$p,
 									_List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
-											$rtfeldman$elm_css$Html$Styled$Attributes$disabled(showFeedback)
+											$rtfeldman$elm_css$Html$Styled$Attributes$class(
+											'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
 										]),
-									_List_fromArray(
+									_Utils_eq(state.userAnswer, trial.definition) ? _List_fromArray(
 										[
-											A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, options)
-										])),
-									$author$project$View$button(
-									(!showFeedback) ? {
-										isDisabled: $elm$core$String$isEmpty(state.userAnswer),
-										message: toggleFeedbackMsg,
-										txt: 'Is it correct?'
-									} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
+											$rtfeldman$elm_css$Html$Styled$text('✔️ Correct Answer ! ')
+										]) : _List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
-										]),
-									_List_fromArray(
-										[
-											viewFeedback(showFeedback)
-										]))
-								]))
-						]));
-			case 'End':
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
+											$rtfeldman$elm_css$Html$Styled$text('❌ The correct definition is : '),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$span,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('font-medium italic')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(trial.definition)
+												]))
+										]));
+							};
+							var viewQuestion = A2(
+								$rtfeldman$elm_css$Html$Styled$h3,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(
+												$elm$core$String$fromInt(trialn + 1) + ('. ' + 'Choose the best definition for the word : ')),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$span,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text(trial.writtenWord)
+													]))
+											]))
+									]));
+							var pct = (trialn / $elm$core$List$length(trials)) * 100;
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
+											]),
+										_List_fromArray(
+											[
+												$author$project$Progressbar$progressBar(pct),
+												viewQuestion,
+												A2(
+												$rtfeldman$elm_css$Html$Styled$div,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+														$rtfeldman$elm_css$Html$Styled$Attributes$disabled(isfeedback)
+													]),
+												_List_fromArray(
+													[
+														A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, options)
+													])),
+												$author$project$View$button(
+												(!isfeedback) ? {
+													isDisabled: $elm$core$String$isEmpty(state.userAnswer),
+													message: toggleFeedbackMsg,
+													txt: 'Is it correct?'
+												} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$div,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
+													]),
+												_List_fromArray(
+													[
+														viewFeedback(isfeedback)
+													]))
+											]))
+									]));
+						case 'End':
+							var _v2 = exp.a;
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Merci de votre participation !🎉')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Vous trouverez dans l\'e-mail que vous avez reçu les liens pour la suite de l\'expérience.')
+											]))
+									]));
+						default:
+							break _v0$3;
+					}
+				case 'DoingTranslation':
+					if (exp.a.$ === 'MainLoop') {
+						var _v3 = exp.a;
+						var trials = _v3.a;
+						var state = _v3.b;
+						var trialn = _v3.c;
+						var feedback = _v3.d;
+						var trial = A2(
+							$elm$core$Maybe$withDefault,
+							$author$project$Experiment$Experiment$defaultTranslationTrial,
 							A2(
-							$rtfeldman$elm_css$Html$Styled$h1,
+								$elm$core$Array$get,
+								trialn,
+								$elm$core$Array$fromList(trials)));
+						var viewFeedback = function (isVisible) {
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class(
+										'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
+									]),
+								(_Utils_eq(state.userAnswer, trial.translation1) || _Utils_eq(state.userAnswer, trial.translation2)) ? _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('✔️ Correct Answer ! ')
+									]) : _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('❌ The correct translation is : '),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-medium italic')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.translation1)
+											]))
+									]));
+						};
+						var viewQuestion = A2(
+							$rtfeldman$elm_css$Html$Styled$h3,
 							_List_Nil,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$text('Merci de votre participation !🎉')
-								])),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$p,
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(
+											$elm$core$String$fromInt(trialn + 1) + ('. ' + 'Choose the best translation for the word: ')),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$span,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(trial.word)
+												]))
+										]))
+								]));
+						var pct = (trialn / $elm$core$List$length(trials)) * 100;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
 								]),
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$text('Vous trouverez dans l\'e-mail que vous avez reçu les liens pour la suite de l\'expérience.')
-								]))
-						]));
-			default:
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Todo : Intro, Pause or Training')
-						]));
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
+										]),
+									_List_fromArray(
+										[
+											$author$project$Progressbar$progressBar(pct),
+											viewQuestion,
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+													$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedback)
+												]),
+											_List_fromArray(
+												[
+													A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, options)
+												])),
+											$author$project$View$button(
+											(!feedback) ? {
+												isDisabled: $elm$core$String$isEmpty(state.userAnswer),
+												message: toggleFeedbackMsg,
+												txt: 'Is it correct?'
+											} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
+												]),
+											_List_fromArray(
+												[
+													viewFeedback(feedback)
+												]))
+										]))
+								]));
+					} else {
+						break _v0$3;
+					}
+				default:
+					break _v0$3;
+			}
 		}
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Todo : Intro, Pause ??')
+				]));
 	});
 var $author$project$Main$viewExperiment = function (model) {
 	var item = F2(
@@ -14244,164 +14535,405 @@ var $author$project$Main$viewExperiment = function (model) {
 					]),
 				attributes));
 	};
-	var _v0 = model.experiment;
-	switch (_v0.$) {
-		case 'NotAsked':
-			return _List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$h1,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-						])),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$p,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-						])),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[$author$project$Main$startButton]))
-				]);
-		case 'Loading':
-			return _List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$h1,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-						])),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$p,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-						])),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$button,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('w-56 cursor-wait'),
-									$rtfeldman$elm_css$Html$Styled$Attributes$disabled(true)
-								]),
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text('Loading...')
-								]))
-						]))
-				]);
-		case 'Failure':
-			var reason = _v0.a;
-			return _List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$h1,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-						])),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$p,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-						])),
-					A2(
-					content,
-					_List_fromArray(
-						[
-							A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-result', 'error'),
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-red-500 p-12 text-white text-center')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$li,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text(
-									$author$project$Main$buildErrorMessage(reason))
-								]))
-						]))
-				]);
-		default:
-			if (_v0.a.a.$ === 'Meaning') {
-				var exp = _v0;
-				var _v1 = exp.a;
-				var _v2 = _v1.a;
-				var trials = _v2.a;
-				var state = _v2.b;
-				var step = _v1.b;
-				var trial = $author$project$Experiment$Meaning$getTrial_(exp);
-				var isCorrect = function (optionN) {
-					return _Utils_eq(optionN, trial.definition);
-				};
-				var feedback = $author$project$Experiment$Meaning$getFeedbackStatus(step);
+	var _v0 = model.meaningTask;
+	_v0$5:
+	while (true) {
+		switch (_v0.$) {
+			case 'NotStarted':
 				return _List_fromArray(
 					[
-						A4(
-						$author$project$Experiment$Meaning$view,
-						exp,
+						A2(
+						$rtfeldman$elm_css$Html$Styled$h1,
+						_List_Nil,
 						_List_fromArray(
 							[
-								A5(
-								$author$project$View$radio,
-								trial.option1,
-								_Utils_eq(state.userAnswer, trial.option1),
-								isCorrect(trial.option1),
-								feedback,
-								$author$project$Main$UserClickedRadioButtonInMeaning(trial.option1)),
-								A5(
-								$author$project$View$radio,
-								trial.option2,
-								_Utils_eq(state.userAnswer, trial.option2),
-								isCorrect(trial.option2),
-								feedback,
-								$author$project$Main$UserClickedRadioButtonInMeaning(trial.option2)),
-								A5(
-								$author$project$View$radio,
-								trial.option3,
-								_Utils_eq(state.userAnswer, trial.option3),
-								isCorrect(trial.option3),
-								feedback,
-								$author$project$Main$UserClickedRadioButtonInMeaning(trial.option3))
+								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$p,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
 							]),
-						$author$project$Main$UserClickedFeedbackButtonInMeaning,
-						$author$project$Main$UserClickedNextTrialButtonInMeaning)
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[$author$project$Main$startButton]))
 					]);
-			} else {
+			case 'Loading':
 				return _List_fromArray(
 					[
-						$rtfeldman$elm_css$Html$Styled$text('impossible case you should change the data model')
+						A2(
+						$rtfeldman$elm_css$Html$Styled$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$p,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$button,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('w-56 cursor-wait'),
+										$rtfeldman$elm_css$Html$Styled$Attributes$disabled(true)
+									]),
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Loading...')
+									]))
+							]))
 					]);
-			}
+			case 'Failure':
+				var reason = _v0.a;
+				return _List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$p,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+							])),
+						A2(
+						content,
+						_List_fromArray(
+							[
+								A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-result', 'error'),
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-red-500 p-12 text-white text-center')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$li,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										$author$project$Main$buildErrorMessage(reason))
+									]))
+							]))
+					]);
+			case 'DoingMeaning':
+				switch (_v0.a.$) {
+					case 'MainLoop':
+						var _v1 = _v0.a;
+						var trials = _v1.a;
+						var state = _v1.b;
+						var trialn = _v1.c;
+						var feedback = _v1.d;
+						var trial = A2(
+							$elm$core$Maybe$withDefault,
+							$author$project$Experiment$Experiment$defaultTrial,
+							A2(
+								$elm$core$Array$get,
+								trialn,
+								$elm$core$Array$fromList(trials)));
+						var isCorrect = function (optionN) {
+							return _Utils_eq(optionN, trial.definition);
+						};
+						return _List_fromArray(
+							[
+								A4(
+								$author$project$Experiment$Meaning$view,
+								model.meaningTask,
+								_List_fromArray(
+									[
+										A5(
+										$author$project$View$radio,
+										trial.option1,
+										_Utils_eq(state.userAnswer, trial.option1),
+										isCorrect(trial.option1),
+										feedback,
+										$author$project$Main$UserClickedRadioButtonInMeaning(trial.option1)),
+										A5(
+										$author$project$View$radio,
+										trial.option2,
+										_Utils_eq(state.userAnswer, trial.option2),
+										isCorrect(trial.option2),
+										feedback,
+										$author$project$Main$UserClickedRadioButtonInMeaning(trial.option2)),
+										A5(
+										$author$project$View$radio,
+										trial.option3,
+										_Utils_eq(state.userAnswer, trial.option3),
+										isCorrect(trial.option3),
+										feedback,
+										$author$project$Main$UserClickedRadioButtonInMeaning(trial.option3)),
+										A5(
+										$author$project$View$radio,
+										trial.option4,
+										_Utils_eq(state.userAnswer, trial.option4),
+										isCorrect(trial.option4),
+										feedback,
+										$author$project$Main$UserClickedRadioButtonInMeaning(trial.option4))
+									]),
+								$author$project$Main$UserClickedFeedbackButtonInMeaning,
+								$author$project$Main$UserClickedNextTrialButtonInMeaning)
+							]);
+					case 'End':
+						var _v2 = _v0.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Merci de votre participation !🎉')
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+									]),
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Vous trouverez dans l\'e-mail que vous avez reçu les liens pour la suite de l\'expérience.')
+									]))
+							]);
+					default:
+						break _v0$5;
+				}
+			default:
+				break _v0$5;
+		}
 	}
+	return _List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$text('Unexpected view. You can take it in account in Main.viewExperiment')
+		]);
+};
+var $author$project$Main$UserClickedFeedbackButtonInTranslation = {$: 'UserClickedFeedbackButtonInTranslation'};
+var $author$project$Main$UserClickedNextTrialButtonInTranslation = {$: 'UserClickedNextTrialButtonInTranslation'};
+var $author$project$Main$UserClickedRadioButtonInTranslation = function (a) {
+	return {$: 'UserClickedRadioButtonInTranslation', a: a};
+};
+var $author$project$Main$viewTranslationTask = function (model) {
+	var item = F2(
+		function (key, value) {
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$li,
+				_List_Nil,
+				A2($author$project$View$keyValue, key, value));
+		});
+	var content = function (attributes) {
+		return $rtfeldman$elm_css$Html$Styled$ul(
+			_Utils_ap(
+				_List_fromArray(
+					[
+						A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-test', 'package'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-8 flex flex-col justify-center max-w-2xl h-48'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-transition rounded'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-10 font-semibold leading-loose')
+					]),
+				attributes));
+	};
+	var _v0 = model.translationTask;
+	_v0$4:
+	while (true) {
+		switch (_v0.$) {
+			case 'NotStarted':
+				return _List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$p,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[$author$project$Main$startButton]))
+					]);
+			case 'Loading':
+				return _List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$p,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$button,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('w-56 cursor-wait'),
+										$rtfeldman$elm_css$Html$Styled$Attributes$disabled(true)
+									]),
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Loading...')
+									]))
+							]))
+					]);
+			case 'Failure':
+				var reason = _v0.a;
+				return _List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$p,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+							])),
+						A2(
+						content,
+						_List_fromArray(
+							[
+								A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-result', 'error'),
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-red-500 p-12 text-white text-center')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$li,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										$author$project$Main$buildErrorMessage(reason))
+									]))
+							]))
+					]);
+			case 'DoingTranslation':
+				if (_v0.a.$ === 'MainLoop') {
+					var _v1 = _v0.a;
+					var trials = _v1.a;
+					var state = _v1.b;
+					var trialn = _v1.c;
+					var feedback = _v1.d;
+					var trial = A2(
+						$elm$core$Maybe$withDefault,
+						$author$project$Experiment$Experiment$defaultTranslationTrial,
+						A2(
+							$elm$core$Array$get,
+							trialn,
+							$elm$core$Array$fromList(trials)));
+					var isCorrect = function (optionN) {
+						return _Utils_eq(optionN, trial.translation1) || _Utils_eq(optionN, trial.translation2);
+					};
+					return _List_fromArray(
+						[
+							A4(
+							$author$project$Experiment$Meaning$view,
+							model.translationTask,
+							_List_fromArray(
+								[
+									A5(
+									$author$project$View$radio,
+									trial.distractor1,
+									_Utils_eq(state.userAnswer, trial.distractor1),
+									isCorrect(trial.distractor1),
+									feedback,
+									$author$project$Main$UserClickedRadioButtonInTranslation(trial.distractor1)),
+									A5(
+									$author$project$View$radio,
+									trial.distractor2,
+									_Utils_eq(state.userAnswer, trial.distractor2),
+									isCorrect(trial.distractor2),
+									feedback,
+									$author$project$Main$UserClickedRadioButtonInTranslation(trial.distractor2)),
+									A5(
+									$author$project$View$radio,
+									trial.distractor3,
+									_Utils_eq(state.userAnswer, trial.distractor3),
+									isCorrect(trial.distractor3),
+									feedback,
+									$author$project$Main$UserClickedRadioButtonInTranslation(trial.distractor3)),
+									A5(
+									$author$project$View$radio,
+									trial.distractor4,
+									_Utils_eq(state.userAnswer, trial.distractor4),
+									isCorrect(trial.distractor4),
+									feedback,
+									$author$project$Main$UserClickedRadioButtonInTranslation(trial.distractor4))
+								]),
+							$author$project$Main$UserClickedFeedbackButtonInTranslation,
+							$author$project$Main$UserClickedNextTrialButtonInTranslation)
+						]);
+				} else {
+					break _v0$4;
+				}
+			default:
+				break _v0$4;
+		}
+	}
+	return _List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$text('impossible case you should change the data model')
+		]);
 };
 var $author$project$Main$body = function (model) {
 	return _List_fromArray(
@@ -14439,17 +14971,17 @@ var $author$project$Main$body = function (model) {
 									])),
 								A2(
 								$rtfeldman$elm_css$Html$Styled$div,
-								_List_Nil,
 								_List_fromArray(
-									[$author$project$Main$startButton]))
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+									]),
+								_List_fromArray(
+									[$author$project$Main$startButton, $author$project$Main$startTranslation]))
 							]);
 					case 'Meaning':
 						return $author$project$Main$viewExperiment(model);
 					case 'Translation':
-						return _List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('I didn\'t create this part yet')
-							]);
+						return $author$project$Main$viewTranslationTask(model);
 					default:
 						return $author$project$View$notFound;
 				}
@@ -14951,7 +15483,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Experiment.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, definition : String.String, question : String.String, option1 : String.String, option2 : String.String, option3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String }"},"Experiment.Translation.Trial":{"args":[],"type":"{}"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedStartExperimentButton":[],"ServerRespondedWithMeaningInput":["Result.Result Http.Error (List.List Experiment.Meaning.Trial)"],"ServerRespondedWithTranslationTrials":["Result.Result Http.Error (List.List Experiment.Translation.Trial)"],"UserClickedRadioButtonInMeaning":["String.String"],"UserClickedFeedbackButtonInMeaning":[],"UserClickedNextTrialButtonInMeaning":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Experiment.Experiment.TranslationInput":{"args":[],"type":"{ uid : String.String, question : String.String, translation1 : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, distractor4 : String.String, word : String.String }"},"Experiment.Experiment.TrialMeaning":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, definition : String.String, question : String.String, option1 : String.String, option2 : String.String, option3 : String.String, option4 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedStartExperimentButton":[],"UserClickedStartTranslationButton":[],"ServerRespondedWithMeaningInput":["Result.Result Http.Error (List.List Experiment.Experiment.TrialMeaning)"],"ServerRespondedWithTranslationTrials":["Result.Result Http.Error (List.List Experiment.Experiment.TranslationInput)"],"UserClickedRadioButtonInMeaning":["String.String"],"UserClickedRadioButtonInTranslation":["String.String"],"UserClickedFeedbackButtonInMeaning":[],"UserClickedFeedbackButtonInTranslation":[],"UserClickedNextTrialButtonInMeaning":[],"UserClickedNextTrialButtonInTranslation":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 

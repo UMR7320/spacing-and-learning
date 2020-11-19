@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Array
 import Browser
 import Browser.Navigation as Nav
 import Data
@@ -25,22 +26,11 @@ type alias Flags =
 -- MODEL
 
 
-type HigherType
-    = None
-    | Option1 Meaning.Trial
-    | Option2 Translation.Trial
-
-
-type HigherTypeTwo
-    = StateOne Translation.State
-    | StateTwo Translation.State
-
-
 type alias Model =
     { key : Nav.Key
     , route : Route.Route
-    , experiment : E.Experiment Meaning.Trial Meaning.State
-    , translation : E.Experiment Translation.Trial Translation.Trial
+    , meaningTask : E.Experiment
+    , translationTask : E.Experiment
     }
 
 
@@ -64,8 +54,8 @@ init flags url key =
     in
     ( { key = key
       , route = route
-      , experiment = E.NotAsked
-      , translation = E.NotAsked
+      , meaningTask = E.NotStarted
+      , translationTask = E.NotStarted
       }
     , fetchData route
     )
@@ -123,14 +113,14 @@ body model =
                     [ class "max-w-xl text-xl mb-8" ]
                     [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
                     ]
-                , div [] [ startButton ]
+                , div [ class "flex flex-col" ] [ startButton, startTranslation ]
                 ]
 
             Meaning ->
                 viewExperiment model
 
             Translation ->
-                [ text "I didn't create this part yet" ]
+                viewTranslationTask model
 
             NotFound ->
                 View.notFound
@@ -140,11 +130,21 @@ body model =
 startButton : Html Msg
 startButton =
     button
-        [ class "w-64"
+        [ class "w-64 mb-8"
         , attribute "data-action" "start-experiment"
         , onClick UserClickedStartExperimentButton
         ]
-        [ text "Commencer l'expérience" ]
+        [ text "Commencer meaning" ]
+
+
+startTranslation : Html Msg
+startTranslation =
+    button
+        [ class "w-64"
+        , attribute "data-action" "start-translation"
+        , onClick UserClickedStartTranslationButton
+        ]
+        [ text "Commencer translation" ]
 
 
 viewExperiment : Model -> List (Html Msg)
@@ -162,8 +162,8 @@ viewExperiment model =
         item key value =
             li [] (View.keyValue key value)
     in
-    case model.experiment of
-        E.NotAsked ->
+    case model.meaningTask of
+        E.NotStarted ->
             [ h1 [] [ text "Apprentissage et Espacement" ]
             , p
                 [ class "max-w-xl text-xl mb-8" ]
@@ -197,19 +197,19 @@ viewExperiment model =
                 [ li [] [ text (buildErrorMessage reason) ] ]
             ]
 
-        (E.Ready ( E.Meaning trials state, step )) as exp ->
+        E.DoingMeaning (E.MainLoop trials state trialn feedback) ->
             let
                 trial =
-                    Meaning.getTrial_ exp
-
-                feedback =
-                    Meaning.getFeedbackStatus step
+                    Array.get
+                        trialn
+                        (Array.fromList trials)
+                        |> Maybe.withDefault E.defaultTrial
 
                 isCorrect optionN =
                     optionN == trial.definition
             in
             [ Meaning.view
-                exp
+                model.meaningTask
                 [ View.radio
                     trial.option1
                     (state.userAnswer == trial.option1)
@@ -228,9 +228,119 @@ viewExperiment model =
                     (isCorrect trial.option3)
                     feedback
                     (UserClickedRadioButtonInMeaning trial.option3)
+                , View.radio
+                    trial.option4
+                    (state.userAnswer == trial.option4)
+                    (isCorrect trial.option4)
+                    feedback
+                    (UserClickedRadioButtonInMeaning trial.option4)
                 ]
                 UserClickedFeedbackButtonInMeaning
                 UserClickedNextTrialButtonInMeaning
+            ]
+
+        E.DoingMeaning E.End ->
+            [ h1 [] [ text "Merci de votre participation !🎉" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Vous trouverez dans l'e-mail que vous avez reçu les liens pour la suite de l'expérience."
+                ]
+            ]
+
+        _ ->
+            [ text "Unexpected view. You can take it in account in Main.viewExperiment" ]
+
+
+viewTranslationTask : Model -> List (Html Msg)
+viewTranslationTask model =
+    let
+        content attributes =
+            ul <|
+                [ attribute "data-test" "package"
+                , class "mt-8 flex flex-col justify-center max-w-2xl h-48"
+                , class "bg-transition rounded"
+                , class "pl-10 font-semibold leading-loose"
+                ]
+                    ++ attributes
+
+        item key value =
+            li [] (View.keyValue key value)
+    in
+    case model.translationTask of
+        E.NotStarted ->
+            [ h1 [] [ text "Apprentissage et Espacement" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
+                ]
+            , div [] [ startButton ]
+            ]
+
+        E.Loading ->
+            [ h1 [] [ text "Apprentissage et Espacement" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
+                ]
+            , div []
+                [ button [ class "w-56 cursor-wait", disabled True ]
+                    [ text "Loading..." ]
+                ]
+            ]
+
+        E.Failure reason ->
+            [ h1 [] [ text "Apprentissage et Espacement" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
+                ]
+            , content
+                [ attribute "data-result" "error"
+                , class "bg-red-500 p-12 text-white text-center"
+                ]
+                [ li [] [ text (buildErrorMessage reason) ] ]
+            ]
+
+        E.DoingTranslation (E.MainLoop trials state trialn feedback) ->
+            let
+                trial =
+                    Array.get
+                        trialn
+                        (Array.fromList trials)
+                        |> Maybe.withDefault E.defaultTranslationTrial
+
+                isCorrect optionN =
+                    optionN == trial.translation1 || optionN == trial.translation2
+            in
+            [ Meaning.view
+                model.translationTask
+                [ View.radio
+                    trial.distractor1
+                    (state.userAnswer == trial.distractor1)
+                    (isCorrect trial.distractor1)
+                    feedback
+                    (UserClickedRadioButtonInTranslation trial.distractor1)
+                , View.radio
+                    trial.distractor2
+                    (state.userAnswer == trial.distractor2)
+                    (isCorrect trial.distractor2)
+                    feedback
+                    (UserClickedRadioButtonInTranslation trial.distractor2)
+                , View.radio
+                    trial.distractor3
+                    (state.userAnswer == trial.distractor3)
+                    (isCorrect trial.distractor3)
+                    feedback
+                    (UserClickedRadioButtonInTranslation trial.distractor3)
+                , View.radio
+                    trial.distractor4
+                    (state.userAnswer == trial.distractor4)
+                    (isCorrect trial.distractor4)
+                    feedback
+                    (UserClickedRadioButtonInTranslation trial.distractor4)
+                ]
+                UserClickedFeedbackButtonInTranslation
+                UserClickedNextTrialButtonInTranslation
             ]
 
         _ ->
@@ -245,18 +355,35 @@ type Msg
     = BrowserChangedUrl Url
     | UserClickedLink Browser.UrlRequest
     | UserClickedStartExperimentButton
-    | ServerRespondedWithMeaningInput (Result Http.Error (List Meaning.Trial))
-    | ServerRespondedWithTranslationTrials (Result Http.Error (List Translation.Trial))
+    | UserClickedStartTranslationButton
+    | ServerRespondedWithMeaningInput (Result Http.Error (List E.TrialMeaning))
+    | ServerRespondedWithTranslationTrials (Result Http.Error (List E.TranslationInput))
     | UserClickedRadioButtonInMeaning String
+    | UserClickedRadioButtonInTranslation String
     | UserClickedFeedbackButtonInMeaning
+    | UserClickedFeedbackButtonInTranslation
     | UserClickedNextTrialButtonInMeaning
+    | UserClickedNextTrialButtonInTranslation
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         currentMeaningState =
-            E.getState model.experiment |> Maybe.withDefault Meaning.initState
+            case E.getState model.meaningTask of
+                E.MeaningState x ->
+                    x
+
+                _ ->
+                    Meaning.initState
+
+        currentTranslationState =
+            case E.getState model.translationTask of
+                E.TranslationState x ->
+                    x
+
+                _ ->
+                    E.initTranslationState
     in
     case msg of
         BrowserChangedUrl url ->
@@ -277,50 +404,71 @@ update msg model =
                     )
 
         UserClickedStartExperimentButton ->
-            ( { model | experiment = E.Loading }
+            ( { model | meaningTask = E.Loading }
             , Cmd.batch
                 [ Nav.pushUrl model.key (Url.Builder.absolute [ "meaning" ] [])
                 , Meaning.getTrialsFromServer ServerRespondedWithMeaningInput
                 ]
             )
 
+        UserClickedStartTranslationButton ->
+            ( { model | meaningTask = E.Loading }
+            , Cmd.batch
+                [ Nav.pushUrl model.key (Url.Builder.absolute [ "translation" ] [])
+                , Translation.getTrialsFromServer ServerRespondedWithTranslationTrials
+                ]
+            )
+
         ServerRespondedWithMeaningInput (Result.Ok data) ->
             ( { model
-                | experiment =
-                    E.Ready
-                        ( E.Meaning data Meaning.initState, E.MainLoop 0 False )
+                | meaningTask =
+                    E.DoingMeaning (E.MainLoop data Meaning.initState 0 False)
               }
             , Cmd.none
             )
 
         ServerRespondedWithTranslationTrials (Result.Err reason) ->
-            ( { model | experiment = E.Failure reason }, Cmd.none )
+            ( { model | translationTask = E.Failure reason }, Cmd.none )
 
         ServerRespondedWithTranslationTrials (Result.Ok data) ->
-            ( { model
-                | translation =
-                    E.Ready
-                        ( E.Meaning data Translation.initState, E.MainLoop 0 False )
-              }
+            ( { model | translationTask = E.DoingTranslation (E.MainLoop data E.initTranslationState 0 False) }
             , Cmd.none
             )
 
         ServerRespondedWithMeaningInput (Result.Err reason) ->
-            ( { model | experiment = E.Failure reason }, Cmd.none )
+            ( { model | meaningTask = E.Failure reason }, Cmd.none )
 
         UserClickedRadioButtonInMeaning newChoice ->
             ( { model
-                | experiment =
-                    model.experiment
-                        |> Meaning.updateState { currentMeaningState | userAnswer = newChoice }
+                | meaningTask =
+                    model.meaningTask
+                        |> E.updateState (E.MeaningState { currentMeaningState | userAnswer = newChoice })
+              }
+            , Cmd.none
+            )
+
+        UserClickedRadioButtonInTranslation newChoice ->
+            ( { model
+                | translationTask =
+                    model.translationTask
+                        |> E.updateState (E.TranslationState { currentMeaningState | userAnswer = newChoice })
               }
             , Cmd.none
             )
 
         UserClickedFeedbackButtonInMeaning ->
             ( { model
-                | experiment =
-                    model.experiment
+                | meaningTask =
+                    model.meaningTask
+                        |> E.toggleFeedback
+              }
+            , Cmd.none
+            )
+
+        UserClickedFeedbackButtonInTranslation ->
+            ( { model
+                | translationTask =
+                    model.translationTask
                         |> E.toggleFeedback
               }
             , Cmd.none
@@ -328,10 +476,21 @@ update msg model =
 
         UserClickedNextTrialButtonInMeaning ->
             ( { model
-                | experiment =
-                    model.experiment
+                | meaningTask =
+                    model.meaningTask
                         |> E.toggleFeedback
-                        |> Meaning.updateState { currentMeaningState | userAnswer = "" }
+                        |> E.updateState (E.MeaningState { currentMeaningState | userAnswer = "" })
+                        |> E.nextTrial
+              }
+            , Cmd.none
+            )
+
+        UserClickedNextTrialButtonInTranslation ->
+            ( { model
+                | translationTask =
+                    model.translationTask
+                        |> E.toggleFeedback
+                        |> E.updateState (E.TranslationState { currentTranslationState | userAnswer = "" })
                         |> E.nextTrial
               }
             , Cmd.none
