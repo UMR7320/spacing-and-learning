@@ -7,6 +7,8 @@ module View exposing
     , navOut
     , notFound
     , radio
+    , simpleAudioPlayer
+    , viewVega
     )
 
 import Css
@@ -195,3 +197,18 @@ button { message, txt, isDisabled } =
                 "visible"
         ]
         [ text txt ]
+
+
+simpleAudioPlayer : String -> Html msg
+simpleAudioPlayer src =
+    Html.Styled.audio
+        [ Html.Styled.Attributes.controls True
+        , Html.Styled.Attributes.src src
+        , Html.Styled.Attributes.autoplay True
+        , Html.Styled.Attributes.width 300
+        ]
+        []
+
+
+viewVega =
+    node "view" [] []

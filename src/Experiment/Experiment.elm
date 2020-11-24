@@ -2,6 +2,7 @@ module Experiment.Experiment exposing (..)
 
 import Array
 import Css exposing (end)
+import Data
 import Html exposing (a)
 import Http
 import Json.Decode as Decode
@@ -53,6 +54,13 @@ nextTrial experiment =
             else
                 DoingTranslation (MainLoop trials state (ntrial + 1) feedback)
 
+        DoingScrabble (MainLoop trials state ntrial feedback) ->
+            if ntrial >= List.length trials - 1 then
+                DoingScrabble End
+
+            else
+                DoingScrabble (MainLoop trials state (ntrial + 1) feedback)
+
         _ ->
             Failure
                 (Http.BadBody
@@ -72,6 +80,9 @@ toggleFeedback exp =
         DoingTranslation (MainLoop trials state ntrial feedback) ->
             DoingTranslation (MainLoop trials state ntrial (not feedback))
 
+        DoingScrabble (MainLoop trials state ntrial feedback) ->
+            DoingScrabble (MainLoop trials state ntrial (not feedback))
+
         _ ->
             Failure (Http.BadBody <| errorMessage "toggle feedback" "Experiment.toggleFeedback")
 
@@ -85,18 +96,6 @@ errorMessage action functioname =
         , functioname
         , " to take in account this case"
         ]
-
-
-
-{--MainLoop ({ isfeedback } as params) ->
-            let
-                togglefeedback =
-                    MainLoop { params | isfeedback = not isfeedback }
-            in
-            { exp | step = togglefeedback }
-
-        _ ->
-            exp--}
 
 
 getTrialnumber : Step a b c d e f -> TrialNumber
@@ -117,19 +116,6 @@ type Step mainTrainingTrials mainTrainingState mainTrials mainState instructions
     | End
 
 
-
-{--case ( step, trials ) of
-        ( MainLoop ({ trialn, isfeedback } as params), MeaningTrials trials_ ) ->
-            if trialn >= List.length trials_ - 1 then
-                { exp | step = End }
-
-            else
-                { exp | step = MainLoop { params | trialn = trialn + 1 } }
-
-        _ ->
-            exp--}
-
-
 getFeedbackStatus : Step b c d e f g -> ToggleFeedback
 getFeedbackStatus step =
     case step of
@@ -145,6 +131,7 @@ type Experiment
     | Loading
     | DoingMeaning (Step (List ()) () (List TrialMeaning) StateMeaning String String)
     | DoingTranslation (Step (List ()) () (List TranslationInput) TranslationOutput String String)
+    | DoingScrabble (Step (List ()) () (List ScrabbleTrial) ScrabbleState String String)
     | Done
     | Failure Http.Error
 
@@ -158,6 +145,9 @@ updateState newState exp =
         ( TranslationState newState_, DoingTranslation (MainLoop trials prevstate ntrial feedback) ) ->
             DoingTranslation (MainLoop trials newState_ ntrial feedback)
 
+        ( ScrabbleStateType newState_, DoingScrabble (MainLoop trials prevstate ntrial feedback) ) ->
+            DoingScrabble (MainLoop trials newState_ ntrial feedback)
+
         _ ->
             Failure (Http.BadBody <| errorMessage "update the state of the experiment" "Experiment.updateState")
 
@@ -170,6 +160,9 @@ getState experiment =
 
         DoingTranslation (MainLoop trials state ntrial feedback) ->
             TranslationState state
+
+        DoingScrabble (MainLoop trials state ntrial feedback) ->
+            ScrabbleStateType state
 
         _ ->
             DummyType
@@ -193,6 +186,7 @@ type alias IsFeedback =
 type StateType
     = MeaningState StateMeaning
     | TranslationState TranslationOutput
+    | ScrabbleStateType ScrabbleState
     | DummyType
 
 
@@ -339,3 +333,29 @@ type alias StateMeaning =
     , userUID : String
     , userAnswer : String
     }
+
+
+
+-- SCRABBLE
+
+
+type alias ScrabbleTrial =
+    { uid : String
+    , writtenWord : String
+    , audioWord : Data.AudioFile
+    }
+
+
+type alias ScrabbleState =
+    { uid : String
+    , userAnswer : String
+    , scrambledLetter : List KeyedItem
+    }
+
+
+type alias Item =
+    String
+
+
+type alias KeyedItem =
+    ( String, Item )

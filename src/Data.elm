@@ -1,4 +1,4 @@
-module Data exposing (decodeRecords)
+module Data exposing (..)
 
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (optional, required)
@@ -21,6 +21,20 @@ decodeTranslationInput =
 --}
 
 
+decodeAudioFiles : Decode.Decoder AudioFile
+decodeAudioFiles =
+    Decode.map (Maybe.withDefault (AudioFile "" "") << List.head) <|
+        Decode.list audioDecoder
+
+
+audioDecoder : Decode.Decoder AudioFile
+audioDecoder =
+    Decode.map2
+        AudioFile
+        (Decode.field "url" Decode.string)
+        (Decode.field "type" Decode.string)
+
+
 decodeRecords : Decoder a -> Decoder (List a)
 decodeRecords xs =
     let
@@ -28,6 +42,12 @@ decodeRecords xs =
             Decode.field "records" fieldsDecoder
     in
     decode (Decode.list xs)
+
+
+type alias AudioFile =
+    { url : String
+    , type_ : String
+    }
 
 
 

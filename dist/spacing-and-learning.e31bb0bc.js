@@ -10859,6 +10859,9 @@ var $author$project$Experiment$Experiment$NotStarted = {$: 'NotStarted'};
 var $author$project$Main$ServerRespondedWithMeaningInput = function (a) {
 	return {$: 'ServerRespondedWithMeaningInput', a: a};
 };
+var $author$project$Main$ServerRespondedWithScrabbleTrials = function (a) {
+	return {$: 'ServerRespondedWithScrabbleTrials', a: a};
+};
 var $author$project$Main$ServerRespondedWithTranslationTrials = function (a) {
 	return {$: 'ServerRespondedWithTranslationTrials', a: a};
 };
@@ -11300,6 +11303,55 @@ var $author$project$Experiment$Experiment$getTrialsFromServer_ = F3(
 var $author$project$Experiment$Meaning$getTrialsFromServer = function (callbackMsg) {
 	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Meaning', callbackMsg, $author$project$Experiment$Meaning$decodeMeaningInput);
 };
+var $author$project$Experiment$Experiment$ScrabbleTrial = F3(
+	function (uid, writtenWord, audioWord) {
+		return {audioWord: audioWord, uid: uid, writtenWord: writtenWord};
+	});
+var $author$project$Data$AudioFile = F2(
+	function (url, type_) {
+		return {type_: type_, url: url};
+	});
+var $author$project$Data$audioDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Data$AudioFile,
+	A2($elm$json$Json$Decode$field, 'url', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string));
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Data$decodeAudioFiles = A2(
+	$elm$json$Json$Decode$map,
+	A2(
+		$elm$core$Basics$composeL,
+		$elm$core$Maybe$withDefault(
+			A2($author$project$Data$AudioFile, '', '')),
+		$elm$core$List$head),
+	$elm$json$Json$Decode$list($author$project$Data$audioDecoder));
+var $author$project$Experiment$Scrabble$decodeTranslationInput = function () {
+	var decoder = A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'Word_Audio',
+		$author$project$Data$decodeAudioFiles,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'Word_Text',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'UID',
+				$elm$json$Json$Decode$string,
+				$elm$json$Json$Decode$succeed($author$project$Experiment$Experiment$ScrabbleTrial))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Experiment$Scrabble$getTrialsFromServer = function (msgHandler) {
+	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Scrabble', msgHandler, $author$project$Experiment$Scrabble$decodeTranslationInput);
+};
 var $author$project$Experiment$Experiment$TranslationInput = F9(
 	function (uid, question, translation1, translation2, distractor1, distractor2, distractor3, distractor4, word) {
 		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, distractor4: distractor4, question: question, translation1: translation1, translation2: translation2, uid: uid, word: word};
@@ -11359,7 +11411,11 @@ var $author$project$Main$fetchData = function (route) {
 			return $author$project$Experiment$Meaning$getTrialsFromServer($author$project$Main$ServerRespondedWithMeaningInput);
 		case 'Translation':
 			return $author$project$Experiment$Translation$getTrialsFromServer($author$project$Main$ServerRespondedWithTranslationTrials);
+		case 'Scrabble':
+			return $author$project$Experiment$Scrabble$getTrialsFromServer($author$project$Main$ServerRespondedWithScrabbleTrials);
 		case 'ExperimentStart':
+			return $elm$core$Platform$Cmd$none;
+		case 'Home':
 			return $elm$core$Platform$Cmd$none;
 		default:
 			return $elm$core$Platform$Cmd$none;
@@ -11486,7 +11542,9 @@ var $elm$url$Url$Parser$parse = F2(
 					$elm$core$Basics$identity)));
 	});
 var $author$project$Route$ExperimentStart = {$: 'ExperimentStart'};
+var $author$project$Route$Home = {$: 'Home'};
 var $author$project$Route$Meaning = {$: 'Meaning'};
+var $author$project$Route$Scrabble = {$: 'Scrabble'};
 var $author$project$Route$Translation = {$: 'Translation'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
@@ -11572,6 +11630,14 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			A2($elm$url$Url$Parser$map, $author$project$Route$ExperimentStart, $elm$url$Url$Parser$top),
 			A2(
 			$elm$url$Url$Parser$map,
+			$author$project$Route$Home,
+			$elm$url$Url$Parser$s('index.html')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Scrabble,
+			$elm$url$Url$Parser$s('scrabble')),
+			A2(
+			$elm$url$Url$Parser$map,
 			$author$project$Route$ExperimentStart,
 			$elm$url$Url$Parser$s('start')),
 			A2(
@@ -11589,20 +11655,956 @@ var $author$project$Route$fromUrl = function (url) {
 		$author$project$Route$NotFound,
 		A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url));
 };
+var $author$project$Main$UserDragsLetter = function (a) {
+	return {$: 'UserDragsLetter', a: a};
+};
+var $annaghi$dnd_list$DnDList$Free = {$: 'Free'};
+var $annaghi$dnd_list$DnDList$OnDrag = {$: 'OnDrag'};
+var $annaghi$dnd_list$DnDList$Swap = {$: 'Swap'};
+var $author$project$Main$config = {
+	beforeUpdate: F3(
+		function (_v0, _v1, list) {
+			return list;
+		}),
+	listen: $annaghi$dnd_list$DnDList$OnDrag,
+	movement: $annaghi$dnd_list$DnDList$Free,
+	operation: $annaghi$dnd_list$DnDList$Swap
+};
+var $annaghi$dnd_list$DnDList$Model = function (a) {
+	return {$: 'Model', a: a};
+};
+var $annaghi$dnd_list$DnDList$GotDragElement = function (a) {
+	return {$: 'GotDragElement', a: a};
+};
+var $elm$core$Task$onError = _Scheduler_onError;
+var $elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return $elm$core$Task$command(
+			$elm$core$Task$Perform(
+				A2(
+					$elm$core$Task$onError,
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+						$elm$core$Result$Err),
+					A2(
+						$elm$core$Task$andThen,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+							$elm$core$Result$Ok),
+						task))));
+	});
+var $elm$browser$Browser$Dom$getElement = _Browser_getElement;
+var $annaghi$dnd_list$DnDList$dragElementCommands = F2(
+	function (stepMsg, state) {
+		var _v0 = state.dragElement;
+		if (_v0.$ === 'Nothing') {
+			return A2(
+				$elm$core$Task$attempt,
+				A2($elm$core$Basics$composeL, stepMsg, $annaghi$dnd_list$DnDList$GotDragElement),
+				$elm$browser$Browser$Dom$getElement(state.dragElementId));
+		} else {
+			return $elm$core$Platform$Cmd$none;
+		}
+	});
+var $annaghi$dnd_list$DnDList$GotDropElement = function (a) {
+	return {$: 'GotDropElement', a: a};
+};
+var $annaghi$dnd_list$DnDList$dropElementCommands = F2(
+	function (stepMsg, state) {
+		return (!state.dragCounter) ? A2(
+			$elm$core$Task$attempt,
+			A2($elm$core$Basics$composeL, stepMsg, $annaghi$dnd_list$DnDList$GotDropElement),
+			$elm$browser$Browser$Dom$getElement(state.dropElementId)) : $elm$core$Platform$Cmd$none;
+	});
+var $annaghi$dnd_list$DnDList$commands = F2(
+	function (stepMsg, _v0) {
+		var model = _v0.a;
+		if (model.$ === 'Nothing') {
+			return $elm$core$Platform$Cmd$none;
+		} else {
+			var state = model.a;
+			return $elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						A2($annaghi$dnd_list$DnDList$dragElementCommands, stepMsg, state),
+						A2($annaghi$dnd_list$DnDList$dropElementCommands, stepMsg, state)
+					]));
+		}
+	});
+var $annaghi$dnd_list$DnDList$DragStart = F3(
+	function (a, b, c) {
+		return {$: 'DragStart', a: a, b: b, c: c};
+	});
+var $annaghi$dnd_list$Internal$Common$Utils$Position = F2(
+	function (x, y) {
+		return {x: x, y: y};
+	});
+var $annaghi$dnd_list$Internal$Common$Utils$clientX = A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float);
+var $annaghi$dnd_list$Internal$Common$Utils$clientY = A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float);
+var $annaghi$dnd_list$Internal$Common$Utils$decodeCoordinates = A3($elm$json$Json$Decode$map2, $annaghi$dnd_list$Internal$Common$Utils$Position, $annaghi$dnd_list$Internal$Common$Utils$clientX, $annaghi$dnd_list$Internal$Common$Utils$clientY);
+var $annaghi$dnd_list$Internal$Common$Utils$decodeMainMouseButton = function (decoder) {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		function (button) {
+			return (!button) ? decoder : $elm$json$Json$Decode$fail('Event is only relevant when the main mouse button was pressed.');
+		},
+		A2($elm$json$Json$Decode$field, 'button', $elm$json$Json$Decode$int));
+};
+var $annaghi$dnd_list$Internal$Common$Utils$decodeCoordinatesWithButtonCheck = $annaghi$dnd_list$Internal$Common$Utils$decodeMainMouseButton($annaghi$dnd_list$Internal$Common$Utils$decodeCoordinates);
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $annaghi$dnd_list$DnDList$dragEvents = F3(
+	function (stepMsg, dragIndex, dragElementId) {
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$Events$preventDefaultOn,
+				'mousedown',
+				A2(
+					$elm$json$Json$Decode$map,
+					function (msg) {
+						return _Utils_Tuple2(msg, true);
+					},
+					A2(
+						$elm$json$Json$Decode$map,
+						A2(
+							$elm$core$Basics$composeL,
+							stepMsg,
+							A2($annaghi$dnd_list$DnDList$DragStart, dragIndex, dragElementId)),
+						$annaghi$dnd_list$Internal$Common$Utils$decodeCoordinatesWithButtonCheck)))
+			]);
+	});
+var $annaghi$dnd_list$DnDList$DragEnter = function (a) {
+	return {$: 'DragEnter', a: a};
+};
+var $annaghi$dnd_list$DnDList$DragLeave = {$: 'DragLeave'};
+var $annaghi$dnd_list$DnDList$DragOver = F2(
+	function (a, b) {
+		return {$: 'DragOver', a: a, b: b};
+	});
+var $elm$html$Html$Events$onMouseEnter = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseenter',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$onMouseLeave = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseleave',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$onMouseOver = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseover',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $annaghi$dnd_list$DnDList$dropEvents = F3(
+	function (stepMsg, dropIndex, dropElementId) {
+		return _List_fromArray(
+			[
+				$elm$html$Html$Events$onMouseOver(
+				stepMsg(
+					A2($annaghi$dnd_list$DnDList$DragOver, dropIndex, dropElementId))),
+				$elm$html$Html$Events$onMouseEnter(
+				stepMsg(
+					$annaghi$dnd_list$DnDList$DragEnter(dropIndex))),
+				$elm$html$Html$Events$onMouseLeave(
+				stepMsg($annaghi$dnd_list$DnDList$DragLeave))
+			]);
+	});
+var $annaghi$dnd_list$Internal$Common$Utils$px = function (n) {
+	return $elm$core$String$fromInt(n) + 'px';
+};
+var $elm$core$Basics$round = _Basics_round;
+var $annaghi$dnd_list$Internal$Common$Utils$translate = F2(
+	function (x, y) {
+		return 'translate3d(' + ($annaghi$dnd_list$Internal$Common$Utils$px(x) + (', ' + ($annaghi$dnd_list$Internal$Common$Utils$px(y) + ', 0)')));
+	});
+var $annaghi$dnd_list$DnDList$ghostStyles = F2(
+	function (movement, _v0) {
+		var model = _v0.a;
+		if (model.$ === 'Nothing') {
+			return _List_Nil;
+		} else {
+			var state = model.a;
+			var _v2 = state.dragElement;
+			if (_v2.$ === 'Just') {
+				var element = _v2.a.element;
+				var viewport = _v2.a.viewport;
+				var transform = function () {
+					switch (movement.$) {
+						case 'Horizontal':
+							return A2(
+								$elm$html$Html$Attributes$style,
+								'transform',
+								A2(
+									$annaghi$dnd_list$Internal$Common$Utils$translate,
+									$elm$core$Basics$round(((state.currentPosition.x - state.startPosition.x) + element.x) - viewport.x),
+									$elm$core$Basics$round(element.y - viewport.y)));
+						case 'Vertical':
+							return A2(
+								$elm$html$Html$Attributes$style,
+								'transform',
+								A2(
+									$annaghi$dnd_list$Internal$Common$Utils$translate,
+									$elm$core$Basics$round(element.x - viewport.x),
+									$elm$core$Basics$round(((state.currentPosition.y - state.startPosition.y) + element.y) - viewport.y)));
+						default:
+							return A2(
+								$elm$html$Html$Attributes$style,
+								'transform',
+								A2(
+									$annaghi$dnd_list$Internal$Common$Utils$translate,
+									$elm$core$Basics$round(((state.currentPosition.x - state.startPosition.x) + element.x) - viewport.x),
+									$elm$core$Basics$round(((state.currentPosition.y - state.startPosition.y) + element.y) - viewport.y)));
+					}
+				}();
+				var baseStyles = _List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'position', 'fixed'),
+						A2($elm$html$Html$Attributes$style, 'top', '0'),
+						A2($elm$html$Html$Attributes$style, 'left', '0'),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'height',
+						$annaghi$dnd_list$Internal$Common$Utils$px(
+							$elm$core$Basics$round(element.height))),
+						A2(
+						$elm$html$Html$Attributes$style,
+						'width',
+						$annaghi$dnd_list$Internal$Common$Utils$px(
+							$elm$core$Basics$round(element.width))),
+						A2($elm$html$Html$Attributes$style, 'pointer-events', 'none')
+					]);
+				return A2($elm$core$List$cons, transform, baseStyles);
+			} else {
+				return _List_Nil;
+			}
+		}
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $annaghi$dnd_list$DnDList$info = function (_v0) {
+	var model = _v0.a;
+	return A2(
+		$elm$core$Maybe$andThen,
+		function (state) {
+			return A3(
+				$elm$core$Maybe$map2,
+				F2(
+					function (dragElement, dropElement) {
+						return {currentPosition: state.currentPosition, dragElement: dragElement, dragElementId: state.dragElementId, dragIndex: state.dragIndex, dropElement: dropElement, dropElementId: state.dropElementId, dropIndex: state.dropIndex, startPosition: state.startPosition};
+					}),
+				state.dragElement,
+				state.dropElement);
+		},
+		model);
+};
+var $annaghi$dnd_list$DnDList$Drag = function (a) {
+	return {$: 'Drag', a: a};
+};
+var $annaghi$dnd_list$DnDList$DragEnd = {$: 'DragEnd'};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$browser$Browser$Events$Document = {$: 'Document'};
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
+var $elm$browser$Browser$Events$Event = F2(
+	function (key, event) {
+		return {event: event, key: key};
+	});
+var $elm$browser$Browser$Events$spawn = F3(
+	function (router, key, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var actualNode = function () {
+			if (node.$ === 'Document') {
+				return _Browser_doc;
+			} else {
+				return _Browser_window;
+			}
+		}();
+		return A2(
+			$elm$core$Task$map,
+			function (value) {
+				return _Utils_Tuple2(key, value);
+			},
+			A3(
+				_Browser_on,
+				actualNode,
+				name,
+				function (event) {
+					return A2(
+						$elm$core$Platform$sendToSelf,
+						router,
+						A2($elm$browser$Browser$Events$Event, key, event));
+				}));
+	});
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
+var $elm$browser$Browser$Events$onEffects = F3(
+	function (router, subs, state) {
+		var stepRight = F3(
+			function (key, sub, _v6) {
+				var deads = _v6.a;
+				var lives = _v6.b;
+				var news = _v6.c;
+				return _Utils_Tuple3(
+					deads,
+					lives,
+					A2(
+						$elm$core$List$cons,
+						A3($elm$browser$Browser$Events$spawn, router, key, sub),
+						news));
+			});
+		var stepLeft = F3(
+			function (_v4, pid, _v5) {
+				var deads = _v5.a;
+				var lives = _v5.b;
+				var news = _v5.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, pid, deads),
+					lives,
+					news);
+			});
+		var stepBoth = F4(
+			function (key, pid, _v2, _v3) {
+				var deads = _v3.a;
+				var lives = _v3.b;
+				var news = _v3.c;
+				return _Utils_Tuple3(
+					deads,
+					A3($elm$core$Dict$insert, key, pid, lives),
+					news);
+			});
+		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
+		var _v0 = A6(
+			$elm$core$Dict$merge,
+			stepLeft,
+			stepBoth,
+			stepRight,
+			state.pids,
+			$elm$core$Dict$fromList(newSubs),
+			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
+		var deadPids = _v0.a;
+		var livePids = _v0.b;
+		var makeNewPids = _v0.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (pids) {
+				return $elm$core$Task$succeed(
+					A2(
+						$elm$browser$Browser$Events$State,
+						newSubs,
+						A2(
+							$elm$core$Dict$union,
+							livePids,
+							$elm$core$Dict$fromList(pids))));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$sequence(makeNewPids);
+				},
+				$elm$core$Task$sequence(
+					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
+	});
+var $elm$browser$Browser$Events$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var key = _v0.key;
+		var event = _v0.event;
+		var toMessage = function (_v2) {
+			var subKey = _v2.a;
+			var _v3 = _v2.b;
+			var node = _v3.a;
+			var name = _v3.b;
+			var decoder = _v3.c;
+			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
+		};
+		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Platform$sendToApp(router),
+					messages)));
+	});
+var $elm$browser$Browser$Events$subMap = F2(
+	function (func, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var decoder = _v0.c;
+		return A3(
+			$elm$browser$Browser$Events$MySub,
+			node,
+			name,
+			A2($elm$json$Json$Decode$map, func, decoder));
+	});
+_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
+var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
+var $elm$browser$Browser$Events$on = F3(
+	function (node, name, decoder) {
+		return $elm$browser$Browser$Events$subscription(
+			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
+	});
+var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
+var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
+var $annaghi$dnd_list$DnDList$subscriptions = F2(
+	function (stepMsg, _v0) {
+		var model = _v0.a;
+		if (model.$ === 'Nothing') {
+			return $elm$core$Platform$Sub$none;
+		} else {
+			return $elm$core$Platform$Sub$batch(
+				_List_fromArray(
+					[
+						$elm$browser$Browser$Events$onMouseMove(
+						A2(
+							$elm$json$Json$Decode$map,
+							A2($elm$core$Basics$composeL, stepMsg, $annaghi$dnd_list$DnDList$Drag),
+							$annaghi$dnd_list$Internal$Common$Utils$decodeCoordinates)),
+						$elm$browser$Browser$Events$onMouseUp(
+						$elm$json$Json$Decode$succeed(
+							stepMsg($annaghi$dnd_list$DnDList$DragEnd)))
+					]));
+		}
+	});
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$splitAt = F2(
+	function (i, list) {
+		return _Utils_Tuple2(
+			A2($elm$core$List$take, i, list),
+			A2($elm$core$List$drop, i, list));
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$afterBackward = F3(
+	function (i, j, list) {
+		var _v0 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, j + 1, list);
+		var beginning = _v0.a;
+		var rest = _v0.b;
+		var _v1 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, (i - j) - 1, rest);
+		var middle = _v1.a;
+		var end = _v1.b;
+		var _v2 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, 1, end);
+		var head = _v2.a;
+		var tail = _v2.b;
+		return _Utils_ap(
+			beginning,
+			_Utils_ap(
+				head,
+				_Utils_ap(middle, tail)));
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$afterForward = F3(
+	function (i, j, list) {
+		var _v0 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, i, list);
+		var beginning = _v0.a;
+		var rest = _v0.b;
+		var _v1 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, (j - i) + 1, rest);
+		var middle = _v1.a;
+		var end = _v1.b;
+		var _v2 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, 1, middle);
+		var head = _v2.a;
+		var tail = _v2.b;
+		return _Utils_ap(
+			beginning,
+			_Utils_ap(
+				tail,
+				_Utils_ap(head, end)));
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$insertAfter = F3(
+	function (dragIndex, dropIndex, list) {
+		return (_Utils_cmp(dragIndex, dropIndex) < 0) ? A3($annaghi$dnd_list$Internal$Common$Operations$afterForward, dragIndex, dropIndex, list) : ((_Utils_cmp(dropIndex, dragIndex) < 0) ? A3($annaghi$dnd_list$Internal$Common$Operations$afterBackward, dragIndex, dropIndex, list) : list);
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$beforeBackward = F3(
+	function (i, j, list) {
+		var _v0 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, j, list);
+		var beginning = _v0.a;
+		var rest = _v0.b;
+		var _v1 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, i - j, rest);
+		var middle = _v1.a;
+		var end = _v1.b;
+		var _v2 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, 1, end);
+		var head = _v2.a;
+		var tail = _v2.b;
+		return _Utils_ap(
+			beginning,
+			_Utils_ap(
+				head,
+				_Utils_ap(middle, tail)));
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$beforeForward = F3(
+	function (i, j, list) {
+		var _v0 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, i, list);
+		var beginning = _v0.a;
+		var rest = _v0.b;
+		var _v1 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, j - i, rest);
+		var middle = _v1.a;
+		var end = _v1.b;
+		var _v2 = A2($annaghi$dnd_list$Internal$Common$Operations$splitAt, 1, middle);
+		var head = _v2.a;
+		var tail = _v2.b;
+		return _Utils_ap(
+			beginning,
+			_Utils_ap(
+				tail,
+				_Utils_ap(head, end)));
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$insertBefore = F3(
+	function (dragIndex, dropIndex, list) {
+		return (_Utils_cmp(dragIndex, dropIndex) < 0) ? A3($annaghi$dnd_list$Internal$Common$Operations$beforeForward, dragIndex, dropIndex, list) : ((_Utils_cmp(dropIndex, dragIndex) < 0) ? A3($annaghi$dnd_list$Internal$Common$Operations$beforeBackward, dragIndex, dropIndex, list) : list);
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$rotate = F3(
+	function (dragIndex, dropIndex, list) {
+		return (_Utils_cmp(dragIndex, dropIndex) < 0) ? A3($annaghi$dnd_list$Internal$Common$Operations$afterForward, dragIndex, dropIndex, list) : ((_Utils_cmp(dropIndex, dragIndex) < 0) ? A3($annaghi$dnd_list$Internal$Common$Operations$beforeBackward, dragIndex, dropIndex, list) : list);
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$swapAt = F3(
+	function (i, j, list) {
+		var item_j = A2(
+			$elm$core$List$take,
+			1,
+			A2($elm$core$List$drop, j, list));
+		var item_i = A2(
+			$elm$core$List$take,
+			1,
+			A2($elm$core$List$drop, i, list));
+		return $elm$core$List$concat(
+			A2(
+				$elm$core$List$indexedMap,
+				F2(
+					function (index, item) {
+						return _Utils_eq(index, i) ? item_j : (_Utils_eq(index, j) ? item_i : _List_fromArray(
+							[item]));
+					}),
+				list));
+	});
+var $annaghi$dnd_list$Internal$Common$Operations$swap = F3(
+	function (dragIndex, dropIndex, list) {
+		return (!_Utils_eq(dragIndex, dropIndex)) ? A3($annaghi$dnd_list$Internal$Common$Operations$swapAt, dragIndex, dropIndex, list) : list;
+	});
+var $annaghi$dnd_list$DnDList$listUpdate = F4(
+	function (operation, dragIndex, dropIndex, list) {
+		switch (operation.$) {
+			case 'InsertAfter':
+				return A3($annaghi$dnd_list$Internal$Common$Operations$insertAfter, dragIndex, dropIndex, list);
+			case 'InsertBefore':
+				return A3($annaghi$dnd_list$Internal$Common$Operations$insertBefore, dragIndex, dropIndex, list);
+			case 'Rotate':
+				return A3($annaghi$dnd_list$Internal$Common$Operations$rotate, dragIndex, dropIndex, list);
+			case 'Swap':
+				return A3($annaghi$dnd_list$Internal$Common$Operations$swap, dragIndex, dropIndex, list);
+			default:
+				return list;
+		}
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $annaghi$dnd_list$DnDList$stateUpdate = F3(
+	function (operation, dropIndex, state) {
+		switch (operation.$) {
+			case 'InsertAfter':
+				return _Utils_update(
+					state,
+					{
+						dragCounter: 0,
+						dragIndex: (_Utils_cmp(dropIndex, state.dragIndex) < 0) ? (dropIndex + 1) : dropIndex
+					});
+			case 'InsertBefore':
+				return _Utils_update(
+					state,
+					{
+						dragCounter: 0,
+						dragIndex: (_Utils_cmp(state.dragIndex, dropIndex) < 0) ? (dropIndex - 1) : dropIndex
+					});
+			case 'Rotate':
+				return _Utils_update(
+					state,
+					{dragCounter: 0, dragIndex: dropIndex});
+			case 'Swap':
+				return _Utils_update(
+					state,
+					{dragCounter: 0, dragIndex: dropIndex});
+			default:
+				return _Utils_update(
+					state,
+					{dragCounter: 0});
+		}
+	});
+var $annaghi$dnd_list$DnDList$update = F4(
+	function (_v0, msg, _v1, list) {
+		var beforeUpdate = _v0.beforeUpdate;
+		var listen = _v0.listen;
+		var operation = _v0.operation;
+		var model = _v1.a;
+		switch (msg.$) {
+			case 'DragStart':
+				var dragIndex = msg.a;
+				var dragElementId = msg.b;
+				var xy = msg.c;
+				return _Utils_Tuple2(
+					$annaghi$dnd_list$DnDList$Model(
+						$elm$core$Maybe$Just(
+							{currentPosition: xy, dragCounter: 0, dragElement: $elm$core$Maybe$Nothing, dragElementId: dragElementId, dragIndex: dragIndex, dropElement: $elm$core$Maybe$Nothing, dropElementId: dragElementId, dropIndex: dragIndex, startPosition: xy})),
+					list);
+			case 'Drag':
+				var xy = msg.a;
+				return _Utils_Tuple2(
+					$annaghi$dnd_list$DnDList$Model(
+						A2(
+							$elm$core$Maybe$map,
+							function (state) {
+								return _Utils_update(
+									state,
+									{currentPosition: xy, dragCounter: state.dragCounter + 1});
+							},
+							model)),
+					list);
+			case 'DragOver':
+				var dropIndex = msg.a;
+				var dropElementId = msg.b;
+				return _Utils_Tuple2(
+					$annaghi$dnd_list$DnDList$Model(
+						A2(
+							$elm$core$Maybe$map,
+							function (state) {
+								return _Utils_update(
+									state,
+									{dropElementId: dropElementId, dropIndex: dropIndex});
+							},
+							model)),
+					list);
+			case 'DragEnter':
+				var dropIndex = msg.a;
+				var _v3 = _Utils_Tuple2(model, listen);
+				if ((_v3.a.$ === 'Just') && (_v3.b.$ === 'OnDrag')) {
+					var state = _v3.a.a;
+					var _v4 = _v3.b;
+					return ((state.dragCounter > 1) && (!_Utils_eq(state.dragIndex, dropIndex))) ? _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model(
+							$elm$core$Maybe$Just(
+								A3($annaghi$dnd_list$DnDList$stateUpdate, operation, dropIndex, state))),
+						A4(
+							$annaghi$dnd_list$DnDList$listUpdate,
+							operation,
+							state.dragIndex,
+							dropIndex,
+							A3(beforeUpdate, state.dragIndex, dropIndex, list))) : _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model(model),
+						list);
+				} else {
+					return _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model(
+							A2(
+								$elm$core$Maybe$map,
+								function (state) {
+									return _Utils_update(
+										state,
+										{dragCounter: 0});
+								},
+								model)),
+						list);
+				}
+			case 'DragLeave':
+				return _Utils_Tuple2(
+					$annaghi$dnd_list$DnDList$Model(
+						A2(
+							$elm$core$Maybe$map,
+							function (state) {
+								return _Utils_update(
+									state,
+									{dropIndex: state.dragIndex});
+							},
+							model)),
+					list);
+			case 'DragEnd':
+				var _v5 = _Utils_Tuple2(model, listen);
+				if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'OnDrop')) {
+					var state = _v5.a.a;
+					var _v6 = _v5.b;
+					return (!_Utils_eq(state.dragIndex, state.dropIndex)) ? _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model($elm$core$Maybe$Nothing),
+						A4(
+							$annaghi$dnd_list$DnDList$listUpdate,
+							operation,
+							state.dragIndex,
+							state.dropIndex,
+							A3(beforeUpdate, state.dragIndex, state.dropIndex, list))) : _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model($elm$core$Maybe$Nothing),
+						list);
+				} else {
+					return _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model($elm$core$Maybe$Nothing),
+						list);
+				}
+			case 'GotDragElement':
+				if (msg.a.$ === 'Err') {
+					return _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model(model),
+						list);
+				} else {
+					var dragElement = msg.a.a;
+					return _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model(
+							A2(
+								$elm$core$Maybe$map,
+								function (state) {
+									return _Utils_update(
+										state,
+										{
+											dragElement: $elm$core$Maybe$Just(dragElement),
+											dropElement: $elm$core$Maybe$Just(dragElement)
+										});
+								},
+								model)),
+						list);
+				}
+			default:
+				if (msg.a.$ === 'Err') {
+					return _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model(model),
+						list);
+				} else {
+					var dropElement = msg.a.a;
+					return _Utils_Tuple2(
+						$annaghi$dnd_list$DnDList$Model(
+							A2(
+								$elm$core$Maybe$map,
+								function (state) {
+									return _Utils_update(
+										state,
+										{
+											dropElement: $elm$core$Maybe$Just(dropElement)
+										});
+								},
+								model)),
+						list);
+				}
+		}
+	});
+var $annaghi$dnd_list$DnDList$create = F2(
+	function (config, stepMsg) {
+		return {
+			commands: $annaghi$dnd_list$DnDList$commands(stepMsg),
+			dragEvents: $annaghi$dnd_list$DnDList$dragEvents(stepMsg),
+			dropEvents: $annaghi$dnd_list$DnDList$dropEvents(stepMsg),
+			ghostStyles: $annaghi$dnd_list$DnDList$ghostStyles(config.movement),
+			info: $annaghi$dnd_list$DnDList$info,
+			model: $annaghi$dnd_list$DnDList$Model($elm$core$Maybe$Nothing),
+			subscriptions: $annaghi$dnd_list$DnDList$subscriptions(stepMsg),
+			update: $annaghi$dnd_list$DnDList$update(config)
+		};
+	});
+var $author$project$Main$system = A2($annaghi$dnd_list$DnDList$create, $author$project$Main$config, $author$project$Main$UserDragsLetter);
 var $author$project$Main$init = F3(
 	function (flags, url, key) {
 		var route = $author$project$Route$fromUrl(url);
 		return _Utils_Tuple2(
-			{key: key, meaningTask: $author$project$Experiment$Experiment$NotStarted, route: route, translationTask: $author$project$Experiment$Experiment$NotStarted},
+			{dnd: $author$project$Main$system.model, key: key, meaningTask: $author$project$Experiment$Experiment$NotStarted, route: route, scrabbleTask: $author$project$Experiment$Experiment$NotStarted, translationTask: $author$project$Experiment$Experiment$NotStarted},
 			$author$project$Main$fetchData(route));
 	});
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
+	return $author$project$Main$system.subscriptions(model.dnd);
 };
 var $author$project$Experiment$Experiment$DoingMeaning = function (a) {
 	return {$: 'DoingMeaning', a: a};
+};
+var $author$project$Experiment$Experiment$DoingScrabble = function (a) {
+	return {$: 'DoingScrabble', a: a};
 };
 var $author$project$Experiment$Experiment$DoingTranslation = function (a) {
 	return {$: 'DoingTranslation', a: a};
@@ -11618,12 +12620,20 @@ var $author$project$Experiment$Experiment$MainLoop = F4(
 var $author$project$Experiment$Experiment$MeaningState = function (a) {
 	return {$: 'MeaningState', a: a};
 };
+var $author$project$Experiment$Experiment$ScrabbleStateType = function (a) {
+	return {$: 'ScrabbleStateType', a: a};
+};
 var $author$project$Experiment$Experiment$TranslationState = function (a) {
 	return {$: 'TranslationState', a: a};
 };
+var $author$project$Experiment$Scrabble$defaultTrial = A3(
+	$author$project$Experiment$Experiment$ScrabbleTrial,
+	'defaultTrial',
+	'defaultTrial',
+	A2($author$project$Data$AudioFile, '', ''));
 var $author$project$Experiment$Experiment$DummyType = {$: 'DummyType'};
 var $author$project$Experiment$Experiment$getState = function (experiment) {
-	_v0$2:
+	_v0$3:
 	while (true) {
 		switch (experiment.$) {
 			case 'DoingMeaning':
@@ -11635,7 +12645,7 @@ var $author$project$Experiment$Experiment$getState = function (experiment) {
 					var feedback = _v1.d;
 					return $author$project$Experiment$Experiment$MeaningState(state);
 				} else {
-					break _v0$2;
+					break _v0$3;
 				}
 			case 'DoingTranslation':
 				if (experiment.a.$ === 'MainLoop') {
@@ -11646,10 +12656,21 @@ var $author$project$Experiment$Experiment$getState = function (experiment) {
 					var feedback = _v2.d;
 					return $author$project$Experiment$Experiment$TranslationState(state);
 				} else {
-					break _v0$2;
+					break _v0$3;
+				}
+			case 'DoingScrabble':
+				if (experiment.a.$ === 'MainLoop') {
+					var _v3 = experiment.a;
+					var trials = _v3.a;
+					var state = _v3.b;
+					var ntrial = _v3.c;
+					var feedback = _v3.d;
+					return $author$project$Experiment$Experiment$ScrabbleStateType(state);
+				} else {
+					break _v0$3;
 				}
 			default:
-				break _v0$2;
+				break _v0$3;
 		}
 	}
 	return $author$project$Experiment$Experiment$DummyType;
@@ -11659,11 +12680,16 @@ var $author$project$Experiment$Experiment$StateMeaning = F3(
 		return {inputUid: inputUid, userAnswer: userAnswer, userUID: userUID};
 	});
 var $author$project$Experiment$Meaning$initState = A3($author$project$Experiment$Experiment$StateMeaning, 'DefaultTrialUID', 'DefaultUserUID', '');
+var $author$project$Experiment$Experiment$ScrabbleState = F3(
+	function (uid, userAnswer, scrambledLetter) {
+		return {scrambledLetter: scrambledLetter, uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Experiment$Scrabble$initState = A3($author$project$Experiment$Experiment$ScrabbleState, 'DefaultUid', '', _List_Nil);
 var $author$project$Experiment$Experiment$initTranslationState = {inputUid: '', userAnswer: '', userUID: ''};
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $author$project$Experiment$Experiment$End = {$: 'End'};
 var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
-	_v0$2:
+	_v0$3:
 	while (true) {
 		switch (experiment.$) {
 			case 'DoingMeaning':
@@ -11678,7 +12704,7 @@ var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
 						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingMeaning($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingMeaning(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
 				} else {
-					break _v0$2;
+					break _v0$3;
 				}
 			case 'DoingTranslation':
 				if (experiment.a.$ === 'MainLoop') {
@@ -11692,16 +12718,49 @@ var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
 						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingTranslation($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingTranslation(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
 				} else {
-					break _v0$2;
+					break _v0$3;
+				}
+			case 'DoingScrabble':
+				if (experiment.a.$ === 'MainLoop') {
+					var _v3 = experiment.a;
+					var trials = _v3.a;
+					var state = _v3.b;
+					var ntrial = _v3.c;
+					var feedback = _v3.d;
+					return (_Utils_cmp(
+						ntrial,
+						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingScrabble($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingScrabble(
+						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
+				} else {
+					break _v0$3;
 				}
 			default:
-				break _v0$2;
+				break _v0$3;
 		}
 	}
 	return $author$project$Experiment$Experiment$Failure(
 		$elm$http$Http$BadBody('\n            I tried to go to next trial but I ended into an ignored case.\n            Please report this error. If you have access to the source code, update the Experiment.nextTrial function to take this case in account. \n            '));
 };
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $elm$core$String$cons = _String_cons;
+var $elm$core$String$fromChar = function (_char) {
+	return A2($elm$core$String$cons, _char, '');
+};
+var $author$project$Main$toKeyedItem = $elm$core$List$map(
+	function (v) {
+		return _Utils_Tuple2('key-' + v, v);
+	});
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
+var $author$project$Main$toItems = function (string) {
+	return $author$project$Main$toKeyedItem(
+		A2(
+			$elm$core$List$map,
+			$elm$core$String$fromChar,
+			$elm$core$String$toList(string)));
+};
 var $elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
 		if (maybePort.$ === 'Nothing') {
@@ -11756,7 +12815,7 @@ var $author$project$Experiment$Experiment$errorMessage = F2(
 				['I tried to ', action, 'but I ended into an ignored case. Please report this error or update the ', functioname, ' to take in account this case']));
 	});
 var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
-	_v0$2:
+	_v0$3:
 	while (true) {
 		switch (exp.$) {
 			case 'DoingMeaning':
@@ -11769,7 +12828,7 @@ var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
 					return $author$project$Experiment$Experiment$DoingMeaning(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
 				} else {
-					break _v0$2;
+					break _v0$3;
 				}
 			case 'DoingTranslation':
 				if (exp.a.$ === 'MainLoop') {
@@ -11781,10 +12840,22 @@ var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
 					return $author$project$Experiment$Experiment$DoingTranslation(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
 				} else {
-					break _v0$2;
+					break _v0$3;
+				}
+			case 'DoingScrabble':
+				if (exp.a.$ === 'MainLoop') {
+					var _v3 = exp.a;
+					var trials = _v3.a;
+					var state = _v3.b;
+					var ntrial = _v3.c;
+					var feedback = _v3.d;
+					return $author$project$Experiment$Experiment$DoingScrabble(
+						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
+				} else {
+					break _v0$3;
 				}
 			default:
-				break _v0$2;
+				break _v0$3;
 		}
 	}
 	return $author$project$Experiment$Experiment$Failure(
@@ -11794,7 +12865,7 @@ var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
 var $author$project$Experiment$Experiment$updateState = F2(
 	function (newState, exp) {
 		var _v0 = _Utils_Tuple2(newState, exp);
-		_v0$2:
+		_v0$3:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'MeaningState':
@@ -11808,7 +12879,7 @@ var $author$project$Experiment$Experiment$updateState = F2(
 						return $author$project$Experiment$Experiment$DoingMeaning(
 							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
 					} else {
-						break _v0$2;
+						break _v0$3;
 					}
 				case 'TranslationState':
 					if ((_v0.b.$ === 'DoingTranslation') && (_v0.b.a.$ === 'MainLoop')) {
@@ -11821,10 +12892,23 @@ var $author$project$Experiment$Experiment$updateState = F2(
 						return $author$project$Experiment$Experiment$DoingTranslation(
 							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
 					} else {
-						break _v0$2;
+						break _v0$3;
+					}
+				case 'ScrabbleStateType':
+					if ((_v0.b.$ === 'DoingScrabble') && (_v0.b.a.$ === 'MainLoop')) {
+						var newState_ = _v0.a.a;
+						var _v3 = _v0.b.a;
+						var trials = _v3.a;
+						var prevstate = _v3.b;
+						var ntrial = _v3.c;
+						var feedback = _v3.d;
+						return $author$project$Experiment$Experiment$DoingScrabble(
+							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
+					} else {
+						break _v0$3;
 					}
 				default:
-					break _v0$2;
+					break _v0$3;
 			}
 		}
 		return $author$project$Experiment$Experiment$Failure(
@@ -11834,33 +12918,122 @@ var $author$project$Experiment$Experiment$updateState = F2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var currentTranslationState = function () {
-			var _v3 = $author$project$Experiment$Experiment$getState(model.translationTask);
-			if (_v3.$ === 'TranslationState') {
-				var x = _v3.a;
+			var _v9 = $author$project$Experiment$Experiment$getState(model.translationTask);
+			if (_v9.$ === 'TranslationState') {
+				var x = _v9.a;
 				return x;
 			} else {
 				return $author$project$Experiment$Experiment$initTranslationState;
 			}
 		}();
+		var currentScrabbleState = function () {
+			var _v8 = $author$project$Experiment$Experiment$getState(model.scrabbleTask);
+			if (_v8.$ === 'ScrabbleStateType') {
+				var x = _v8.a;
+				return x;
+			} else {
+				return $author$project$Experiment$Scrabble$initState;
+			}
+		}();
 		var currentMeaningState = function () {
-			var _v2 = $author$project$Experiment$Experiment$getState(model.meaningTask);
-			if (_v2.$ === 'MeaningState') {
-				var x = _v2.a;
+			var _v7 = $author$project$Experiment$Experiment$getState(model.meaningTask);
+			if (_v7.$ === 'MeaningState') {
+				var x = _v7.a;
 				return x;
 			} else {
 				return $author$project$Experiment$Meaning$initState;
 			}
 		}();
+		var _v0 = function () {
+			var _v1 = model.scrabbleTask;
+			if ((_v1.$ === 'DoingScrabble') && (_v1.a.$ === 'MainLoop')) {
+				var _v2 = _v1.a;
+				var trials = _v2.a;
+				var state = _v2.b;
+				var trialn = _v2.c;
+				var feedback = _v2.d;
+				return _Utils_Tuple2(
+					A2(
+						$elm$core$Maybe$withDefault,
+						$author$project$Experiment$Scrabble$defaultTrial,
+						A2(
+							$elm$core$Array$get,
+							trialn,
+							$elm$core$Array$fromList(trials))),
+					A2(
+						$elm$core$Maybe$withDefault,
+						$author$project$Experiment$Scrabble$defaultTrial,
+						A2(
+							$elm$core$Array$get,
+							trialn + 1,
+							$elm$core$Array$fromList(trials))));
+			} else {
+				return _Utils_Tuple2($author$project$Experiment$Scrabble$defaultTrial, $author$project$Experiment$Scrabble$defaultTrial);
+			}
+		}();
+		var currentScrabbleTrialn = _v0.a;
+		var nextScrabbleTrial = _v0.b;
 		switch (msg.$) {
 			case 'BrowserChangedUrl':
 				var url = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							route: $author$project$Route$fromUrl(url)
-						}),
-					$author$project$Main$fetchData(model.route));
+				var _v4 = $author$project$Route$fromUrl(url);
+				switch (_v4.$) {
+					case 'Meaning':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									meaningTask: $author$project$Experiment$Experiment$Loading,
+									route: $author$project$Route$fromUrl(url)
+								}),
+							$author$project$Main$fetchData(
+								$author$project$Route$fromUrl(url)));
+					case 'Translation':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									route: $author$project$Route$fromUrl(url),
+									translationTask: $author$project$Experiment$Experiment$Loading
+								}),
+							$author$project$Main$fetchData(
+								$author$project$Route$fromUrl(url)));
+					case 'Scrabble':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									route: $author$project$Route$fromUrl(url),
+									scrabbleTask: $author$project$Experiment$Experiment$Loading
+								}),
+							$author$project$Main$fetchData(
+								$author$project$Route$fromUrl(url)));
+					case 'ExperimentStart':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									route: $author$project$Route$fromUrl(url)
+								}),
+							$author$project$Main$fetchData(
+								$author$project$Route$fromUrl(url)));
+					case 'Home':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									route: $author$project$Route$fromUrl(url)
+								}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									route: $author$project$Route$fromUrl(url)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
 			case 'UserClickedLink':
 				var urlRequest = msg.a;
 				if (urlRequest.$ === 'Internal') {
@@ -11931,6 +13104,45 @@ var $author$project$Main$update = F2(
 							{
 								translationTask: $author$project$Experiment$Experiment$DoingTranslation(
 									A4($author$project$Experiment$Experiment$MainLoop, data, $author$project$Experiment$Experiment$initTranslationState, 0, false))
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'ServerRespondedWithScrabbleTrials':
+				if (msg.a.$ === 'Err') {
+					var reason = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								scrabbleTask: $author$project$Experiment$Experiment$Failure(reason)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var data = msg.a.a;
+					var record = $author$project$Experiment$Scrabble$initState;
+					var firstTrialWord = A2(
+						$elm$core$Maybe$withDefault,
+						$author$project$Experiment$Scrabble$defaultTrial,
+						A2(
+							$elm$core$Array$get,
+							0,
+							$elm$core$Array$fromList(data))).writtenWord;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								scrabbleTask: $author$project$Experiment$Experiment$DoingScrabble(
+									A4(
+										$author$project$Experiment$Experiment$MainLoop,
+										data,
+										_Utils_update(
+											record,
+											{
+												scrambledLetter: $author$project$Main$toItems(firstTrialWord),
+												userAnswer: firstTrialWord
+											}),
+										0,
+										false))
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -12016,7 +13228,7 @@ var $author$project$Main$update = F2(
 									$author$project$Experiment$Experiment$toggleFeedback(model.meaningTask)))
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'UserClickedNextTrialButtonInTranslation':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -12031,6 +13243,44 @@ var $author$project$Main$update = F2(
 									$author$project$Experiment$Experiment$toggleFeedback(model.translationTask)))
 						}),
 					$elm$core$Platform$Cmd$none);
+			case 'UserClickedNextTrialButtonInScrabble':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							scrabbleTask: $author$project$Experiment$Experiment$nextTrial(
+								A2(
+									$author$project$Experiment$Experiment$updateState,
+									$author$project$Experiment$Experiment$ScrabbleStateType(
+										_Utils_update(
+											currentScrabbleState,
+											{
+												scrambledLetter: $author$project$Main$toItems(nextScrabbleTrial.writtenWord),
+												userAnswer: nextScrabbleTrial.writtenWord
+											})),
+									model.scrabbleTask))
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var dndmsg = msg.a;
+				var items_ = $author$project$Main$toItems(currentScrabbleState.userAnswer);
+				var _v6 = A3($author$project$Main$system.update, dndmsg, model.dnd, currentScrabbleState.scrambledLetter);
+				var dnd = _v6.a;
+				var items = _v6.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							dnd: dnd,
+							scrabbleTask: A2(
+								$author$project$Experiment$Experiment$updateState,
+								$author$project$Experiment$Experiment$ScrabbleStateType(
+									_Utils_update(
+										currentScrabbleState,
+										{scrambledLetter: items})),
+								model.scrabbleTask)
+						}),
+					$author$project$Main$system.commands(dnd));
 		}
 	});
 var $rtfeldman$elm_css$VirtualDom$Styled$Attribute = F3(
@@ -12202,16 +13452,6 @@ var $rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_v0) {
 	var finalDeclarations = A2($rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations, keyframesByName, compactedDeclarations);
 	return {charset: charset, declarations: finalDeclarations, imports: imports, namespaces: namespaces};
 };
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset) {
 	return A2(
 		$elm$core$Maybe$withDefault,
@@ -12903,7 +14143,6 @@ var $rtfeldman$elm_css$Css$Structure$concatMapLastStyleBlock = F2(
 			first,
 			A2($rtfeldman$elm_css$Css$Structure$concatMapLastStyleBlock, update, rest));
 	});
-var $elm$core$String$cons = _String_cons;
 var $Skinney$murmur3$Murmur3$HashData = F4(
 	function (shift, seed, hash, charsProcessed) {
 		return {charsProcessed: charsProcessed, hash: hash, seed: seed, shift: shift};
@@ -13056,15 +14295,6 @@ var $rtfeldman$elm_css$Hash$fromString = function (str) {
 		$rtfeldman$elm_hex$Hex$toString(
 			A2($Skinney$murmur3$Murmur3$hashString, $rtfeldman$elm_css$Hash$murmurSeed, str)));
 };
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$last = function (list) {
 	last:
 	while (true) {
@@ -13169,132 +14399,6 @@ var $elm$core$List$tail = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$toDocumentRule = F5(
 	function (str1, str2, str3, str4, declaration) {
 		if (declaration.$ === 'StyleBlockDeclaration') {
@@ -14005,54 +15109,9 @@ var $author$project$View$notFound = _List_fromArray(
 					]))
 			]))
 	]);
-var $author$project$Main$UserClickedStartExperimentButton = {$: 'UserClickedStartExperimentButton'};
-var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
-var $rtfeldman$elm_css$VirtualDom$Styled$on = F2(
-	function (eventName, handler) {
-		return A3(
-			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2($elm$virtual_dom$VirtualDom$on, eventName, handler),
-			_List_Nil,
-			'');
-	});
-var $rtfeldman$elm_css$Html$Styled$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$rtfeldman$elm_css$VirtualDom$Styled$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Main$startButton = A2(
-	$rtfeldman$elm_css$Html$Styled$button,
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$Attributes$class('w-64 mb-8'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-action', 'start-experiment'),
-			$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$UserClickedStartExperimentButton)
-		]),
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$text('Commencer meaning')
-		]));
-var $author$project$Main$UserClickedStartTranslationButton = {$: 'UserClickedStartTranslationButton'};
-var $author$project$Main$startTranslation = A2(
-	$rtfeldman$elm_css$Html$Styled$button,
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$Attributes$class('w-64'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-action', 'start-translation'),
-			$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$UserClickedStartTranslationButton)
-		]),
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$text('Commencer translation')
-		]));
+var $author$project$Main$startButton = A2($author$project$View$navIn, 'Go to Meaning >', '/meaning');
+var $author$project$Main$startScrabble = A2($author$project$View$navIn, 'Go to Scrabble >', '/scrabble');
+var $author$project$Main$startTranslation = A2($author$project$View$navIn, 'Go to Translation >', '/translation');
 var $author$project$Main$UserClickedFeedbackButtonInMeaning = {$: 'UserClickedFeedbackButtonInMeaning'};
 var $author$project$Main$UserClickedNextTrialButtonInMeaning = {$: 'UserClickedNextTrialButtonInMeaning'};
 var $author$project$Main$UserClickedRadioButtonInMeaning = function (a) {
@@ -14076,15 +15135,6 @@ var $author$project$Main$buildErrorMessage = function (httpError) {
 	}
 };
 var $author$project$Experiment$Experiment$defaultTrial = {definition: 'MISSING', feedbackCorrect: 'MISSING', feedbackIncorrect: 'MISSING', option1: 'MISSING', option2: 'MISSING', option3: 'MISSING', option4: 'DEFAULT', question: 'MISSING', uid: 'MISSING', writtenWord: 'MISSING'};
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			$rtfeldman$elm_css$VirtualDom$Styled$property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $rtfeldman$elm_css$Html$Styled$Attributes$disabled = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('disabled');
 var $rtfeldman$elm_css$Html$Styled$span = $rtfeldman$elm_css$Html$Styled$node('span');
 var $author$project$View$keyValue = F2(
 	function (key, value) {
@@ -14113,12 +15163,42 @@ var $author$project$View$keyValue = F2(
 					]))
 			]);
 	});
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			$rtfeldman$elm_css$VirtualDom$Styled$property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$autofocus = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('autofocus');
 var $rtfeldman$elm_css$Html$Styled$Attributes$checked = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('checked');
+var $rtfeldman$elm_css$Html$Styled$Attributes$disabled = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('disabled');
 var $rtfeldman$elm_css$Html$Styled$Attributes$id = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('id');
 var $rtfeldman$elm_css$Html$Styled$input = $rtfeldman$elm_css$Html$Styled$node('input');
 var $rtfeldman$elm_css$Html$Styled$label = $rtfeldman$elm_css$Html$Styled$node('label');
 var $rtfeldman$elm_css$Html$Styled$Attributes$name = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('name');
+var $rtfeldman$elm_css$VirtualDom$Styled$on = F2(
+	function (eventName, handler) {
+		return A3(
+			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2($elm$virtual_dom$VirtualDom$on, eventName, handler),
+			_List_Nil,
+			'');
+	});
+var $rtfeldman$elm_css$Html$Styled$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$rtfeldman$elm_css$VirtualDom$Styled$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $rtfeldman$elm_css$Html$Styled$Attributes$type_ = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('type');
 var $author$project$View$radio = F5(
 	function (value, isChecked, isCorrect, feedbackMode, msg) {
@@ -14186,6 +15266,7 @@ var $author$project$View$radio = F5(
 						]))
 				]));
 	});
+var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
 var $author$project$View$button = function (_v0) {
 	var message = _v0.message;
 	var txt = _v0.txt;
@@ -14211,7 +15292,6 @@ var $rtfeldman$elm_css$Html$Styled$fieldset = $rtfeldman$elm_css$Html$Styled$nod
 var $rtfeldman$elm_css$Html$Styled$h3 = $rtfeldman$elm_css$Html$Styled$node('h3');
 var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
 var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
-var $elm$core$Basics$round = _Basics_round;
 var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
 var $author$project$Progressbar$progressBar = function (percentage) {
 	return A2(
@@ -14547,23 +15627,8 @@ var $author$project$Main$viewExperiment = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$p,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[$author$project$Main$startButton]))
+								$rtfeldman$elm_css$Html$Styled$text('NotStarted')
+							]))
 					]);
 			case 'Loading':
 				return _List_fromArray(
@@ -14573,34 +15638,7 @@ var $author$project$Main$viewExperiment = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$p,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$button,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('w-56 cursor-wait'),
-										$rtfeldman$elm_css$Html$Styled$Attributes$disabled(true)
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Loading...')
-									]))
+								$rtfeldman$elm_css$Html$Styled$text('loading')
 							]))
 					]);
 			case 'Failure':
@@ -14734,6 +15772,232 @@ var $author$project$Main$viewExperiment = function (model) {
 			$rtfeldman$elm_css$Html$Styled$text('Unexpected view. You can take it in account in Main.viewExperiment')
 		]);
 };
+var $author$project$Main$UserClickedNextTrialButtonInScrabble = {$: 'UserClickedNextTrialButtonInScrabble'};
+var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
+	function (key, val) {
+		return A3(
+			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2($elm$virtual_dom$VirtualDom$style, key, val),
+			_List_Nil,
+			'');
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$style = $rtfeldman$elm_css$VirtualDom$Styled$style;
+var $author$project$Main$containerStyles = _List_fromArray(
+	[
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex'),
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'flex-wrap', 'wrap'),
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'align-items', 'center'),
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'padding-top', '2em')
+	]);
+var $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute = function (prop) {
+	return A3($rtfeldman$elm_css$VirtualDom$Styled$Attribute, prop, _List_Nil, '');
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute;
+var $author$project$Main$ghostGreen = '#2f804e';
+var $author$project$Main$itemStyles = function (color) {
+	return _List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'width', '5rem'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'height', '5rem'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'background-color', color),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'border-radius', '8px'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'color', 'white'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'cursor', 'pointer'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'margin', '0 2em 2em 0'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'align-items', 'center'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'justify-content', 'center')
+		]);
+};
+var $author$project$Main$ghostView = F2(
+	function (dnd, items) {
+		var maybeDragItem = A2(
+			$elm$core$Maybe$andThen,
+			function (_v2) {
+				var dragIndex = _v2.dragIndex;
+				return $elm$core$List$head(
+					A2($elm$core$List$drop, dragIndex, items));
+			},
+			$author$project$Main$system.info(dnd));
+		if (maybeDragItem.$ === 'Just') {
+			var _v1 = maybeDragItem.a;
+			var item = _v1.b;
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_Utils_ap(
+					$author$project$Main$itemStyles($author$project$Main$ghostGreen),
+					A2(
+						$elm$core$List$map,
+						$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
+						$author$project$Main$system.ghostStyles(dnd))),
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text(item)
+					]));
+		} else {
+			return $rtfeldman$elm_css$Html$Styled$text('');
+		}
+	});
+var $author$project$Main$green = '#3da565';
+var $author$project$Main$itemView = F3(
+	function (dnd, index, _v0) {
+		var key = _v0.a;
+		var item = _v0.b;
+		var itemId = 'id-' + item;
+		var _v1 = $author$project$Main$system.info(dnd);
+		if (_v1.$ === 'Just') {
+			var dragIndex = _v1.a.dragIndex;
+			return (!_Utils_eq(dragIndex, index)) ? _Utils_Tuple2(
+				key,
+				A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					A2(
+						$elm$core$List$cons,
+						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
+						_Utils_ap(
+							$author$project$Main$itemStyles($author$project$Main$green),
+							A2(
+								$elm$core$List$map,
+								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
+								A2($author$project$Main$system.dropEvents, index, itemId)))),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(item)
+						]))) : _Utils_Tuple2(
+				key,
+				A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					A2(
+						$elm$core$List$cons,
+						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
+						$author$project$Main$itemStyles('dimgray')),
+					_List_Nil));
+		} else {
+			return _Utils_Tuple2(
+				key,
+				A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					A2(
+						$elm$core$List$cons,
+						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
+						_Utils_ap(
+							$author$project$Main$itemStyles($author$project$Main$green),
+							A2(
+								$elm$core$List$map,
+								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
+								A2($author$project$Main$system.dragEvents, index, itemId)))),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(item)
+						])));
+		}
+	});
+var $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode = F3(
+	function (a, b, c) {
+		return {$: 'KeyedNode', a: a, b: b, c: c};
+	});
+var $rtfeldman$elm_css$VirtualDom$Styled$keyedNode = $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode;
+var $rtfeldman$elm_css$Html$Styled$Keyed$node = $rtfeldman$elm_css$VirtualDom$Styled$keyedNode;
+var $rtfeldman$elm_css$Html$Styled$audio = $rtfeldman$elm_css$Html$Styled$node('audio');
+var $rtfeldman$elm_css$Html$Styled$Attributes$autoplay = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('autoplay');
+var $rtfeldman$elm_css$Html$Styled$Attributes$controls = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('controls');
+var $rtfeldman$elm_css$Html$Styled$Attributes$src = function (url) {
+	return A2($rtfeldman$elm_css$Html$Styled$Attributes$stringProperty, 'src', url);
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$width = function (n) {
+	return A2(
+		$rtfeldman$elm_css$VirtualDom$Styled$attribute,
+		'width',
+		$elm$core$String$fromInt(n));
+};
+var $author$project$View$simpleAudioPlayer = function (src) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$audio,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$controls(true),
+				$rtfeldman$elm_css$Html$Styled$Attributes$src(src),
+				$rtfeldman$elm_css$Html$Styled$Attributes$autoplay(true),
+				$rtfeldman$elm_css$Html$Styled$Attributes$width(300)
+			]),
+		_List_Nil);
+};
+var $author$project$Main$viewScrabbleTask = function (model) {
+	var _v0 = model.scrabbleTask;
+	_v0$4:
+	while (true) {
+		switch (_v0.$) {
+			case 'NotStarted':
+				return _List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('NotAsked')
+					]);
+			case 'Loading':
+				return _List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Loading')
+					]);
+			case 'DoingScrabble':
+				switch (_v0.a.$) {
+					case 'MainLoop':
+						var _v1 = _v0.a;
+						var trials = _v1.a;
+						var state = _v1.b;
+						var ntrial = _v1.c;
+						var feedback = _v1.d;
+						var currentTrial = A2(
+							$elm$core$Maybe$withDefault,
+							$author$project$Experiment$Scrabble$defaultTrial,
+							A2(
+								$elm$core$Array$get,
+								ntrial,
+								$elm$core$Array$fromList(trials)));
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$h3,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Listen to the sound and write what you here')
+									])),
+								$author$project$View$simpleAudioPlayer(currentTrial.audioWord.url),
+								A3(
+								$rtfeldman$elm_css$Html$Styled$Keyed$node,
+								'div',
+								$author$project$Main$containerStyles,
+								A2(
+									$elm$core$List$indexedMap,
+									$author$project$Main$itemView(model.dnd),
+									state.scrambledLetter)),
+								A2($author$project$Main$ghostView, model.dnd, state.scrambledLetter),
+								$author$project$View$button(
+								{isDisabled: false, message: $author$project$Main$UserClickedNextTrialButtonInScrabble, txt: 'Next Trial '})
+							]);
+					case 'End':
+						var _v2 = _v0.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$h3,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('C\'est la fin, merci de votre participation ! 🎉️')
+									]))
+							]);
+					default:
+						break _v0$4;
+				}
+			default:
+				break _v0$4;
+		}
+	}
+	return _List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$text('unexpected view in viewscrabble. Please update Main.viewScrabbleTask or report this error message')
+		]);
+};
 var $author$project$Main$UserClickedFeedbackButtonInTranslation = {$: 'UserClickedFeedbackButtonInTranslation'};
 var $author$project$Main$UserClickedNextTrialButtonInTranslation = {$: 'UserClickedNextTrialButtonInTranslation'};
 var $author$project$Main$UserClickedRadioButtonInTranslation = function (a) {
@@ -14771,7 +16035,7 @@ var $author$project$Main$viewTranslationTask = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+								$rtfeldman$elm_css$Html$Styled$text('NotStarted')
 							])),
 						A2(
 						$rtfeldman$elm_css$Html$Styled$p,
@@ -14797,7 +16061,7 @@ var $author$project$Main$viewTranslationTask = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+								$rtfeldman$elm_css$Html$Styled$text('loading')
 							])),
 						A2(
 						$rtfeldman$elm_css$Html$Styled$p,
@@ -14836,7 +16100,7 @@ var $author$project$Main$viewTranslationTask = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+								$rtfeldman$elm_css$Html$Styled$text('Failure')
 							])),
 						A2(
 						$rtfeldman$elm_css$Html$Styled$p,
@@ -14935,6 +16199,7 @@ var $author$project$Main$viewTranslationTask = function (model) {
 			$rtfeldman$elm_css$Html$Styled$text('impossible case you should change the data model')
 		]);
 };
+var $author$project$View$viewVega = A3($rtfeldman$elm_css$Html$Styled$node, 'view', _List_Nil, _List_Nil);
 var $author$project$Main$body = function (model) {
 	return _List_fromArray(
 		[
@@ -14976,12 +16241,20 @@ var $author$project$Main$body = function (model) {
 										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
 									]),
 								_List_fromArray(
-									[$author$project$Main$startButton, $author$project$Main$startTranslation]))
+									[$author$project$Main$startButton, $author$project$Main$startTranslation, $author$project$Main$startScrabble])),
+								$author$project$View$viewVega
 							]);
 					case 'Meaning':
 						return $author$project$Main$viewExperiment(model);
 					case 'Translation':
 						return $author$project$Main$viewTranslationTask(model);
+					case 'Scrabble':
+						return $author$project$Main$viewScrabbleTask(model);
+					case 'Home':
+						return _List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('home ?')
+							]);
 					default:
 						return $author$project$View$notFound;
 				}
@@ -15483,7 +16756,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Experiment.Experiment.TranslationInput":{"args":[],"type":"{ uid : String.String, question : String.String, translation1 : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, distractor4 : String.String, word : String.String }"},"Experiment.Experiment.TrialMeaning":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, definition : String.String, question : String.String, option1 : String.String, option2 : String.String, option3 : String.String, option4 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedStartExperimentButton":[],"UserClickedStartTranslationButton":[],"ServerRespondedWithMeaningInput":["Result.Result Http.Error (List.List Experiment.Experiment.TrialMeaning)"],"ServerRespondedWithTranslationTrials":["Result.Result Http.Error (List.List Experiment.Experiment.TranslationInput)"],"UserClickedRadioButtonInMeaning":["String.String"],"UserClickedRadioButtonInTranslation":["String.String"],"UserClickedFeedbackButtonInMeaning":[],"UserClickedFeedbackButtonInTranslation":[],"UserClickedNextTrialButtonInMeaning":[],"UserClickedNextTrialButtonInTranslation":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Experiment.Experiment.ScrabbleTrial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile }"},"Experiment.Experiment.TranslationInput":{"args":[],"type":"{ uid : String.String, question : String.String, translation1 : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, distractor4 : String.String, word : String.String }"},"Experiment.Experiment.TrialMeaning":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, definition : String.String, question : String.String, option1 : String.String, option2 : String.String, option3 : String.String, option4 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedStartExperimentButton":[],"UserClickedStartTranslationButton":[],"ServerRespondedWithMeaningInput":["Result.Result Http.Error (List.List Experiment.Experiment.TrialMeaning)"],"ServerRespondedWithTranslationTrials":["Result.Result Http.Error (List.List Experiment.Experiment.TranslationInput)"],"ServerRespondedWithScrabbleTrials":["Result.Result Http.Error (List.List Experiment.Experiment.ScrabbleTrial)"],"UserClickedRadioButtonInMeaning":["String.String"],"UserClickedRadioButtonInTranslation":["String.String"],"UserClickedFeedbackButtonInMeaning":[],"UserClickedFeedbackButtonInTranslation":[],"UserClickedNextTrialButtonInMeaning":[],"UserClickedNextTrialButtonInTranslation":[],"UserClickedNextTrialButtonInScrabble":[],"UserDragsLetter":["DnDList.Msg"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
@@ -16134,7 +17407,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35031" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40591" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

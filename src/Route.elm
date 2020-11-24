@@ -9,9 +9,10 @@ import Url.Parser as Parser exposing ((</>), Parser, map, oneOf, s, top)
 
 type Route
     = ExperimentStart
-      --| Home
+    | Home
     | Meaning
     | Translation
+    | Scrabble
     | NotFound
 
 
@@ -19,8 +20,8 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ map ExperimentStart top
-
-        --, map Home (s "index.html")
+        , map Home (s "index.html")
+        , map Scrabble (s "scrabble")
         , map ExperimentStart (s "start")
         , map Meaning (s "meaning")
         , map Translation (s "translation")

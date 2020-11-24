@@ -4,12 +4,15 @@ import Array
 import Browser
 import Browser.Navigation as Nav
 import Data
+import DnDList
 import Experiment.Experiment as E
 import Experiment.Meaning as Meaning exposing (..)
+import Experiment.Scrabble as Scrabble
 import Experiment.Translation as Translation
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (attribute, class, disabled, href)
 import Html.Styled.Events exposing (onClick)
+import Html.Styled.Keyed as Keyed
 import Http
 import RemoteData exposing (RemoteData, WebData)
 import Route exposing (Route(..))
@@ -23,6 +26,33 @@ type alias Flags =
 
 
 
+--DATA
+
+
+toKeyedItem : List String -> List ( String, String )
+toKeyedItem =
+    List.map (\v -> ( "key-" ++ v, v ))
+
+
+
+-- SYSTEM
+
+
+config : DnDList.Config E.KeyedItem
+config =
+    { beforeUpdate = \_ _ list -> list
+    , movement = DnDList.Free
+    , listen = DnDList.OnDrag
+    , operation = DnDList.Swap
+    }
+
+
+system : DnDList.System E.KeyedItem Msg
+system =
+    DnDList.create config UserDragsLetter
+
+
+
 -- MODEL
 
 
@@ -31,6 +61,10 @@ type alias Model =
     , route : Route.Route
     , meaningTask : E.Experiment
     , translationTask : E.Experiment
+    , scrabbleTask : E.Experiment
+    , dnd : DnDList.Model
+
+    --, scrabbleItems : List E.KeyedItem
     }
 
 
@@ -56,39 +90,13 @@ init flags url key =
       , route = route
       , meaningTask = E.NotStarted
       , translationTask = E.NotStarted
+      , scrabbleTask = E.NotStarted
+      , dnd = system.model
+
+      --, scrabbleItems = []
       }
     , fetchData route
     )
-
-
-fetchData : Route -> Cmd Msg
-fetchData route =
-    case route of
-        Meaning ->
-            Meaning.getTrialsFromServer ServerRespondedWithMeaningInput
-
-        Translation ->
-            Translation.getTrialsFromServer ServerRespondedWithTranslationTrials
-
-        ExperimentStart ->
-            Cmd.none
-
-        NotFound ->
-            Cmd.none
-
-
-
--- VIEW
-
-
-project : { description : String, title : String, url : String }
-project =
-    { title = "Apprentissage et espacement"
-    , description = """
-        Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. 
-      """
-    , url = Url.Builder.absolute [ "start" ] []
-    }
 
 
 view : Model -> Browser.Document Msg
@@ -113,7 +121,12 @@ body model =
                     [ class "max-w-xl text-xl mb-8" ]
                     [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
                     ]
-                , div [ class "flex flex-col" ] [ startButton, startTranslation ]
+                , div [ class "flex flex-col" ]
+                    [ startButton
+                    , startTranslation
+                    , startScrabble
+                    ]
+                , View.viewVega
                 ]
 
             Meaning ->
@@ -122,29 +135,131 @@ body model =
             Translation ->
                 viewTranslationTask model
 
+            Scrabble ->
+                viewScrabbleTask model
+
+            Home ->
+                [ text "home ?" ]
+
             NotFound ->
                 View.notFound
     ]
 
 
+viewScrabbleTask model =
+    case model.scrabbleTask of
+        E.NotStarted ->
+            [ text "NotAsked" ]
+
+        E.Loading ->
+            [ text "Loading" ]
+
+        E.DoingScrabble (E.MainLoop trials state ntrial feedback) ->
+            let
+                currentTrial =
+                    Array.get ntrial (Array.fromList trials) |> Maybe.withDefault Scrabble.defaultTrial
+            in
+            [ h3 [] [ text "Listen to the sound and write what you here" ]
+            , View.simpleAudioPlayer currentTrial.audioWord.url
+            , state.scrambledLetter
+                |> List.indexedMap (itemView model.dnd)
+                |> Keyed.node "div" containerStyles
+            , ghostView model.dnd state.scrambledLetter
+            , View.button
+                { message = UserClickedNextTrialButtonInScrabble
+                , txt = "Next Trial "
+                , isDisabled = False
+                }
+            ]
+
+        E.DoingScrabble E.End ->
+            [ h3 [] [ text "C'est la fin, merci de votre participation ! 🎉️" ] ]
+
+        _ ->
+            [ text "unexpected view in viewscrabble. Please update Main.viewScrabbleTask or report this error message" ]
+
+
+itemView : DnDList.Model -> Int -> E.KeyedItem -> ( String, Html Msg )
+itemView dnd index ( key, item ) =
+    let
+        itemId : String
+        itemId =
+            "id-" ++ item
+    in
+    case system.info dnd of
+        Just { dragIndex } ->
+            if dragIndex /= index then
+                ( key
+                , div
+                    (Html.Styled.Attributes.id itemId
+                        :: itemStyles green
+                        ++ List.map Html.Styled.Attributes.fromUnstyled (system.dropEvents index itemId)
+                    )
+                    [ text item ]
+                )
+
+            else
+                ( key
+                , div
+                    (Html.Styled.Attributes.id itemId :: itemStyles "dimgray")
+                    []
+                )
+
+        Nothing ->
+            ( key
+            , div
+                (Html.Styled.Attributes.id itemId
+                    :: itemStyles green
+                    ++ List.map Html.Styled.Attributes.fromUnstyled (system.dragEvents index itemId)
+                )
+                [ text item ]
+            )
+
+
+ghostView : DnDList.Model -> List E.KeyedItem -> Html Msg
+ghostView dnd items =
+    let
+        maybeDragItem : Maybe E.KeyedItem
+        maybeDragItem =
+            system.info dnd
+                |> Maybe.andThen
+                    (\{ dragIndex } ->
+                        items
+                            |> List.drop dragIndex
+                            |> List.head
+                    )
+    in
+    case maybeDragItem of
+        Just ( _, item ) ->
+            div (itemStyles ghostGreen ++ List.map Html.Styled.Attributes.fromUnstyled (system.ghostStyles dnd)) [ text item ]
+
+        Nothing ->
+            text ""
+
+
 startButton : Html Msg
 startButton =
-    button
+    View.navIn "Go to Meaning >" "/meaning"
+
+
+
+{--
+button
         [ class "w-64 mb-8"
         , attribute "data-action" "start-experiment"
         , onClick UserClickedStartExperimentButton
         ]
-        [ text "Commencer meaning" ]
+        [ text "Commencer meaning" ]--}
 
 
 startTranslation : Html Msg
 startTranslation =
-    button
-        [ class "w-64"
-        , attribute "data-action" "start-translation"
-        , onClick UserClickedStartTranslationButton
-        ]
-        [ text "Commencer translation" ]
+    View.navIn "Go to Translation >" "/translation"
+
+
+startScrabble : Html Msg
+startScrabble =
+    View.navIn "Go to Scrabble >" "/scrabble"
 
 
 viewExperiment : Model -> List (Html Msg)
@@ -164,24 +279,11 @@ viewExperiment model =
     in
     case model.meaningTask of
         E.NotStarted ->
-            [ h1 [] [ text "Apprentissage et Espacement" ]
-            , p
-                [ class "max-w-xl text-xl mb-8" ]
-                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
-                ]
-            , div [] [ startButton ]
+            [ h1 [] [ text "NotStarted" ]
             ]
 
         E.Loading ->
-            [ h1 [] [ text "Apprentissage et Espacement" ]
-            , p
-                [ class "max-w-xl text-xl mb-8" ]
-                [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
-                ]
-            , div []
-                [ button [ class "w-56 cursor-wait", disabled True ]
-                    [ text "Loading..." ]
-                ]
+            [ h1 [] [ text "loading" ]
             ]
 
         E.Failure reason ->
@@ -268,7 +370,7 @@ viewTranslationTask model =
     in
     case model.translationTask of
         E.NotStarted ->
-            [ h1 [] [ text "Apprentissage et Espacement" ]
+            [ h1 [] [ text "NotStarted" ]
             , p
                 [ class "max-w-xl text-xl mb-8" ]
                 [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
@@ -277,7 +379,7 @@ viewTranslationTask model =
             ]
 
         E.Loading ->
-            [ h1 [] [ text "Apprentissage et Espacement" ]
+            [ h1 [] [ text "loading" ]
             , p
                 [ class "max-w-xl text-xl mb-8" ]
                 [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
@@ -289,7 +391,7 @@ viewTranslationTask model =
             ]
 
         E.Failure reason ->
-            [ h1 [] [ text "Apprentissage et Espacement" ]
+            [ h1 [] [ text "Failure" ]
             , p
                 [ class "max-w-xl text-xl mb-8" ]
                 [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
@@ -358,12 +460,15 @@ type Msg
     | UserClickedStartTranslationButton
     | ServerRespondedWithMeaningInput (Result Http.Error (List E.TrialMeaning))
     | ServerRespondedWithTranslationTrials (Result Http.Error (List E.TranslationInput))
+    | ServerRespondedWithScrabbleTrials (Result Http.Error (List E.ScrabbleTrial))
     | UserClickedRadioButtonInMeaning String
     | UserClickedRadioButtonInTranslation String
     | UserClickedFeedbackButtonInMeaning
     | UserClickedFeedbackButtonInTranslation
     | UserClickedNextTrialButtonInMeaning
     | UserClickedNextTrialButtonInTranslation
+    | UserClickedNextTrialButtonInScrabble
+    | UserDragsLetter DnDList.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -384,12 +489,57 @@ update msg model =
 
                 _ ->
                     E.initTranslationState
+
+        currentScrabbleState =
+            case E.getState model.scrabbleTask of
+                E.ScrabbleStateType x ->
+                    x
+
+                _ ->
+                    Scrabble.initState
+
+        ( currentScrabbleTrialn, nextScrabbleTrial ) =
+            case model.scrabbleTask of
+                E.DoingScrabble (E.MainLoop trials state trialn feedback) ->
+                    ( Array.get trialn (Array.fromList trials) |> Maybe.withDefault Scrabble.defaultTrial
+                    , Array.get (trialn + 1) (Array.fromList trials) |> Maybe.withDefault Scrabble.defaultTrial
+                    )
+
+                _ ->
+                    ( Scrabble.defaultTrial, Scrabble.defaultTrial )
     in
     case msg of
         BrowserChangedUrl url ->
-            ( { model | route = Route.fromUrl url }
-            , fetchData model.route
-            )
+            case Route.fromUrl url of
+                Meaning ->
+                    ( { model | route = Route.fromUrl url, meaningTask = E.Loading }
+                    , fetchData (Route.fromUrl url)
+                    )
+
+                Translation ->
+                    ( { model | route = Route.fromUrl url, translationTask = E.Loading }
+                    , fetchData (Route.fromUrl url)
+                    )
+
+                Scrabble ->
+                    ( { model | route = Route.fromUrl url, scrabbleTask = E.Loading }
+                    , fetchData (Route.fromUrl url)
+                    )
+
+                ExperimentStart ->
+                    ( { model | route = Route.fromUrl url }
+                    , fetchData (Route.fromUrl url)
+                    )
+
+                Home ->
+                    ( { model | route = Route.fromUrl url }
+                    , Cmd.none
+                    )
+
+                NotFound ->
+                    ( { model | route = Route.fromUrl url }
+                    , Cmd.none
+                    )
 
         UserClickedLink urlRequest ->
             case urlRequest of
@@ -432,6 +582,35 @@ update msg model =
 
         ServerRespondedWithTranslationTrials (Result.Ok data) ->
             ( { model | translationTask = E.DoingTranslation (E.MainLoop data E.initTranslationState 0 False) }
+            , Cmd.none
+            )
+
+        ServerRespondedWithScrabbleTrials (Result.Err reason) ->
+            ( { model | scrabbleTask = E.Failure reason }, Cmd.none )
+
+        ServerRespondedWithScrabbleTrials (Result.Ok data) ->
+            let
+                record =
+                    Scrabble.initState
+
+                firstTrialWord =
+                    Array.get 0 (Array.fromList data)
+                        |> Maybe.withDefault Scrabble.defaultTrial
+                        |> .writtenWord
+            in
+            ( { model
+                | scrabbleTask =
+                    E.DoingScrabble
+                        (E.MainLoop data
+                            { record
+                                | userAnswer =
+                                    firstTrialWord
+                                , scrambledLetter = toItems firstTrialWord
+                            }
+                            0
+                            False
+                        )
+              }
             , Cmd.none
             )
 
@@ -496,10 +675,54 @@ update msg model =
             , Cmd.none
             )
 
+        UserClickedNextTrialButtonInScrabble ->
+            ( { model
+                | scrabbleTask =
+                    model.scrabbleTask
+                        |> E.updateState
+                            (E.ScrabbleStateType
+                                { currentScrabbleState
+                                    | userAnswer = nextScrabbleTrial.writtenWord
+                                    , scrambledLetter = toItems nextScrabbleTrial.writtenWord
+                                }
+                            )
+                        |> E.nextTrial
+              }
+            , Cmd.none
+            )
+
+        UserDragsLetter dndmsg ->
+            let
+                items_ =
+                    toItems currentScrabbleState.userAnswer
+
+                ( dnd, items ) =
+                    system.update dndmsg model.dnd currentScrabbleState.scrambledLetter
+            in
+            ( { model
+                | dnd = dnd
+                , scrabbleTask = E.updateState (E.ScrabbleStateType { currentScrabbleState | scrambledLetter = items }) model.scrabbleTask
+              }
+            , system.commands dnd
+            )
+
+
+toItems : String -> List E.KeyedItem
+toItems string =
+    string
+        |> String.toList
+        |> List.map String.fromChar
+        |> toKeyedItem
+
+
+fromItems : List E.KeyedItem -> String
+fromItems =
+    List.map Tuple.second >> String.join ""
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    system.subscriptions model.dnd
 
 
 buildErrorMessage : Http.Error -> String
@@ -519,3 +742,70 @@ buildErrorMessage httpError =
 
         Http.BadBody message ->
             message
+
+
+fetchData : Route -> Cmd Msg
+fetchData route =
+    case route of
+        Meaning ->
+            Meaning.getTrialsFromServer ServerRespondedWithMeaningInput
+
+        Translation ->
+            Translation.getTrialsFromServer ServerRespondedWithTranslationTrials
+
+        Scrabble ->
+            Scrabble.getTrialsFromServer ServerRespondedWithScrabbleTrials
+
+        ExperimentStart ->
+            Cmd.none
+
+        Home ->
+            Cmd.none
+
+        NotFound ->
+            Cmd.none
+
+
+green : String
+green =
+    "#3da565"
+
+
+ghostGreen =
+    "#2f804e"
+
+
+containerStyles : List (Html.Styled.Attribute msg)
+containerStyles =
+    [ Html.Styled.Attributes.style "display" "flex"
+    , Html.Styled.Attributes.style "flex-wrap" "wrap"
+    , Html.Styled.Attributes.style "align-items" "center"
+
+    --, Html.Styled.Attributes.style "justify-content" "center"
+    , Html.Styled.Attributes.style "padding-top" "2em"
+    ]
+
+
+itemStyles : String -> List (Html.Styled.Attribute msg)
+itemStyles color =
+    [ Html.Styled.Attributes.style "width" "5rem"
+    , Html.Styled.Attributes.style "height" "5rem"
+    , Html.Styled.Attributes.style "background-color" color
+    , Html.Styled.Attributes.style "border-radius" "8px"
+    , Html.Styled.Attributes.style "color" "white"
+    , Html.Styled.Attributes.style "cursor" "pointer"
+    , Html.Styled.Attributes.style "margin" "0 2em 2em 0"
+    , Html.Styled.Attributes.style "display" "flex"
+    , Html.Styled.Attributes.style "align-items" "center"
+    , Html.Styled.Attributes.style "justify-content" "center"
+    ]
+
+
+project : { description : String, title : String, url : String }
+project =
+    { title = "Apprentissage et espacement"
+    , description = """
+        Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. 
+      """
+    , url = Url.Builder.absolute [ "start" ] []
+    }
