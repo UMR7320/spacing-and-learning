@@ -1,6 +1,6 @@
 module Experiment.Translation exposing (..)
 
-import Data
+import Data exposing (decodeRecords)
 import Experiment.Experiment as Experiment
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)

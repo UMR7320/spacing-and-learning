@@ -61,6 +61,13 @@ nextTrial experiment =
             else
                 DoingScrabble (MainLoop trials state (ntrial + 1) feedback)
 
+        DoingSynonym (MainLoop trials state ntrial feedback) ->
+            if ntrial >= List.length trials - 1 then
+                DoingSynonym End
+
+            else
+                DoingSynonym (MainLoop trials state (ntrial + 1) feedback)
+
         _ ->
             Failure
                 (Http.BadBody
@@ -82,6 +89,9 @@ toggleFeedback exp =
 
         DoingScrabble (MainLoop trials state ntrial feedback) ->
             DoingScrabble (MainLoop trials state ntrial (not feedback))
+
+        DoingSynonym (MainLoop trials state ntrial feedback) ->
+            DoingSynonym (MainLoop trials state ntrial (not feedback))
 
         _ ->
             Failure (Http.BadBody <| errorMessage "toggle feedback" "Experiment.toggleFeedback")
@@ -132,6 +142,7 @@ type Experiment
     | DoingMeaning (Step (List ()) () (List TrialMeaning) StateMeaning String String)
     | DoingTranslation (Step (List ()) () (List TranslationInput) TranslationOutput String String)
     | DoingScrabble (Step (List ()) () (List ScrabbleTrial) ScrabbleState String String)
+    | DoingSynonym (Step (List ()) () (List SynonymTrial) SynonymState String String)
     | Done
     | Failure Http.Error
 
@@ -148,6 +159,9 @@ updateState newState exp =
         ( ScrabbleStateType newState_, DoingScrabble (MainLoop trials prevstate ntrial feedback) ) ->
             DoingScrabble (MainLoop trials newState_ ntrial feedback)
 
+        ( SynonymStateType newState_, DoingSynonym (MainLoop trials prevstate ntrial feedback) ) ->
+            DoingSynonym (MainLoop trials newState_ ntrial feedback)
+
         _ ->
             Failure (Http.BadBody <| errorMessage "update the state of the experiment" "Experiment.updateState")
 
@@ -163,6 +177,9 @@ getState experiment =
 
         DoingScrabble (MainLoop trials state ntrial feedback) ->
             ScrabbleStateType state
+
+        DoingSynonym (MainLoop trials state ntrial feedback) ->
+            SynonymStateType state
 
         _ ->
             DummyType
@@ -187,6 +204,7 @@ type StateType
     = MeaningState StateMeaning
     | TranslationState TranslationOutput
     | ScrabbleStateType ScrabbleState
+    | SynonymStateType SynonymState
     | DummyType
 
 
@@ -359,3 +377,24 @@ type alias Item =
 
 type alias KeyedItem =
     ( String, Item )
+
+
+
+--Synonym
+
+
+type alias SynonymTrial =
+    { uid : String
+    , question : String
+    , target : String
+    , distractor1 : String
+    , distractor2 : String
+    , distractor3 : String
+    }
+
+
+type alias SynonymState =
+    { inputUid : String
+    , userUID : String
+    , userAnswer : String
+    }

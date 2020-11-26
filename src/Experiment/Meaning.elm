@@ -5,6 +5,7 @@ import Browser
 import Css exposing (visibility)
 import Data exposing (decodeRecords)
 import Experiment.Experiment as E
+import Experiment.Synonym as Synonym
 import Html.Styled
     exposing
         ( Html
@@ -145,6 +146,71 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                         [ p []
                             [ text <| String.fromInt (trialn + 1) ++ ". " ++ "Choose the best translation for the word: "
                             , span [ class "italic" ] [ text trial.word ]
+                            ]
+                        ]
+            in
+            div [ class "flex flex-wrap items-center" ]
+                [ div [ class "mr-8" ]
+                    [ Progressbar.progressBar pct
+                    , viewQuestion
+                    , div
+                        [ class "pt-6 max-w-xl ", disabled feedback ]
+                        [ fieldset
+                            []
+                            options
+                        ]
+                    , View.button <|
+                        if not feedback then
+                            { message = toggleFeedbackMsg
+                            , txt = "Is it correct?"
+                            , isDisabled = String.isEmpty state.userAnswer
+                            }
+
+                        else
+                            { message = nextTrialMsg
+                            , txt = "Next "
+                            , isDisabled = False
+                            }
+                    , div [ class "mt-4 max-w-xl w-full" ] [ viewFeedback feedback ]
+                    ]
+                ]
+
+        E.DoingSynonym (E.MainLoop trials state trialn feedback) ->
+            let
+                trial =
+                    Array.get trialn (Array.fromList trials)
+                        |> Maybe.withDefault Synonym.defaultTrial
+
+                pct =
+                    (toFloat trialn / toFloat (List.length trials)) * 100
+
+                viewFeedback isVisible =
+                    p
+                        [ class
+                            ("font-medium py-4 w-full"
+                                ++ " "
+                                ++ (if isVisible then
+                                        "visible"
+
+                                    else
+                                        "invisible"
+                                   )
+                            )
+                        ]
+                        (if state.userAnswer == trial.target then
+                            [ text "✔️ Correct Answer ! " ]
+
+                         else
+                            [ text "❌ The correct translation is : "
+                            , span [ class "font-medium italic" ] [ text trial.target ]
+                            ]
+                        )
+
+                viewQuestion =
+                    h3 []
+                        [ p []
+                            [ text <| String.fromInt (trialn + 1) ++ ". " ++ "Choose the best synonym for the word: "
+                            , span [ class "italic" ] [ text trial.question ]
                             ]
                         ]
             in

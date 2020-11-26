@@ -13,7 +13,9 @@ type Route
     | Meaning
     | Translation
     | Scrabble
+    | CloudWords
     | NotFound
+    | Synonym
 
 
 parser : Parser (Route -> a) a
@@ -25,6 +27,8 @@ parser =
         , map ExperimentStart (s "start")
         , map Meaning (s "meaning")
         , map Translation (s "translation")
+        , map CloudWords (s "cloudwords")
+        , map Synonym (s "synonym")
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)

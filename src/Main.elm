@@ -3,19 +3,26 @@ module Main exposing (main)
 import Array
 import Browser
 import Browser.Navigation as Nav
+import Canvas
 import Data
+import Dict
 import DnDList
+import Experiment.CloudWords as CloudWords
 import Experiment.Experiment as E
 import Experiment.Meaning as Meaning exposing (..)
 import Experiment.Scrabble as Scrabble
+import Experiment.Synonym as Synonym
 import Experiment.Translation as Translation
+import Html.Attributes
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (attribute, class, disabled, href)
+import Html.Styled.Attributes exposing (attribute, class, disabled, href, type_)
 import Html.Styled.Events exposing (onClick)
 import Html.Styled.Keyed as Keyed
 import Http
+import Json.Decode exposing (errorToString)
 import RemoteData exposing (RemoteData, WebData)
 import Route exposing (Route(..))
+import Set exposing (Set)
 import Url exposing (Url)
 import Url.Builder
 import View exposing (navIn, navOut)
@@ -61,7 +68,9 @@ type alias Model =
     , route : Route.Route
     , meaningTask : E.Experiment
     , translationTask : E.Experiment
+    , synonymTask : E.Experiment
     , scrabbleTask : E.Experiment
+    , cloudWords : Dict.Dict String Bool
     , dnd : DnDList.Model
 
     --, scrabbleItems : List E.KeyedItem
@@ -90,7 +99,9 @@ init flags url key =
       , route = route
       , meaningTask = E.NotStarted
       , translationTask = E.NotStarted
+      , synonymTask = E.NotStarted
       , scrabbleTask = E.NotStarted
+      , cloudWords = Dict.fromList CloudWords.words
       , dnd = system.model
 
       --, scrabbleItems = []
@@ -104,6 +115,30 @@ view model =
     { title = project.title
     , body = [ body model |> div [] |> toUnstyled ]
     }
+
+
+viewCloud : Model -> Html Msg
+viewCloud model =
+    div [ class "grid grid-flow-col grid-rows-4 auto-cols-max gap-4 " ]
+        (List.map
+            (\word ->
+                let
+                    value =
+                        Dict.get word model.cloudWords
+                in
+                label [ class "border-2 p-2 text-black align-baseline flex flex-row" ]
+                    [ input
+                        [ type_ "checkbox"
+                        , Html.Styled.Attributes.checked <| Maybe.withDefault False value
+                        , Html.Styled.Events.onClick <|
+                            UserToggledInCloudWords word
+                        ]
+                        []
+                    , span [ class "pl-4" ] [ text word ]
+                    ]
+            )
+            (Dict.keys model.cloudWords)
+        )
 
 
 body : Model -> List (Html Msg)
@@ -124,9 +159,13 @@ body model =
                 , div [ class "flex flex-col" ]
                     [ startButton
                     , startTranslation
+                    , startSynonym
                     , startScrabble
+                    , startCloudWords
                     ]
-                , View.viewVega
+
+                --, div [ class "grid grid-flow-col grid-rows-4  gap-4" ] words
+                --, viewCloud model
                 ]
 
             Meaning ->
@@ -135,8 +174,14 @@ body model =
             Translation ->
                 viewTranslationTask model
 
+            Synonym ->
+                viewSynonymTask model
+
             Scrabble ->
                 viewScrabbleTask model
+
+            CloudWords ->
+                [ viewCloud model ]
 
             Home ->
                 [ text "home ?" ]
@@ -144,6 +189,10 @@ body model =
             NotFound ->
                 View.notFound
     ]
+
+
+
+--words : List (Html msg)
 
 
 viewScrabbleTask model =
@@ -257,9 +306,19 @@ startTranslation =
     View.navIn "Go to Translation >" "/translation"
 
 
+startSynonym : Html Msg
+startSynonym =
+    View.navIn "Go to Synonym >" "/synonym"
+
+
 startScrabble : Html Msg
 startScrabble =
     View.navIn "Go to Scrabble >" "/scrabble"
+
+
+startCloudWords : Html Msg
+startCloudWords =
+    View.navIn "Go to CloudWords >" "/cloudwords"
 
 
 viewExperiment : Model -> List (Html Msg)
@@ -453,6 +512,75 @@ viewTranslationTask model =
 -- UPDATE
 
 
+viewSynonymTask : Model -> List (Html Msg)
+viewSynonymTask model =
+    case model.synonymTask of
+        E.NotStarted ->
+            [ h1 [] [ text "NotStarted" ]
+            ]
+
+        E.Loading ->
+            [ h1 [] [ text "loading" ]
+            ]
+
+        E.Failure reason ->
+            [ h1 [] [ text ("Failure" ++ buildErrorMessage reason) ]
+            ]
+
+        E.DoingSynonym (E.MainLoop trials state trialn feedback) ->
+            let
+                trial =
+                    Array.get
+                        trialn
+                        (Array.fromList trials)
+                        |> Maybe.withDefault Synonym.defaultTrial
+
+                isCorrect optionN =
+                    optionN == trial.target
+            in
+            [ Meaning.view
+                model.synonymTask
+                [ View.radio
+                    trial.distractor1
+                    (state.userAnswer == trial.distractor1)
+                    (isCorrect trial.distractor1)
+                    feedback
+                    (UserClickedRadioButtonInSynonym trial.distractor1)
+                , View.radio
+                    trial.distractor2
+                    (state.userAnswer == trial.distractor2)
+                    (isCorrect trial.distractor2)
+                    feedback
+                    (UserClickedRadioButtonInSynonym trial.distractor2)
+                , View.radio
+                    trial.distractor3
+                    (state.userAnswer == trial.distractor3)
+                    (isCorrect trial.distractor3)
+                    feedback
+                    (UserClickedRadioButtonInSynonym trial.distractor3)
+                , View.radio
+                    trial.target
+                    (state.userAnswer == trial.target)
+                    (isCorrect trial.target)
+                    feedback
+                    (UserClickedRadioButtonInSynonym trial.target)
+                ]
+                UserClickedFeedbackButtonInSynonym
+                UserClickedNextTrialButtonInSynonym
+            ]
+
+        E.DoingMeaning E.End ->
+            [ h1 [] [ text "Merci de votre participation !🎉" ]
+            , p
+                [ class "max-w-xl text-xl mb-8" ]
+                [ text "Vous trouverez dans l'e-mail que vous avez reçu les liens pour la suite de l'expérience."
+                ]
+            ]
+
+        _ ->
+            [ text "Unexpected view. You can take it in account in Main.viewExperiment" ]
+
+
 type Msg
     = BrowserChangedUrl Url
     | UserClickedLink Browser.UrlRequest
@@ -461,13 +589,18 @@ type Msg
     | ServerRespondedWithMeaningInput (Result Http.Error (List E.TrialMeaning))
     | ServerRespondedWithTranslationTrials (Result Http.Error (List E.TranslationInput))
     | ServerRespondedWithScrabbleTrials (Result Http.Error (List E.ScrabbleTrial))
+    | ServerRespondedWithSynonymTrials (Result Http.Error (List E.SynonymTrial))
     | UserClickedRadioButtonInMeaning String
     | UserClickedRadioButtonInTranslation String
+    | UserClickedRadioButtonInSynonym String
     | UserClickedFeedbackButtonInMeaning
     | UserClickedFeedbackButtonInTranslation
+    | UserClickedFeedbackButtonInSynonym
     | UserClickedNextTrialButtonInMeaning
     | UserClickedNextTrialButtonInTranslation
+    | UserClickedNextTrialButtonInSynonym
     | UserClickedNextTrialButtonInScrabble
+    | UserToggledInCloudWords String
     | UserDragsLetter DnDList.Msg
 
 
@@ -489,6 +622,14 @@ update msg model =
 
                 _ ->
                     E.initTranslationState
+
+        currentSynonymState =
+            case E.getState model.synonymTask of
+                E.SynonymStateType x ->
+                    x
+
+                _ ->
+                    Synonym.initState
 
         currentScrabbleState =
             case E.getState model.scrabbleTask of
@@ -521,6 +662,11 @@ update msg model =
                     , fetchData (Route.fromUrl url)
                     )
 
+                Synonym ->
+                    ( { model | route = Route.fromUrl url, translationTask = E.Loading }
+                    , fetchData (Route.fromUrl url)
+                    )
+
                 Scrabble ->
                     ( { model | route = Route.fromUrl url, scrabbleTask = E.Loading }
                     , fetchData (Route.fromUrl url)
@@ -529,6 +675,11 @@ update msg model =
                 ExperimentStart ->
                     ( { model | route = Route.fromUrl url }
                     , fetchData (Route.fromUrl url)
+                    )
+
+                CloudWords ->
+                    ( { model | route = Route.fromUrl url }
+                    , Cmd.none
                     )
 
                 Home ->
@@ -585,6 +736,14 @@ update msg model =
             , Cmd.none
             )
 
+        ServerRespondedWithSynonymTrials (Result.Err reason) ->
+            ( { model | synonymTask = E.Failure reason }, Cmd.none )
+
+        ServerRespondedWithSynonymTrials (Result.Ok data) ->
+            ( { model | synonymTask = E.DoingSynonym (E.MainLoop data E.initTranslationState 0 False) }
+            , Cmd.none
+            )
+
         ServerRespondedWithScrabbleTrials (Result.Err reason) ->
             ( { model | scrabbleTask = E.Failure reason }, Cmd.none )
 
@@ -626,6 +785,15 @@ update msg model =
             , Cmd.none
             )
 
+        UserClickedRadioButtonInSynonym newChoice ->
+            ( { model
+                | synonymTask =
+                    model.synonymTask
+                        |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = newChoice })
+              }
+            , Cmd.none
+            )
+
         UserClickedRadioButtonInTranslation newChoice ->
             ( { model
                 | translationTask =
@@ -639,6 +807,15 @@ update msg model =
             ( { model
                 | meaningTask =
                     model.meaningTask
+                        |> E.toggleFeedback
+              }
+            , Cmd.none
+            )
+
+        UserClickedFeedbackButtonInSynonym ->
+            ( { model
+                | synonymTask =
+                    model.synonymTask
                         |> E.toggleFeedback
               }
             , Cmd.none
@@ -675,6 +852,17 @@ update msg model =
             , Cmd.none
             )
 
+        UserClickedNextTrialButtonInSynonym ->
+            ( { model
+                | synonymTask =
+                    model.synonymTask
+                        |> E.toggleFeedback
+                        |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = "" })
+                        |> E.nextTrial
+              }
+            , Cmd.none
+            )
+
         UserClickedNextTrialButtonInScrabble ->
             ( { model
                 | scrabbleTask =
@@ -690,6 +878,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        UserToggledInCloudWords word ->
+            ( { model | cloudWords = CloudWords.toggle word model.cloudWords }, Cmd.none )
 
         UserDragsLetter dndmsg ->
             let
@@ -753,8 +944,14 @@ fetchData route =
         Translation ->
             Translation.getTrialsFromServer ServerRespondedWithTranslationTrials
 
+        Synonym ->
+            Synonym.getTrialsFromServer ServerRespondedWithSynonymTrials
+
         Scrabble ->
             Scrabble.getTrialsFromServer ServerRespondedWithScrabbleTrials
+
+        CloudWords ->
+            Cmd.none
 
         ExperimentStart ->
             Cmd.none

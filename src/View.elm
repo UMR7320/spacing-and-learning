@@ -8,7 +8,6 @@ module View exposing
     , notFound
     , radio
     , simpleAudioPlayer
-    , viewVega
     )
 
 import Css
@@ -208,7 +207,3 @@ simpleAudioPlayer src =
         , Html.Styled.Attributes.width 300
         ]
         []
-
-
-viewVega =
-    node "view" [] []
