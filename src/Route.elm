@@ -14,6 +14,7 @@ type Route
     | Translation
     | Scrabble
     | CloudWords
+    | Acceptability
     | NotFound
     | Synonym
 
@@ -29,6 +30,7 @@ parser =
         , map Translation (s "translation")
         , map CloudWords (s "cloudwords")
         , map Synonym (s "synonym")
+        , map Acceptability (s "acceptability")
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)

@@ -1,24 +1,52 @@
 module Data exposing (..)
 
+import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (optional, required)
+import Url.Builder
 
 
+getTrialsFromServer_ : String -> String -> (Result Http.Error a -> msg) -> Decode.Decoder a -> Cmd msg
+getTrialsFromServer_ baseName viewName callbackMsg decoder =
+    Http.get
+        { url =
+            buildQuery
+                { app = apps.spacing
+                , base = baseName
+                , view_ = viewName
+                }
+        , expect =
+            Http.expectJson
+                callbackMsg
+                decoder
+        }
 
-{--
-decodeTranslationInput : Decoder (List Experiment.TranslationInput)
-decodeTranslationInput =
-    let
-        decoder =
-            Decode.succeed Experiment.TranslationInput
-                |> required "UID" string
-                |> required "Question_Translation" string
-                |> required "Distractor_1_Translation" string
-                |> required "Distractor_2_Translation" string
-                |> required "Distractor_3_Translation" string
-    in
-    decodeRecords decoder
---}
+
+type alias AirtableQueryParameters =
+    { app : String
+    , base : String
+    , view_ : String
+    }
+
+
+buildQuery : AirtableQueryParameters -> String
+buildQuery { app, base, view_ } =
+    Url.Builder.absolute
+        [ ".netlify"
+        , "functions"
+        , "api"
+        ]
+        [ Url.Builder.string "app" app
+        , Url.Builder.string "base" base
+        , Url.Builder.string "view" view_
+        ]
+
+
+apps : { spacing : String, sleep : String }
+apps =
+    { spacing = "appvKOc8FH0j48Hw1"
+    , sleep = "appTEVHZLw3jNa7fU"
+    }
 
 
 decodeAudioFiles : Decode.Decoder AudioFile
@@ -48,21 +76,3 @@ type alias AudioFile =
     { url : String
     , type_ : String
     }
-
-
-
-{--
-
-packageDecoder : Decoder Package
-packageDecoder =
-    -- Build JSON decoders using the pipeline (|>) operator:
-    -- https://package.elm-lang.org/packages/NoRedInk/elm-json-decode-pipeline/1.0.0/
-    -- See also bool, float, int, list, nullable, etc. in:
-    -- https://package.elm-lang.org/packages/elm/json/latest/Json-Decode
-    Decode.succeed Package
-        |> required "name" string
-        |> required "url" string
-        |> required "author" string
-        |> required "license" string
-
---}

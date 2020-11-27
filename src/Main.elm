@@ -2,11 +2,14 @@ module Main exposing (main)
 
 import Array
 import Browser
+import Browser.Events exposing (onKeyDown, onKeyPress)
 import Browser.Navigation as Nav
 import Canvas
 import Data
 import Dict
 import DnDList
+import DnDList.Groups exposing (Model)
+import Experiment.Acceptability as Acceptability
 import Experiment.CloudWords as CloudWords
 import Experiment.Experiment as E
 import Experiment.Meaning as Meaning exposing (..)
@@ -20,9 +23,16 @@ import Html.Styled.Events exposing (onClick)
 import Html.Styled.Keyed as Keyed
 import Http
 import Json.Decode exposing (errorToString)
+import List.Extra
+import Random
+import Random.Extra
+import Random.List
 import RemoteData exposing (RemoteData, WebData)
+import Result exposing (Result)
 import Route exposing (Route(..))
 import Set exposing (Set)
+import Task
+import Time
 import Url exposing (Url)
 import Url.Builder
 import View exposing (navIn, navOut)
@@ -70,9 +80,11 @@ type alias Model =
     , translationTask : E.Experiment
     , synonymTask : E.Experiment
     , scrabbleTask : E.Experiment
+    , acceptabilityTask : Acceptability.Task
     , cloudWords : Dict.Dict String Bool
     , dnd : DnDList.Model
 
+    --, updateTime : Time.Posix
     --, scrabbleItems : List E.KeyedItem
     }
 
@@ -101,10 +113,9 @@ init flags url key =
       , translationTask = E.NotStarted
       , synonymTask = E.NotStarted
       , scrabbleTask = E.NotStarted
+      , acceptabilityTask = Acceptability.NotStarted
       , cloudWords = Dict.fromList CloudWords.words
       , dnd = system.model
-
-      --, scrabbleItems = []
       }
     , fetchData route
     )
@@ -162,6 +173,7 @@ body model =
                     , startSynonym
                     , startScrabble
                     , startCloudWords
+                    , View.navIn "Go to Acceptability >" "/acceptability"
                     ]
 
                 --, div [ class "grid grid-flow-col grid-rows-4  gap-4" ] words
@@ -182,6 +194,9 @@ body model =
 
             CloudWords ->
                 [ viewCloud model ]
+
+            Acceptability ->
+                [ Acceptability.view model.acceptabilityTask { nextTrialMsg = UserClickedNextTrialInAcceptability } ]
 
             Home ->
                 [ text "home ?" ]
@@ -208,7 +223,7 @@ viewScrabbleTask model =
                 currentTrial =
                     Array.get ntrial (Array.fromList trials) |> Maybe.withDefault Scrabble.defaultTrial
             in
-            [ h3 [] [ text "Listen to the sound and write what you here" ]
+            [ h3 [] [ text "Listen to the sound and write what you hear" ]
             , View.simpleAudioPlayer currentTrial.audioWord.url
             , state.scrambledLetter
                 |> List.indexedMap (itemView model.dnd)
@@ -289,16 +304,6 @@ ghostView dnd items =
 startButton : Html Msg
 startButton =
     View.navIn "Go to Meaning >" "/meaning"
-
-
-
-{--
-button
-        [ class "w-64 mb-8"
-        , attribute "data-action" "start-experiment"
-        , onClick UserClickedStartExperimentButton
-        ]
-        [ text "Commencer meaning" ]--}
 
 
 startTranslation : Html Msg
@@ -583,13 +588,13 @@ viewSynonymTask model =
 
 type Msg
     = BrowserChangedUrl Url
-    | UserClickedLink Browser.UrlRequest
-    | UserClickedStartExperimentButton
-    | UserClickedStartTranslationButton
     | ServerRespondedWithMeaningInput (Result Http.Error (List E.TrialMeaning))
     | ServerRespondedWithTranslationTrials (Result Http.Error (List E.TranslationInput))
     | ServerRespondedWithScrabbleTrials (Result Http.Error (List E.ScrabbleTrial))
     | ServerRespondedWithSynonymTrials (Result Http.Error (List E.SynonymTrial))
+    | ServerRespondedWithAcceptabilityTrials (Result Http.Error (List Acceptability.Trial))
+    | Shuffled Msg
+    | UserClickedLink Browser.UrlRequest
     | UserClickedRadioButtonInMeaning String
     | UserClickedRadioButtonInTranslation String
     | UserClickedRadioButtonInSynonym String
@@ -600,8 +605,15 @@ type Msg
     | UserClickedNextTrialButtonInTranslation
     | UserClickedNextTrialButtonInSynonym
     | UserClickedNextTrialButtonInScrabble
+    | UserClickedNextTrialInAcceptability
     | UserToggledInCloudWords String
     | UserDragsLetter DnDList.Msg
+    | UserPressedKey Acceptability.Evaluation
+    | WithTime Msg Time.Posix
+
+
+
+--| GetTimeAndThen (Time.Posix -> Msg)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -677,6 +689,11 @@ update msg model =
                     , fetchData (Route.fromUrl url)
                     )
 
+                Acceptability ->
+                    ( { model | route = Route.fromUrl url }
+                    , fetchData (Route.fromUrl url)
+                    )
+
                 CloudWords ->
                     ( { model | route = Route.fromUrl url }
                     , Cmd.none
@@ -704,23 +721,12 @@ update msg model =
                     , Nav.load url
                     )
 
-        UserClickedStartExperimentButton ->
-            ( { model | meaningTask = E.Loading }
-            , Cmd.batch
-                [ Nav.pushUrl model.key (Url.Builder.absolute [ "meaning" ] [])
-                , Meaning.getTrialsFromServer ServerRespondedWithMeaningInput
-                ]
-            )
-
-        UserClickedStartTranslationButton ->
-            ( { model | meaningTask = E.Loading }
-            , Cmd.batch
-                [ Nav.pushUrl model.key (Url.Builder.absolute [ "translation" ] [])
-                , Translation.getTrialsFromServer ServerRespondedWithTranslationTrials
-                ]
-            )
-
         ServerRespondedWithMeaningInput (Result.Ok data) ->
+            ( model
+            , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithMeaningInput (Result.Ok shuffledData))) (Random.List.shuffle data)
+            )
+
+        Shuffled (ServerRespondedWithMeaningInput (Result.Ok data)) ->
             ( { model
                 | meaningTask =
                     E.DoingMeaning (E.MainLoop data Meaning.initState 0 False)
@@ -732,15 +738,34 @@ update msg model =
             ( { model | translationTask = E.Failure reason }, Cmd.none )
 
         ServerRespondedWithTranslationTrials (Result.Ok data) ->
-            ( { model | translationTask = E.DoingTranslation (E.MainLoop data E.initTranslationState 0 False) }
-            , Cmd.none
+            ( model
+            , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithTranslationTrials (Result.Ok shuffledData))) (Random.List.shuffle data)
             )
+
+        Shuffled (ServerRespondedWithTranslationTrials (Result.Ok data)) ->
+            ( { model | translationTask = E.DoingTranslation (E.MainLoop data E.initTranslationState 0 False) }, Cmd.none )
 
         ServerRespondedWithSynonymTrials (Result.Err reason) ->
             ( { model | synonymTask = E.Failure reason }, Cmd.none )
 
         ServerRespondedWithSynonymTrials (Result.Ok data) ->
-            ( { model | synonymTask = E.DoingSynonym (E.MainLoop data E.initTranslationState 0 False) }
+            ( model
+            , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithSynonymTrials (Result.Ok shuffledData))) (Random.List.shuffle data)
+            )
+
+        Shuffled (ServerRespondedWithSynonymTrials (Result.Ok data)) ->
+            ( { model | synonymTask = E.DoingSynonym (E.MainLoop data E.initTranslationState 0 False) }, Cmd.none )
+
+        ServerRespondedWithAcceptabilityTrials (Result.Ok trials) ->
+            ( model
+            , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithAcceptabilityTrials (Result.Ok shuffledData))) (Random.List.shuffle trials)
+            )
+
+        Shuffled (ServerRespondedWithAcceptabilityTrials (Result.Ok trials)) ->
+            ( { model | acceptabilityTask = Acceptability.DoingTask trials Acceptability.initState 0 [] }, Cmd.none )
+
+        ServerRespondedWithAcceptabilityTrials (Result.Err reason) ->
+            ( { model | acceptabilityTask = Acceptability.Failure reason }
             , Cmd.none
             )
 
@@ -756,11 +781,51 @@ update msg model =
                     Array.get 0 (Array.fromList data)
                         |> Maybe.withDefault Scrabble.defaultTrial
                         |> .writtenWord
+
+                --shuffleLetters : String
+                shuffleLetters =
+                    data
+                        |> List.map
+                            (\trial ->
+                                Random.map3 E.ScrabbleTrial
+                                    (Random.uniform trial.uid [])
+                                    (trial.writtenWord
+                                        |> String.toList
+                                        |> Random.List.shuffle
+                                        |> Random.map
+                                            (\letters_ ->
+                                                letters_
+                                                    |> List.map String.fromChar
+                                                    |> String.concat
+                                            )
+                                    )
+                                    (Random.uniform trial.audioWord [])
+                            )
+                        |> Random.Extra.sequence
+                        |> Random.andThen Random.List.shuffle
+            in
+            ( model
+            , Random.generate
+                (\shuffledData ->
+                    Shuffled (ServerRespondedWithScrabbleTrials (Result.Ok shuffledData))
+                )
+                shuffleLetters
+            )
+
+        Shuffled (ServerRespondedWithScrabbleTrials (Result.Ok trials)) ->
+            let
+                record =
+                    Scrabble.initState
+
+                firstTrialWord =
+                    Array.get 0 (Array.fromList trials)
+                        |> Maybe.withDefault Scrabble.defaultTrial
+                        |> .writtenWord
             in
             ( { model
                 | scrabbleTask =
                     E.DoingScrabble
-                        (E.MainLoop data
+                        (E.MainLoop trials
                             { record
                                 | userAnswer =
                                     firstTrialWord
@@ -863,6 +928,20 @@ update msg model =
             , Cmd.none
             )
 
+        UserClickedNextTrialInAcceptability ->
+            let
+                state =
+                    Acceptability.getState model.acceptabilityTask
+            in
+            ( model
+            , Task.perform (\time -> WithTime UserClickedNextTrialInAcceptability time) Time.now
+            )
+
+        UserPressedKey evaluation ->
+            ( model
+            , Task.perform (\time -> WithTime (UserPressedKey evaluation) time) Time.now
+            )
+
         UserClickedNextTrialButtonInScrabble ->
             ( { model
                 | scrabbleTask =
@@ -897,6 +976,35 @@ update msg model =
             , system.commands dnd
             )
 
+        WithTime (UserPressedKey evaluation) time ->
+            let
+                prevState =
+                    Acceptability.getState model.acceptabilityTask
+
+                trial =
+                    Acceptability.getCurrentTrial model.acceptabilityTask
+            in
+            ( { model
+                | acceptabilityTask =
+                    model.acceptabilityTask
+                        |> Acceptability.updateState { prevState | endedAt = Just time, evaluation = evaluation, trialuid = trial.uid }
+                        |> Acceptability.recordState
+                        |> Acceptability.nextTrial time
+              }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+
+--generateTrials : List E.ScrabbleTrial -> Random.Generator (List E.ScrabbleTrial)
+
+
+generateTrials trials =
+    Debug.todo ""
+
 
 toItems : String -> List E.KeyedItem
 toItems string =
@@ -913,7 +1021,28 @@ fromItems =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    system.subscriptions model.dnd
+    Sub.batch
+        [ system.subscriptions model.dnd
+        , onKeyDown keyDecoder
+        ]
+
+
+keyDecoder : Json.Decode.Decoder Msg
+keyDecoder =
+    Json.Decode.map toEvaluation (Json.Decode.field "key" Json.Decode.string)
+
+
+toEvaluation : String -> Msg
+toEvaluation x =
+    case x of
+        "y" ->
+            UserPressedKey Acceptability.SentenceCorrect
+
+        "n" ->
+            UserPressedKey Acceptability.SentenceIncorrect
+
+        _ ->
+            UserPressedKey Acceptability.NoEvaluation
 
 
 buildErrorMessage : Http.Error -> String
@@ -949,6 +1078,9 @@ fetchData route =
 
         Scrabble ->
             Scrabble.getTrialsFromServer ServerRespondedWithScrabbleTrials
+
+        Acceptability ->
+            Acceptability.getTrialsFromServer ServerRespondedWithAcceptabilityTrials
 
         CloudWords ->
             Cmd.none
