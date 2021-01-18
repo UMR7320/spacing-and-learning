@@ -16,6 +16,7 @@ import Experiment.Meaning as Meaning exposing (..)
 import Experiment.Scrabble as Scrabble
 import Experiment.Synonym as Synonym
 import Experiment.Translation as Translation
+import ExperimentInfo
 import Html.Attributes
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (attribute, class, disabled, href, type_)
@@ -35,6 +36,7 @@ import Task
 import Time
 import Url exposing (Url)
 import Url.Builder
+import User
 import View exposing (navIn, navOut)
 
 
@@ -83,9 +85,8 @@ type alias Model =
     , acceptabilityTask : Acceptability.Task
     , cloudWords : Dict.Dict String Bool
     , dnd : DnDList.Model
-
-    --, updateTime : Time.Posix
-    --, scrabbleItems : List E.KeyedItem
+    , infos : RemoteData Http.Error (List ExperimentInfo.Task)
+    , user : Maybe User.User
     }
 
 
@@ -116,8 +117,10 @@ init flags url key =
       , acceptabilityTask = Acceptability.NotStarted
       , cloudWords = Dict.fromList CloudWords.words
       , dnd = system.model
+      , infos = RemoteData.Loading
+      , user = Nothing
       }
-    , fetchData route
+    , Cmd.batch [ fetchData route, ExperimentInfo.getInfos ServerRespondedWithInfos ]
     )
 
 
@@ -160,48 +163,59 @@ body model =
         , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
         ]
     , View.container <|
-        case model.route of
-            ExperimentStart ->
+        case ( model.route, model.infos ) of
+            ( ExperimentStart, RemoteData.Success infos ) ->
                 [ h1 [] [ text "Apprentissage et Espacement" ]
                 , p
                     [ class "max-w-xl text-xl mb-8" ]
                     [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
                     ]
-                , div [ class "flex flex-col" ]
-                    [ startButton
-                    , startTranslation
-                    , startSynonym
-                    , startScrabble
-                    , startCloudWords
-                    , View.navIn "Go to Acceptability >" "/acceptability"
-                    ]
-
-                --, div [ class "grid grid-flow-col grid-rows-4  gap-4" ] words
-                --, viewCloud model
+                , infos
+                    |> List.map
+                        (\info ->
+                            div [ class "my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-13" ]
+                                [ Html.Styled.article [ class "overflow-hidden rounded-lg shadow-lg" ]
+                                    [ Html.Styled.img [ class "block h-auto w-full", Html.Styled.Attributes.src "https://picsum.photos/600/400/?random" ] []
+                                    , Html.Styled.header [ class "flex items-center justify-between leading-tight p-2 md:p4" ]
+                                        [ h1 [ class "text-lg" ] [ a [ Html.Styled.Attributes.href info.url ] [ text info.name ] ]
+                                        ]
+                                    , p [ class "px-2" ] [ text info.description ]
+                                    , Html.Styled.footer
+                                        [ class "flex items-center justify-between leading-none p-2 md:p-4" ]
+                                        [ div [ class "bg-green-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.typeToString info.type_) ]
+                                        , div [ class "bg-blue-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.sessionToString info.session) ]
+                                        ]
+                                    ]
+                                ]
+                        )
+                    |> div [ class "flex flex-wrap -mx-1 px-4 md:px-12" ]
                 ]
 
-            Meaning ->
+            ( ExperimentStart, _ ) ->
+                [ text "Loading" ]
+
+            ( Meaning, _ ) ->
                 viewExperiment model
 
-            Translation ->
+            ( Translation, _ ) ->
                 viewTranslationTask model
 
-            Synonym ->
+            ( Synonym, _ ) ->
                 viewSynonymTask model
 
-            Scrabble ->
+            ( Scrabble, _ ) ->
                 viewScrabbleTask model
 
-            CloudWords ->
+            ( CloudWords, _ ) ->
                 [ viewCloud model ]
 
-            Acceptability ->
+            ( Acceptability, _ ) ->
                 [ Acceptability.view model.acceptabilityTask { nextTrialMsg = UserClickedNextTrialInAcceptability } ]
 
-            Home ->
+            ( Home, _ ) ->
                 [ text "home ?" ]
 
-            NotFound ->
+            ( NotFound, _ ) ->
                 View.notFound
     ]
 
@@ -236,7 +250,7 @@ viewScrabbleTask model =
                 }
             ]
 
-        E.DoingScrabble E.End ->
+        E.DoingScrabble (E.End txt) ->
             [ h3 [] [ text "C'est la fin, merci de votre participation ! 🎉️" ] ]
 
         _ ->
@@ -405,7 +419,7 @@ viewExperiment model =
                 UserClickedNextTrialButtonInMeaning
             ]
 
-        E.DoingMeaning E.End ->
+        E.DoingMeaning (E.End txt) ->
             [ h1 [] [ text "Merci de votre participation !🎉" ]
             , p
                 [ class "max-w-xl text-xl mb-8" ]
@@ -529,52 +543,104 @@ viewSynonymTask model =
             ]
 
         E.Failure reason ->
-            [ h1 [] [ text ("Failure" ++ buildErrorMessage reason) ]
+            [ h4 [] [ text ("Failure" ++ buildErrorMessage reason) ]
             ]
+
+        E.DoingSynonym (E.Intro trials state trialn feedback instructions) ->
+            let
+                trainingTrial =
+                    trials
+                        |> List.filter (\datum -> datum.isTraining)
+                        |> Array.fromList
+                        |> Array.get trialn
+
+                toggleFeedback =
+                    View.button
+                        { message = UserClickedFeedbackButtonInSynonym
+                        , txt = "Check my answer"
+                        , isDisabled = False
+                        }
+
+                viewInstructions x =
+                    div [ class "flex flex-col" ]
+                        [ h2 [ class "font-bold" ] [ text "Instructions" ]
+                        , p [ class "pt-8 pb-8" ] [ text "Focus on the word in the box in each sentence.\u{200B}\nIt’s a synonym for one of the words you are learning.\u{200B}\nClick on the word in the box to type your synonym." ]
+                        ]
+            in
+            case ( trainingTrial, feedback ) of
+                ( Just x, False ) ->
+                    [ viewInstructions x
+                    , View.sentenceInSynonym x state UserChangedInputInSynonym
+                    , toggleFeedback
+                    ]
+
+                ( Just x, True ) ->
+                    [ viewInstructions x
+                    , View.sentenceInSynonym x state UserChangedInputInSynonym
+                    , div [ class "w-full mt-8 rounded-md text-center object-center bg-green-300 " ]
+                        [ p [ class "p-6 text-xl text-white" ]
+                            [ text "The correct synonym for "
+                            , text x.stimulus
+                            , text " is "
+                            , span [ class "font-bold" ] [ text x.target ]
+                            ]
+                        , div [ class "pb-4" ]
+                            [ View.button
+                                { message = UserClickedNextTrialButtonInSynonym
+                                , txt = "Next practice item"
+                                , isDisabled = False
+                                }
+                            ]
+                        ]
+                    ]
+
+                ( Nothing, _ ) ->
+                    [ text "Now you understand the activity, let's try our target words"
+                    , View.button
+                        { message = UserClickedStartSynonym trials
+                        , txt = "Ready?"
+                        , isDisabled = False
+                        }
+                    ]
 
         E.DoingSynonym (E.MainLoop trials state trialn feedback) ->
             let
                 trial =
-                    Array.get
-                        trialn
-                        (Array.fromList trials)
-                        |> Maybe.withDefault Synonym.defaultTrial
-
-                isCorrect optionN =
-                    optionN == trial.target
+                    trials
+                        |> List.filter (\datum -> not datum.isTraining)
+                        |> Array.fromList
+                        |> Array.get trialn
             in
-            [ Meaning.view
-                model.synonymTask
-                [ View.radio
-                    trial.distractor1
-                    (state.userAnswer == trial.distractor1)
-                    (isCorrect trial.distractor1)
-                    feedback
-                    (UserClickedRadioButtonInSynonym trial.distractor1)
-                , View.radio
-                    trial.distractor2
-                    (state.userAnswer == trial.distractor2)
-                    (isCorrect trial.distractor2)
-                    feedback
-                    (UserClickedRadioButtonInSynonym trial.distractor2)
-                , View.radio
-                    trial.distractor3
-                    (state.userAnswer == trial.distractor3)
-                    (isCorrect trial.distractor3)
-                    feedback
-                    (UserClickedRadioButtonInSynonym trial.distractor3)
-                , View.radio
-                    trial.target
-                    (state.userAnswer == trial.target)
-                    (isCorrect trial.target)
-                    feedback
-                    (UserClickedRadioButtonInSynonym trial.target)
-                ]
-                UserClickedFeedbackButtonInSynonym
-                UserClickedNextTrialButtonInSynonym
-            ]
+            case ( trial, feedback ) of
+                ( Just t, False ) ->
+                    [ View.sentenceInSynonym t state UserChangedInputInSynonym
+                    , View.button
+                        { message = UserValidatedInputInSynonym
+                        , txt = "Valider"
+                        , isDisabled = String.isEmpty state.userAnswer
+                        }
+                    ]
 
-        E.DoingMeaning E.End ->
+                ( Just t, True ) ->
+                    [ View.sentenceInSynonym t state UserChangedInputInSynonym
+                    , div [ class "p-4" ] []
+                    , div [ class "flex flex-col w-full rounded-lg h-48 bg-green-500 items-center text-center" ]
+                        [ span [ class "pt-8 text-lg font-bold text-white" ] [ text <| "The best synonym for " ++ t.stimulus ++ " is " ++ t.target ]
+                        , View.button
+                            { message = UserClickedNextTrialButtonInSynonym
+                            , txt = "Next trial"
+                            , isDisabled = False
+                            }
+                        ]
+                    ]
+
+                ( Nothing, _ ) ->
+                    [ text "C'est fini" ]
+
+        E.DoingSynonym (E.End txt) ->
+            [ text "Synonym est fini" ]
+
+        E.DoingMeaning (E.End txt) ->
             [ h1 [] [ text "Merci de votre participation !🎉" ]
             , p
                 [ class "max-w-xl text-xl mb-8" ]
@@ -593,6 +659,7 @@ type Msg
     | ServerRespondedWithScrabbleTrials (Result Http.Error (List E.ScrabbleTrial))
     | ServerRespondedWithSynonymTrials (Result Http.Error (List E.SynonymTrial))
     | ServerRespondedWithAcceptabilityTrials (Result Http.Error (List Acceptability.Trial))
+    | ServerRespondedWithInfos (Result Http.Error (List ExperimentInfo.Task))
     | Shuffled Msg
     | UserClickedLink Browser.UrlRequest
     | UserClickedRadioButtonInMeaning String
@@ -604,8 +671,11 @@ type Msg
     | UserClickedNextTrialButtonInMeaning
     | UserClickedNextTrialButtonInTranslation
     | UserClickedNextTrialButtonInSynonym
+    | UserClickedStartSynonym (List E.SynonymTrial)
     | UserClickedNextTrialButtonInScrabble
     | UserClickedNextTrialInAcceptability
+    | UserChangedInputInSynonym String
+    | UserValidatedInputInSynonym
     | UserToggledInCloudWords String
     | UserDragsLetter DnDList.Msg
     | UserPressedKey Acceptability.Evaluation
@@ -754,12 +824,15 @@ update msg model =
             )
 
         Shuffled (ServerRespondedWithSynonymTrials (Result.Ok data)) ->
-            ( { model | synonymTask = E.DoingSynonym (E.MainLoop data E.initTranslationState 0 False) }, Cmd.none )
+            ( { model | synonymTask = E.DoingSynonym (E.Intro data Synonym.initState 0 False "Instructions de synonyme") }, Cmd.none )
 
         ServerRespondedWithAcceptabilityTrials (Result.Ok trials) ->
             ( model
             , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithAcceptabilityTrials (Result.Ok shuffledData))) (Random.List.shuffle trials)
             )
+
+        ServerRespondedWithInfos infos ->
+            ( { model | infos = RemoteData.fromResult infos }, Cmd.none )
 
         Shuffled (ServerRespondedWithAcceptabilityTrials (Result.Ok trials)) ->
             ( { model | acceptabilityTask = Acceptability.DoingTask trials Acceptability.initState 0 [] }, Cmd.none )
@@ -788,7 +861,7 @@ update msg model =
                         |> List.map
                             (\trial ->
                                 Random.map3 E.ScrabbleTrial
-                                    (Random.uniform trial.uid [])
+                                    (Random.constant trial.uid)
                                     (trial.writtenWord
                                         |> String.toList
                                         |> Random.List.shuffle
@@ -799,7 +872,7 @@ update msg model =
                                                     |> String.concat
                                             )
                                     )
-                                    (Random.uniform trial.audioWord [])
+                                    (Random.constant trial.audioWord)
                             )
                         |> Random.Extra.sequence
                         |> Random.andThen Random.List.shuffle
@@ -886,6 +959,9 @@ update msg model =
             , Cmd.none
             )
 
+        UserClickedStartSynonym trials ->
+            ( { model | synonymTask = E.DoingSynonym (E.MainLoop trials Synonym.initState 0 False) }, Cmd.none )
+
         UserClickedFeedbackButtonInTranslation ->
             ( { model
                 | translationTask =
@@ -957,6 +1033,12 @@ update msg model =
               }
             , Cmd.none
             )
+
+        UserChangedInputInSynonym new ->
+            ( { model | synonymTask = E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = new }) model.synonymTask }, Cmd.none )
+
+        UserValidatedInputInSynonym ->
+            ( { model | synonymTask = model.synonymTask |> E.toggleFeedback }, Cmd.none )
 
         UserToggledInCloudWords word ->
             ( { model | cloudWords = CloudWords.toggle word model.cloudWords }, Cmd.none )

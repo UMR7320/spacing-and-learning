@@ -1,16 +1,20 @@
 module View exposing
     ( button
     , container
+    , floatingLabel
     , header
     , keyValue
     , navIn
     , navOut
     , notFound
     , radio
+    , sentenceInSynonym
     , simpleAudioPlayer
     )
 
 import Css
+import Css.Global
+import Css.Transitions
 import Experiment.Experiment as E
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
@@ -179,6 +183,59 @@ radio value isChecked isCorrect feedbackMode msg =
                 []
             , span [ class "pl-4 " ] [ text value ]
             ]
+        ]
+
+
+floatingLabel : String -> String -> (String -> msg) -> Html msg
+floatingLabel stim val msg =
+    Html.Styled.div
+        [ Html.Styled.Attributes.css
+            [ Css.position Css.relative
+            , Css.Global.descendants
+                [ Css.Global.selector ".floating-label__input:not(:placeholder-shown) + label"
+                    [ Css.backgroundColor <| Css.hex "ffffff"
+                    , Css.transform <| Css.translate2 Css.zero (Css.pct -50)
+                    , Css.opacity <| Css.num 1
+                    ]
+                ]
+            ]
+        ]
+        [ Html.Styled.input
+            [ Html.Styled.Attributes.class "floating-label__input"
+            , Html.Styled.Attributes.placeholder stim
+            , Html.Styled.Attributes.value val
+            , Html.Styled.Attributes.css
+                [ Css.padding <| Css.px 8
+                , Css.borderRadius <| Css.px 4
+                , Css.border3 (Css.px 1) Css.solid (Css.hex "efefef")
+                ]
+            , Html.Styled.Events.onInput msg
+            ]
+            []
+        , Html.Styled.label
+            [ Html.Styled.Attributes.class "floating-label__label"
+            , Html.Styled.Attributes.css
+                [ Css.position Css.absolute
+                , Css.left <| Css.px 8
+                , Css.top <| Css.px 0
+                , Css.opacity Css.zero
+                , Css.pointerEvents Css.none
+                , Css.Transitions.transition
+                    [ Css.Transitions.opacity 200
+                    , Css.Transitions.transform 200
+                    ]
+                ]
+            ]
+            [ Html.Styled.text stim ]
+        ]
+
+
+sentenceInSynonym : { a | pre : String, stimulus : String, post : String } -> { b | userAnswer : String } -> (String -> msg) -> Html msg
+sentenceInSynonym t state msg =
+    div [ class "flex w-full border-2 p-4  space-x-4 text-xl text-center items-center" ]
+        [ span [] [ text t.pre ]
+        , floatingLabel t.stimulus state.userAnswer msg
+        , span [] [ text t.post ]
         ]
 
 

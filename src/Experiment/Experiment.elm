@@ -42,31 +42,38 @@ nextTrial experiment =
     case experiment of
         DoingMeaning (MainLoop trials state ntrial feedback) ->
             if ntrial >= List.length trials - 1 then
-                DoingMeaning End
+                DoingMeaning (End "This is the end")
 
             else
                 DoingMeaning (MainLoop trials state (ntrial + 1) feedback)
 
         DoingTranslation (MainLoop trials state ntrial feedback) ->
             if ntrial >= List.length trials - 1 then
-                DoingTranslation End
+                DoingTranslation (End "This is the end")
 
             else
                 DoingTranslation (MainLoop trials state (ntrial + 1) feedback)
 
         DoingScrabble (MainLoop trials state ntrial feedback) ->
             if ntrial >= List.length trials - 1 then
-                DoingScrabble End
+                DoingScrabble (End "This is the end")
 
             else
                 DoingScrabble (MainLoop trials state (ntrial + 1) feedback)
 
         DoingSynonym (MainLoop trials state ntrial feedback) ->
             if ntrial >= List.length trials - 1 then
-                DoingSynonym End
+                DoingSynonym (End "this is the end of synonym")
 
             else
                 DoingSynonym (MainLoop trials state (ntrial + 1) feedback)
+
+        DoingSynonym (Intro trials state ntrial feedback instructions) ->
+            if ntrial >= List.length trials - 1 then
+                DoingSynonym (MainLoop trials state 0 False)
+
+            else
+                DoingSynonym (Intro trials state (ntrial + 1) feedback instructions)
 
         _ ->
             Failure
@@ -93,6 +100,9 @@ toggleFeedback exp =
         DoingSynonym (MainLoop trials state ntrial feedback) ->
             DoingSynonym (MainLoop trials state ntrial (not feedback))
 
+        DoingSynonym (Intro trials state ntrial feedback instructions) ->
+            DoingSynonym (Intro trials state ntrial (not feedback) instructions)
+
         _ ->
             Failure (Http.BadBody <| errorMessage "toggle feedback" "Experiment.toggleFeedback")
 
@@ -108,7 +118,7 @@ errorMessage action functioname =
         ]
 
 
-getTrialnumber : Step a b c d e f -> TrialNumber
+getTrialnumber : Step a b c d -> TrialNumber
 getTrialnumber step =
     case step of
         MainLoop trials state trialn _ ->
@@ -118,15 +128,14 @@ getTrialnumber step =
             9999
 
 
-type Step mainTrainingTrials mainTrainingState mainTrials mainState instructions end
-    = Intro instructions
-    | Training mainTrainingTrials mainTrainingState Trialn IsFeedback
+type Step mainTrials mainState instructions end
+    = Intro mainTrials mainState Trialn IsFeedback instructions
     | Pause
     | MainLoop mainTrials mainState Trialn IsFeedback
-    | End
+    | End end
 
 
-getFeedbackStatus : Step b c d e f g -> ToggleFeedback
+getFeedbackStatus : Step b c d e -> ToggleFeedback
 getFeedbackStatus step =
     case step of
         MainLoop _ _ _ isfeedback ->
@@ -136,13 +145,21 @@ getFeedbackStatus step =
             False
 
 
+type alias Instructions =
+    String
+
+
+type alias Conclusion =
+    String
+
+
 type Experiment
     = NotStarted
     | Loading
-    | DoingMeaning (Step (List ()) () (List TrialMeaning) StateMeaning String String)
-    | DoingTranslation (Step (List ()) () (List TranslationInput) TranslationOutput String String)
-    | DoingScrabble (Step (List ()) () (List ScrabbleTrial) ScrabbleState String String)
-    | DoingSynonym (Step (List ()) () (List SynonymTrial) SynonymState String String)
+    | DoingMeaning (Step (List TrialMeaning) StateMeaning Instructions Conclusion)
+    | DoingTranslation (Step (List TranslationInput) TranslationOutput Instructions Conclusion)
+    | DoingScrabble (Step (List ScrabbleTrial) ScrabbleState Instructions Conclusion)
+    | DoingSynonym (Step (List SynonymTrial) SynonymState Instructions Conclusion)
     | Done
     | Failure Http.Error
 
@@ -161,6 +178,9 @@ updateState newState exp =
 
         ( SynonymStateType newState_, DoingSynonym (MainLoop trials prevstate ntrial feedback) ) ->
             DoingSynonym (MainLoop trials newState_ ntrial feedback)
+
+        ( SynonymStateType newState_, DoingSynonym (Intro trials prevstate ntrial feedback instructions) ) ->
+            DoingSynonym (Intro trials newState_ ntrial feedback instructions)
 
         _ ->
             Failure (Http.BadBody <| errorMessage "update the state of the experiment" "Experiment.updateState")
@@ -385,11 +405,11 @@ type alias KeyedItem =
 
 type alias SynonymTrial =
     { uid : String
-    , question : String
     , target : String
-    , distractor1 : String
-    , distractor2 : String
-    , distractor3 : String
+    , pre : String
+    , stimulus : String
+    , post : String
+    , isTraining : Bool
     }
 
 

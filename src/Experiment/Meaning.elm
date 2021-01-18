@@ -101,7 +101,7 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                     ]
                 ]
 
-        E.DoingMeaning E.End ->
+        E.DoingMeaning (E.End txt) ->
             div []
                 [ h1 [] [ text "Merci de votre participation !🎉" ]
                 , p
@@ -210,7 +210,7 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                     h3 []
                         [ p []
                             [ text <| String.fromInt (trialn + 1) ++ ". " ++ "Choose the best synonym for the word: "
-                            , span [ class "italic" ] [ text trial.question ]
+                            , span [ class "italic" ] [ text <| trial.pre ++ trial.stimulus ++ trial.post ]
                             ]
                         ]
             in

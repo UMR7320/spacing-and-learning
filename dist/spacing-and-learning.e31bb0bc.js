@@ -10901,8 +10901,12 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$application = _Browser_application;
+var $krisajenkins$remotedata$RemoteData$Loading = {$: 'Loading'};
 var $author$project$Experiment$Acceptability$NotStarted = {$: 'NotStarted'};
 var $author$project$Experiment$Experiment$NotStarted = {$: 'NotStarted'};
+var $author$project$Main$ServerRespondedWithInfos = function (a) {
+	return {$: 'ServerRespondedWithInfos', a: a};
+};
 var $author$project$Main$ServerRespondedWithAcceptabilityTrials = function (a) {
 	return {$: 'ServerRespondedWithAcceptabilityTrials', a: a};
 };
@@ -11460,29 +11464,38 @@ var $author$project$Experiment$Scrabble$getTrialsFromServer = function (msgHandl
 	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Scrabble', msgHandler, $author$project$Experiment$Scrabble$decodeTranslationInput);
 };
 var $author$project$Experiment$Experiment$SynonymTrial = F6(
-	function (uid, question, target, distractor1, distractor2, distractor3) {
-		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, question: question, target: target, uid: uid};
+	function (uid, target, pre, stimulus, post, isTraining) {
+		return {isTraining: isTraining, post: post, pre: pre, stimulus: stimulus, target: target, uid: uid};
 	});
 var $author$project$Experiment$Synonym$decodeSynonymTrials = function () {
-	var decoder = A3(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'Distractor_3_Synonym',
-		$elm$json$Json$Decode$string,
+	var stringToBoolDecoder = function (str) {
+		if (str === 'true') {
+			return $elm$json$Json$Decode$succeed(true);
+		} else {
+			return $elm$json$Json$Decode$succeed(false);
+		}
+	};
+	var decoder = A2(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+		A2(
+			$elm$json$Json$Decode$andThen,
+			stringToBoolDecoder,
+			A2($elm$json$Json$Decode$field, 'isTraining', $elm$json$Json$Decode$string)),
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'Distractor_2_Synonym',
+			'post',
 			$elm$json$Json$Decode$string,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'Distractor_1_Synonym',
+				'stim',
 				$elm$json$Json$Decode$string,
 				A3(
 					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'Word_Text',
+					'pre',
 					$elm$json$Json$Decode$string,
 					A3(
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'Question_Synonym',
+						'Word_Text',
 						$elm$json$Json$Decode$string,
 						A3(
 							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
@@ -11817,6 +11830,91 @@ var $author$project$Route$fromUrl = function (url) {
 		$elm$core$Maybe$withDefault,
 		$author$project$Route$NotFound,
 		A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url));
+};
+var $author$project$ExperimentInfo$Context = {$: 'Context'};
+var $author$project$ExperimentInfo$Forme = {$: 'Forme'};
+var $author$project$ExperimentInfo$Other = {$: 'Other'};
+var $author$project$ExperimentInfo$Pretest = {$: 'Pretest'};
+var $author$project$ExperimentInfo$Sens = {$: 'Sens'};
+var $author$project$ExperimentInfo$Session1 = {$: 'Session1'};
+var $author$project$ExperimentInfo$Session2 = {$: 'Session2'};
+var $author$project$ExperimentInfo$Session3 = {$: 'Session3'};
+var $author$project$ExperimentInfo$Task = F9(
+	function (uid, session, type_, name, url, description, instructions, instructions_short, end) {
+		return {description: description, end: end, instructions: instructions, instructions_short: instructions_short, name: name, session: session, type_: type_, uid: uid, url: url};
+	});
+var $author$project$ExperimentInfo$decode = function () {
+	var mapToType_ = function (str) {
+		switch (str) {
+			case 'Sens':
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Sens);
+			case 'Forme':
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Forme);
+			case 'Context':
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Context);
+			default:
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Other);
+		}
+	};
+	var mapToSession = function (str) {
+		switch (str) {
+			case 'session1':
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Session1);
+			case 'session2':
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Session2);
+			case 'session3':
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Session3);
+			case 'Prétest':
+				return $elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Pretest);
+			default:
+				return $elm$json$Json$Decode$fail('I couldn\'t map this to a Session');
+		}
+	};
+	var decoder = A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'End',
+		$elm$json$Json$Decode$string,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'Instructions_short',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'Instructions',
+				$elm$json$Json$Decode$string,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'Description',
+					$elm$json$Json$Decode$string,
+					A3(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'Demo_Link',
+						$elm$json$Json$Decode$string,
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'Name',
+							$elm$json$Json$Decode$string,
+							A2(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+								A2(
+									$elm$json$Json$Decode$andThen,
+									mapToType_,
+									A2($elm$json$Json$Decode$field, 'Type', $elm$json$Json$Decode$string)),
+								A2(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+									A2(
+										$elm$json$Json$Decode$andThen,
+										mapToSession,
+										A2($elm$json$Json$Decode$field, 'Session', $elm$json$Json$Decode$string)),
+									A3(
+										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+										'UID',
+										$elm$json$Json$Decode$string,
+										$elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Task))))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$ExperimentInfo$getInfos = function (toMsg) {
+	return A4($author$project$Data$getTrialsFromServer_, 'tasks', 'allTasksGrid', toMsg, $author$project$ExperimentInfo$decode);
 };
 var $author$project$Main$UserDragsLetter = function (a) {
 	return {$: 'UserDragsLetter', a: a};
@@ -12790,14 +12888,21 @@ var $author$project$Main$init = F3(
 				acceptabilityTask: $author$project$Experiment$Acceptability$NotStarted,
 				cloudWords: $elm$core$Dict$fromList($author$project$Experiment$CloudWords$words),
 				dnd: $author$project$Main$system.model,
+				infos: $krisajenkins$remotedata$RemoteData$Loading,
 				key: key,
 				meaningTask: $author$project$Experiment$Experiment$NotStarted,
 				route: route,
 				scrabbleTask: $author$project$Experiment$Experiment$NotStarted,
 				synonymTask: $author$project$Experiment$Experiment$NotStarted,
-				translationTask: $author$project$Experiment$Experiment$NotStarted
+				translationTask: $author$project$Experiment$Experiment$NotStarted,
+				user: $elm$core$Maybe$Nothing
 			},
-			$author$project$Main$fetchData(route));
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						$author$project$Main$fetchData(route),
+						$author$project$ExperimentInfo$getInfos($author$project$Main$ServerRespondedWithInfos)
+					])));
 	});
 var $author$project$Experiment$Acceptability$NoEvaluation = {$: 'NoEvaluation'};
 var $author$project$Experiment$Acceptability$SentenceCorrect = {$: 'SentenceCorrect'};
@@ -12850,6 +12955,10 @@ var $author$project$Experiment$Acceptability$Failure = function (a) {
 var $author$project$Experiment$Experiment$Failure = function (a) {
 	return {$: 'Failure', a: a};
 };
+var $author$project$Experiment$Experiment$Intro = F5(
+	function (a, b, c, d, e) {
+		return {$: 'Intro', a: a, b: b, c: c, d: d, e: e};
+	});
 var $author$project$Experiment$Experiment$Loading = {$: 'Loading'};
 var $author$project$Experiment$Experiment$MainLoop = F4(
 	function (a, b, c, d) {
@@ -12894,6 +13003,12 @@ var $elm$random$Random$andThen = F2(
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
+var $elm$random$Random$constant = function (value) {
+	return $elm$random$Random$Generator(
+		function (seed) {
+			return _Utils_Tuple2(value, seed);
+		});
+};
 var $author$project$Experiment$Scrabble$defaultTrial = A3(
 	$author$project$Experiment$Experiment$ScrabbleTrial,
 	'defaultTrial',
@@ -12902,6 +13017,21 @@ var $author$project$Experiment$Scrabble$defaultTrial = A3(
 var $elm$core$String$cons = _String_cons;
 var $elm$core$String$fromChar = function (_char) {
 	return A2($elm$core$String$cons, _char, '');
+};
+var $krisajenkins$remotedata$RemoteData$Failure = function (a) {
+	return {$: 'Failure', a: a};
+};
+var $krisajenkins$remotedata$RemoteData$Success = function (a) {
+	return {$: 'Success', a: a};
+};
+var $krisajenkins$remotedata$RemoteData$fromResult = function (result) {
+	if (result.$ === 'Err') {
+		var e = result.a;
+		return $krisajenkins$remotedata$RemoteData$Failure(e);
+	} else {
+		var x = result.a;
+		return $krisajenkins$remotedata$RemoteData$Success(x);
+	}
 };
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
@@ -13153,9 +13283,11 @@ var $author$project$Experiment$Acceptability$nextTrial = F2(
 			return task;
 		}
 	});
-var $author$project$Experiment$Experiment$End = {$: 'End'};
+var $author$project$Experiment$Experiment$End = function (a) {
+	return {$: 'End', a: a};
+};
 var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
-	_v0$4:
+	_v0$5:
 	while (true) {
 		switch (experiment.$) {
 			case 'DoingMeaning':
@@ -13167,10 +13299,11 @@ var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
 					var feedback = _v1.d;
 					return (_Utils_cmp(
 						ntrial,
-						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingMeaning($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingMeaning(
+						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingMeaning(
+						$author$project$Experiment$Experiment$End('This is the end')) : $author$project$Experiment$Experiment$DoingMeaning(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
 				} else {
-					break _v0$4;
+					break _v0$5;
 				}
 			case 'DoingTranslation':
 				if (experiment.a.$ === 'MainLoop') {
@@ -13181,10 +13314,11 @@ var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
 					var feedback = _v2.d;
 					return (_Utils_cmp(
 						ntrial,
-						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingTranslation($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingTranslation(
+						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingTranslation(
+						$author$project$Experiment$Experiment$End('This is the end')) : $author$project$Experiment$Experiment$DoingTranslation(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
 				} else {
-					break _v0$4;
+					break _v0$5;
 				}
 			case 'DoingScrabble':
 				if (experiment.a.$ === 'MainLoop') {
@@ -13195,27 +13329,42 @@ var $author$project$Experiment$Experiment$nextTrial = function (experiment) {
 					var feedback = _v3.d;
 					return (_Utils_cmp(
 						ntrial,
-						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingScrabble($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingScrabble(
+						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingScrabble(
+						$author$project$Experiment$Experiment$End('This is the end')) : $author$project$Experiment$Experiment$DoingScrabble(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
 				} else {
-					break _v0$4;
+					break _v0$5;
 				}
 			case 'DoingSynonym':
-				if (experiment.a.$ === 'MainLoop') {
-					var _v4 = experiment.a;
-					var trials = _v4.a;
-					var state = _v4.b;
-					var ntrial = _v4.c;
-					var feedback = _v4.d;
-					return (_Utils_cmp(
-						ntrial,
-						$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingSynonym($author$project$Experiment$Experiment$End) : $author$project$Experiment$Experiment$DoingSynonym(
-						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
-				} else {
-					break _v0$4;
+				switch (experiment.a.$) {
+					case 'MainLoop':
+						var _v4 = experiment.a;
+						var trials = _v4.a;
+						var state = _v4.b;
+						var ntrial = _v4.c;
+						var feedback = _v4.d;
+						return (_Utils_cmp(
+							ntrial,
+							$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingSynonym(
+							$author$project$Experiment$Experiment$End('this is the end of synonym')) : $author$project$Experiment$Experiment$DoingSynonym(
+							A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial + 1, feedback));
+					case 'Intro':
+						var _v5 = experiment.a;
+						var trials = _v5.a;
+						var state = _v5.b;
+						var ntrial = _v5.c;
+						var feedback = _v5.d;
+						var instructions = _v5.e;
+						return (_Utils_cmp(
+							ntrial,
+							$elm$core$List$length(trials) - 1) > -1) ? $author$project$Experiment$Experiment$DoingSynonym(
+							A4($author$project$Experiment$Experiment$MainLoop, trials, state, 0, false)) : $author$project$Experiment$Experiment$DoingSynonym(
+							A5($author$project$Experiment$Experiment$Intro, trials, state, ntrial + 1, feedback, instructions));
+					default:
+						break _v0$5;
 				}
 			default:
-				break _v0$4;
+				break _v0$5;
 		}
 	}
 	return $author$project$Experiment$Experiment$Failure(
@@ -13237,12 +13386,6 @@ var $author$project$Experiment$Acceptability$recordState = function (task) {
 	} else {
 		return task;
 	}
-};
-var $elm$random$Random$constant = function (value) {
-	return $elm$random$Random$Generator(
-		function (seed) {
-			return _Utils_Tuple2(value, seed);
-		});
 };
 var $elm$random$Random$map2 = F3(
 	function (func, _v0, _v1) {
@@ -13524,7 +13667,7 @@ var $author$project$Experiment$Experiment$errorMessage = F2(
 				['I tried to ', action, 'but I ended into an ignored case. Please report this error or update the ', functioname, ' to take in account this case']));
 	});
 var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
-	_v0$4:
+	_v0$5:
 	while (true) {
 		switch (exp.$) {
 			case 'DoingMeaning':
@@ -13537,7 +13680,7 @@ var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
 					return $author$project$Experiment$Experiment$DoingMeaning(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
 				} else {
-					break _v0$4;
+					break _v0$5;
 				}
 			case 'DoingTranslation':
 				if (exp.a.$ === 'MainLoop') {
@@ -13549,7 +13692,7 @@ var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
 					return $author$project$Experiment$Experiment$DoingTranslation(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
 				} else {
-					break _v0$4;
+					break _v0$5;
 				}
 			case 'DoingScrabble':
 				if (exp.a.$ === 'MainLoop') {
@@ -13561,101 +13704,38 @@ var $author$project$Experiment$Experiment$toggleFeedback = function (exp) {
 					return $author$project$Experiment$Experiment$DoingScrabble(
 						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
 				} else {
-					break _v0$4;
+					break _v0$5;
 				}
 			case 'DoingSynonym':
-				if (exp.a.$ === 'MainLoop') {
-					var _v4 = exp.a;
-					var trials = _v4.a;
-					var state = _v4.b;
-					var ntrial = _v4.c;
-					var feedback = _v4.d;
-					return $author$project$Experiment$Experiment$DoingSynonym(
-						A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
-				} else {
-					break _v0$4;
+				switch (exp.a.$) {
+					case 'MainLoop':
+						var _v4 = exp.a;
+						var trials = _v4.a;
+						var state = _v4.b;
+						var ntrial = _v4.c;
+						var feedback = _v4.d;
+						return $author$project$Experiment$Experiment$DoingSynonym(
+							A4($author$project$Experiment$Experiment$MainLoop, trials, state, ntrial, !feedback));
+					case 'Intro':
+						var _v5 = exp.a;
+						var trials = _v5.a;
+						var state = _v5.b;
+						var ntrial = _v5.c;
+						var feedback = _v5.d;
+						var instructions = _v5.e;
+						return $author$project$Experiment$Experiment$DoingSynonym(
+							A5($author$project$Experiment$Experiment$Intro, trials, state, ntrial, !feedback, instructions));
+					default:
+						break _v0$5;
 				}
 			default:
-				break _v0$4;
+				break _v0$5;
 		}
 	}
 	return $author$project$Experiment$Experiment$Failure(
 		$elm$http$Http$BadBody(
 			A2($author$project$Experiment$Experiment$errorMessage, 'toggle feedback', 'Experiment.toggleFeedback')));
 };
-var $elm$random$Random$addOne = function (value) {
-	return _Utils_Tuple2(1, value);
-};
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $elm$random$Random$float = F2(
-	function (a, b) {
-		return $elm$random$Random$Generator(
-			function (seed0) {
-				var seed1 = $elm$random$Random$next(seed0);
-				var range = $elm$core$Basics$abs(b - a);
-				var n1 = $elm$random$Random$peel(seed1);
-				var n0 = $elm$random$Random$peel(seed0);
-				var lo = (134217727 & n1) * 1.0;
-				var hi = (67108863 & n0) * 1.0;
-				var val = ((hi * 134217728.0) + lo) / 9007199254740992.0;
-				var scaled = (val * range) + a;
-				return _Utils_Tuple2(
-					scaled,
-					$elm$random$Random$next(seed1));
-			});
-	});
-var $elm$random$Random$getByWeight = F3(
-	function (_v0, others, countdown) {
-		getByWeight:
-		while (true) {
-			var weight = _v0.a;
-			var value = _v0.b;
-			if (!others.b) {
-				return value;
-			} else {
-				var second = others.a;
-				var otherOthers = others.b;
-				if (_Utils_cmp(
-					countdown,
-					$elm$core$Basics$abs(weight)) < 1) {
-					return value;
-				} else {
-					var $temp$_v0 = second,
-						$temp$others = otherOthers,
-						$temp$countdown = countdown - $elm$core$Basics$abs(weight);
-					_v0 = $temp$_v0;
-					others = $temp$others;
-					countdown = $temp$countdown;
-					continue getByWeight;
-				}
-			}
-		}
-	});
-var $elm$core$List$sum = function (numbers) {
-	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
-};
-var $elm$random$Random$weighted = F2(
-	function (first, others) {
-		var normalize = function (_v0) {
-			var weight = _v0.a;
-			return $elm$core$Basics$abs(weight);
-		};
-		var total = normalize(first) + $elm$core$List$sum(
-			A2($elm$core$List$map, normalize, others));
-		return A2(
-			$elm$random$Random$map,
-			A2($elm$random$Random$getByWeight, first, others),
-			A2($elm$random$Random$float, 0, total));
-	});
-var $elm$random$Random$uniform = F2(
-	function (value, valueList) {
-		return A2(
-			$elm$random$Random$weighted,
-			$elm$random$Random$addOne(value),
-			A2($elm$core$List$map, $elm$random$Random$addOne, valueList));
-	});
 var $author$project$Experiment$Acceptability$updateState = F2(
 	function (newState, task) {
 		if (task.$ === 'DoingTask') {
@@ -13671,7 +13751,7 @@ var $author$project$Experiment$Acceptability$updateState = F2(
 var $author$project$Experiment$Experiment$updateState = F2(
 	function (newState, exp) {
 		var _v0 = _Utils_Tuple2(newState, exp);
-		_v0$4:
+		_v0$5:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'MeaningState':
@@ -13685,7 +13765,7 @@ var $author$project$Experiment$Experiment$updateState = F2(
 						return $author$project$Experiment$Experiment$DoingMeaning(
 							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
 					} else {
-						break _v0$4;
+						break _v0$5;
 					}
 				case 'TranslationState':
 					if ((_v0.b.$ === 'DoingTranslation') && (_v0.b.a.$ === 'MainLoop')) {
@@ -13698,7 +13778,7 @@ var $author$project$Experiment$Experiment$updateState = F2(
 						return $author$project$Experiment$Experiment$DoingTranslation(
 							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
 					} else {
-						break _v0$4;
+						break _v0$5;
 					}
 				case 'ScrabbleStateType':
 					if ((_v0.b.$ === 'DoingScrabble') && (_v0.b.a.$ === 'MainLoop')) {
@@ -13711,23 +13791,38 @@ var $author$project$Experiment$Experiment$updateState = F2(
 						return $author$project$Experiment$Experiment$DoingScrabble(
 							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
 					} else {
-						break _v0$4;
+						break _v0$5;
 					}
 				case 'SynonymStateType':
-					if ((_v0.b.$ === 'DoingSynonym') && (_v0.b.a.$ === 'MainLoop')) {
-						var newState_ = _v0.a.a;
-						var _v4 = _v0.b.a;
-						var trials = _v4.a;
-						var prevstate = _v4.b;
-						var ntrial = _v4.c;
-						var feedback = _v4.d;
-						return $author$project$Experiment$Experiment$DoingSynonym(
-							A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
+					if (_v0.b.$ === 'DoingSynonym') {
+						switch (_v0.b.a.$) {
+							case 'MainLoop':
+								var newState_ = _v0.a.a;
+								var _v4 = _v0.b.a;
+								var trials = _v4.a;
+								var prevstate = _v4.b;
+								var ntrial = _v4.c;
+								var feedback = _v4.d;
+								return $author$project$Experiment$Experiment$DoingSynonym(
+									A4($author$project$Experiment$Experiment$MainLoop, trials, newState_, ntrial, feedback));
+							case 'Intro':
+								var newState_ = _v0.a.a;
+								var _v5 = _v0.b.a;
+								var trials = _v5.a;
+								var prevstate = _v5.b;
+								var ntrial = _v5.c;
+								var feedback = _v5.d;
+								var instructions = _v5.e;
+								return $author$project$Experiment$Experiment$DoingSynonym(
+									A5($author$project$Experiment$Experiment$Intro, trials, newState_, ntrial, feedback, instructions));
+							default:
+								break _v0$5;
+						}
 					} else {
-						break _v0$4;
+						break _v0$5;
 					}
 				default:
-					break _v0$4;
+					break _v0$5;
 			}
 		}
 		return $author$project$Experiment$Experiment$Failure(
@@ -13801,7 +13896,7 @@ var $author$project$Main$update = F2(
 		}();
 		var currentScrabbleTrialn = _v0.a;
 		var nextScrabbleTrial = _v0.b;
-		_v3$32:
+		_v3$36:
 		while (true) {
 			switch (msg.$) {
 				case 'BrowserChangedUrl':
@@ -13953,6 +14048,15 @@ var $author$project$Main$update = F2(
 								},
 								$elm_community$random_extra$Random$List$shuffle(data)));
 					}
+				case 'ServerRespondedWithInfos':
+					var infos = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								infos: $krisajenkins$remotedata$RemoteData$fromResult(infos)
+							}),
+						$elm$core$Platform$Cmd$none);
 				case 'ServerRespondedWithAcceptabilityTrials':
 					if (msg.a.$ === 'Ok') {
 						var trials = msg.a.a;
@@ -13998,7 +14102,7 @@ var $author$project$Main$update = F2(
 										return A4(
 											$elm$random$Random$map3,
 											$author$project$Experiment$Experiment$ScrabbleTrial,
-											A2($elm$random$Random$uniform, trial.uid, _List_Nil),
+											$elm$random$Random$constant(trial.uid),
 											A2(
 												$elm$random$Random$map,
 												function (letters_) {
@@ -14007,7 +14111,7 @@ var $author$project$Main$update = F2(
 												},
 												$elm_community$random_extra$Random$List$shuffle(
 													$elm$core$String$toList(trial.writtenWord))),
-											A2($elm$random$Random$uniform, trial.audioWord, _List_Nil));
+											$elm$random$Random$constant(trial.audioWord));
 									},
 									data)));
 						var record = $author$project$Experiment$Scrabble$initState;
@@ -14043,7 +14147,7 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$32;
+								break _v3$36;
 							}
 						case 'ServerRespondedWithTranslationTrials':
 							if (msg.a.a.$ === 'Ok') {
@@ -14057,7 +14161,7 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$32;
+								break _v3$36;
 							}
 						case 'ServerRespondedWithSynonymTrials':
 							if (msg.a.a.$ === 'Ok') {
@@ -14067,11 +14171,11 @@ var $author$project$Main$update = F2(
 										model,
 										{
 											synonymTask: $author$project$Experiment$Experiment$DoingSynonym(
-												A4($author$project$Experiment$Experiment$MainLoop, data, $author$project$Experiment$Experiment$initTranslationState, 0, false))
+												A5($author$project$Experiment$Experiment$Intro, data, $author$project$Experiment$Synonym$initState, 0, false, 'Instructions de synonyme'))
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$32;
+								break _v3$36;
 							}
 						case 'ServerRespondedWithAcceptabilityTrials':
 							if (msg.a.a.$ === 'Ok') {
@@ -14084,7 +14188,7 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$32;
+								break _v3$36;
 							}
 						case 'ServerRespondedWithScrabbleTrials':
 							if (msg.a.a.$ === 'Ok') {
@@ -14116,10 +14220,10 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$32;
+								break _v3$36;
 							}
 						default:
-							break _v3$32;
+							break _v3$36;
 					}
 				case 'ServerRespondedWithMeaningInput':
 					if (msg.a.$ === 'Ok') {
@@ -14203,6 +14307,16 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								synonymTask: $author$project$Experiment$Experiment$toggleFeedback(model.synonymTask)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'UserClickedStartSynonym':
+					var trials = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								synonymTask: $author$project$Experiment$Experiment$DoingSynonym(
+									A4($author$project$Experiment$Experiment$MainLoop, trials, $author$project$Experiment$Synonym$initState, 0, false))
 							}),
 						$elm$core$Platform$Cmd$none);
 				case 'UserClickedFeedbackButtonInTranslation':
@@ -14299,6 +14413,29 @@ var $author$project$Main$update = F2(
 										model.scrabbleTask))
 							}),
 						$elm$core$Platform$Cmd$none);
+				case 'UserChangedInputInSynonym':
+					var _new = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								synonymTask: A2(
+									$author$project$Experiment$Experiment$updateState,
+									$author$project$Experiment$Experiment$SynonymStateType(
+										_Utils_update(
+											currentSynonymState,
+											{userAnswer: _new})),
+									model.synonymTask)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'UserValidatedInputInSynonym':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								synonymTask: $author$project$Experiment$Experiment$toggleFeedback(model.synonymTask)
+							}),
+						$elm$core$Platform$Cmd$none);
 				case 'UserToggledInCloudWords':
 					var word = msg.a;
 					return _Utils_Tuple2(
@@ -14355,12 +14492,20 @@ var $author$project$Main$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v3$32;
+						break _v3$36;
 					}
 			}
 		}
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	});
+var $rtfeldman$elm_css$VirtualDom$Styled$Node = F3(
+	function (a, b, c) {
+		return {$: 'Node', a: a, b: b, c: c};
+	});
+var $rtfeldman$elm_css$VirtualDom$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$Node;
+var $rtfeldman$elm_css$Html$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$node;
+var $rtfeldman$elm_css$Html$Styled$a = $rtfeldman$elm_css$Html$Styled$node('a');
+var $rtfeldman$elm_css$Html$Styled$article = $rtfeldman$elm_css$Html$Styled$node('article');
 var $rtfeldman$elm_css$VirtualDom$Styled$Attribute = F3(
 	function (a, b, c) {
 		return {$: 'Attribute', a: a, b: b, c: c};
@@ -15962,12 +16107,6 @@ var $rtfeldman$elm_css$Html$Styled$Internal$css = function (styles) {
 	return A3($rtfeldman$elm_css$VirtualDom$Styled$Attribute, classProperty, styles, classname);
 };
 var $rtfeldman$elm_css$Html$Styled$Attributes$css = $rtfeldman$elm_css$Html$Styled$Internal$css;
-var $rtfeldman$elm_css$VirtualDom$Styled$Node = F3(
-	function (a, b, c) {
-		return {$: 'Node', a: a, b: b, c: c};
-	});
-var $rtfeldman$elm_css$VirtualDom$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$Node;
-var $rtfeldman$elm_css$Html$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$node;
 var $rtfeldman$elm_css$Html$Styled$div = $rtfeldman$elm_css$Html$Styled$node('div');
 var $rtfeldman$elm_css$Css$Preprocess$AppendProperty = function (a) {
 	return {$: 'AppendProperty', a: a};
@@ -16026,8 +16165,9 @@ var $author$project$View$container = function (content) {
 			]),
 		content);
 };
+var $rtfeldman$elm_css$Html$Styled$footer = $rtfeldman$elm_css$Html$Styled$node('footer');
 var $rtfeldman$elm_css$Html$Styled$h1 = $rtfeldman$elm_css$Html$Styled$node('h1');
-var $rtfeldman$elm_css$Html$Styled$a = $rtfeldman$elm_css$Html$Styled$node('a');
+var $rtfeldman$elm_css$Html$Styled$header = $rtfeldman$elm_css$Html$Styled$node('header');
 var $rtfeldman$elm_css$Css$height = $rtfeldman$elm_css$Css$prop1('height');
 var $rtfeldman$elm_css$Html$Styled$Attributes$href = function (url) {
 	return A2($rtfeldman$elm_css$Html$Styled$Attributes$stringProperty, 'href', url);
@@ -16105,6 +16245,7 @@ var $author$project$View$header = function (items) {
 					]))
 			]));
 };
+var $rtfeldman$elm_css$Html$Styled$img = $rtfeldman$elm_css$Html$Styled$node('img');
 var $rtfeldman$elm_css$Html$Styled$li = $rtfeldman$elm_css$Html$Styled$node('li');
 var $author$project$View$item = F2(
 	function (name, attributes) {
@@ -16185,11 +16326,33 @@ var $author$project$View$notFound = _List_fromArray(
 					]))
 			]))
 	]);
-var $author$project$Main$startButton = A2($author$project$View$navIn, 'Go to Meaning >', '/meaning');
-var $author$project$Main$startCloudWords = A2($author$project$View$navIn, 'Go to CloudWords >', '/cloudwords');
-var $author$project$Main$startScrabble = A2($author$project$View$navIn, 'Go to Scrabble >', '/scrabble');
-var $author$project$Main$startSynonym = A2($author$project$View$navIn, 'Go to Synonym >', '/synonym');
-var $author$project$Main$startTranslation = A2($author$project$View$navIn, 'Go to Translation >', '/translation');
+var $author$project$ExperimentInfo$sessionToString = function (str) {
+	switch (str.$) {
+		case 'Session1':
+			return 'Session1';
+		case 'Session2':
+			return 'Session 2';
+		case 'Session3':
+			return 'Session 3';
+		default:
+			return 'Pretest ';
+	}
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$src = function (url) {
+	return A2($rtfeldman$elm_css$Html$Styled$Attributes$stringProperty, 'src', url);
+};
+var $author$project$ExperimentInfo$typeToString = function (t) {
+	switch (t.$) {
+		case 'Sens':
+			return 'Sens';
+		case 'Forme':
+			return 'Forme';
+		case 'Context':
+			return 'Context';
+		default:
+			return 'Other';
+	}
+};
 var $rtfeldman$elm_css$Html$Styled$h3 = $rtfeldman$elm_css$Html$Styled$node('h3');
 var $author$project$Experiment$Acceptability$view = F2(
 	function (task, _v0) {
@@ -16485,7 +16648,7 @@ var $author$project$View$button = function (_v0) {
 };
 var $author$project$Experiment$Experiment$defaultTranslationTrial = {distractor1: '', distractor2: '', distractor3: '', distractor4: '', question: 'String', translation1: 'String', translation2: 'String', uid: '', word: 'String'};
 var $author$project$Experiment$Meaning$defaultTrial = {definition: 'MISSING', feedbackCorrect: 'MISSING', feedbackIncorrect: 'MISSING', option1: 'MISSING', option2: 'MISSING', option3: 'MISSING', option4: 'Default', question: 'MISSING', uid: 'MISSING', writtenWord: 'MISSING'};
-var $author$project$Experiment$Synonym$defaultTrial = {distractor1: 'distractor1MISSING', distractor2: 'distractor2MISSING', distractor3: 'distractor3MISSING', question: 'questionMISSING', target: 'targetMISSING', uid: 'uidMISSING'};
+var $author$project$Experiment$Synonym$defaultTrial = {isTraining: false, post: 'postMissing', pre: 'preMissing', stimulus: 'stimulusMissing', target: 'targetMISSING', uid: 'uidMISSING'};
 var $rtfeldman$elm_css$Html$Styled$fieldset = $rtfeldman$elm_css$Html$Styled$node('fieldset');
 var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
 var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
@@ -16638,7 +16801,7 @@ var $author$project$Experiment$Meaning$view = F4(
 											]))
 									]));
 						case 'End':
-							var _v2 = exp.a;
+							var txt = exp.a.a;
 							return A2(
 								$rtfeldman$elm_css$Html$Styled$div,
 								_List_Nil,
@@ -16667,11 +16830,11 @@ var $author$project$Experiment$Meaning$view = F4(
 					}
 				case 'DoingTranslation':
 					if (exp.a.$ === 'MainLoop') {
-						var _v3 = exp.a;
-						var trials = _v3.a;
-						var state = _v3.b;
-						var trialn = _v3.c;
-						var feedback = _v3.d;
+						var _v2 = exp.a;
+						var trials = _v2.a;
+						var state = _v2.b;
+						var trialn = _v2.c;
+						var feedback = _v2.d;
 						var trial = A2(
 							$elm$core$Maybe$withDefault,
 							$author$project$Experiment$Experiment$defaultTranslationTrial,
@@ -16782,11 +16945,11 @@ var $author$project$Experiment$Meaning$view = F4(
 					}
 				case 'DoingSynonym':
 					if (exp.a.$ === 'MainLoop') {
-						var _v4 = exp.a;
-						var trials = _v4.a;
-						var state = _v4.b;
-						var trialn = _v4.c;
-						var feedback = _v4.d;
+						var _v3 = exp.a;
+						var trials = _v3.a;
+						var state = _v3.b;
+						var trialn = _v3.c;
+						var feedback = _v3.d;
 						var trial = A2(
 							$elm$core$Maybe$withDefault,
 							$author$project$Experiment$Synonym$defaultTrial,
@@ -16840,7 +17003,10 @@ var $author$project$Experiment$Meaning$view = F4(
 												]),
 											_List_fromArray(
 												[
-													$rtfeldman$elm_css$Html$Styled$text(trial.question)
+													$rtfeldman$elm_css$Html$Styled$text(
+													_Utils_ap(
+														trial.pre,
+														_Utils_ap(trial.stimulus, trial.post)))
 												]))
 										]))
 								]));
@@ -17051,7 +17217,7 @@ var $author$project$Main$viewExperiment = function (model) {
 								$author$project$Main$UserClickedNextTrialButtonInMeaning)
 							]);
 					case 'End':
-						var _v2 = _v0.a;
+						var txt = _v0.a.a;
 						return _List_fromArray(
 							[
 								A2(
@@ -17213,9 +17379,6 @@ var $rtfeldman$elm_css$Html$Styled$Keyed$node = $rtfeldman$elm_css$VirtualDom$St
 var $rtfeldman$elm_css$Html$Styled$audio = $rtfeldman$elm_css$Html$Styled$node('audio');
 var $rtfeldman$elm_css$Html$Styled$Attributes$autoplay = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('autoplay');
 var $rtfeldman$elm_css$Html$Styled$Attributes$controls = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('controls');
-var $rtfeldman$elm_css$Html$Styled$Attributes$src = function (url) {
-	return A2($rtfeldman$elm_css$Html$Styled$Attributes$stringProperty, 'src', url);
-};
 var $rtfeldman$elm_css$Html$Styled$Attributes$width = function (n) {
 	return A2(
 		$rtfeldman$elm_css$VirtualDom$Styled$attribute,
@@ -17287,7 +17450,7 @@ var $author$project$Main$viewScrabbleTask = function (model) {
 								{isDisabled: false, message: $author$project$Main$UserClickedNextTrialButtonInScrabble, txt: 'Next Trial '})
 							]);
 					case 'End':
-						var _v2 = _v0.a;
+						var txt = _v0.a.a;
 						return _List_fromArray(
 							[
 								A2(
@@ -17310,14 +17473,879 @@ var $author$project$Main$viewScrabbleTask = function (model) {
 			$rtfeldman$elm_css$Html$Styled$text('unexpected view in viewscrabble. Please update Main.viewScrabbleTask or report this error message')
 		]);
 };
+var $author$project$Main$UserChangedInputInSynonym = function (a) {
+	return {$: 'UserChangedInputInSynonym', a: a};
+};
 var $author$project$Main$UserClickedFeedbackButtonInSynonym = {$: 'UserClickedFeedbackButtonInSynonym'};
 var $author$project$Main$UserClickedNextTrialButtonInSynonym = {$: 'UserClickedNextTrialButtonInSynonym'};
-var $author$project$Main$UserClickedRadioButtonInSynonym = function (a) {
-	return {$: 'UserClickedRadioButtonInSynonym', a: a};
+var $author$project$Main$UserClickedStartSynonym = function (a) {
+	return {$: 'UserClickedStartSynonym', a: a};
 };
+var $author$project$Main$UserValidatedInputInSynonym = {$: 'UserValidatedInputInSynonym'};
+var $rtfeldman$elm_css$Html$Styled$h2 = $rtfeldman$elm_css$Html$Styled$node('h2');
+var $rtfeldman$elm_css$Html$Styled$h4 = $rtfeldman$elm_css$Html$Styled$node('h4');
+var $rtfeldman$elm_css$Css$absolute = {position: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
+var $rtfeldman$elm_css$Css$backgroundColor = function (c) {
+	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.value);
+};
+var $rtfeldman$elm_css$Css$prop3 = F4(
+	function (key, argA, argB, argC) {
+		return A2(
+			$rtfeldman$elm_css$Css$property,
+			key,
+			A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[argA.value, argB.value, argC.value])));
+	});
+var $rtfeldman$elm_css$Css$border3 = $rtfeldman$elm_css$Css$prop3('border');
+var $rtfeldman$elm_css$Css$borderRadius = $rtfeldman$elm_css$Css$prop1('border-radius');
+var $rtfeldman$elm_css$Css$Structure$Descendant = {$: 'Descendant'};
+var $rtfeldman$elm_css$Css$Preprocess$NestSnippet = F2(
+	function (a, b) {
+		return {$: 'NestSnippet', a: a, b: b};
+	});
+var $rtfeldman$elm_css$Css$Global$descendants = $rtfeldman$elm_css$Css$Preprocess$NestSnippet($rtfeldman$elm_css$Css$Structure$Descendant);
+var $rtfeldman$elm_css$Css$withPrecedingHash = function (str) {
+	return A2($elm$core$String$startsWith, '#', str) ? str : A2(
+		$elm$core$String$cons,
+		_Utils_chr('#'),
+		str);
+};
+var $rtfeldman$elm_css$Css$erroneousHex = function (str) {
+	return {
+		alpha: 1,
+		blue: 0,
+		color: $rtfeldman$elm_css$Css$Structure$Compatible,
+		green: 0,
+		red: 0,
+		value: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+	};
+};
+var $elm$core$Basics$pow = _Basics_pow;
+var $rtfeldman$elm_hex$Hex$fromStringHelp = F3(
+	function (position, chars, accumulated) {
+		fromStringHelp:
+		while (true) {
+			if (!chars.b) {
+				return $elm$core$Result$Ok(accumulated);
+			} else {
+				var _char = chars.a;
+				var rest = chars.b;
+				switch (_char.valueOf()) {
+					case '0':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated;
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '1':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + A2($elm$core$Basics$pow, 16, position);
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '2':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (2 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '3':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (3 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '4':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (4 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '5':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (5 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '6':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (6 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '7':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (7 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '8':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (8 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '9':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (9 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'a':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (10 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'b':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (11 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'c':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (12 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'd':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (13 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'e':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (14 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'f':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (15 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					default:
+						var nonHex = _char;
+						return $elm$core$Result$Err(
+							$elm$core$String$fromChar(nonHex) + ' is not a valid hexadecimal character.');
+				}
+			}
+		}
+	});
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $rtfeldman$elm_hex$Hex$fromString = function (str) {
+	if ($elm$core$String$isEmpty(str)) {
+		return $elm$core$Result$Err('Empty strings are not valid hexadecimal strings.');
+	} else {
+		var result = function () {
+			if (A2($elm$core$String$startsWith, '-', str)) {
+				var list = A2(
+					$elm$core$Maybe$withDefault,
+					_List_Nil,
+					$elm$core$List$tail(
+						$elm$core$String$toList(str)));
+				return A2(
+					$elm$core$Result$map,
+					$elm$core$Basics$negate,
+					A3(
+						$rtfeldman$elm_hex$Hex$fromStringHelp,
+						$elm$core$List$length(list) - 1,
+						list,
+						0));
+			} else {
+				return A3(
+					$rtfeldman$elm_hex$Hex$fromStringHelp,
+					$elm$core$String$length(str) - 1,
+					$elm$core$String$toList(str),
+					0);
+			}
+		}();
+		var formatError = function (err) {
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					['\"' + (str + '\"'), 'is not a valid hexadecimal string because', err]));
+		};
+		return A2($elm$core$Result$mapError, formatError, result);
+	}
+};
+var $elm$core$String$toLower = _String_toLower;
+var $rtfeldman$elm_css$Css$validHex = F5(
+	function (str, _v0, _v1, _v2, _v3) {
+		var r1 = _v0.a;
+		var r2 = _v0.b;
+		var g1 = _v1.a;
+		var g2 = _v1.b;
+		var b1 = _v2.a;
+		var b2 = _v2.b;
+		var a1 = _v3.a;
+		var a2 = _v3.b;
+		var toResult = A2(
+			$elm$core$Basics$composeR,
+			$elm$core$String$fromList,
+			A2($elm$core$Basics$composeR, $elm$core$String$toLower, $rtfeldman$elm_hex$Hex$fromString));
+		var results = _Utils_Tuple2(
+			_Utils_Tuple2(
+				toResult(
+					_List_fromArray(
+						[r1, r2])),
+				toResult(
+					_List_fromArray(
+						[g1, g2]))),
+			_Utils_Tuple2(
+				toResult(
+					_List_fromArray(
+						[b1, b2])),
+				toResult(
+					_List_fromArray(
+						[a1, a2]))));
+		if ((((results.a.a.$ === 'Ok') && (results.a.b.$ === 'Ok')) && (results.b.a.$ === 'Ok')) && (results.b.b.$ === 'Ok')) {
+			var _v5 = results.a;
+			var red = _v5.a.a;
+			var green = _v5.b.a;
+			var _v6 = results.b;
+			var blue = _v6.a.a;
+			var alpha = _v6.b.a;
+			return {
+				alpha: alpha / 255,
+				blue: blue,
+				color: $rtfeldman$elm_css$Css$Structure$Compatible,
+				green: green,
+				red: red,
+				value: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+			};
+		} else {
+			return $rtfeldman$elm_css$Css$erroneousHex(str);
+		}
+	});
+var $rtfeldman$elm_css$Css$hex = function (str) {
+	var withoutHash = A2($elm$core$String$startsWith, '#', str) ? A2($elm$core$String$dropLeft, 1, str) : str;
+	var _v0 = $elm$core$String$toList(withoutHash);
+	_v0$4:
+	while (true) {
+		if ((_v0.b && _v0.b.b) && _v0.b.b.b) {
+			if (!_v0.b.b.b.b) {
+				var r = _v0.a;
+				var _v1 = _v0.b;
+				var g = _v1.a;
+				var _v2 = _v1.b;
+				var b = _v2.a;
+				return A5(
+					$rtfeldman$elm_css$Css$validHex,
+					str,
+					_Utils_Tuple2(r, r),
+					_Utils_Tuple2(g, g),
+					_Utils_Tuple2(b, b),
+					_Utils_Tuple2(
+						_Utils_chr('f'),
+						_Utils_chr('f')));
+			} else {
+				if (!_v0.b.b.b.b.b) {
+					var r = _v0.a;
+					var _v3 = _v0.b;
+					var g = _v3.a;
+					var _v4 = _v3.b;
+					var b = _v4.a;
+					var _v5 = _v4.b;
+					var a = _v5.a;
+					return A5(
+						$rtfeldman$elm_css$Css$validHex,
+						str,
+						_Utils_Tuple2(r, r),
+						_Utils_Tuple2(g, g),
+						_Utils_Tuple2(b, b),
+						_Utils_Tuple2(a, a));
+				} else {
+					if (_v0.b.b.b.b.b.b) {
+						if (!_v0.b.b.b.b.b.b.b) {
+							var r1 = _v0.a;
+							var _v6 = _v0.b;
+							var r2 = _v6.a;
+							var _v7 = _v6.b;
+							var g1 = _v7.a;
+							var _v8 = _v7.b;
+							var g2 = _v8.a;
+							var _v9 = _v8.b;
+							var b1 = _v9.a;
+							var _v10 = _v9.b;
+							var b2 = _v10.a;
+							return A5(
+								$rtfeldman$elm_css$Css$validHex,
+								str,
+								_Utils_Tuple2(r1, r2),
+								_Utils_Tuple2(g1, g2),
+								_Utils_Tuple2(b1, b2),
+								_Utils_Tuple2(
+									_Utils_chr('f'),
+									_Utils_chr('f')));
+						} else {
+							if (_v0.b.b.b.b.b.b.b.b && (!_v0.b.b.b.b.b.b.b.b.b)) {
+								var r1 = _v0.a;
+								var _v11 = _v0.b;
+								var r2 = _v11.a;
+								var _v12 = _v11.b;
+								var g1 = _v12.a;
+								var _v13 = _v12.b;
+								var g2 = _v13.a;
+								var _v14 = _v13.b;
+								var b1 = _v14.a;
+								var _v15 = _v14.b;
+								var b2 = _v15.a;
+								var _v16 = _v15.b;
+								var a1 = _v16.a;
+								var _v17 = _v16.b;
+								var a2 = _v17.a;
+								return A5(
+									$rtfeldman$elm_css$Css$validHex,
+									str,
+									_Utils_Tuple2(r1, r2),
+									_Utils_Tuple2(g1, g2),
+									_Utils_Tuple2(b1, b2),
+									_Utils_Tuple2(a1, a2));
+							} else {
+								break _v0$4;
+							}
+						}
+					} else {
+						break _v0$4;
+					}
+				}
+			}
+		} else {
+			break _v0$4;
+		}
+	}
+	return $rtfeldman$elm_css$Css$erroneousHex(str);
+};
+var $rtfeldman$elm_css$Css$left = $rtfeldman$elm_css$Css$prop1('left');
+var $rtfeldman$elm_css$Css$none = {backgroundImage: $rtfeldman$elm_css$Css$Structure$Compatible, blockAxisOverflow: $rtfeldman$elm_css$Css$Structure$Compatible, borderStyle: $rtfeldman$elm_css$Css$Structure$Compatible, cursor: $rtfeldman$elm_css$Css$Structure$Compatible, display: $rtfeldman$elm_css$Css$Structure$Compatible, hoverCapability: $rtfeldman$elm_css$Css$Structure$Compatible, inlineAxisOverflow: $rtfeldman$elm_css$Css$Structure$Compatible, keyframes: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNone: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNoneOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNumberOrAutoOrNoneOrContent: $rtfeldman$elm_css$Css$Structure$Compatible, listStyleType: $rtfeldman$elm_css$Css$Structure$Compatible, listStyleTypeOrPositionOrImage: $rtfeldman$elm_css$Css$Structure$Compatible, none: $rtfeldman$elm_css$Css$Structure$Compatible, outline: $rtfeldman$elm_css$Css$Structure$Compatible, pointerDevice: $rtfeldman$elm_css$Css$Structure$Compatible, pointerEvents: $rtfeldman$elm_css$Css$Structure$Compatible, resize: $rtfeldman$elm_css$Css$Structure$Compatible, scriptingSupport: $rtfeldman$elm_css$Css$Structure$Compatible, textDecorationLine: $rtfeldman$elm_css$Css$Structure$Compatible, textTransform: $rtfeldman$elm_css$Css$Structure$Compatible, touchAction: $rtfeldman$elm_css$Css$Structure$Compatible, transform: $rtfeldman$elm_css$Css$Structure$Compatible, updateFrequency: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'none'};
+var $rtfeldman$elm_css$Css$UnitlessFloat = {$: 'UnitlessFloat'};
+var $rtfeldman$elm_css$Css$num = function (val) {
+	return {
+		lengthOrNumber: $rtfeldman$elm_css$Css$Structure$Compatible,
+		lengthOrNumberOrAutoOrNoneOrContent: $rtfeldman$elm_css$Css$Structure$Compatible,
+		number: $rtfeldman$elm_css$Css$Structure$Compatible,
+		numberOrInfinite: $rtfeldman$elm_css$Css$Structure$Compatible,
+		numericValue: val,
+		unitLabel: '',
+		units: $rtfeldman$elm_css$Css$UnitlessFloat,
+		value: $elm$core$String$fromFloat(val)
+	};
+};
+var $rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$rtfeldman$elm_css$VirtualDom$Styled$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $rtfeldman$elm_css$Html$Styled$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $rtfeldman$elm_css$Html$Styled$Events$onInput = function (tagger) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$rtfeldman$elm_css$Html$Styled$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $rtfeldman$elm_css$Html$Styled$Events$targetValue)));
+};
+var $rtfeldman$elm_css$Css$opacity = $rtfeldman$elm_css$Css$prop1('opacity');
+var $rtfeldman$elm_css$Css$Transitions$Opacity = {$: 'Opacity'};
+var $rtfeldman$elm_css$Css$Transitions$Transition = function (a) {
+	return {$: 'Transition', a: a};
+};
+var $rtfeldman$elm_css$Css$Transitions$durationTransition = F2(
+	function (animation, duration) {
+		return $rtfeldman$elm_css$Css$Transitions$Transition(
+			{animation: animation, delay: $elm$core$Maybe$Nothing, duration: duration, timing: $elm$core$Maybe$Nothing});
+	});
+var $rtfeldman$elm_css$Css$Transitions$opacity = $rtfeldman$elm_css$Css$Transitions$durationTransition($rtfeldman$elm_css$Css$Transitions$Opacity);
+var $rtfeldman$elm_css$Css$padding = $rtfeldman$elm_css$Css$prop1('padding');
+var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
+var $rtfeldman$elm_css$Css$pointerEvents = $rtfeldman$elm_css$Css$prop1('pointer-events');
+var $rtfeldman$elm_css$Css$position = $rtfeldman$elm_css$Css$prop1('position');
+var $rtfeldman$elm_css$Css$PxUnits = {$: 'PxUnits'};
+var $rtfeldman$elm_css$Css$px = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PxUnits, 'px');
+var $rtfeldman$elm_css$Css$relative = {position: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'relative'};
+var $rtfeldman$elm_css$Css$Global$selector = F2(
+	function (selectorStr, styles) {
+		return A2(
+			$rtfeldman$elm_css$VirtualDom$Styled$makeSnippet,
+			styles,
+			A2($rtfeldman$elm_css$Css$Structure$CustomSelector, selectorStr, _List_Nil));
+	});
+var $rtfeldman$elm_css$Css$solid = {borderStyle: $rtfeldman$elm_css$Css$Structure$Compatible, textDecorationStyle: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'solid'};
+var $rtfeldman$elm_css$Css$top = $rtfeldman$elm_css$Css$prop1('top');
+var $rtfeldman$elm_css$Css$valuesOrNone = function (list) {
+	return $elm$core$List$isEmpty(list) ? {value: 'none'} : {
+		value: A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				function ($) {
+					return $.value;
+				},
+				list))
+	};
+};
+var $rtfeldman$elm_css$Css$transforms = A2(
+	$elm$core$Basics$composeL,
+	$rtfeldman$elm_css$Css$prop1('transform'),
+	$rtfeldman$elm_css$Css$valuesOrNone);
+var $rtfeldman$elm_css$Css$transform = function (only) {
+	return $rtfeldman$elm_css$Css$transforms(
+		_List_fromArray(
+			[only]));
+};
+var $rtfeldman$elm_css$Css$Transitions$Transform = {$: 'Transform'};
+var $rtfeldman$elm_css$Css$Transitions$transform = $rtfeldman$elm_css$Css$Transitions$durationTransition($rtfeldman$elm_css$Css$Transitions$Transform);
+var $rtfeldman$elm_css$Css$Transitions$propToString = function (prop) {
+	switch (prop.$) {
+		case 'Background':
+			return 'background';
+		case 'BackgroundColor':
+			return 'background-color';
+		case 'BackgroundPosition':
+			return 'background-position';
+		case 'BackgroundSize':
+			return 'background-size';
+		case 'Border':
+			return 'border';
+		case 'BorderBottom':
+			return 'border-bottom';
+		case 'BorderBottomColor':
+			return 'border-bottom-color';
+		case 'BorderBottomLeftRadius':
+			return 'border-bottom-left-radius';
+		case 'BorderBottomRightRadius':
+			return 'border-bottom-right-radius';
+		case 'BorderBottomWidth':
+			return 'border-bottom-width';
+		case 'BorderColor':
+			return 'border-color';
+		case 'BorderLeft':
+			return 'border-left';
+		case 'BorderLeftColor':
+			return 'border-left-color';
+		case 'BorderLeftWidth':
+			return 'border-left-width';
+		case 'BorderRadius':
+			return 'border-radius';
+		case 'BorderRight':
+			return 'border-right';
+		case 'BorderRightColor':
+			return 'border-right-color';
+		case 'BorderRightWidth':
+			return 'border-right-width';
+		case 'BorderTop':
+			return 'border-top';
+		case 'BorderTopColor':
+			return 'border-top-color';
+		case 'BorderTopLeftRadius':
+			return 'border-top-left-radius';
+		case 'BorderTopRightRadius':
+			return 'border-top-right-radius';
+		case 'BorderTopWidth':
+			return 'border-top-width';
+		case 'BorderWidth':
+			return 'border-width';
+		case 'Bottom':
+			return 'bottom';
+		case 'BoxShadow':
+			return 'box-shadow';
+		case 'CaretColor':
+			return 'caret-color';
+		case 'Clip':
+			return 'clip';
+		case 'ClipPath':
+			return 'clip-path';
+		case 'Color':
+			return 'color';
+		case 'ColumnCount':
+			return 'column-count';
+		case 'ColumnGap':
+			return 'column-gap';
+		case 'ColumnRule':
+			return 'column-rule';
+		case 'ColumnRuleColor':
+			return 'column-rule-color';
+		case 'ColumnRuleWidth':
+			return 'column-rule-width';
+		case 'ColumnWidth':
+			return 'column-width';
+		case 'Columns':
+			return 'columns';
+		case 'Filter':
+			return 'filter';
+		case 'Flex':
+			return 'flex';
+		case 'FlexBasis':
+			return 'flex-basis';
+		case 'FlexGrow':
+			return 'flex-grow';
+		case 'FlexShrink':
+			return 'flex-shrink';
+		case 'Font':
+			return 'font';
+		case 'FontSize':
+			return 'font-size';
+		case 'FontSizeAdjust':
+			return 'font-size-adjust';
+		case 'FontStretch':
+			return 'font-stretch';
+		case 'FontVariationSettings':
+			return 'font-variation-settings';
+		case 'FontWeight':
+			return 'font-weight';
+		case 'GridColumnGap':
+			return 'grid-column-gap';
+		case 'GridGap':
+			return 'grid-gap';
+		case 'GridRowGap':
+			return 'grid-row-gap';
+		case 'Height':
+			return 'height';
+		case 'Left':
+			return 'left';
+		case 'LetterSpacing':
+			return 'letter-spacing';
+		case 'LineHeight':
+			return 'line-height';
+		case 'Margin':
+			return 'margin';
+		case 'MarginBottom':
+			return 'margin-bottom';
+		case 'MarginLeft':
+			return 'margin-left';
+		case 'MarginRight':
+			return 'margin-right';
+		case 'MarginTop':
+			return 'margin-top';
+		case 'Mask':
+			return 'mask';
+		case 'MaskPosition':
+			return 'mask-position';
+		case 'MaskSize':
+			return 'mask-size';
+		case 'MaxHeight':
+			return 'max-height';
+		case 'MaxWidth':
+			return 'max-width';
+		case 'MinHeight':
+			return 'min-height';
+		case 'MinWidth':
+			return 'min-width';
+		case 'ObjectPosition':
+			return 'object-position';
+		case 'Offset':
+			return 'offset';
+		case 'OffsetAnchor':
+			return 'offset-anchor';
+		case 'OffsetDistance':
+			return 'offset-distance';
+		case 'OffsetPath':
+			return 'offset-path';
+		case 'OffsetRotate':
+			return 'offset-rotate';
+		case 'Opacity':
+			return 'opacity';
+		case 'Order':
+			return 'order';
+		case 'Outline':
+			return 'outline';
+		case 'OutlineColor':
+			return 'outline-color';
+		case 'OutlineOffset':
+			return 'outline-offset';
+		case 'OutlineWidth':
+			return 'outline-width';
+		case 'Padding':
+			return 'padding';
+		case 'PaddingBottom':
+			return 'padding-bottom';
+		case 'PaddingLeft':
+			return 'padding-left';
+		case 'PaddingRight':
+			return 'padding-right';
+		case 'PaddingTop':
+			return 'padding-top';
+		case 'Right':
+			return 'right';
+		case 'TabSize':
+			return 'tab-size';
+		case 'TextIndent':
+			return 'text-indent';
+		case 'TextShadow':
+			return 'text-shadow';
+		case 'Top':
+			return 'top';
+		case 'Transform':
+			return 'transform';
+		case 'TransformOrigin':
+			return 'transform-origin';
+		case 'VerticalAlign':
+			return 'vertical-align';
+		case 'Visibility':
+			return 'visibility';
+		case 'Width':
+			return 'width';
+		case 'WordSpacing':
+			return 'word-spacing';
+		default:
+			return 'z-index';
+	}
+};
+var $rtfeldman$elm_css$Css$Transitions$timeToString = function (time) {
+	return $elm$core$String$fromFloat(time) + 'ms';
+};
+var $rtfeldman$elm_css$Css$Transitions$timingFunctionToString = function (tf) {
+	switch (tf.$) {
+		case 'Ease':
+			return 'ease';
+		case 'Linear':
+			return 'linear';
+		case 'EaseIn':
+			return 'ease-in';
+		case 'EaseOut':
+			return 'ease-out';
+		case 'EaseInOut':
+			return 'ease-in-out';
+		case 'StepStart':
+			return 'step-start';
+		case 'StepEnd':
+			return 'step-end';
+		default:
+			var _float = tf.a;
+			var float2 = tf.b;
+			var float3 = tf.c;
+			var float4 = tf.d;
+			return 'cubic-bezier(' + ($elm$core$String$fromFloat(_float) + (' , ' + ($elm$core$String$fromFloat(float2) + (' , ' + ($elm$core$String$fromFloat(float3) + (' , ' + ($elm$core$String$fromFloat(float4) + ')')))))));
+	}
+};
+var $rtfeldman$elm_css$Css$Transitions$transition = function (options) {
+	var v = A3(
+		$elm$core$String$slice,
+		0,
+		-1,
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, s) {
+					var animation = _v0.a.animation;
+					var duration = _v0.a.duration;
+					var delay = _v0.a.delay;
+					var timing = _v0.a.timing;
+					return s + (A2(
+						$elm$core$String$join,
+						' ',
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Css$Transitions$propToString(animation),
+								$rtfeldman$elm_css$Css$Transitions$timeToString(duration),
+								A2(
+								$elm$core$Maybe$withDefault,
+								'',
+								A2($elm$core$Maybe$map, $rtfeldman$elm_css$Css$Transitions$timeToString, delay)),
+								A2(
+								$elm$core$Maybe$withDefault,
+								'',
+								A2($elm$core$Maybe$map, $rtfeldman$elm_css$Css$Transitions$timingFunctionToString, timing))
+							])) + ',');
+				}),
+			'',
+			options));
+	return A2($rtfeldman$elm_css$Css$property, 'transition', v);
+};
+var $rtfeldman$elm_css$Css$cssFunction = F2(
+	function (funcName, args) {
+		return funcName + ('(' + (A2($elm$core$String$join, ', ', args) + ')'));
+	});
+var $rtfeldman$elm_css$Css$translate2 = F2(
+	function (tx, ty) {
+		return {
+			transform: $rtfeldman$elm_css$Css$Structure$Compatible,
+			value: A2(
+				$rtfeldman$elm_css$Css$cssFunction,
+				'translate',
+				_List_fromArray(
+					[tx.value, ty.value]))
+		};
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$value = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('value');
+var $rtfeldman$elm_css$Css$UnitlessInteger = {$: 'UnitlessInteger'};
+var $rtfeldman$elm_css$Css$zero = {length: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrAuto: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrAutoOrCoverOrContain: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNone: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNoneOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNumber: $rtfeldman$elm_css$Css$Structure$Compatible, number: $rtfeldman$elm_css$Css$Structure$Compatible, numericValue: 0, outline: $rtfeldman$elm_css$Css$Structure$Compatible, unitLabel: '', units: $rtfeldman$elm_css$Css$UnitlessInteger, value: '0'};
+var $author$project$View$floatingLabel = F3(
+	function (stim, val, msg) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$css(
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
+							$rtfeldman$elm_css$Css$Global$descendants(
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Css$Global$selector,
+									'.floating-label__input:not(:placeholder-shown) + label',
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Css$backgroundColor(
+											$rtfeldman$elm_css$Css$hex('ffffff')),
+											$rtfeldman$elm_css$Css$transform(
+											A2(
+												$rtfeldman$elm_css$Css$translate2,
+												$rtfeldman$elm_css$Css$zero,
+												$rtfeldman$elm_css$Css$pct(-50))),
+											$rtfeldman$elm_css$Css$opacity(
+											$rtfeldman$elm_css$Css$num(1))
+										]))
+								]))
+						]))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$input,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('floating-label__input'),
+							$rtfeldman$elm_css$Html$Styled$Attributes$placeholder(stim),
+							$rtfeldman$elm_css$Html$Styled$Attributes$value(val),
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Css$padding(
+									$rtfeldman$elm_css$Css$px(8)),
+									$rtfeldman$elm_css$Css$borderRadius(
+									$rtfeldman$elm_css$Css$px(4)),
+									A3(
+									$rtfeldman$elm_css$Css$border3,
+									$rtfeldman$elm_css$Css$px(1),
+									$rtfeldman$elm_css$Css$solid,
+									$rtfeldman$elm_css$Css$hex('efefef'))
+								])),
+							$rtfeldman$elm_css$Html$Styled$Events$onInput(msg)
+						]),
+					_List_Nil),
+					A2(
+					$rtfeldman$elm_css$Html$Styled$label,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('floating-label__label'),
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$absolute),
+									$rtfeldman$elm_css$Css$left(
+									$rtfeldman$elm_css$Css$px(8)),
+									$rtfeldman$elm_css$Css$top(
+									$rtfeldman$elm_css$Css$px(0)),
+									$rtfeldman$elm_css$Css$opacity($rtfeldman$elm_css$Css$zero),
+									$rtfeldman$elm_css$Css$pointerEvents($rtfeldman$elm_css$Css$none),
+									$rtfeldman$elm_css$Css$Transitions$transition(
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Css$Transitions$opacity(200),
+											$rtfeldman$elm_css$Css$Transitions$transform(200)
+										]))
+								]))
+						]),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(stim)
+						]))
+				]));
+	});
+var $author$project$View$sentenceInSynonym = F3(
+	function (t, state, msg) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex w-full border-2 p-4  space-x-4 text-xl text-center items-center')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(t.pre)
+						])),
+					A3($author$project$View$floatingLabel, t.stimulus, state.userAnswer, msg),
+					A2(
+					$rtfeldman$elm_css$Html$Styled$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(t.post)
+						]))
+				]));
+	});
 var $author$project$Main$viewSynonymTask = function (model) {
 	var _v0 = model.synonymTask;
-	_v0$5:
+	_v0$7:
 	while (true) {
 		switch (_v0.$) {
 			case 'NotStarted':
@@ -17347,7 +18375,7 @@ var $author$project$Main$viewSynonymTask = function (model) {
 				return _List_fromArray(
 					[
 						A2(
-						$rtfeldman$elm_css$Html$Styled$h1,
+						$rtfeldman$elm_css$Html$Styled$h4,
 						_List_Nil,
 						_List_fromArray(
 							[
@@ -17356,67 +18384,214 @@ var $author$project$Main$viewSynonymTask = function (model) {
 							]))
 					]);
 			case 'DoingSynonym':
-				if (_v0.a.$ === 'MainLoop') {
-					var _v1 = _v0.a;
-					var trials = _v1.a;
-					var state = _v1.b;
-					var trialn = _v1.c;
-					var feedback = _v1.d;
-					var trial = A2(
-						$elm$core$Maybe$withDefault,
-						$author$project$Experiment$Synonym$defaultTrial,
-						A2(
+				switch (_v0.a.$) {
+					case 'Intro':
+						var _v1 = _v0.a;
+						var trials = _v1.a;
+						var state = _v1.b;
+						var trialn = _v1.c;
+						var feedback = _v1.d;
+						var instructions = _v1.e;
+						var viewInstructions = function (x) {
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$h2,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Instructions')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 pb-8')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Focus on the word in the box in each sentence.\u200B\nIt’s a synonym for one of the words you are learning.\u200B\nClick on the word in the box to type your synonym.')
+											]))
+									]));
+						};
+						var trainingTrial = A2(
 							$elm$core$Array$get,
 							trialn,
-							$elm$core$Array$fromList(trials)));
-					var isCorrect = function (optionN) {
-						return _Utils_eq(optionN, trial.target);
-					};
-					return _List_fromArray(
-						[
-							A4(
-							$author$project$Experiment$Meaning$view,
-							model.synonymTask,
-							_List_fromArray(
+							$elm$core$Array$fromList(
+								A2(
+									$elm$core$List$filter,
+									function (datum) {
+										return datum.isTraining;
+									},
+									trials)));
+						var toggleFeedback = $author$project$View$button(
+							{isDisabled: false, message: $author$project$Main$UserClickedFeedbackButtonInSynonym, txt: 'Check my answer'});
+						var _v2 = _Utils_Tuple2(trainingTrial, feedback);
+						if (_v2.a.$ === 'Just') {
+							if (!_v2.b) {
+								var x = _v2.a.a;
+								return _List_fromArray(
+									[
+										viewInstructions(x),
+										A3($author$project$View$sentenceInSynonym, x, state, $author$project$Main$UserChangedInputInSynonym),
+										toggleFeedback
+									]);
+							} else {
+								var x = _v2.a.a;
+								return _List_fromArray(
+									[
+										viewInstructions(x),
+										A3($author$project$View$sentenceInSynonym, x, state, $author$project$Main$UserChangedInputInSynonym),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full mt-8 rounded-md text-center object-center bg-green-300 ')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$p,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text('The correct synonym for '),
+														$rtfeldman$elm_css$Html$Styled$text(x.stimulus),
+														$rtfeldman$elm_css$Html$Styled$text(' is '),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$span,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text(x.target)
+															]))
+													])),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$div,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
+													]),
+												_List_fromArray(
+													[
+														$author$project$View$button(
+														{isDisabled: false, message: $author$project$Main$UserClickedNextTrialButtonInSynonym, txt: 'Next practice item'})
+													]))
+											]))
+									]);
+							}
+						} else {
+							var _v3 = _v2.a;
+							return _List_fromArray(
 								[
-									A5(
-									$author$project$View$radio,
-									trial.distractor1,
-									_Utils_eq(state.userAnswer, trial.distractor1),
-									isCorrect(trial.distractor1),
-									feedback,
-									$author$project$Main$UserClickedRadioButtonInSynonym(trial.distractor1)),
-									A5(
-									$author$project$View$radio,
-									trial.distractor2,
-									_Utils_eq(state.userAnswer, trial.distractor2),
-									isCorrect(trial.distractor2),
-									feedback,
-									$author$project$Main$UserClickedRadioButtonInSynonym(trial.distractor2)),
-									A5(
-									$author$project$View$radio,
-									trial.distractor3,
-									_Utils_eq(state.userAnswer, trial.distractor3),
-									isCorrect(trial.distractor3),
-									feedback,
-									$author$project$Main$UserClickedRadioButtonInSynonym(trial.distractor3)),
-									A5(
-									$author$project$View$radio,
-									trial.target,
-									_Utils_eq(state.userAnswer, trial.target),
-									isCorrect(trial.target),
-									feedback,
-									$author$project$Main$UserClickedRadioButtonInSynonym(trial.target))
-								]),
-							$author$project$Main$UserClickedFeedbackButtonInSynonym,
-							$author$project$Main$UserClickedNextTrialButtonInSynonym)
-						]);
-				} else {
-					break _v0$5;
+									$rtfeldman$elm_css$Html$Styled$text('Now you understand the activity, let\'s try our target words'),
+									$author$project$View$button(
+									{
+										isDisabled: false,
+										message: $author$project$Main$UserClickedStartSynonym(trials),
+										txt: 'Ready?'
+									})
+								]);
+						}
+					case 'MainLoop':
+						var _v4 = _v0.a;
+						var trials = _v4.a;
+						var state = _v4.b;
+						var trialn = _v4.c;
+						var feedback = _v4.d;
+						var trial = A2(
+							$elm$core$Array$get,
+							trialn,
+							$elm$core$Array$fromList(
+								A2(
+									$elm$core$List$filter,
+									function (datum) {
+										return !datum.isTraining;
+									},
+									trials)));
+						var _v5 = _Utils_Tuple2(trial, feedback);
+						if (_v5.a.$ === 'Just') {
+							if (!_v5.b) {
+								var t = _v5.a.a;
+								return _List_fromArray(
+									[
+										A3($author$project$View$sentenceInSynonym, t, state, $author$project$Main$UserChangedInputInSynonym),
+										$author$project$View$button(
+										{
+											isDisabled: $elm$core$String$isEmpty(state.userAnswer),
+											message: $author$project$Main$UserValidatedInputInSynonym,
+											txt: 'Valider'
+										})
+									]);
+							} else {
+								var t = _v5.a.a;
+								return _List_fromArray(
+									[
+										A3($author$project$View$sentenceInSynonym, t, state, $author$project$Main$UserChangedInputInSynonym),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-4')
+											]),
+										_List_Nil),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full rounded-lg h-48 bg-green-500 items-center text-center')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$span,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 text-lg font-bold text-white')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text('The best synonym for ' + (t.stimulus + (' is ' + t.target)))
+													])),
+												$author$project$View$button(
+												{isDisabled: false, message: $author$project$Main$UserClickedNextTrialButtonInSynonym, txt: 'Next trial'})
+											]))
+									]);
+							}
+						} else {
+							var _v6 = _v5.a;
+							return _List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('C\'est fini')
+								]);
+						}
+					case 'End':
+						var txt = _v0.a.a;
+						return _List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Synonym est fini')
+							]);
+					default:
+						break _v0$7;
 				}
 			case 'DoingMeaning':
 				if (_v0.a.$ === 'End') {
-					var _v2 = _v0.a;
+					var txt = _v0.a.a;
 					return _List_fromArray(
 						[
 							A2(
@@ -17438,10 +18613,10 @@ var $author$project$Main$viewSynonymTask = function (model) {
 								]))
 						]);
 				} else {
-					break _v0$5;
+					break _v0$7;
 				}
 			default:
-				break _v0$5;
+				break _v0$7;
 		}
 	}
 	return _List_fromArray(
@@ -17454,6 +18629,7 @@ var $author$project$Main$UserClickedNextTrialButtonInTranslation = {$: 'UserClic
 var $author$project$Main$UserClickedRadioButtonInTranslation = function (a) {
 	return {$: 'UserClickedRadioButtonInTranslation', a: a};
 };
+var $author$project$Main$startButton = A2($author$project$View$navIn, 'Go to Meaning >', '/meaning');
 var $author$project$Main$viewTranslationTask = function (model) {
 	var item = F2(
 		function (key, value) {
@@ -17662,58 +18838,165 @@ var $author$project$Main$body = function (model) {
 				])),
 			$author$project$View$container(
 			function () {
-				var _v0 = model.route;
-				switch (_v0.$) {
+				var _v0 = _Utils_Tuple2(model.route, model.infos);
+				switch (_v0.a.$) {
 					case 'ExperimentStart':
-						return _List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$h1,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-									]),
-								_List_fromArray(
-									[
-										$author$project$Main$startButton,
-										$author$project$Main$startTranslation,
-										$author$project$Main$startSynonym,
-										$author$project$Main$startScrabble,
-										$author$project$Main$startCloudWords,
-										A2($author$project$View$navIn, 'Go to Acceptability >', '/acceptability')
-									]))
-							]);
+						if (_v0.b.$ === 'Success') {
+							var _v1 = _v0.a;
+							var infos = _v0.b.a;
+							return _List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$h1,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap -mx-1 px-4 md:px-12')
+										]),
+									A2(
+										$elm$core$List$map,
+										function (info) {
+											return A2(
+												$rtfeldman$elm_css$Html$Styled$div,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-13')
+													]),
+												_List_fromArray(
+													[
+														A2(
+														$rtfeldman$elm_css$Html$Styled$article,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('overflow-hidden rounded-lg shadow-lg')
+															]),
+														_List_fromArray(
+															[
+																A2(
+																$rtfeldman$elm_css$Html$Styled$img,
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$Attributes$class('block h-auto w-full'),
+																		$rtfeldman$elm_css$Html$Styled$Attributes$src('https://picsum.photos/600/400/?random')
+																	]),
+																_List_Nil),
+																A2(
+																$rtfeldman$elm_css$Html$Styled$header,
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$Attributes$class('flex items-center justify-between leading-tight p-2 md:p4')
+																	]),
+																_List_fromArray(
+																	[
+																		A2(
+																		$rtfeldman$elm_css$Html$Styled$h1,
+																		_List_fromArray(
+																			[
+																				$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
+																			]),
+																		_List_fromArray(
+																			[
+																				A2(
+																				$rtfeldman$elm_css$Html$Styled$a,
+																				_List_fromArray(
+																					[
+																						$rtfeldman$elm_css$Html$Styled$Attributes$href(info.url)
+																					]),
+																				_List_fromArray(
+																					[
+																						$rtfeldman$elm_css$Html$Styled$text(info.name)
+																					]))
+																			]))
+																	])),
+																A2(
+																$rtfeldman$elm_css$Html$Styled$p,
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$Attributes$class('px-2')
+																	]),
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$text(info.description)
+																	])),
+																A2(
+																$rtfeldman$elm_css$Html$Styled$footer,
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$Attributes$class('flex items-center justify-between leading-none p-2 md:p-4')
+																	]),
+																_List_fromArray(
+																	[
+																		A2(
+																		$rtfeldman$elm_css$Html$Styled$div,
+																		_List_fromArray(
+																			[
+																				$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-green-500 rounded-lg p-2 text-white')
+																			]),
+																		_List_fromArray(
+																			[
+																				$rtfeldman$elm_css$Html$Styled$text(
+																				$author$project$ExperimentInfo$typeToString(info.type_))
+																			])),
+																		A2(
+																		$rtfeldman$elm_css$Html$Styled$div,
+																		_List_fromArray(
+																			[
+																				$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-blue-500 rounded-lg p-2 text-white')
+																			]),
+																		_List_fromArray(
+																			[
+																				$rtfeldman$elm_css$Html$Styled$text(
+																				$author$project$ExperimentInfo$sessionToString(info.session))
+																			]))
+																	]))
+															]))
+													]));
+										},
+										infos))
+								]);
+						} else {
+							var _v2 = _v0.a;
+							return _List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('Loading')
+								]);
+						}
 					case 'Meaning':
+						var _v3 = _v0.a;
 						return $author$project$Main$viewExperiment(model);
 					case 'Translation':
+						var _v4 = _v0.a;
 						return $author$project$Main$viewTranslationTask(model);
 					case 'Synonym':
+						var _v5 = _v0.a;
 						return $author$project$Main$viewSynonymTask(model);
 					case 'Scrabble':
+						var _v6 = _v0.a;
 						return $author$project$Main$viewScrabbleTask(model);
 					case 'CloudWords':
+						var _v7 = _v0.a;
 						return _List_fromArray(
 							[
 								$author$project$Main$viewCloud(model)
 							]);
 					case 'Acceptability':
+						var _v8 = _v0.a;
 						return _List_fromArray(
 							[
 								A2(
@@ -17722,11 +19005,13 @@ var $author$project$Main$body = function (model) {
 								{nextTrialMsg: $author$project$Main$UserClickedNextTrialInAcceptability})
 							]);
 					case 'Home':
+						var _v9 = _v0.a;
 						return _List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$text('home ?')
 							]);
 					default:
+						var _v10 = _v0.a;
 						return $author$project$View$notFound;
 				}
 			}())
@@ -18227,7 +19512,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Experiment.Experiment.ScrabbleTrial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile }"},"Experiment.Experiment.SynonymTrial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String }"},"Experiment.Experiment.TranslationInput":{"args":[],"type":"{ uid : String.String, question : String.String, translation1 : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, distractor4 : String.String, word : String.String }"},"Experiment.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, isCorrect : Basics.Bool, duration : Basics.Int }"},"Experiment.Experiment.TrialMeaning":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, definition : String.String, question : String.String, option1 : String.String, option2 : String.String, option3 : String.String, option4 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"ServerRespondedWithMeaningInput":["Result.Result Http.Error (List.List Experiment.Experiment.TrialMeaning)"],"ServerRespondedWithTranslationTrials":["Result.Result Http.Error (List.List Experiment.Experiment.TranslationInput)"],"ServerRespondedWithScrabbleTrials":["Result.Result Http.Error (List.List Experiment.Experiment.ScrabbleTrial)"],"ServerRespondedWithSynonymTrials":["Result.Result Http.Error (List.List Experiment.Experiment.SynonymTrial)"],"ServerRespondedWithAcceptabilityTrials":["Result.Result Http.Error (List.List Experiment.Acceptability.Trial)"],"Shuffled":["Main.Msg"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedRadioButtonInMeaning":["String.String"],"UserClickedRadioButtonInTranslation":["String.String"],"UserClickedRadioButtonInSynonym":["String.String"],"UserClickedFeedbackButtonInMeaning":[],"UserClickedFeedbackButtonInTranslation":[],"UserClickedFeedbackButtonInSynonym":[],"UserClickedNextTrialButtonInMeaning":[],"UserClickedNextTrialButtonInTranslation":[],"UserClickedNextTrialButtonInSynonym":[],"UserClickedNextTrialButtonInScrabble":[],"UserClickedNextTrialInAcceptability":[],"UserToggledInCloudWords":["String.String"],"UserDragsLetter":["DnDList.Msg"],"UserPressedKey":["Experiment.Acceptability.Evaluation"],"WithTime":["Main.Msg","Time.Posix"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Experiment.Acceptability.Evaluation":{"args":[],"tags":{"NoEvaluation":[],"SentenceCorrect":[],"SentenceIncorrect":[],"EvaluationTimeOut":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Experiment.Experiment.ScrabbleTrial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile }"},"Experiment.Experiment.SynonymTrial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool }"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, end : String.String }"},"Experiment.Experiment.TranslationInput":{"args":[],"type":"{ uid : String.String, question : String.String, translation1 : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, distractor4 : String.String, word : String.String }"},"Experiment.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, isCorrect : Basics.Bool, duration : Basics.Int }"},"Experiment.Experiment.TrialMeaning":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, definition : String.String, question : String.String, option1 : String.String, option2 : String.String, option3 : String.String, option4 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"ServerRespondedWithMeaningInput":["Result.Result Http.Error (List.List Experiment.Experiment.TrialMeaning)"],"ServerRespondedWithTranslationTrials":["Result.Result Http.Error (List.List Experiment.Experiment.TranslationInput)"],"ServerRespondedWithScrabbleTrials":["Result.Result Http.Error (List.List Experiment.Experiment.ScrabbleTrial)"],"ServerRespondedWithSynonymTrials":["Result.Result Http.Error (List.List Experiment.Experiment.SynonymTrial)"],"ServerRespondedWithAcceptabilityTrials":["Result.Result Http.Error (List.List Experiment.Acceptability.Trial)"],"ServerRespondedWithInfos":["Result.Result Http.Error (List.List ExperimentInfo.Task)"],"Shuffled":["Main.Msg"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedRadioButtonInMeaning":["String.String"],"UserClickedRadioButtonInTranslation":["String.String"],"UserClickedRadioButtonInSynonym":["String.String"],"UserClickedFeedbackButtonInMeaning":[],"UserClickedFeedbackButtonInTranslation":[],"UserClickedFeedbackButtonInSynonym":[],"UserClickedNextTrialButtonInMeaning":[],"UserClickedNextTrialButtonInTranslation":[],"UserClickedNextTrialButtonInSynonym":[],"UserClickedStartSynonym":["List.List Experiment.Experiment.SynonymTrial"],"UserClickedNextTrialButtonInScrabble":[],"UserClickedNextTrialInAcceptability":[],"UserChangedInputInSynonym":["String.String"],"UserValidatedInputInSynonym":[],"UserToggledInCloudWords":["String.String"],"UserDragsLetter":["DnDList.Msg"],"UserPressedKey":["Experiment.Acceptability.Evaluation"],"WithTime":["Main.Msg","Time.Posix"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Experiment.Acceptability.Evaluation":{"args":[],"tags":{"NoEvaluation":[],"SentenceCorrect":[],"SentenceIncorrect":[],"EvaluationTimeOut":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[]}},"String.String":{"args":[],"tags":{"String":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
@@ -18878,7 +20163,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38889" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36459" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

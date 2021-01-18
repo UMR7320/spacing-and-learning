@@ -50,7 +50,7 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                     h3 []
                         [ p []
                             [ text <| String.fromInt (trialn + 1) ++ ". " ++ "Choose the best definition for the word : "
-                            , span [ class "italic" ] [ text trial.question ]
+                            , span [ class "italic" ] [ text <| trial.pre ++ trial.stimulus ++ trial.post ]
                             ]
                         ]
             in
@@ -87,14 +87,23 @@ view exp options toggleFeedbackMsg nextTrialMsg =
 decodeSynonymTrials : Decode.Decoder (List E.SynonymTrial)
 decodeSynonymTrials =
     let
+        stringToBoolDecoder : String -> Decode.Decoder Bool
+        stringToBoolDecoder str =
+            case str of
+                "true" ->
+                    Decode.succeed True
+
+                _ ->
+                    Decode.succeed False
+
         decoder =
             Decode.succeed E.SynonymTrial
                 |> required "UID" Decode.string
-                |> required "Question_Synonym" Decode.string
                 |> required "Word_Text" Decode.string
-                |> required "Distractor_1_Synonym" Decode.string
-                |> required "Distractor_2_Synonym" Decode.string
-                |> required "Distractor_3_Synonym" Decode.string
+                |> required "pre" Decode.string
+                |> required "stim" Decode.string
+                |> required "post" Decode.string
+                |> custom (Decode.field "isTraining" Decode.string |> Decode.andThen stringToBoolDecoder)
     in
     decodeRecords decoder
 
@@ -112,9 +121,9 @@ initState =
 defaultTrial : E.SynonymTrial
 defaultTrial =
     { uid = "uidMISSING"
-    , question = "questionMISSING"
     , target = "targetMISSING"
-    , distractor1 = "distractor1MISSING"
-    , distractor2 = "distractor2MISSING"
-    , distractor3 = "distractor3MISSING"
+    , pre = "preMissing"
+    , stimulus = "stimulusMissing"
+    , post = "postMissing"
+    , isTraining = False
     }
