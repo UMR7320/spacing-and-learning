@@ -13,9 +13,13 @@ module.exports = async (event) => {
     const createdRecord = await base(event.queryStringParameters.base).create([
       { fields },
     ]);
-    return formattedReturn(200, createdRecord);
+    const formattedRecord = createdRecord.map((datum) => ({
+      id: datum.id,
+      ...datum.fields,
+    }));
+    return formattedReturn(200, formattedRecord.shift());
   } catch (err) {
     console.error(err);
-    return formattedReturn(500, {"err":err});
+    return formattedReturn(500, { "err": err });
   }
 };
