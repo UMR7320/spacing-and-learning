@@ -1,30 +1,33 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Array
 import Browser
 import Browser.Events exposing (onKeyDown, onKeyPress)
 import Browser.Navigation as Nav
-import Canvas
 import Data
 import Dict
 import DnDList
 import DnDList.Groups exposing (Model)
-import Experiment.Acceptability as Acceptability
+import Experiment.Acceptability as Acceptability exposing (nextTrial)
+import Experiment.CU1 as CU1
+import Experiment.CU2 as CU2
 import Experiment.CloudWords as CloudWords
 import Experiment.Experiment as E
 import Experiment.Meaning as Meaning exposing (..)
 import Experiment.Scrabble as Scrabble
+import Experiment.SpellingLvl1 as SpellingLvl1
 import Experiment.Synonym as Synonym
 import Experiment.Translation as Translation
-import ExperimentInfo
-import Html.Attributes
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (attribute, class, disabled, href, type_)
 import Html.Styled.Events exposing (onClick)
 import Html.Styled.Keyed as Keyed
 import Http
+import Icons
 import Json.Decode exposing (errorToString)
-import List.Extra
+import Json.Encode as Encode
+import PsychTask
 import Random
 import Random.Extra
 import Random.List
@@ -44,13 +47,16 @@ type alias Flags =
     {}
 
 
+port playAudio : String -> Cmd msg
+
+
 
 --DATA
 
 
 toKeyedItem : List String -> List ( String, String )
-toKeyedItem =
-    List.map (\v -> ( "key-" ++ v, v ))
+toKeyedItem letters =
+    List.map (\( lett, rec ) -> ( "key-" ++ lett ++ String.fromInt rec, lett )) (Scrabble.dedupe letters)
 
 
 
@@ -62,7 +68,8 @@ config =
     { beforeUpdate = \_ _ list -> list
     , movement = DnDList.Free
     , listen = DnDList.OnDrag
-    , operation = DnDList.Swap
+    , operation =
+        DnDList.Swap
     }
 
 
@@ -81,12 +88,18 @@ type alias Model =
     , meaningTask : E.Experiment
     , translationTask : E.Experiment
     , synonymTask : E.Experiment
-    , scrabbleTask : E.Experiment
+    , scrabbleTask : PsychTask.Task Scrabble.Trial Scrabble.State
+    , spellingLvl1 : PsychTask.Task SpellingLvl1.Trial SpellingLvl1.State
+    , cuLvl2 : PsychTask.Task CU2.Trial CU2.State
+    , cu1 : PsychTask.Task CU1.Trial CU1.State
     , acceptabilityTask : Acceptability.Task
     , cloudWords : Dict.Dict String Bool
     , dnd : DnDList.Model
     , infos : RemoteData Http.Error (List ExperimentInfo.Task)
     , user : Maybe User.User
+    , userFirstName : String
+    , userEmail : String
+    , optionsOrder : List Int
     }
 
 
@@ -113,12 +126,18 @@ init flags url key =
       , meaningTask = E.NotStarted
       , translationTask = E.NotStarted
       , synonymTask = E.NotStarted
-      , scrabbleTask = E.NotStarted
+      , scrabbleTask = PsychTask.NotStartedYet
+      , spellingLvl1 = PsychTask.NotStartedYet
+      , cuLvl2 = PsychTask.NotStartedYet
+      , cu1 = PsychTask.NotStartedYet
       , acceptabilityTask = Acceptability.NotStarted
       , cloudWords = Dict.fromList CloudWords.words
       , dnd = system.model
       , infos = RemoteData.Loading
       , user = Nothing
+      , userFirstName = ""
+      , userEmail = ""
+      , optionsOrder = [ 0, 1, 2, 3 ]
       }
     , Cmd.batch [ fetchData route, ExperimentInfo.getInfos ServerRespondedWithInfos ]
     )
@@ -159,64 +178,227 @@ body : Model -> List (Html Msg)
 body model =
     [ View.header
         [ navIn "L'expérience" "/meaning"
+        , navIn "Log in" "/login"
         , navOut "BCL" "https://bcl.cnrs.fr/"
         , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
         ]
     , View.container <|
-        case ( model.route, model.infos ) of
-            ( ExperimentStart, RemoteData.Success infos ) ->
-                [ h1 [] [ text "Apprentissage et Espacement" ]
-                , p
-                    [ class "max-w-xl text-xl mb-8" ]
-                    [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
-                    ]
-                , infos
-                    |> List.map
-                        (\info ->
-                            div [ class "my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-13" ]
-                                [ Html.Styled.article [ class "overflow-hidden rounded-lg shadow-lg" ]
-                                    [ Html.Styled.img [ class "block h-auto w-full", Html.Styled.Attributes.src "https://picsum.photos/600/400/?random" ] []
-                                    , Html.Styled.header [ class "flex items-center justify-between leading-tight p-2 md:p4" ]
-                                        [ h1 [ class "text-lg" ] [ a [ Html.Styled.Attributes.href info.url ] [ text info.name ] ]
+        case model.infos of
+            RemoteData.Success infos ->
+                let
+                    infosAsDict =
+                        infos
+                            |> List.map
+                                (\info ->
+                                    ( info.name
+                                    , { uid = info.uid
+                                      , session = info.session
+                                      , type_ = info.type_
+                                      , name = info.name
+                                      , url = info.url
+                                      , description = info.description
+                                      , instructions = info.instructions
+                                      , instructions_short = info.instructions_short
+                                      , end = info.end
+                                      }
+                                    )
+                                )
+                            |> Dict.fromList
+                in
+                case ( model.route, model.user ) of
+                    ( ExperimentStart, Just user ) ->
+                        let
+                            toCard =
+                                \info ->
+                                    div [ class "my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-13" ]
+                                        [ Html.Styled.article [ class "overflow-hidden rounded-lg shadow-lg" ]
+                                            [ Html.Styled.img [ class "block h-auto w-full", Html.Styled.Attributes.src "https://picsum.photos/600/400/?random" ] []
+                                            , Html.Styled.header [ class "flex items-center justify-between leading-tight p-2 md:p4" ]
+                                                [ h1 [ class "text-lg" ] [ a [ Html.Styled.Attributes.href info.url ] [ text info.name ] ]
+                                                ]
+                                            , p [ class "px-2 overflow-ellipsis" ] [ text info.description ]
+                                            , Html.Styled.footer
+                                                [ class "flex items-center justify-between leading-none p-2 md:p-4" ]
+                                                [ div [ class "bg-green-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.typeToString info.type_) ]
+                                                , div [ class "bg-blue-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.sessionToString info.session) ]
+                                                ]
+                                            ]
                                         ]
-                                    , p [ class "px-2" ] [ text info.description ]
-                                    , Html.Styled.footer
-                                        [ class "flex items-center justify-between leading-none p-2 md:p-4" ]
-                                        [ div [ class "bg-green-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.typeToString info.type_) ]
-                                        , div [ class "bg-blue-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.sessionToString info.session) ]
-                                        ]
-                                    ]
+
+                            viewCard with =
+                                infos
+                                    |> List.filter with
+                                    |> List.map toCard
+                                    |> div [ class "flex flex-wrap -mx-1 px-4 md:px-12" ]
+                        in
+                        [ h1 [] [ text "Apprentissage et Espacement" ]
+                        , p
+                            [ class "max-w-xl text-xl mb-8" ]
+                            [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
+                            ]
+                        , h2 [] [ text "Session 1" ]
+                        , viewCard (\info -> info.session == Session1)
+                        , h2 [] [ text "Session 2" ]
+                        , viewCard (\info -> info.session == Session2)
+                        , h2 [] [ text "Session 3" ]
+                        , viewCard (\info -> info.session == Session3)
+                        , h2 [] [ text "Pretests" ]
+                        , viewCard (\info -> info.session == Pretest)
+                        ]
+
+                    ( ExperimentStart, Nothing ) ->
+                        [ text "Welcome maybe you should login ?", a [ href "/login" ] [ text "Log here" ] ]
+
+                    ( Meaning, _ ) ->
+                        viewExperiment model
+
+                    ( Translation, _ ) ->
+                        viewTranslationTask model
+
+                    ( Synonym, _ ) ->
+                        let
+                            synonymInfos =
+                                Dict.get "Synonym" infosAsDict
+                        in
+                        Synonym.viewTask model.synonymTask
+                            synonymInfos
+                            { toggleFeedbackMsg = UserClickedFeedbackButton model.route
+                            , inputValidationMsg = UserValidatedInputInSynonym
+                            , nextTrialMsg = UserClickedNextTrial model.route
+                            , toMainloopMsg = UserClickedStartSynonym
+                            , updateInputMsg = UserChangedInputInSynonym
+                            }
+
+                    ( Scrabble, _ ) ->
+                        viewScrabbleTask model
+
+                    ( CULevel2, _ ) ->
+                        let
+                            cu2Infos =
+                                Dict.get "Context Understanding level 2" infosAsDict
+                        in
+                        [ CU2.view model.cuLvl2
+                            cu2Infos
+                            model.optionsOrder
+                            { userClickedNextTrial = CU2 CU2.UserClickedNextTrial
+                            , userClickedAudio = PlaysoundInJS
+                            , radioMsg = \id -> CU2 (CU2.UserClickedRadioButton id)
+                            , toggleFeedback = CU2 CU2.UserClickedToggleFeedback
+                            , nextTrialMsg = CU2 CU2.UserClickedNextTrial
+                            , startMainMsg = \trials -> CU2 (CU2.UserClickedStartMain trials)
+                            }
+                        ]
+
+                    ( Route.CU1, _ ) ->
+                        let
+                            cu1Infos =
+                                Dict.get "Context Understanding level 1" infosAsDict
+                        in
+                        [ CU1.view
+                            { task = model.cu1
+                            , infos = cu1Infos
+                            , optionsOrder = Just model.optionsOrder
+                            , nextTrialMsg = CU1 CU1.UserClickedNextTrial
+                            , userClickedAudio = Nothing
+                            , radioMsg = Just (\id -> CU1 (CU1.UserClickedRadioButton id))
+                            , toggleFeedbackMsg = CU1 CU1.UserClickedToggleFeedback
+                            , startMainMsg = \trials -> CU1 (CU1.UserClickedStartMain trials)
+                            , inputChangedMsg = Nothing
+                            }
+                        ]
+
+                    ( CloudWords, _ ) ->
+                        [ viewCloud model ]
+
+                    ( Acceptability, _ ) ->
+                        [ Acceptability.view model.acceptabilityTask { nextTrialMsg = UserClickedNextTrial model.route } ]
+
+                    ( Home, _ ) ->
+                        [ text "home ?" ]
+
+                    ( LogIn, Nothing ) ->
+                        let
+                            fieldStyle :
+                                { fieldType : String
+                                , placeholder : String
+                                , id : String
+                                , name : String
+                                , value : String
+                                , msg : String -> msg
+                                }
+                                -> List (Attribute msg)
+                            fieldStyle { fieldType, placeholder, id, name, value, msg } =
+                                [ Html.Styled.Attributes.placeholder placeholder
+                                , type_ fieldType
+                                , Html.Styled.Attributes.required True
+                                , Html.Styled.Attributes.name name
+                                , Html.Styled.Attributes.id id
+                                , Html.Styled.Attributes.value value
+                                , Html.Styled.Events.onInput msg
                                 ]
-                        )
-                    |> div [ class "flex flex-wrap -mx-1 px-4 md:px-12" ]
-                ]
 
-            ( ExperimentStart, _ ) ->
-                [ text "Loading" ]
+                            firstNameField =
+                                input
+                                    (fieldStyle
+                                        { fieldType = "text"
+                                        , placeholder = "John"
+                                        , name = "firstName"
+                                        , id = "firstName"
+                                        , value = model.userFirstName
+                                        , msg = UserUpdatedFirstNameFieldInLogIn
+                                        }
+                                    )
+                                    [ label [] [ text "Your first name" ] ]
 
-            ( Meaning, _ ) ->
-                viewExperiment model
+                            emailField =
+                                input
+                                    (fieldStyle
+                                        { fieldType = "email"
+                                        , placeholder = "john.doe@anydomain.com"
+                                        , name = "email"
+                                        , id = "email"
+                                        , value = model.userEmail
+                                        , msg = UserUpdatedEmailFieldInLogIn
+                                        }
+                                    )
+                                    [ label [] [ text "What's your email address ?" ] ]
+                        in
+                        [ text "C'est ici qu'on se connecte ! "
+                        , div
+                            [ class "flex flex-col" ]
+                            [ firstNameField
+                            , emailField
+                            , button [ Html.Styled.Events.onClick UserClickedCreateUserInLogin ] [ label [] [ text "Create user" ] ]
+                            ]
+                        ]
 
-            ( Translation, _ ) ->
-                viewTranslationTask model
+                    ( LogIn, Just (User.Authenticated user) ) ->
+                        [ text <| "Hey " ++ user.firstName ++ " we already know you. You can browse the experiments now!" ]
 
-            ( Synonym, _ ) ->
-                viewSynonymTask model
+                    ( LogIn, Just (User.Ano user) ) ->
+                        [ text <| "Hey " ++ user.firstName ++ " you're anonymous. It's an impossible case. Please tell the developer !" ]
 
-            ( Scrabble, _ ) ->
-                viewScrabbleTask model
+                    ( NotFound, _ ) ->
+                        View.notFound
 
-            ( CloudWords, _ ) ->
-                [ viewCloud model ]
+                    ( SpellingLevel1, _ ) ->
+                        [ SpellingLvl1.view model.spellingLvl1
+                            model.optionsOrder
+                            { toggleFeedbackMsg = UserClickedFeedbackButton model.route
+                            , nextTrialMsg = UserClickedNextTrial model.route
+                            , radioMsg = UserClickedRadioButtonInSpellingLvl1
+                            , startMainloopMsg = UserClickedStartMainloopInSpellingLvl1
+                            }
+                        ]
 
-            ( Acceptability, _ ) ->
-                [ Acceptability.view model.acceptabilityTask { nextTrialMsg = UserClickedNextTrialInAcceptability } ]
+            RemoteData.NotAsked ->
+                [ text "" ]
 
-            ( Home, _ ) ->
-                [ text "home ?" ]
+            RemoteData.Loading ->
+                [ text "I'm loading the tasks related infos." ]
 
-            ( NotFound, _ ) ->
-                View.notFound
+            RemoteData.Failure reason ->
+                [ text ("I couldn't fetch the tasks data. Please report this issue :" ++ Data.buildErrorMessage reason) ]
     ]
 
 
@@ -224,37 +406,116 @@ body model =
 --words : List (Html msg)
 
 
+viewScrabbleTask : { a | scrabbleTask : PsychTask.Task Scrabble.Trial Scrabble.State, dnd : DnDList.Model, route : Route } -> List (Html Msg)
 viewScrabbleTask model =
-    case model.scrabbleTask of
-        E.NotStarted ->
-            [ text "NotAsked" ]
-
-        E.Loading ->
-            [ text "Loading" ]
-
-        E.DoingScrabble (E.MainLoop trials state ntrial feedback) ->
-            let
-                currentTrial =
-                    Array.get ntrial (Array.fromList trials) |> Maybe.withDefault Scrabble.defaultTrial
-            in
-            [ h3 [] [ text "Listen to the sound and write what you hear" ]
-            , View.simpleAudioPlayer currentTrial.audioWord.url
-            , state.scrambledLetter
+    let
+        viewLetters scrambledLetters =
+            scrambledLetters
                 |> List.indexedMap (itemView model.dnd)
                 |> Keyed.node "div" containerStyles
-            , ghostView model.dnd state.scrambledLetter
-            , View.button
-                { message = UserClickedNextTrialButtonInScrabble
-                , txt = "Next Trial "
-                , isDisabled = False
-                }
-            ]
 
-        E.DoingScrabble (E.End txt) ->
-            [ h3 [] [ text "C'est la fin, merci de votre participation ! 🎉️" ] ]
+        audioButton url =
+            div
+                [ Html.Styled.Events.onClick (PlaysoundInJS url), class "col-start-2 col-span-4 h-8 w-8" ]
+                [ fromUnstyled <| Icons.music ]
 
-        _ ->
-            [ text "unexpected view in viewscrabble. Please update Main.viewScrabbleTask or report this error message" ]
+        feedback feedback_ { target, attempt } nextItem =
+            case ( feedback_, target == attempt ) of
+                ( True, True ) ->
+                    div [ class " rounded-md text-center object-center bg-green-300 m-8" ]
+                        [ p [ class "p-6 text-xl text-white" ]
+                            [ text "The word you heard is spelled "
+                            , span [ class "font-bold" ] [ text target ]
+                            ]
+                        , div [ class "pb-4" ]
+                            [ View.button
+                                { message = UserClickedNextTrialButtonInScrabble nextItem
+                                , txt = "Next"
+                                , isDisabled = False
+                                }
+                            ]
+                        ]
+
+                ( True, False ) ->
+                    div [ class " rounded-md text-center object-center bg-red-300 m-8" ]
+                        [ p [ class "p-6 text-xl text-white" ]
+                            [ text "The word you heard is spelled "
+                            , span [ class "font-bold" ] [ text target ]
+                            ]
+                        , div [ class "pb-4" ]
+                            [ View.button
+                                { message = UserClickedNextTrialButtonInScrabble nextItem
+                                , txt = "Next"
+                                , isDisabled = False
+                                }
+                            ]
+                        ]
+
+                _ ->
+                    div []
+                        [ View.button
+                            { message = UserClickedFeedbackButton model.route
+                            , txt = "Next item "
+                            , isDisabled = False
+                            }
+                        ]
+    in
+    case model.scrabbleTask of
+        PsychTask.NotStartedYet ->
+            [ text "NotAsked" ]
+
+        PsychTask.Main data ->
+            case data.current of
+                Just currentTrial ->
+                    [ audioButton currentTrial.audioWord.url
+                    , if not data.feedback then
+                        div []
+                            [ div [ class "col-start-2 col-span-4" ] [ viewLetters data.state.scrambledLetter ]
+                            , ghostView model.dnd
+                                data.state.scrambledLetter
+                            ]
+
+                      else
+                        div [] []
+                    , feedback
+                        data.feedback
+                        { target = currentTrial.target, attempt = data.state.userAnswer }
+                        data.next
+                    ]
+
+                Nothing ->
+                    [ text " Main is over" ]
+
+        PsychTask.Intr data ->
+            case data.current of
+                Just currentTrial ->
+                    [ View.viewTraining "Are you ready to test your spelling?\nClick to hear the word. Then move the letters to spell it correctly. "
+                        [ audioButton currentTrial.audioWord.url
+                        , div [ class "col-start-2 col-span-4" ] [ viewLetters data.state.scrambledLetter ]
+                        , ghostView model.dnd data.state.scrambledLetter
+                        , div [ class "col-start-2 col-span-4 pb-4" ]
+                            [ feedback
+                                data.feedback
+                                { target = currentTrial.target, attempt = data.state.userAnswer }
+                                data.next
+                            ]
+                        ]
+                    ]
+
+                Nothing ->
+                    [ text "Intro is over"
+                    , View.button
+                        { message = UserClickedStartMainloopInScrabble data.mainTrials
+                        , txt = "Commencer l'expérience "
+                        , isDisabled = False
+                        }
+                    ]
+
+        PsychTask.Over ->
+            [ text "cette tâche est finie merci beaucoup" ]
+
+        PsychTask.IntroOver ->
+            [ text "L'entrainement est fini" ]
 
 
 itemView : DnDList.Model -> Int -> E.KeyedItem -> ( String, Html Msg )
@@ -262,7 +523,7 @@ itemView dnd index ( key, item ) =
     let
         itemId : String
         itemId =
-            "id-" ++ item
+            "id-" ++ key
     in
     case system.info dnd of
         Just { dragIndex } ->
@@ -273,7 +534,7 @@ itemView dnd index ( key, item ) =
                         :: itemStyles green
                         ++ List.map Html.Styled.Attributes.fromUnstyled (system.dropEvents index itemId)
                     )
-                    [ text item ]
+                    [ text (String.toUpper item) ]
                 )
 
             else
@@ -290,7 +551,7 @@ itemView dnd index ( key, item ) =
                     :: itemStyles green
                     ++ List.map Html.Styled.Attributes.fromUnstyled (system.dragEvents index itemId)
                 )
-                [ text item ]
+                [ text (String.toUpper item) ]
             )
 
 
@@ -309,7 +570,7 @@ ghostView dnd items =
     in
     case maybeDragItem of
         Just ( _, item ) ->
-            div (itemStyles ghostGreen ++ List.map Html.Styled.Attributes.fromUnstyled (system.ghostStyles dnd)) [ text item ]
+            div (itemStyles ghostGreen ++ List.map Html.Styled.Attributes.fromUnstyled (system.ghostStyles dnd)) [ text (String.toUpper item) ]
 
         Nothing ->
             text ""
@@ -318,26 +579,6 @@ ghostView dnd items =
 startButton : Html Msg
 startButton =
     View.navIn "Go to Meaning >" "/meaning"
-
-
-startTranslation : Html Msg
-startTranslation =
-    View.navIn "Go to Translation >" "/translation"
-
-
-startSynonym : Html Msg
-startSynonym =
-    View.navIn "Go to Synonym >" "/synonym"
-
-
-startScrabble : Html Msg
-startScrabble =
-    View.navIn "Go to Scrabble >" "/scrabble"
-
-
-startCloudWords : Html Msg
-startCloudWords =
-    View.navIn "Go to CloudWords >" "/cloudwords"
 
 
 viewExperiment : Model -> List (Html Msg)
@@ -370,11 +611,6 @@ viewExperiment model =
                 [ class "max-w-xl text-xl mb-8" ]
                 [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
                 ]
-            , content
-                [ attribute "data-result" "error"
-                , class "bg-red-500 p-12 text-white text-center"
-                ]
-                [ li [] [ text (buildErrorMessage reason) ] ]
             ]
 
         E.DoingMeaning (E.MainLoop trials state trialn feedback) ->
@@ -387,36 +623,26 @@ viewExperiment model =
 
                 isCorrect optionN =
                     optionN == trial.definition
+
+                option id =
+                    View.radio
+                        id
+                        (state.userAnswer == id)
+                        (isCorrect id)
+                        feedback
+                        (UserClickedRadioButton model.route id)
+
+                options =
+                    [ option trial.option1
+                    , option trial.option2
+                    , option trial.option3
+                    , option trial.definition
+                    ]
+                        |> List.map2 Tuple.pair model.optionsOrder
+                        |> List.sortBy Tuple.first
+                        |> List.map Tuple.second
             in
-            [ Meaning.view
-                model.meaningTask
-                [ View.radio
-                    trial.option1
-                    (state.userAnswer == trial.option1)
-                    (isCorrect trial.option1)
-                    feedback
-                    (UserClickedRadioButtonInMeaning trial.option1)
-                , View.radio
-                    trial.option2
-                    (state.userAnswer == trial.option2)
-                    (isCorrect trial.option2)
-                    feedback
-                    (UserClickedRadioButtonInMeaning trial.option2)
-                , View.radio
-                    trial.option3
-                    (state.userAnswer == trial.option3)
-                    (isCorrect trial.option3)
-                    feedback
-                    (UserClickedRadioButtonInMeaning trial.option3)
-                , View.radio
-                    trial.option4
-                    (state.userAnswer == trial.option4)
-                    (isCorrect trial.option4)
-                    feedback
-                    (UserClickedRadioButtonInMeaning trial.option4)
-                ]
-                UserClickedFeedbackButtonInMeaning
-                UserClickedNextTrialButtonInMeaning
+            [ Meaning.view model.meaningTask options (UserClickedFeedbackButton model.route) (UserClickedNextTrial model.route)
             ]
 
         E.DoingMeaning (E.End txt) ->
@@ -474,11 +700,6 @@ viewTranslationTask model =
                 [ class "max-w-xl text-xl mb-8" ]
                 [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
                 ]
-            , content
-                [ attribute "data-result" "error"
-                , class "bg-red-500 p-12 text-white text-center"
-                ]
-                [ li [] [ text (buildErrorMessage reason) ] ]
             ]
 
         E.DoingTranslation (E.MainLoop trials state trialn feedback) ->
@@ -491,36 +712,24 @@ viewTranslationTask model =
 
                 isCorrect optionN =
                     optionN == trial.translation1 || optionN == trial.translation2
+
+                option id =
+                    View.radio
+                        id
+                        (state.userAnswer == id)
+                        (isCorrect id)
+                        feedback
+                        (UserClickedRadioButton model.route id)
             in
             [ Meaning.view
                 model.translationTask
-                [ View.radio
-                    trial.distractor1
-                    (state.userAnswer == trial.distractor1)
-                    (isCorrect trial.distractor1)
-                    feedback
-                    (UserClickedRadioButtonInTranslation trial.distractor1)
-                , View.radio
-                    trial.distractor2
-                    (state.userAnswer == trial.distractor2)
-                    (isCorrect trial.distractor2)
-                    feedback
-                    (UserClickedRadioButtonInTranslation trial.distractor2)
-                , View.radio
-                    trial.distractor3
-                    (state.userAnswer == trial.distractor3)
-                    (isCorrect trial.distractor3)
-                    feedback
-                    (UserClickedRadioButtonInTranslation trial.distractor3)
-                , View.radio
-                    trial.distractor4
-                    (state.userAnswer == trial.distractor4)
-                    (isCorrect trial.distractor4)
-                    feedback
-                    (UserClickedRadioButtonInTranslation trial.distractor4)
+                [ option trial.distractor1
+                , option trial.distractor2
+                , option trial.distractor3
+                , option trial.translation1
                 ]
-                UserClickedFeedbackButtonInTranslation
-                UserClickedNextTrialButtonInTranslation
+                (UserClickedFeedbackButton model.route)
+                (UserClickedNextTrial model.route)
             ]
 
         _ ->
@@ -531,155 +740,39 @@ viewTranslationTask model =
 -- UPDATE
 
 
-viewSynonymTask : Model -> List (Html Msg)
-viewSynonymTask model =
-    case model.synonymTask of
-        E.NotStarted ->
-            [ h1 [] [ text "NotStarted" ]
-            ]
-
-        E.Loading ->
-            [ h1 [] [ text "loading" ]
-            ]
-
-        E.Failure reason ->
-            [ h4 [] [ text ("Failure" ++ buildErrorMessage reason) ]
-            ]
-
-        E.DoingSynonym (E.Intro trials state trialn feedback instructions) ->
-            let
-                trainingTrial =
-                    trials
-                        |> List.filter (\datum -> datum.isTraining)
-                        |> Array.fromList
-                        |> Array.get trialn
-
-                toggleFeedback =
-                    View.button
-                        { message = UserClickedFeedbackButtonInSynonym
-                        , txt = "Check my answer"
-                        , isDisabled = False
-                        }
-
-                viewInstructions x =
-                    div [ class "flex flex-col" ]
-                        [ h2 [ class "font-bold" ] [ text "Instructions" ]
-                        , p [ class "pt-8 pb-8" ] [ text "Focus on the word in the box in each sentence.\u{200B}\nIt’s a synonym for one of the words you are learning.\u{200B}\nClick on the word in the box to type your synonym." ]
-                        ]
-            in
-            case ( trainingTrial, feedback ) of
-                ( Just x, False ) ->
-                    [ viewInstructions x
-                    , View.sentenceInSynonym x state UserChangedInputInSynonym
-                    , toggleFeedback
-                    ]
-
-                ( Just x, True ) ->
-                    [ viewInstructions x
-                    , View.sentenceInSynonym x state UserChangedInputInSynonym
-                    , div [ class "w-full mt-8 rounded-md text-center object-center bg-green-300 " ]
-                        [ p [ class "p-6 text-xl text-white" ]
-                            [ text "The correct synonym for "
-                            , text x.stimulus
-                            , text " is "
-                            , span [ class "font-bold" ] [ text x.target ]
-                            ]
-                        , div [ class "pb-4" ]
-                            [ View.button
-                                { message = UserClickedNextTrialButtonInSynonym
-                                , txt = "Next practice item"
-                                , isDisabled = False
-                                }
-                            ]
-                        ]
-                    ]
-
-                ( Nothing, _ ) ->
-                    [ text "Now you understand the activity, let's try our target words"
-                    , View.button
-                        { message = UserClickedStartSynonym trials
-                        , txt = "Ready?"
-                        , isDisabled = False
-                        }
-                    ]
-
-        E.DoingSynonym (E.MainLoop trials state trialn feedback) ->
-            let
-                trial =
-                    trials
-                        |> List.filter (\datum -> not datum.isTraining)
-                        |> Array.fromList
-                        |> Array.get trialn
-            in
-            case ( trial, feedback ) of
-                ( Just t, False ) ->
-                    [ View.sentenceInSynonym t state UserChangedInputInSynonym
-                    , View.button
-                        { message = UserValidatedInputInSynonym
-                        , txt = "Valider"
-                        , isDisabled = String.isEmpty state.userAnswer
-                        }
-                    ]
-
-                ( Just t, True ) ->
-                    [ View.sentenceInSynonym t state UserChangedInputInSynonym
-                    , div [ class "p-4" ] []
-                    , div [ class "flex flex-col w-full rounded-lg h-48 bg-green-500 items-center text-center" ]
-                        [ span [ class "pt-8 text-lg font-bold text-white" ] [ text <| "The best synonym for " ++ t.stimulus ++ " is " ++ t.target ]
-                        , View.button
-                            { message = UserClickedNextTrialButtonInSynonym
-                            , txt = "Next trial"
-                            , isDisabled = False
-                            }
-                        ]
-                    ]
-
-                ( Nothing, _ ) ->
-                    [ text "C'est fini" ]
-
-        E.DoingSynonym (E.End txt) ->
-            [ text "Synonym est fini" ]
-
-        E.DoingMeaning (E.End txt) ->
-            [ h1 [] [ text "Merci de votre participation !🎉" ]
-            , p
-                [ class "max-w-xl text-xl mb-8" ]
-                [ text "Vous trouverez dans l'e-mail que vous avez reçu les liens pour la suite de l'expérience."
-                ]
-            ]
-
-        _ ->
-            [ text "Unexpected view. You can take it in account in Main.viewExperiment" ]
-
-
 type Msg
     = BrowserChangedUrl Url
     | ServerRespondedWithMeaningInput (Result Http.Error (List E.TrialMeaning))
     | ServerRespondedWithTranslationTrials (Result Http.Error (List E.TranslationInput))
-    | ServerRespondedWithScrabbleTrials (Result Http.Error (List E.ScrabbleTrial))
+    | ServerRespondedWithScrabbleTrials (Result Http.Error (List Scrabble.Trial))
     | ServerRespondedWithSynonymTrials (Result Http.Error (List E.SynonymTrial))
     | ServerRespondedWithAcceptabilityTrials (Result Http.Error (List Acceptability.Trial))
     | ServerRespondedWithInfos (Result Http.Error (List ExperimentInfo.Task))
+    | ServerRespondedWithUserInfo (Result Http.Error User.AuthenticatedInfo)
+    | ServerRespondedWithSpellingTrials (Result Http.Error (List SpellingLvl1.Trial))
     | Shuffled Msg
     | UserClickedLink Browser.UrlRequest
-    | UserClickedRadioButtonInMeaning String
-    | UserClickedRadioButtonInTranslation String
-    | UserClickedRadioButtonInSynonym String
-    | UserClickedFeedbackButtonInMeaning
-    | UserClickedFeedbackButtonInTranslation
-    | UserClickedFeedbackButtonInSynonym
-    | UserClickedNextTrialButtonInMeaning
-    | UserClickedNextTrialButtonInTranslation
-    | UserClickedNextTrialButtonInSynonym
     | UserClickedStartSynonym (List E.SynonymTrial)
-    | UserClickedNextTrialButtonInScrabble
-    | UserClickedNextTrialInAcceptability
+    | UserClickedStartMainloopInSpellingLvl1 (List SpellingLvl1.Trial)
+    | UserClickedStartMainloopInScrabble (List Scrabble.Trial)
+    | UserClickedNextTrialButtonInScrabble (Maybe Scrabble.Trial)
+    | UserClickedCreateUserInLogin
     | UserChangedInputInSynonym String
+    | UserUpdatedFirstNameFieldInLogIn String
+    | UserUpdatedEmailFieldInLogIn String
     | UserValidatedInputInSynonym
     | UserToggledInCloudWords String
     | UserDragsLetter DnDList.Msg
     | UserPressedKey Acceptability.Evaluation
     | WithTime Msg Time.Posix
+    | RuntimeShuffledOptionsOrder (List Int)
+    | UserClickedRadioButtonInSpellingLvl1 String
+    | PlaysoundInJS String
+    | UserClickedFeedbackButton Route
+    | UserClickedNextTrial Route
+    | UserClickedRadioButton Route String
+    | CU1 CU1.CU1Msg
+    | CU2 CU2.CU2Msg
 
 
 
@@ -714,22 +807,15 @@ update msg model =
                     Synonym.initState
 
         currentScrabbleState =
-            case E.getState model.scrabbleTask of
-                E.ScrabbleStateType x ->
+            case PsychTask.getState model.scrabbleTask of
+                Just x ->
                     x
 
                 _ ->
                     Scrabble.initState
 
-        ( currentScrabbleTrialn, nextScrabbleTrial ) =
-            case model.scrabbleTask of
-                E.DoingScrabble (E.MainLoop trials state trialn feedback) ->
-                    ( Array.get trialn (Array.fromList trials) |> Maybe.withDefault Scrabble.defaultTrial
-                    , Array.get (trialn + 1) (Array.fromList trials) |> Maybe.withDefault Scrabble.defaultTrial
-                    )
-
-                _ ->
-                    ( Scrabble.defaultTrial, Scrabble.defaultTrial )
+        currentSpellingState =
+            PsychTask.getState model.spellingLvl1
     in
     case msg of
         BrowserChangedUrl url ->
@@ -750,9 +836,12 @@ update msg model =
                     )
 
                 Scrabble ->
-                    ( { model | route = Route.fromUrl url, scrabbleTask = E.Loading }
+                    ( { model | route = Route.fromUrl url, scrabbleTask = PsychTask.NotStartedYet }
                     , fetchData (Route.fromUrl url)
                     )
+
+                CULevel2 ->
+                    ( { model | route = Route.fromUrl url, cuLvl2 = PsychTask.NotStartedYet }, fetchData (Route.fromUrl url) )
 
                 ExperimentStart ->
                     ( { model | route = Route.fromUrl url }
@@ -764,17 +853,12 @@ update msg model =
                     , fetchData (Route.fromUrl url)
                     )
 
-                CloudWords ->
+                SpellingLevel1 ->
                     ( { model | route = Route.fromUrl url }
-                    , Cmd.none
+                    , fetchData (Route.fromUrl url)
                     )
 
-                Home ->
-                    ( { model | route = Route.fromUrl url }
-                    , Cmd.none
-                    )
-
-                NotFound ->
+                _ ->
                     ( { model | route = Route.fromUrl url }
                     , Cmd.none
                     )
@@ -796,13 +880,62 @@ update msg model =
             , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithMeaningInput (Result.Ok shuffledData))) (Random.List.shuffle data)
             )
 
-        Shuffled (ServerRespondedWithMeaningInput (Result.Ok data)) ->
-            ( { model
-                | meaningTask =
-                    E.DoingMeaning (E.MainLoop data Meaning.initState 0 False)
-              }
-            , Cmd.none
-            )
+        Shuffled message ->
+            case message of
+                ServerRespondedWithMeaningInput (Result.Ok data) ->
+                    ( { model
+                        | meaningTask =
+                            E.DoingMeaning (E.MainLoop data Meaning.initState 0 False)
+                      }
+                    , Cmd.none
+                    )
+
+                ServerRespondedWithSpellingTrials (Result.Ok data) ->
+                    ( { model
+                        | spellingLvl1 =
+                            PsychTask.startIntro
+                                (List.filter (\datum -> datum.isTraining) data)
+                                (List.filter (\datum -> not datum.isTraining) data)
+                                SpellingLvl1.initState
+                      }
+                    , Cmd.none
+                    )
+
+                ServerRespondedWithTranslationTrials (Result.Ok data) ->
+                    ( { model | translationTask = E.DoingTranslation (E.MainLoop data E.initTranslationState 0 False) }, Cmd.none )
+
+                ServerRespondedWithSynonymTrials (Result.Ok data) ->
+                    ( { model | synonymTask = E.DoingSynonym (E.Intro data Synonym.initState 0 False "Instructions de synonyme") }, Cmd.none )
+
+                ServerRespondedWithAcceptabilityTrials (Result.Ok trials) ->
+                    ( { model | acceptabilityTask = Acceptability.DoingTask trials Acceptability.initState 0 [] }, Cmd.none )
+
+                ServerRespondedWithScrabbleTrials (Result.Ok trials) ->
+                    let
+                        record =
+                            Scrabble.initState
+
+                        trainingItems =
+                            List.filter (\datum -> datum.isTraining) trials
+
+                        mainItems =
+                            List.filter (\datum -> not datum.isTraining) trials
+
+                        firstTrialWord =
+                            trainingItems
+                                |> List.head
+                                |> Maybe.withDefault Scrabble.defaultTrial
+                                |> .writtenWord
+                    in
+                    ( { model
+                        | scrabbleTask =
+                            PsychTask.startIntro trainingItems mainItems { currentScrabbleState | userAnswer = firstTrialWord, scrambledLetter = toItems firstTrialWord }
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
         ServerRespondedWithTranslationTrials (Result.Err reason) ->
             ( { model | translationTask = E.Failure reason }, Cmd.none )
@@ -812,8 +945,10 @@ update msg model =
             , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithTranslationTrials (Result.Ok shuffledData))) (Random.List.shuffle data)
             )
 
-        Shuffled (ServerRespondedWithTranslationTrials (Result.Ok data)) ->
-            ( { model | translationTask = E.DoingTranslation (E.MainLoop data E.initTranslationState 0 False) }, Cmd.none )
+        ServerRespondedWithSpellingTrials (Result.Ok data) ->
+            ( model
+            , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithSpellingTrials (Result.Ok shuffledData))) (Random.List.shuffle data)
+            )
 
         ServerRespondedWithSynonymTrials (Result.Err reason) ->
             ( { model | synonymTask = E.Failure reason }, Cmd.none )
@@ -823,9 +958,6 @@ update msg model =
             , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithSynonymTrials (Result.Ok shuffledData))) (Random.List.shuffle data)
             )
 
-        Shuffled (ServerRespondedWithSynonymTrials (Result.Ok data)) ->
-            ( { model | synonymTask = E.DoingSynonym (E.Intro data Synonym.initState 0 False "Instructions de synonyme") }, Cmd.none )
-
         ServerRespondedWithAcceptabilityTrials (Result.Ok trials) ->
             ( model
             , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithAcceptabilityTrials (Result.Ok shuffledData))) (Random.List.shuffle trials)
@@ -834,8 +966,11 @@ update msg model =
         ServerRespondedWithInfos infos ->
             ( { model | infos = RemoteData.fromResult infos }, Cmd.none )
 
-        Shuffled (ServerRespondedWithAcceptabilityTrials (Result.Ok trials)) ->
-            ( { model | acceptabilityTask = Acceptability.DoingTask trials Acceptability.initState 0 [] }, Cmd.none )
+        ServerRespondedWithUserInfo (Result.Ok info) ->
+            ( { model | user = Just (User.Authenticated info) }, User.encoder (User.Authenticated info) |> Encode.encode 0 |> User.storeInfo )
+
+        ServerRespondedWithUserInfo (Result.Err reason) ->
+            ( model, Cmd.none )
 
         ServerRespondedWithAcceptabilityTrials (Result.Err reason) ->
             ( { model | acceptabilityTask = Acceptability.Failure reason }
@@ -843,7 +978,7 @@ update msg model =
             )
 
         ServerRespondedWithScrabbleTrials (Result.Err reason) ->
-            ( { model | scrabbleTask = E.Failure reason }, Cmd.none )
+            ( { model | scrabbleTask = PsychTask.Over }, Cmd.none )
 
         ServerRespondedWithScrabbleTrials (Result.Ok data) ->
             let
@@ -855,12 +990,12 @@ update msg model =
                         |> Maybe.withDefault Scrabble.defaultTrial
                         |> .writtenWord
 
-                --shuffleLetters : String
+                --shuffleLetters recreates each trial in shuffling every each word's letter. When it's done it shuffles trials.
                 shuffleLetters =
                     data
                         |> List.map
                             (\trial ->
-                                Random.map3 E.ScrabbleTrial
+                                Random.map5 Scrabble.Trial
                                     (Random.constant trial.uid)
                                     (trial.writtenWord
                                         |> String.toList
@@ -873,6 +1008,8 @@ update msg model =
                                             )
                                     )
                                     (Random.constant trial.audioWord)
+                                    (Random.constant trial.isTraining)
+                                    (Random.constant trial.writtenWord)
                             )
                         |> Random.Extra.sequence
                         |> Random.andThen Random.List.shuffle
@@ -885,157 +1022,57 @@ update msg model =
                 shuffleLetters
             )
 
-        Shuffled (ServerRespondedWithScrabbleTrials (Result.Ok trials)) ->
-            let
-                record =
-                    Scrabble.initState
-
-                firstTrialWord =
-                    Array.get 0 (Array.fromList trials)
-                        |> Maybe.withDefault Scrabble.defaultTrial
-                        |> .writtenWord
-            in
-            ( { model
-                | scrabbleTask =
-                    E.DoingScrabble
-                        (E.MainLoop trials
-                            { record
-                                | userAnswer =
-                                    firstTrialWord
-                                , scrambledLetter = toItems firstTrialWord
-                            }
-                            0
-                            False
-                        )
-              }
-            , Cmd.none
-            )
-
         ServerRespondedWithMeaningInput (Result.Err reason) ->
             ( { model | meaningTask = E.Failure reason }, Cmd.none )
-
-        UserClickedRadioButtonInMeaning newChoice ->
-            ( { model
-                | meaningTask =
-                    model.meaningTask
-                        |> E.updateState (E.MeaningState { currentMeaningState | userAnswer = newChoice })
-              }
-            , Cmd.none
-            )
-
-        UserClickedRadioButtonInSynonym newChoice ->
-            ( { model
-                | synonymTask =
-                    model.synonymTask
-                        |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = newChoice })
-              }
-            , Cmd.none
-            )
-
-        UserClickedRadioButtonInTranslation newChoice ->
-            ( { model
-                | translationTask =
-                    model.translationTask
-                        |> E.updateState (E.TranslationState { currentMeaningState | userAnswer = newChoice })
-              }
-            , Cmd.none
-            )
-
-        UserClickedFeedbackButtonInMeaning ->
-            ( { model
-                | meaningTask =
-                    model.meaningTask
-                        |> E.toggleFeedback
-              }
-            , Cmd.none
-            )
-
-        UserClickedFeedbackButtonInSynonym ->
-            ( { model
-                | synonymTask =
-                    model.synonymTask
-                        |> E.toggleFeedback
-              }
-            , Cmd.none
-            )
 
         UserClickedStartSynonym trials ->
             ( { model | synonymTask = E.DoingSynonym (E.MainLoop trials Synonym.initState 0 False) }, Cmd.none )
 
-        UserClickedFeedbackButtonInTranslation ->
+        UserClickedStartMainloopInSpellingLvl1 trials ->
             ( { model
-                | translationTask =
-                    model.translationTask
-                        |> E.toggleFeedback
+                | spellingLvl1 =
+                    PsychTask.startMain trials SpellingLvl1.initState
               }
             , Cmd.none
             )
 
-        UserClickedNextTrialButtonInMeaning ->
-            ( { model
-                | meaningTask =
-                    model.meaningTask
-                        |> E.toggleFeedback
-                        |> E.updateState (E.MeaningState { currentMeaningState | userAnswer = "" })
-                        |> E.nextTrial
-              }
-            , Cmd.none
-            )
-
-        UserClickedNextTrialButtonInTranslation ->
-            ( { model
-                | translationTask =
-                    model.translationTask
-                        |> E.toggleFeedback
-                        |> E.updateState (E.TranslationState { currentTranslationState | userAnswer = "" })
-                        |> E.nextTrial
-              }
-            , Cmd.none
-            )
-
-        UserClickedNextTrialButtonInSynonym ->
-            ( { model
-                | synonymTask =
-                    model.synonymTask
-                        |> E.toggleFeedback
-                        |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = "" })
-                        |> E.nextTrial
-              }
-            , Cmd.none
-            )
-
-        UserClickedNextTrialInAcceptability ->
-            let
-                state =
-                    Acceptability.getState model.acceptabilityTask
-            in
-            ( model
-            , Task.perform (\time -> WithTime UserClickedNextTrialInAcceptability time) Time.now
-            )
+        UserClickedCreateUserInLogin ->
+            ( model, Data.sendUserData (Http.jsonBody (User.encoder (User.Ano { firstName = model.userFirstName, email = model.userEmail }))) ServerRespondedWithUserInfo User.decodeAuthenticatedInfo )
 
         UserPressedKey evaluation ->
             ( model
             , Task.perform (\time -> WithTime (UserPressedKey evaluation) time) Time.now
             )
 
-        UserClickedNextTrialButtonInScrabble ->
+        UserClickedNextTrialButtonInScrabble (Just nextTrial) ->
             ( { model
                 | scrabbleTask =
-                    model.scrabbleTask
-                        |> E.updateState
-                            (E.ScrabbleStateType
-                                { currentScrabbleState
-                                    | userAnswer = nextScrabbleTrial.writtenWord
-                                    , scrambledLetter = toItems nextScrabbleTrial.writtenWord
-                                }
-                            )
-                        |> E.nextTrial
+                    PsychTask.next
+                        { currentScrabbleState
+                            | userAnswer = nextTrial.writtenWord
+                            , scrambledLetter = toItems nextTrial.writtenWord
+                        }
+                        model.scrabbleTask
+              }
+            , Cmd.none
+            )
+
+        UserClickedNextTrialButtonInScrabble Nothing ->
+            ( { model
+                | scrabbleTask =
+                    PsychTask.next currentScrabbleState model.scrabbleTask
               }
             , Cmd.none
             )
 
         UserChangedInputInSynonym new ->
             ( { model | synonymTask = E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = new }) model.synonymTask }, Cmd.none )
+
+        UserUpdatedFirstNameFieldInLogIn new ->
+            ( { model | userFirstName = new }, Cmd.none )
+
+        UserUpdatedEmailFieldInLogIn new ->
+            ( { model | userEmail = new }, Cmd.none )
 
         UserValidatedInputInSynonym ->
             ( { model | synonymTask = model.synonymTask |> E.toggleFeedback }, Cmd.none )
@@ -1053,39 +1090,259 @@ update msg model =
             in
             ( { model
                 | dnd = dnd
-                , scrabbleTask = E.updateState (E.ScrabbleStateType { currentScrabbleState | scrambledLetter = items }) model.scrabbleTask
+                , scrabbleTask = PsychTask.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.scrabbleTask
               }
             , system.commands dnd
             )
 
-        WithTime (UserPressedKey evaluation) time ->
-            let
-                prevState =
-                    Acceptability.getState model.acceptabilityTask
+        WithTime message time ->
+            case message of
+                UserPressedKey evaluation ->
+                    let
+                        prevState =
+                            Acceptability.getState model.acceptabilityTask
 
-                trial =
-                    Acceptability.getCurrentTrial model.acceptabilityTask
-            in
-            ( { model
-                | acceptabilityTask =
-                    model.acceptabilityTask
-                        |> Acceptability.updateState { prevState | endedAt = Just time, evaluation = evaluation, trialuid = trial.uid }
-                        |> Acceptability.recordState
-                        |> Acceptability.nextTrial time
-              }
-            , Cmd.none
-            )
+                        trial =
+                            Acceptability.getCurrentTrial model.acceptabilityTask
+                    in
+                    ( { model
+                        | acceptabilityTask =
+                            model.acceptabilityTask
+                                |> Acceptability.updateState { prevState | endedAt = Just time, evaluation = evaluation, trialuid = trial.uid }
+                                |> Acceptability.recordState
+                                |> Acceptability.nextTrial time
+                      }
+                    , Cmd.none
+                    )
 
-        _ ->
+                _ ->
+                    ( model, Cmd.none )
+
+        RuntimeShuffledOptionsOrder newOrder ->
+            ( { model | optionsOrder = newOrder }, Cmd.none )
+
+        UserClickedRadioButtonInSpellingLvl1 newChoice ->
+            case currentSpellingState of
+                Just prevState ->
+                    ( { model
+                        | spellingLvl1 =
+                            PsychTask.update { prevState | userAnswer = newChoice } model.spellingLvl1
+                      }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        UserClickedStartMainloopInScrabble trials ->
+            case trials of
+                [] ->
+                    ( { model | scrabbleTask = PsychTask.Over }, Cmd.none )
+
+                x :: _ ->
+                    ( { model | scrabbleTask = PsychTask.startMain trials { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord } }, Cmd.none )
+
+        ServerRespondedWithSpellingTrials (Err _) ->
             ( model, Cmd.none )
 
+        PlaysoundInJS url ->
+            ( model, playAudio url )
 
+        UserClickedFeedbackButton context ->
+            case context of
+                Route.Scrabble ->
+                    ( { model | scrabbleTask = PsychTask.toggle model.scrabbleTask }, Cmd.none )
 
---generateTrials : List E.ScrabbleTrial -> Random.Generator (List E.ScrabbleTrial)
+                Route.Meaning ->
+                    ( { model
+                        | meaningTask =
+                            model.meaningTask
+                                |> E.toggleFeedback
+                      }
+                    , Cmd.none
+                    )
 
+                Route.Synonym ->
+                    ( { model
+                        | synonymTask =
+                            model.synonymTask
+                                |> E.toggleFeedback
+                      }
+                    , Cmd.none
+                    )
 
-generateTrials trials =
-    Debug.todo ""
+                Route.Translation ->
+                    ( { model
+                        | translationTask =
+                            model.translationTask
+                                |> E.toggleFeedback
+                      }
+                    , Cmd.none
+                    )
+
+                Route.SpellingLevel1 ->
+                    ( { model
+                        | spellingLvl1 =
+                            model.spellingLvl1
+                                |> PsychTask.toggle
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        UserClickedNextTrial context ->
+            case context of
+                Route.Scrabble ->
+                    ( { model | scrabbleTask = PsychTask.toggle model.scrabbleTask }, Cmd.none )
+
+                Route.Meaning ->
+                    ( { model
+                        | meaningTask =
+                            model.meaningTask
+                                |> E.toggleFeedback
+                                |> E.updateState (E.MeaningState { currentMeaningState | userAnswer = "" })
+                                |> E.nextTrial
+                      }
+                    , Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                    )
+
+                Route.Synonym ->
+                    ( { model
+                        | synonymTask =
+                            model.synonymTask
+                                |> E.toggleFeedback
+                                |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = "" })
+                                |> E.nextTrial
+                      }
+                    , Cmd.none
+                    )
+
+                Route.Translation ->
+                    ( { model
+                        | translationTask =
+                            model.translationTask
+                                |> E.toggleFeedback
+                                |> E.updateState (E.TranslationState { currentTranslationState | userAnswer = "" })
+                                |> E.nextTrial
+                      }
+                    , Cmd.none
+                    )
+
+                Route.SpellingLevel1 ->
+                    ( { model
+                        | spellingLvl1 =
+                            PsychTask.next SpellingLvl1.initState model.spellingLvl1
+
+                        -- ICI GROS BUG À VENIR, il faut reset uniquement la réponse du volontaire
+                      }
+                    , Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                    )
+
+                Route.Acceptability ->
+                    let
+                        state =
+                            Acceptability.getState model.acceptabilityTask
+                    in
+                    ( model
+                    , Task.perform (\time -> WithTime (UserClickedNextTrial model.route) time) Time.now
+                    )
+
+                _ ->
+                    Debug.todo "Other contexts when next trial is clicked"
+
+        UserClickedRadioButton context newChoice ->
+            case context of
+                Route.Meaning ->
+                    ( { model
+                        | meaningTask =
+                            model.meaningTask
+                                |> E.updateState (E.MeaningState { currentMeaningState | userAnswer = newChoice })
+                      }
+                    , Cmd.none
+                    )
+
+                Route.Translation ->
+                    ( { model
+                        | translationTask =
+                            model.translationTask
+                                |> E.updateState (E.TranslationState { currentMeaningState | userAnswer = newChoice })
+                      }
+                    , Cmd.none
+                    )
+
+                Route.Synonym ->
+                    ( { model
+                        | synonymTask =
+                            model.synonymTask
+                                |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = newChoice })
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    Debug.todo "other contexts when radio button is clicked"
+
+        CU2 message ->
+            case message of
+                CU2.UserClickedNextTrial ->
+                    ( { model | cuLvl2 = PsychTask.next CU2.initState model.cuLvl2 }, Cmd.none )
+
+                CU2.UserClickedToggleFeedback ->
+                    ( { model | cuLvl2 = PsychTask.toggle model.cuLvl2 }, Cmd.none )
+
+                CU2.UserClickedRadioButton newChoice ->
+                    ( { model | cuLvl2 = PsychTask.update { uid = "", userAnswer = newChoice } model.cuLvl2 }, Cmd.none )
+
+                CU2.ServerRespondedWith (Ok results) ->
+                    let
+                        trainingTrials =
+                            List.filter (\datum -> datum.isTraining) results
+
+                        mainTrials =
+                            List.filter (\datum -> not datum.isTraining) results
+                    in
+                    ( { model | cuLvl2 = PsychTask.startIntro trainingTrials mainTrials CU2.initState }, Cmd.none )
+
+                CU2.ServerRespondedWith (Err reason) ->
+                    Debug.todo ""
+
+                CU2.UserClickedStartIntro trials ->
+                    Debug.todo ""
+
+                CU2.UserClickedStartMain trials ->
+                    ( { model | cuLvl2 = PsychTask.startMain trials CU2.initState }, Cmd.none )
+
+        CU1 message ->
+            case message of
+                CU1.UserClickedNextTrial ->
+                    ( { model | cu1 = PsychTask.next CU1.initState model.cu1 }, Cmd.none )
+
+                CU1.UserClickedToggleFeedback ->
+                    ( { model | cu1 = PsychTask.toggle model.cu1 }, Cmd.none )
+
+                CU1.UserClickedRadioButton newChoice ->
+                    ( { model | cu1 = PsychTask.update { uid = "", userAnswer = newChoice } model.cu1 }, Cmd.none )
+
+                CU1.ServerRespondedWith (Ok results) ->
+                    let
+                        trainingTrials =
+                            List.filter (\datum -> datum.isTraining) results
+
+                        mainTrials =
+                            List.filter (\datum -> not datum.isTraining) results
+                    in
+                    ( { model | cu1 = PsychTask.startIntro trainingTrials mainTrials CU1.initState }, Cmd.none )
+
+                CU1.ServerRespondedWith (Err reason) ->
+                    ( model, Cmd.none )
+
+                CU1.UserClickedStartIntro trials ->
+                    Debug.todo ""
+
+                CU1.UserClickedStartMain trials ->
+                    ( { model | cu1 = PsychTask.startMain trials CU2.initState }, Cmd.none )
 
 
 toItems : String -> List E.KeyedItem
@@ -1127,25 +1384,6 @@ toEvaluation x =
             UserPressedKey Acceptability.NoEvaluation
 
 
-buildErrorMessage : Http.Error -> String
-buildErrorMessage httpError =
-    case httpError of
-        Http.BadUrl message ->
-            message
-
-        Http.Timeout ->
-            "Server is taking too long to respond. Please try again later."
-
-        Http.NetworkError ->
-            "Unable to reach server."
-
-        Http.BadStatus statusCode ->
-            "Request failed with status code: " ++ String.fromInt statusCode
-
-        Http.BadBody message ->
-            message
-
-
 fetchData : Route -> Cmd Msg
 fetchData route =
     case route of
@@ -1164,16 +1402,16 @@ fetchData route =
         Acceptability ->
             Acceptability.getTrialsFromServer ServerRespondedWithAcceptabilityTrials
 
-        CloudWords ->
-            Cmd.none
+        SpellingLevel1 ->
+            SpellingLvl1.getTrialsFromServer ServerRespondedWithSpellingTrials
 
-        ExperimentStart ->
-            Cmd.none
+        CULevel2 ->
+            CU2.getTrialsFromServer (\trials -> CU2 (CU2.ServerRespondedWith trials))
 
-        Home ->
-            Cmd.none
+        Route.CU1 ->
+            CU1.getTrialsFromServer (\trials -> CU1 (CU1.ServerRespondedWith trials))
 
-        NotFound ->
+        _ ->
             Cmd.none
 
 
@@ -1194,6 +1432,7 @@ containerStyles =
 
     --, Html.Styled.Attributes.style "justify-content" "center"
     , Html.Styled.Attributes.style "padding-top" "2em"
+    , class "font-bold text-lg"
     ]
 
 

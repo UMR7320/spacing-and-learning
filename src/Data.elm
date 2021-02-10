@@ -2,8 +2,27 @@ module Data exposing (..)
 
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
-import Json.Decode.Pipeline exposing (optional, required)
+import Json.Decode.Pipeline exposing (custom, optional, required)
 import Url.Builder
+
+
+buildErrorMessage : Http.Error -> String
+buildErrorMessage httpError =
+    case httpError of
+        Http.BadUrl message ->
+            message
+
+        Http.Timeout ->
+            "Server is taking too long to respond. Please try again later."
+
+        Http.NetworkError ->
+            "Unable to reach server."
+
+        Http.BadStatus statusCode ->
+            "Request failed with status code: " ++ String.fromInt statusCode
+
+        Http.BadBody message ->
+            message
 
 
 getTrialsFromServer_ : String -> String -> (Result Http.Error a -> msg) -> Decode.Decoder a -> Cmd msg
@@ -19,6 +38,34 @@ getTrialsFromServer_ baseName viewName callbackMsg decoder =
             Http.expectJson
                 callbackMsg
                 decoder
+        }
+
+
+decodeBool =
+    let
+        stringToBoolDecoder : String -> Decode.Decoder Bool
+        stringToBoolDecoder str =
+            case str of
+                "true" ->
+                    Decode.succeed True
+
+                _ ->
+                    Decode.succeed False
+    in
+    custom (Decode.field "isTraining" Decode.string |> Decode.andThen stringToBoolDecoder)
+
+
+sendUserData : Http.Body -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
+sendUserData payload callbackMsg decoder =
+    Http.post
+        { url =
+            buildQuery
+                { app = apps.spacing
+                , base = "users"
+                , view_ = "allUsers"
+                }
+        , body = payload
+        , expect = Http.expectJson callbackMsg decoder
         }
 
 

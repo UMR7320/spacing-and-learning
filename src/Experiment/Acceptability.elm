@@ -2,16 +2,13 @@ module Experiment.Acceptability exposing (..)
 
 import Array
 import Data exposing (decodeRecords)
-import Experiment.Experiment as E
 import Html.Styled exposing (Html, div, fieldset, h1, h2, h3, p, span, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Maybe
-import Progressbar
 import Time
-import View
 
 
 view : Task -> { nextTrialMsg : msg } -> Html msg

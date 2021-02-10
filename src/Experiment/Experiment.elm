@@ -1,5 +1,7 @@
 module Experiment.Experiment exposing (..)
 
+--import Experiment.Acceptability exposing (Trial)
+
 import Array
 import Css exposing (end)
 import Data
@@ -167,19 +169,19 @@ type Experiment
 updateState : StateType -> Experiment -> Experiment
 updateState newState exp =
     case ( newState, exp ) of
-        ( MeaningState newState_, DoingMeaning (MainLoop trials prevstate ntrial feedback) ) ->
+        ( MeaningState newState_, DoingMeaning (MainLoop trials _ ntrial feedback) ) ->
             DoingMeaning (MainLoop trials newState_ ntrial feedback)
 
-        ( TranslationState newState_, DoingTranslation (MainLoop trials prevstate ntrial feedback) ) ->
+        ( TranslationState newState_, DoingTranslation (MainLoop trials _ ntrial feedback) ) ->
             DoingTranslation (MainLoop trials newState_ ntrial feedback)
 
-        ( ScrabbleStateType newState_, DoingScrabble (MainLoop trials prevstate ntrial feedback) ) ->
+        ( ScrabbleStateType newState_, DoingScrabble (MainLoop trials _ ntrial feedback) ) ->
             DoingScrabble (MainLoop trials newState_ ntrial feedback)
 
-        ( SynonymStateType newState_, DoingSynonym (MainLoop trials prevstate ntrial feedback) ) ->
+        ( SynonymStateType newState_, DoingSynonym (MainLoop trials _ ntrial feedback) ) ->
             DoingSynonym (MainLoop trials newState_ ntrial feedback)
 
-        ( SynonymStateType newState_, DoingSynonym (Intro trials prevstate ntrial feedback instructions) ) ->
+        ( SynonymStateType newState_, DoingSynonym (Intro trials _ ntrial feedback instructions) ) ->
             DoingSynonym (Intro trials newState_ ntrial feedback instructions)
 
         _ ->
@@ -292,11 +294,9 @@ defaultTrial =
     { uid = "MISSING"
     , writtenWord = "MISSING"
     , definition = "MISSING"
-    , question = "MISSING"
     , option1 = "MISSING"
     , option2 = "MISSING"
     , option3 = "MISSING"
-    , option4 = "DEFAULT"
     , feedbackCorrect = "MISSING"
     , feedbackIncorrect = "MISSING"
     }
@@ -356,11 +356,9 @@ type alias TrialMeaning =
     { uid : String
     , writtenWord : String
     , definition : String
-    , question : String
     , option1 : String
     , option2 : String
     , option3 : String
-    , option4 : String
     , feedbackCorrect : String
     , feedbackIncorrect : String
     }
@@ -410,6 +408,7 @@ type alias SynonymTrial =
     , stimulus : String
     , post : String
     , isTraining : Bool
+    , radical : String
     }
 
 
@@ -418,3 +417,7 @@ type alias SynonymState =
     , userUID : String
     , userAnswer : String
     }
+
+
+
+--Spelling

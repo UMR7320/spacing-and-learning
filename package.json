@@ -3,18 +3,13 @@
   "version": "1.0.0",
   "description": "A psychological experiment to better understand the learning of new syntaxic patterns in English.",
   "author": "Yoelis Acourt",
-  "contributors": [
-    {
-      "name": "Cédric Soulas",
-      "email": "soulascedric@gmail.com",
-      "url": "https://github.com/cedricss/elm-batteries"
-    }
-  ],
+  "contributors": [],
   "private": true,
   "main": "index.js",
   "dependencies": {
     "airtable": "^0.10.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "howler": "^2.2.1"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^2.3.0",

@@ -1,34 +1,98 @@
 module Experiment.Scrabble exposing (..)
 
 import Data
-import Experiment.Experiment as Experiment
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 
 
-getTrialsFromServer : (Result Error (List Experiment.ScrabbleTrial) -> msg) -> Cmd msg
+getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
 getTrialsFromServer msgHandler =
-    Experiment.getTrialsFromServer_ "Scrabble" msgHandler decodeTranslationInput
+    Data.getTrialsFromServer_ "input" "SpellingLvl2" msgHandler decodeTranslationInput
 
 
-decodeTranslationInput : Decoder (List Experiment.ScrabbleTrial)
+decodeTranslationInput : Decoder (List Trial)
 decodeTranslationInput =
     let
         decoder =
-            Decode.succeed Experiment.ScrabbleTrial
+            Decode.succeed Trial
                 |> required "UID" string
                 |> required "Word_Text" string
                 |> required "Word_Audio" Data.decodeAudioFiles
+                |> Data.decodeBool
+                |> required "Word_Text" string
     in
     Data.decodeRecords decoder
 
 
-initState : Experiment.ScrabbleState
+initState : State
 initState =
-    Experiment.ScrabbleState "DefaultUid" "" []
+    State "DefaultUid" "" []
 
 
-defaultTrial : Experiment.ScrabbleTrial
+defaultTrial : Trial
 defaultTrial =
-    Experiment.ScrabbleTrial "defaultTrial" "defaultTrial" (Data.AudioFile "" "")
+    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") False ""
+
+
+type alias Trial =
+    { uid : String
+    , writtenWord : String
+    , audioWord : Data.AudioFile
+    , isTraining : Bool
+    , target : String
+    }
+
+
+type alias State =
+    { uid : String
+    , userAnswer : String
+    , scrambledLetter : List KeyedItem
+    }
+
+
+type alias Item =
+    String
+
+
+type alias KeyedItem =
+    ( String, Item )
+
+
+dedupeHelper : List String -> List ( String, Int ) -> List ( String, Int )
+dedupeHelper letters acc =
+    let
+        lettersInAcc =
+            List.map Tuple.first acc
+
+        countRecLetters target =
+            List.foldr
+                (\letter acc_ ->
+                    if target == letter then
+                        acc_ + 1
+
+                    else
+                        acc_
+                )
+                1
+                lettersInAcc
+    in
+    case letters of
+        [] ->
+            acc |> List.reverse
+
+        x :: xs ->
+            if List.member x lettersInAcc then
+                dedupeHelper xs <|
+                    ( x
+                    , countRecLetters x
+                    )
+                        :: acc
+
+            else
+                dedupeHelper xs <| ( x, 1 ) :: acc
+
+
+dedupe : List String -> List ( String, Int )
+dedupe letters =
+    dedupeHelper letters []

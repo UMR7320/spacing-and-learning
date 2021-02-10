@@ -59,18 +59,17 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                             )
                         ]
                         (if state.userAnswer == trial.definition then
-                            [ text "✔️ Correct Answer ! " ]
+                            [ text ("✔️ " ++ trial.feedbackIncorrect) ]
 
                          else
-                            [ text "❌ The correct definition is : "
-                            , span [ class "font-medium italic" ] [ text trial.definition ]
+                            [ text ("❌ " ++ trial.feedbackCorrect)
                             ]
                         )
 
                 viewQuestion =
                     h3 []
                         [ p []
-                            [ text <| String.fromInt (trialn + 1) ++ ". " ++ "Choose the best definition for the word : "
+                            [ text <| String.fromInt (trialn + 1) ++ ". "
                             , span [ class "italic" ] [ text trial.writtenWord ]
                             ]
                         ]
@@ -88,7 +87,7 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                     , View.button <|
                         if not isfeedback then
                             { message = toggleFeedbackMsg
-                            , txt = "Is it correct?"
+                            , txt = "Check my answer"
                             , isDisabled = String.isEmpty state.userAnswer
                             }
 
@@ -162,7 +161,7 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                     , View.button <|
                         if not feedback then
                             { message = toggleFeedbackMsg
-                            , txt = "Is it correct?"
+                            , txt = "Check my answer"
                             , isDisabled = String.isEmpty state.userAnswer
                             }
 
@@ -227,7 +226,7 @@ view exp options toggleFeedbackMsg nextTrialMsg =
                     , View.button <|
                         if not feedback then
                             { message = toggleFeedbackMsg
-                            , txt = "Is it correct?"
+                            , txt = "Check my answer"
                             , isDisabled = String.isEmpty state.userAnswer
                             }
 
@@ -267,11 +266,9 @@ decodeMeaningInput =
                 |> required "UID" string
                 |> required "Word_Text" string
                 |> required "Definition" string
-                |> required "Question_Meaning" string
                 |> optional "Distractor_1_Meaning" string "MISSING"
                 |> optional "Distractor_2_Meaning" string "MISSING"
                 |> optional "Distractor_3_Meaning" string "MISSING"
-                |> optional "Distractor_4_Meaning" string "Missing"
                 |> required "Feedback_Incorrect_Meaning" string
                 |> required "Feedback_Correct_Meaning" string
     in
@@ -293,11 +290,9 @@ defaultTrial =
     { uid = "MISSING"
     , writtenWord = "MISSING"
     , definition = "MISSING"
-    , question = "MISSING"
     , option1 = "MISSING"
     , option2 = "MISSING"
     , option3 = "MISSING"
-    , option4 = "Default"
     , feedbackCorrect = "MISSING"
     , feedbackIncorrect = "MISSING"
     }

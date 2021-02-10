@@ -4,7 +4,7 @@ module Route exposing
     )
 
 import Url
-import Url.Parser as Parser exposing ((</>), Parser, map, oneOf, s, top)
+import Url.Parser as Parser exposing ((</>), Parser, int, map, oneOf, s, top)
 
 
 type Route
@@ -17,6 +17,16 @@ type Route
     | Acceptability
     | NotFound
     | Synonym
+    | LogIn
+    | SpellingLevel1
+    | CULevel2
+    | CU1
+
+
+type Level
+    = Level1
+    | Level2
+    | Level3
 
 
 parser : Parser (Route -> a) a
@@ -31,6 +41,10 @@ parser =
         , map CloudWords (s "cloudwords")
         , map Synonym (s "synonym")
         , map Acceptability (s "acceptability")
+        , map LogIn (s "login")
+        , map SpellingLevel1 (s "spelling")
+        , map CULevel2 (s "cu-lvl2")
+        , map CU1 (s "cu1")
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)

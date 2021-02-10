@@ -7,15 +7,25 @@ module View exposing
     , navIn
     , navOut
     , notFound
+    , pct
     , radio
+    , renderTask
     , sentenceInSynonym
+    , shuffledOptions
     , simpleAudioPlayer
+    , tooltip
+    , viewFeedbackInSingleChoice
+    , viewInstructions
+    , viewQuestion
+    , viewTraining
     )
 
+import Array
 import Css
 import Css.Global
 import Css.Transitions
 import Experiment.Experiment as E
+import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
     exposing
@@ -32,6 +42,178 @@ import Html.Styled.Attributes
         , type_
         )
 import Html.Styled.Events exposing (onClick)
+import Icons
+import PsychTask
+
+
+renderTask :
+    { task : PsychTask.Task t s
+    , infos : Maybe ExperimentInfo.Task
+    , optionsOrder : Maybe (List comparable)
+    , nextTrialMsg : msg
+    , userClickedAudio : Maybe (String -> msg)
+    , radioMsg : Maybe (String -> msg)
+    , toggleFeedbackMsg : msg
+    , startMainMsg : List t -> msg
+    , inputChangedMsg : Maybe (String -> msg)
+    }
+    -> List (Html msg)
+    -> List (Html msg)
+    -> List (Html msg)
+    -> Html msg
+renderTask { task, infos, startMainMsg } intro main error =
+    case ( task, infos ) of
+        ( _, Nothing ) ->
+            div [] error
+
+        ( PsychTask.NotStartedYet, Just info ) ->
+            div [] [ text "loading" ]
+
+        ( PsychTask.Intr { trainingTrials, mainTrials, current, state, feedback, history }, Just info ) ->
+            case current of
+                Just trial ->
+                    div [] intro
+
+                Nothing ->
+                    div []
+                        [ text "Intro is over"
+                        , button
+                            { message = startMainMsg mainTrials
+                            , isDisabled = False
+                            , txt = "Start"
+                            }
+                        ]
+
+        ( PsychTask.IntroOver, Just info ) ->
+            text "L'entrainement est fini"
+
+        ( PsychTask.Main { mainTrials, current, state, feedback, history }, Just info ) ->
+            case current of
+                Just trial ->
+                    div []
+                        main
+
+                Nothing ->
+                    text info.end
+
+        ( PsychTask.Over, Just info ) ->
+            text "I'm over"
+
+
+shuffledOptions state fb radioMsg trial optionsOrder =
+    let
+        option id =
+            radio
+                id
+                (state.userAnswer == id)
+                (isCorrect id)
+                fb
+                (radioMsg id)
+
+        isCorrect optionN =
+            optionN == trial.target
+
+        options =
+            [ option trial.distractor1
+            , option trial.distractor2
+            , option trial.distractor3
+            , option trial.target
+            ]
+
+        ordoredOptions =
+            options
+                |> List.map2 Tuple.pair optionsOrder
+                |> List.sortBy Tuple.first
+                |> List.map Tuple.second
+    in
+    ordoredOptions
+
+
+viewQuestion : Int -> { a | target : String } -> String -> Html msg
+viewQuestion trialn trial instructions =
+    h3 []
+        [ p []
+            [ text <| String.fromInt (trialn + 1) ++ ". " ++ instructions
+            , span [ class "italic" ] [ text <| trial.target ]
+            ]
+        ]
+
+
+viewFeedbackInSingleChoice : Bool -> { a | userAnswer : String } -> { b | target : String } -> Html msg
+viewFeedbackInSingleChoice isVisible state trial =
+    p
+        [ class
+            ("font-medium py-4 w-full"
+                ++ " "
+                ++ (if isVisible then
+                        "visible"
+
+                    else
+                        "invisible"
+                   )
+            )
+        ]
+        (if state.userAnswer == trial.target then
+            [ text "✔️ Correct Answer ! " ]
+
+         else
+            [ text "❌ The correct definition is : "
+            , span [ class "font-medium italic" ] [ text trial.target ]
+            ]
+        )
+
+
+
+--TRAINING
+
+
+trainingBox : List (Html msg) -> Html msg
+trainingBox =
+    div [ class "grid grid-cols-6 mx-auto w-full h-full border-4 border-green-500 border-rounded-lg border-dashed " ]
+
+
+viewInstructions : String -> Html msg
+viewInstructions instructions =
+    div [ class "flex flex-col" ]
+        [ h2 [ class "font-bold" ] [ text "Instructions" ]
+        , p [ class "pt-8 pb-8 font-medium" ]
+            [ pre [] [ text instructions ]
+            ]
+        , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
+        ]
+
+
+trainingWheels : Int -> String -> String -> Html msg
+trainingWheels trialn radical target =
+    let
+        helpSentence =
+            div [ class "flex flex-col pt-4 italic text-xl " ]
+                [ p []
+                    [ text "The synonym of "
+                    , span [ class "font-bold" ] [ text radical ]
+                    , text " is "
+                    , span [ class "font-bold" ] [ text target ]
+                    ]
+                , span [] [ text "Type it here and you're good to go!" ]
+                ]
+    in
+    case trialn of
+        0 ->
+            helpSentence
+
+        _ ->
+            div [] []
+
+
+viewTraining : String -> List (Html msg) -> Html msg
+viewTraining instructions content =
+    div [ class "flex flex-col" ]
+        [ viewInstructions instructions, trainingBox content ]
+
+
+pct : Int -> List a -> Float
+pct trialn trials =
+    (toFloat trialn / toFloat (List.length trials)) * 100
 
 
 theme : { headerHeight : Css.Rem }
@@ -40,6 +222,32 @@ theme =
 
 
 
+{--
+feedback_ : { attempt : String, stimulus : String, target : String } -> String -> Html msg
+feedback_ { attempt, stimulus, target } str =
+    let
+        feedback_ =
+            String.words str
+
+        injectVariable word =
+            case word of
+                "attempt" ->
+                    text attempt
+
+                "stimulus" ->
+                    text stimulus
+
+                "target" ->
+                    text target
+
+                _ ->
+                    text word
+    in
+    feedback_
+        |> List.map injectVariable
+        |> div []
+
+--}
 -- HEADER
 
 
@@ -178,7 +386,6 @@ radio value isChecked isCorrect feedbackMode msg =
                 , name "definition-choice"
                 , onClick msg
                 , Html.Styled.Attributes.disabled feedbackMode
-                , autofocus isCorrect
                 ]
                 []
             , span [ class "pl-4 " ] [ text value ]
@@ -186,8 +393,8 @@ radio value isChecked isCorrect feedbackMode msg =
         ]
 
 
-floatingLabel : String -> String -> (String -> msg) -> Html msg
-floatingLabel stim val msg =
+floatingLabel : String -> String -> (String -> msg) -> Bool -> Html msg
+floatingLabel stim val msg givenIsFeedback =
     Html.Styled.div
         [ Html.Styled.Attributes.css
             [ Css.position Css.relative
@@ -203,6 +410,7 @@ floatingLabel stim val msg =
         [ Html.Styled.input
             [ Html.Styled.Attributes.class "floating-label__input"
             , Html.Styled.Attributes.placeholder stim
+            , Html.Styled.Attributes.readonly givenIsFeedback
             , Html.Styled.Attributes.value val
             , Html.Styled.Attributes.css
                 [ Css.padding <| Css.px 8
@@ -224,17 +432,70 @@ floatingLabel stim val msg =
                     [ Css.Transitions.opacity 200
                     , Css.Transitions.transform 200
                     ]
+                , Css.color (Css.hex "b6b6b6")
                 ]
             ]
             [ Html.Styled.text stim ]
         ]
 
 
-sentenceInSynonym : { a | pre : String, stimulus : String, post : String } -> { b | userAnswer : String } -> (String -> msg) -> Html msg
-sentenceInSynonym t state msg =
+tooltip : String -> Html msg
+tooltip text_ =
+    Html.Styled.div
+        [ Html.Styled.Attributes.css
+            [ Css.position Css.relative
+            , Css.hover
+                [ Css.Global.descendants
+                    [ Css.Global.selector ".tooltip__content"
+                        [ Css.opacity <| Css.num 1
+                        , Css.pointerEventsAll
+                        ]
+                    ]
+                ]
+            ]
+        ]
+        [ Html.Styled.div
+            [ Html.Styled.Attributes.class "tooltip__content"
+            , Html.Styled.Attributes.css
+                [ Css.opacity Css.zero
+                , Css.position Css.absolute
+                , Css.backgroundColor <| Css.hex "fffff"
+                , Css.width <| Css.px 200
+                , Css.color (Css.hex "333333")
+                , Css.bottom <| Css.pct 100
+
+                --, Css.right <| Css.pct 50
+                --, Css.transform <| Css.translate2 (Css.pct -50) (Css.px -8)
+                , Css.Transitions.transition
+                    [ Css.Transitions.opacity 200 ]
+                , Css.after
+                    [ Css.property "content" " "
+                    , Css.position Css.absolute
+                    , Css.border3 (Css.px 8) Css.solid Css.transparent
+                    , Css.borderTopColor <| Css.hex "333333"
+                    , Css.bottom Css.zero
+
+                    --, Css.left <| Css.pct 50
+                    --, Css.transform <| Css.translate2 (Css.pct -50) (Css.px 16)
+                    , Css.height Css.zero
+                    , Css.width Css.zero
+                    , Css.Transitions.transition
+                        [ Css.Transitions.opacity 200 ]
+                    ]
+                ]
+            ]
+            [ div [ class "border-2 p-2 bg-white" ] [ text text_ ] ]
+        , Html.Styled.div
+            [ Html.Styled.Attributes.class "tooltip__trigger" ]
+            [ div [ class "" ] [ Html.Styled.fromUnstyled Icons.helpCircle ] ]
+        ]
+
+
+sentenceInSynonym : { a | pre : String, stimulus : String, post : String } -> { b | userAnswer : String } -> (String -> msg) -> Bool -> Html msg
+sentenceInSynonym t state msg feedback_ =
     div [ class "flex w-full border-2 p-4  space-x-4 text-xl text-center items-center" ]
         [ span [] [ text t.pre ]
-        , floatingLabel t.stimulus state.userAnswer msg
+        , floatingLabel t.stimulus state.userAnswer msg feedback_
         , span [] [ text t.post ]
         ]
 
