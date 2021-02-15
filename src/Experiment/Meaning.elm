@@ -1,11 +1,11 @@
 module Experiment.Meaning exposing (..)
 
-import Array
 import Browser
 import Css exposing (visibility)
 import Data exposing (decodeRecords)
 import Experiment.Experiment as E
 import Experiment.Synonym as Synonym
+import ExperimentInfo
 import Html.Styled
     exposing
         ( Html
@@ -28,241 +28,27 @@ import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Progressbar
+import PsychTask
+import String.Interpolate exposing (interpolate)
 import Url exposing (Url)
 import Url.Builder
 import View
 
 
-view : E.Experiment -> List (Html msg) -> msg -> msg -> Html msg
-view exp options toggleFeedbackMsg nextTrialMsg =
-    case exp of
-        E.DoingMeaning (E.MainLoop trials state trialn isfeedback) ->
-            let
-                trial =
-                    Array.get trialn (Array.fromList trials)
-                        |> Maybe.withDefault defaultTrial
-
-                pct =
-                    (toFloat trialn / toFloat (List.length trials)) * 100
-
-                viewFeedback isVisible =
-                    p
-                        [ class
-                            ("font-medium py-4 w-full"
-                                ++ " "
-                                ++ (if isVisible then
-                                        "visible"
-
-                                    else
-                                        "invisible"
-                                   )
-                            )
-                        ]
-                        (if state.userAnswer == trial.definition then
-                            [ text ("✔️ " ++ trial.feedbackIncorrect) ]
-
-                         else
-                            [ text ("❌ " ++ trial.feedbackCorrect)
-                            ]
-                        )
-
-                viewQuestion =
-                    h3 []
-                        [ p []
-                            [ text <| String.fromInt (trialn + 1) ++ ". "
-                            , span [ class "italic" ] [ text trial.writtenWord ]
-                            ]
-                        ]
-            in
-            div [ class "flex flex-wrap items-center" ]
-                [ div [ class "mr-8" ]
-                    [ Progressbar.progressBar pct
-                    , viewQuestion
-                    , div
-                        [ class "pt-6 max-w-xl ", disabled isfeedback ]
-                        [ fieldset
-                            []
-                            options
-                        ]
-                    , View.button <|
-                        if not isfeedback then
-                            { message = toggleFeedbackMsg
-                            , txt = "Check my answer"
-                            , isDisabled = String.isEmpty state.userAnswer
-                            }
-
-                        else
-                            { message = nextTrialMsg
-                            , txt = "Next "
-                            , isDisabled = False
-                            }
-                    , div [ class "mt-4 max-w-xl w-full" ] [ viewFeedback isfeedback ]
-                    ]
-                ]
-
-        E.DoingMeaning (E.End txt) ->
-            div []
-                [ h1 [] [ text "Merci de votre participation !🎉" ]
-                , p
-                    [ class "max-w-xl text-xl mb-8" ]
-                    [ text "Vous trouverez dans l'e-mail que vous avez reçu les liens pour la suite de l'expérience."
-                    ]
-                ]
-
-        E.DoingTranslation (E.MainLoop trials state trialn feedback) ->
-            let
-                trial =
-                    Array.get trialn (Array.fromList trials)
-                        |> Maybe.withDefault E.defaultTranslationTrial
-
-                pct =
-                    (toFloat trialn / toFloat (List.length trials)) * 100
-
-                viewFeedback isVisible =
-                    p
-                        [ class
-                            ("font-medium py-4 w-full"
-                                ++ " "
-                                ++ (if isVisible then
-                                        "visible"
-
-                                    else
-                                        "invisible"
-                                   )
-                            )
-                        ]
-                        (if state.userAnswer == trial.translation1 || state.userAnswer == trial.translation2 then
-                            [ text "✔️ Correct Answer ! " ]
-
-                         else
-                            [ text "❌ The correct translation is : "
-                            , span [ class "font-medium italic" ] [ text trial.translation1 ]
-                            ]
-                        )
-
-                viewQuestion =
-                    h3 []
-                        [ p []
-                            [ text <| String.fromInt (trialn + 1) ++ ". " ++ "Choose the best translation for the word: "
-                            , span [ class "italic" ] [ text trial.word ]
-                            ]
-                        ]
-            in
-            div [ class "flex flex-wrap items-center" ]
-                [ div [ class "mr-8" ]
-                    [ Progressbar.progressBar pct
-                    , viewQuestion
-                    , div
-                        [ class "pt-6 max-w-xl ", disabled feedback ]
-                        [ fieldset
-                            []
-                            options
-                        ]
-                    , View.button <|
-                        if not feedback then
-                            { message = toggleFeedbackMsg
-                            , txt = "Check my answer"
-                            , isDisabled = String.isEmpty state.userAnswer
-                            }
-
-                        else
-                            { message = nextTrialMsg
-                            , txt = "Next "
-                            , isDisabled = False
-                            }
-                    , div [ class "mt-4 max-w-xl w-full" ] [ viewFeedback feedback ]
-                    ]
-                ]
-
-        E.DoingSynonym (E.MainLoop trials state trialn feedback) ->
-            let
-                trial =
-                    Array.get trialn (Array.fromList trials)
-                        |> Maybe.withDefault Synonym.defaultTrial
-
-                pct =
-                    (toFloat trialn / toFloat (List.length trials)) * 100
-
-                viewFeedback isVisible =
-                    p
-                        [ class
-                            ("font-medium py-4 w-full"
-                                ++ " "
-                                ++ (if isVisible then
-                                        "visible"
-
-                                    else
-                                        "invisible"
-                                   )
-                            )
-                        ]
-                        (if state.userAnswer == trial.target then
-                            [ text "✔️ Correct Answer ! " ]
-
-                         else
-                            [ text "❌ The correct translation is : "
-                            , span [ class "font-medium italic" ] [ text trial.target ]
-                            ]
-                        )
-
-                viewQuestion =
-                    h3 []
-                        [ p []
-                            [ text <| String.fromInt (trialn + 1) ++ ". " ++ "Choose the best synonym for the word: "
-                            , span [ class "italic" ] [ text <| trial.pre ++ trial.stimulus ++ trial.post ]
-                            ]
-                        ]
-            in
-            div [ class "flex flex-wrap items-center" ]
-                [ div [ class "mr-8" ]
-                    [ Progressbar.progressBar pct
-                    , viewQuestion
-                    , div
-                        [ class "pt-6 max-w-xl ", disabled feedback ]
-                        [ fieldset
-                            []
-                            options
-                        ]
-                    , View.button <|
-                        if not feedback then
-                            { message = toggleFeedbackMsg
-                            , txt = "Check my answer"
-                            , isDisabled = String.isEmpty state.userAnswer
-                            }
-
-                        else
-                            { message = nextTrialMsg
-                            , txt = "Next "
-                            , isDisabled = False
-                            }
-                    , div [ class "mt-4 max-w-xl w-full" ] [ viewFeedback feedback ]
-                    ]
-                ]
-
-        _ ->
-            div [] [ text "Todo : Intro, Pause ??" ]
---}
+type Msg
+    = UserClickedNextTrial
+    | UserClickedToggleFeedback
+    | UserClickedRadioButton String
+    | ServerRespondedWith (Result Http.Error (List Trial))
+    | UserClickedStartIntro (List Trial)
+    | UserClickedStartMain (List Trial)
 
 
-getTrial : Int -> List input -> input -> input
-getTrial trial trials_ default =
-    let
-        trials =
-            Array.fromList trials_
-    in
-    case Array.get trial trials of
-        Nothing ->
-            default
-
-        Just x ->
-            x
-
-
-decodeMeaningInput : Decoder (List E.TrialMeaning)
+decodeMeaningInput : Decoder (List Trial)
 decodeMeaningInput =
     let
         decoder =
-            Decode.succeed E.TrialMeaning
+            Decode.succeed Trial
                 |> required "UID" string
                 |> required "Word_Text" string
                 |> required "Definition" string
@@ -271,28 +57,175 @@ decodeMeaningInput =
                 |> optional "Distractor_3_Meaning" string "MISSING"
                 |> required "Feedback_Incorrect_Meaning" string
                 |> required "Feedback_Correct_Meaning" string
+                |> Data.decodeBool "isTraining"
     in
     decodeRecords decoder
 
 
-getTrialsFromServer : (Result Http.Error (List E.TrialMeaning) -> msg) -> Cmd msg
+getTrialsFromServer : (Result Http.Error (List Trial) -> msg) -> Cmd msg
 getTrialsFromServer callbackMsg =
-    E.getTrialsFromServer_ "Meaning" callbackMsg decodeMeaningInput
+    Data.getTrialsFromServer_ "input" "Meaning" callbackMsg decodeMeaningInput
 
 
-initState : E.StateMeaning
+initState : State
 initState =
-    E.StateMeaning "DefaultTrialUID" "DefaultUserUID" ""
+    State "DefaultTrialUID" ""
 
 
-defaultTrial : E.TrialMeaning
+defaultTrial : Trial
 defaultTrial =
     { uid = "MISSING"
     , writtenWord = "MISSING"
-    , definition = "MISSING"
-    , option1 = "MISSING"
-    , option2 = "MISSING"
-    , option3 = "MISSING"
+    , target = "MISSING"
+    , distractor1 = "MISSING"
+    , distractor2 = "MISSING"
+    , distractor3 = "MISSING"
     , feedbackCorrect = "MISSING"
     , feedbackIncorrect = "MISSING"
+    , isTraining = False
     }
+
+
+type alias Trial =
+    { uid : String
+    , writtenWord : String
+    , target : String
+    , distractor1 : String
+    , distractor2 : String
+    , distractor3 : String
+    , feedbackCorrect : String
+    , feedbackIncorrect : String
+    , isTraining : Bool
+    }
+
+
+type alias State =
+    { uid : String
+    , userAnswer : String
+    }
+
+
+viewQuestion word trialn =
+    h3 []
+        [ p []
+            [ text <| String.fromInt (trialn + 1) ++ ". "
+            , span [ class "italic" ] [ text word ]
+            ]
+        ]
+
+
+view :
+    { task : PsychTask.Task Trial State
+    , infos : Maybe ExperimentInfo.Task
+    , radioMsg : String -> msg
+    , toggleFeedbackMsg : msg
+    , nextTrialMsg : msg
+    , optionsOrder : List comparable
+    , startMainMsg : List Trial -> msg
+    }
+    -> Html msg
+view task =
+    case ( task.task, task.infos ) of
+        ( _, Nothing ) ->
+            div [] [ text "Error : I can't find the task's infos" ]
+
+        ( PsychTask.Intr data, Just info ) ->
+            case data.current of
+                Just trial ->
+                    View.viewTraining info.instructions
+                        [ p [ class "col-start-2 col-span-4" ] [ viewQuestion trial.writtenWord (List.length data.history) ]
+                        , div [ class "p-2 col-start-2 col-span-4" ]
+                            [ div
+                                [ class "pt-6 max-w-xl ", disabled data.feedback ]
+                              <|
+                                View.shuffledOptions
+                                    data.state
+                                    data.feedback
+                                    task.radioMsg
+                                    trial
+                                    task.optionsOrder
+                            ]
+                        , div [ class "col-start-2 col-span-4" ] <|
+                            if data.feedback then
+                                [ text <|
+                                    if data.state.userAnswer == trial.target then
+                                        interpolate info.feedback_correct [ trial.target ]
+
+                                    else
+                                        interpolate info.feedback_incorrect [ trial.target ]
+                                , View.button
+                                    { message = task.nextTrialMsg
+                                    , isDisabled = False
+                                    , txt = "Next Training Item"
+                                    }
+                                ]
+
+                            else
+                                [ View.button
+                                    { message = task.toggleFeedbackMsg
+                                    , isDisabled = False
+                                    , txt = "Check my answer"
+                                    }
+                                ]
+                        ]
+
+                Nothing ->
+                    div []
+                        [ View.button
+                            { message = task.startMainMsg data.mainTrials
+                            , isDisabled = False
+                            , txt = "Start"
+                            }
+                        ]
+
+        ( PsychTask.IntroOver, Just info ) ->
+            div [] []
+
+        ( PsychTask.Main data, Just info ) ->
+            case data.current of
+                Just trial ->
+                    div []
+                        [ p [ class "col-start-2 col-span-4" ] [ viewQuestion trial.writtenWord (List.length data.history) ]
+                        , div [ class "p-2 col-start-2 col-span-4" ]
+                            [ div
+                                [ class "pt-6 max-w-xl ", disabled data.feedback ]
+                              <|
+                                View.shuffledOptions
+                                    data.state
+                                    data.feedback
+                                    task.radioMsg
+                                    trial
+                                    task.optionsOrder
+                            ]
+                        , div [ class "col-start-2 col-span-4" ] <|
+                            if data.feedback then
+                                [ text <|
+                                    if data.state.userAnswer == trial.target then
+                                        interpolate info.feedback_correct [ trial.target ]
+
+                                    else
+                                        interpolate info.feedback_incorrect [ trial.target ]
+                                , View.button
+                                    { message = task.nextTrialMsg
+                                    , isDisabled = False
+                                    , txt = "Next Item"
+                                    }
+                                ]
+
+                            else
+                                [ View.button
+                                    { message = task.toggleFeedbackMsg
+                                    , isDisabled = False
+                                    , txt = "Check my answer"
+                                    }
+                                ]
+                        ]
+
+                Nothing ->
+                    div [] []
+
+        ( PsychTask.Over, Just info ) ->
+            div [] []
+
+        ( PsychTask.NotStartedYet, Just info ) ->
+            div [] []

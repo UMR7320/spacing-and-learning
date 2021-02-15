@@ -5297,6 +5297,206 @@ function _Time_getZoneName()
 		callback(_Scheduler_succeed(name));
 	});
 }
+
+
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+
+
+
+
+// VIRTUAL-DOM WIDGETS
+
+
+var _Markdown_toHtml = F3(function(options, factList, rawMarkdown)
+{
+	return _VirtualDom_custom(
+		factList,
+		{
+			a: options,
+			b: rawMarkdown
+		},
+		_Markdown_render,
+		_Markdown_diff
+	);
+});
+
+
+
+// WIDGET IMPLEMENTATION
+
+
+function _Markdown_render(model)
+{
+	return A2(_Markdown_replace, model, _VirtualDom_doc.createElement('div'));
+}
+
+
+function _Markdown_diff(x, y)
+{
+	return x.b === y.b && x.a === y.a
+		? false
+		: _Markdown_replace(y);
+}
+
+
+var _Markdown_replace = F2(function(model, div)
+{
+	div.innerHTML = _Markdown_marked(model.b, _Markdown_formatOptions(model.a));
+	return div;
+});
+
+
+
+// ACTUAL MARKDOWN PARSER
+
+
+var _Markdown_marked = function() {
+	// catch the `marked` object regardless of the outer environment.
+	// (ex. a CommonJS module compatible environment.)
+	// note that this depends on marked's implementation of environment detection.
+	var module = {};
+	var exports = module.exports = {};
+
+	/**
+	 * marked - a markdown parser
+	 * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
+	 * https://github.com/chjj/marked
+	 * commit cd2f6f5b7091154c5526e79b5f3bfb4d15995a51
+	 */
+	(function(){var block={newline:/^\n+/,code:/^( {4}[^\n]+\n*)+/,fences:noop,hr:/^( *[-*_]){3,} *(?:\n+|$)/,heading:/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,nptable:noop,lheading:/^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,blockquote:/^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,list:/^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,html:/^ *(?:comment *(?:\n|\s*$)|closed *(?:\n{2,}|\s*$)|closing *(?:\n{2,}|\s*$))/,def:/^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,table:noop,paragraph:/^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,text:/^[^\n]+/};block.bullet=/(?:[*+-]|\d+\.)/;block.item=/^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;block.item=replace(block.item,"gm")(/bull/g,block.bullet)();block.list=replace(block.list)(/bull/g,block.bullet)("hr","\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))")("def","\\n+(?="+block.def.source+")")();block.blockquote=replace(block.blockquote)("def",block.def)();block._tag="(?!(?:"+"a|em|strong|small|s|cite|q|dfn|abbr|data|time|code"+"|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo"+"|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b";block.html=replace(block.html)("comment",/<!--[\s\S]*?-->/)("closed",/<(tag)[\s\S]+?<\/\1>/)("closing",/<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)(/tag/g,block._tag)();block.paragraph=replace(block.paragraph)("hr",block.hr)("heading",block.heading)("lheading",block.lheading)("blockquote",block.blockquote)("tag","<"+block._tag)("def",block.def)();block.normal=merge({},block);block.gfm=merge({},block.normal,{fences:/^ *(`{3,}|~{3,})[ \.]*(\S+)? *\n([\s\S]*?)\s*\1 *(?:\n+|$)/,paragraph:/^/,heading:/^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/});block.gfm.paragraph=replace(block.paragraph)("(?!","(?!"+block.gfm.fences.source.replace("\\1","\\2")+"|"+block.list.source.replace("\\1","\\3")+"|")();block.tables=merge({},block.gfm,{nptable:/^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,table:/^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/});function Lexer(options){this.tokens=[];this.tokens.links={};this.options=options||marked.defaults;this.rules=block.normal;if(this.options.gfm){if(this.options.tables){this.rules=block.tables}else{this.rules=block.gfm}}}Lexer.rules=block;Lexer.lex=function(src,options){var lexer=new Lexer(options);return lexer.lex(src)};Lexer.prototype.lex=function(src){src=src.replace(/\r\n|\r/g,"\n").replace(/\t/g,"    ").replace(/\u00a0/g," ").replace(/\u2424/g,"\n");return this.token(src,true)};Lexer.prototype.token=function(src,top,bq){var src=src.replace(/^ +$/gm,""),next,loose,cap,bull,b,item,space,i,l;while(src){if(cap=this.rules.newline.exec(src)){src=src.substring(cap[0].length);if(cap[0].length>1){this.tokens.push({type:"space"})}}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);cap=cap[0].replace(/^ {4}/gm,"");this.tokens.push({type:"code",text:!this.options.pedantic?cap.replace(/\n+$/,""):cap});continue}if(cap=this.rules.fences.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"code",lang:cap[2],text:cap[3]||""});continue}if(cap=this.rules.heading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[1].length,text:cap[2]});continue}if(top&&(cap=this.rules.nptable.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].split(/ *\| */)}this.tokens.push(item);continue}if(cap=this.rules.lheading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[2]==="="?1:2,text:cap[1]});continue}if(cap=this.rules.hr.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"hr"});continue}if(cap=this.rules.blockquote.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"blockquote_start"});cap=cap[0].replace(/^ *> ?/gm,"");this.token(cap,top,true);this.tokens.push({type:"blockquote_end"});continue}if(cap=this.rules.list.exec(src)){src=src.substring(cap[0].length);bull=cap[2];this.tokens.push({type:"list_start",ordered:bull.length>1});cap=cap[0].match(this.rules.item);next=false;l=cap.length;i=0;for(;i<l;i++){item=cap[i];space=item.length;item=item.replace(/^ *([*+-]|\d+\.) +/,"");if(~item.indexOf("\n ")){space-=item.length;item=!this.options.pedantic?item.replace(new RegExp("^ {1,"+space+"}","gm"),""):item.replace(/^ {1,4}/gm,"")}if(this.options.smartLists&&i!==l-1){b=block.bullet.exec(cap[i+1])[0];if(bull!==b&&!(bull.length>1&&b.length>1)){src=cap.slice(i+1).join("\n")+src;i=l-1}}loose=next||/\n\n(?!\s*$)/.test(item);if(i!==l-1){next=item.charAt(item.length-1)==="\n";if(!loose)loose=next}this.tokens.push({type:loose?"loose_item_start":"list_item_start"});this.token(item,false,bq);this.tokens.push({type:"list_item_end"})}this.tokens.push({type:"list_end"});continue}if(cap=this.rules.html.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:this.options.sanitize?"paragraph":"html",pre:!this.options.sanitizer&&(cap[1]==="pre"||cap[1]==="script"||cap[1]==="style"),text:cap[0]});continue}if(!bq&&top&&(cap=this.rules.def.exec(src))){src=src.substring(cap[0].length);this.tokens.links[cap[1].toLowerCase()]={href:cap[2],title:cap[3]};continue}if(top&&(cap=this.rules.table.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/(?: *\| *)?\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].replace(/^ *\| *| *\| *$/g,"").split(/ *\| */)}this.tokens.push(item);continue}if(top&&(cap=this.rules.paragraph.exec(src))){src=src.substring(cap[0].length);this.tokens.push({type:"paragraph",text:cap[1].charAt(cap[1].length-1)==="\n"?cap[1].slice(0,-1):cap[1]});continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"text",text:cap[0]});continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return this.tokens};var inline={escape:/^\\([\\`*{}\[\]()#+\-.!_>])/,autolink:/^<([^ >]+(@|:\/)[^ >]+)>/,url:noop,tag:/^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,link:/^!?\[(inside)\]\(href\)/,reflink:/^!?\[(inside)\]\s*\[([^\]]*)\]/,nolink:/^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,strong:/^_\_([\s\S]+?)_\_(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,em:/^\b_((?:[^_]|_\_)+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,code:/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,br:/^ {2,}\n(?!\s*$)/,del:noop,text:/^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/};inline._inside=/(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;inline._href=/\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;inline.link=replace(inline.link)("inside",inline._inside)("href",inline._href)();inline.reflink=replace(inline.reflink)("inside",inline._inside)();inline.normal=merge({},inline);inline.pedantic=merge({},inline.normal,{strong:/^_\_(?=\S)([\s\S]*?\S)_\_(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,em:/^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/});inline.gfm=merge({},inline.normal,{escape:replace(inline.escape)("])","~|])")(),url:/^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,del:/^~~(?=\S)([\s\S]*?\S)~~/,text:replace(inline.text)("]|","~]|")("|","|https?://|")()});inline.breaks=merge({},inline.gfm,{br:replace(inline.br)("{2,}","*")(),text:replace(inline.gfm.text)("{2,}","*")()});function InlineLexer(links,options){this.options=options||marked.defaults;this.links=links;this.rules=inline.normal;this.renderer=this.options.renderer||new Renderer;this.renderer.options=this.options;if(!this.links){throw new Error("Tokens array requires a `links` property.")}if(this.options.gfm){if(this.options.breaks){this.rules=inline.breaks}else{this.rules=inline.gfm}}else if(this.options.pedantic){this.rules=inline.pedantic}}InlineLexer.rules=inline;InlineLexer.output=function(src,links,options){var inline=new InlineLexer(links,options);return inline.output(src)};InlineLexer.prototype.output=function(src){var out="",link,text,href,cap;while(src){if(cap=this.rules.escape.exec(src)){src=src.substring(cap[0].length);out+=cap[1];continue}if(cap=this.rules.autolink.exec(src)){src=src.substring(cap[0].length);if(cap[2]==="@"){text=cap[1].charAt(6)===":"?this.mangle(cap[1].substring(7)):this.mangle(cap[1]);href=this.mangle("mailto:")+text}else{text=escape(cap[1]);href=text}out+=this.renderer.link(href,null,text);continue}if(!this.inLink&&(cap=this.rules.url.exec(src))){src=src.substring(cap[0].length);text=escape(cap[1]);href=text;out+=this.renderer.link(href,null,text);continue}if(cap=this.rules.tag.exec(src)){if(!this.inLink&&/^<a /i.test(cap[0])){this.inLink=true}else if(this.inLink&&/^<\/a>/i.test(cap[0])){this.inLink=false}src=src.substring(cap[0].length);out+=this.options.sanitize?this.options.sanitizer?this.options.sanitizer(cap[0]):escape(cap[0]):cap[0];continue}if(cap=this.rules.link.exec(src)){src=src.substring(cap[0].length);this.inLink=true;out+=this.outputLink(cap,{href:cap[2],title:cap[3]});this.inLink=false;continue}if((cap=this.rules.reflink.exec(src))||(cap=this.rules.nolink.exec(src))){src=src.substring(cap[0].length);link=(cap[2]||cap[1]).replace(/\s+/g," ");link=this.links[link.toLowerCase()];if(!link||!link.href){out+=cap[0].charAt(0);src=cap[0].substring(1)+src;continue}this.inLink=true;out+=this.outputLink(cap,link);this.inLink=false;continue}if(cap=this.rules.strong.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.strong(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.em.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.em(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.codespan(escape(cap[2],true));continue}if(cap=this.rules.br.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.br();continue}if(cap=this.rules.del.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.del(this.output(cap[1]));continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.text(escape(this.smartypants(cap[0])));continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return out};InlineLexer.prototype.outputLink=function(cap,link){var href=escape(link.href),title=link.title?escape(link.title):null;return cap[0].charAt(0)!=="!"?this.renderer.link(href,title,this.output(cap[1])):this.renderer.image(href,title,escape(cap[1]))};InlineLexer.prototype.smartypants=function(text){if(!this.options.smartypants)return text;return text.replace(/---/g,"—").replace(/--/g,"–").replace(/(^|[-\u2014\/(\[{"\s])'/g,"$1‘").replace(/'/g,"’").replace(/(^|[-\u2014\/(\[{\u2018\s])"/g,"$1“").replace(/"/g,"”").replace(/\.{3}/g,"…")};InlineLexer.prototype.mangle=function(text){if(!this.options.mangle)return text;var out="",l=text.length,i=0,ch;for(;i<l;i++){ch=text.charCodeAt(i);if(Math.random()>.5){ch="x"+ch.toString(16)}out+="&#"+ch+";"}return out};function Renderer(options){this.options=options||{}}Renderer.prototype.code=function(code,lang,escaped){if(this.options.highlight){var out=this.options.highlight(code,lang);if(out!=null&&out!==code){escaped=true;code=out}}if(!lang){return"<pre><code>"+(escaped?code:escape(code,true))+"\n</code></pre>"}return'<pre><code class="'+this.options.langPrefix+escape(lang,true)+'">'+(escaped?code:escape(code,true))+"\n</code></pre>\n"};Renderer.prototype.blockquote=function(quote){return"<blockquote>\n"+quote+"</blockquote>\n"};Renderer.prototype.html=function(html){return html};Renderer.prototype.heading=function(text,level,raw){return"<h"+level+' id="'+this.options.headerPrefix+raw.toLowerCase().replace(/[^\w]+/g,"-")+'">'+text+"</h"+level+">\n"};Renderer.prototype.hr=function(){return this.options.xhtml?"<hr/>\n":"<hr>\n"};Renderer.prototype.list=function(body,ordered){var type=ordered?"ol":"ul";return"<"+type+">\n"+body+"</"+type+">\n"};Renderer.prototype.listitem=function(text){return"<li>"+text+"</li>\n"};Renderer.prototype.paragraph=function(text){return"<p>"+text+"</p>\n"};Renderer.prototype.table=function(header,body){return"<table>\n"+"<thead>\n"+header+"</thead>\n"+"<tbody>\n"+body+"</tbody>\n"+"</table>\n"};Renderer.prototype.tablerow=function(content){return"<tr>\n"+content+"</tr>\n"};Renderer.prototype.tablecell=function(content,flags){var type=flags.header?"th":"td";var tag=flags.align?"<"+type+' style="text-align:'+flags.align+'">':"<"+type+">";return tag+content+"</"+type+">\n"};Renderer.prototype.strong=function(text){return"<strong>"+text+"</strong>"};Renderer.prototype.em=function(text){return"<em>"+text+"</em>"};Renderer.prototype.codespan=function(text){return"<code>"+text+"</code>"};Renderer.prototype.br=function(){return this.options.xhtml?"<br/>":"<br>"};Renderer.prototype.del=function(text){return"<del>"+text+"</del>"};Renderer.prototype.link=function(href,title,text){if(this.options.sanitize){try{var prot=decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase()}catch(e){return""}if(prot.indexOf("javascript:")===0||prot.indexOf("vbscript:")===0||prot.indexOf("data:")===0){return""}}var out='<a href="'+href+'"';if(title){out+=' title="'+title+'"'}out+=">"+text+"</a>";return out};Renderer.prototype.image=function(href,title,text){var out='<img src="'+href+'" alt="'+text+'"';if(title){out+=' title="'+title+'"'}out+=this.options.xhtml?"/>":">";return out};Renderer.prototype.text=function(text){return text};function Parser(options){this.tokens=[];this.token=null;this.options=options||marked.defaults;this.options.renderer=this.options.renderer||new Renderer;this.renderer=this.options.renderer;this.renderer.options=this.options}Parser.parse=function(src,options,renderer){var parser=new Parser(options,renderer);return parser.parse(src)};Parser.prototype.parse=function(src){this.inline=new InlineLexer(src.links,this.options,this.renderer);this.tokens=src.reverse();var out="";while(this.next()){out+=this.tok()}return out};Parser.prototype.next=function(){return this.token=this.tokens.pop()};Parser.prototype.peek=function(){return this.tokens[this.tokens.length-1]||0};Parser.prototype.parseText=function(){var body=this.token.text;while(this.peek().type==="text"){body+="\n"+this.next().text}return this.inline.output(body)};Parser.prototype.tok=function(){switch(this.token.type){case"space":{return""}case"hr":{return this.renderer.hr()}case"heading":{return this.renderer.heading(this.inline.output(this.token.text),this.token.depth,this.token.text)}case"code":{return this.renderer.code(this.token.text,this.token.lang,this.token.escaped)}case"table":{var header="",body="",i,row,cell,flags,j;cell="";for(i=0;i<this.token.header.length;i++){flags={header:true,align:this.token.align[i]};cell+=this.renderer.tablecell(this.inline.output(this.token.header[i]),{header:true,align:this.token.align[i]})}header+=this.renderer.tablerow(cell);for(i=0;i<this.token.cells.length;i++){row=this.token.cells[i];cell="";for(j=0;j<row.length;j++){cell+=this.renderer.tablecell(this.inline.output(row[j]),{header:false,align:this.token.align[j]})}body+=this.renderer.tablerow(cell)}return this.renderer.table(header,body)}case"blockquote_start":{var body="";while(this.next().type!=="blockquote_end"){body+=this.tok()}return this.renderer.blockquote(body)}case"list_start":{var body="",ordered=this.token.ordered;while(this.next().type!=="list_end"){body+=this.tok()}return this.renderer.list(body,ordered)}case"list_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.token.type==="text"?this.parseText():this.tok()}return this.renderer.listitem(body)}case"loose_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.tok()}return this.renderer.listitem(body)}case"html":{var html=!this.token.pre&&!this.options.pedantic?this.inline.output(this.token.text):this.token.text;return this.renderer.html(html)}case"paragraph":{return this.renderer.paragraph(this.inline.output(this.token.text))}case"text":{return this.renderer.paragraph(this.parseText())}}};function escape(html,encode){return html.replace(!encode?/&(?!#?\w+;)/g:/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}function unescape(html){return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g,function(_,n){n=n.toLowerCase();if(n==="colon")return":";if(n.charAt(0)==="#"){return n.charAt(1)==="x"?String.fromCharCode(parseInt(n.substring(2),16)):String.fromCharCode(+n.substring(1))}return""})}function replace(regex,opt){regex=regex.source;opt=opt||"";return function self(name,val){if(!name)return new RegExp(regex,opt);val=val.source||val;val=val.replace(/(^|[^\[])\^/g,"$1");regex=regex.replace(name,val);return self}}function noop(){}noop.exec=noop;function merge(obj){var i=1,target,key;for(;i<arguments.length;i++){target=arguments[i];for(key in target){if(Object.prototype.hasOwnProperty.call(target,key)){obj[key]=target[key]}}}return obj}function marked(src,opt,callback){if(callback||typeof opt==="function"){if(!callback){callback=opt;opt=null}opt=merge({},marked.defaults,opt||{});var highlight=opt.highlight,tokens,pending,i=0;try{tokens=Lexer.lex(src,opt)}catch(e){return callback(e)}pending=tokens.length;var done=function(err){if(err){opt.highlight=highlight;return callback(err)}var out;try{out=Parser.parse(tokens,opt)}catch(e){err=e}opt.highlight=highlight;return err?callback(err):callback(null,out)};if(!highlight||highlight.length<3){return done()}delete opt.highlight;if(!pending)return done();for(;i<tokens.length;i++){(function(token){if(token.type!=="code"){return--pending||done()}return highlight(token.text,token.lang,function(err,code){if(err)return done(err);if(code==null||code===token.text){return--pending||done()}token.text=code;token.escaped=true;--pending||done()})})(tokens[i])}return}try{if(opt)opt=merge({},marked.defaults,opt);return Parser.parse(Lexer.lex(src,opt),opt)}catch(e){e.message+="\nPlease report this to https://github.com/chjj/marked.";if((opt||marked.defaults).silent){return"<p>An error occured:</p><pre>"+escape(e.message+"",true)+"</pre>"}throw e}}marked.options=marked.setOptions=function(opt){merge(marked.defaults,opt);return marked};marked.defaults={gfm:true,tables:true,breaks:false,pedantic:false,sanitize:false,sanitizer:null,mangle:true,smartLists:false,silent:false,highlight:null,langPrefix:"lang-",smartypants:false,headerPrefix:"",renderer:new Renderer,xhtml:false};marked.Parser=Parser;marked.parser=Parser.parse;marked.Renderer=Renderer;marked.Lexer=Lexer;marked.lexer=Lexer.lex;marked.InlineLexer=InlineLexer;marked.inlineLexer=InlineLexer.output;marked.parse=marked;if(typeof module!=="undefined"&&typeof exports==="object"){module.exports=marked}else if(typeof define==="function"&&define.amd){define(function(){return marked})}else{this.marked=marked}}).call(function(){return this||(typeof window!=="undefined"?window:global)}());
+
+	return module.exports;
+}();
+
+
+// FORMAT OPTIONS FOR MARKED IMPLEMENTATION
+
+function _Markdown_formatOptions(options)
+{
+	function toHighlight(code, lang)
+	{
+		if (!lang && $elm$core$Maybe$isJust(options.defaultHighlighting))
+		{
+			lang = options.defaultHighlighting.a;
+		}
+
+		if (typeof hljs !== 'undefined' && lang && hljs.listLanguages().indexOf(lang) >= 0)
+		{
+			return hljs.highlight(lang, code, true).value;
+		}
+
+		return code;
+	}
+
+	var gfm = options.githubFlavored.a;
+
+	return {
+		highlight: toHighlight,
+		gfm: gfm,
+		tables: gfm && gfm.tables,
+		breaks: gfm && gfm.breaks,
+		sanitize: options.sanitize,
+		smartypants: options.smartypants
+	};
+}
 var $author$project$Main$BrowserChangedUrl = function (a) {
 	return {$: 'BrowserChangedUrl', a: a};
 };
@@ -10914,17 +11114,41 @@ var $author$project$Main$CU1 = function (a) {
 var $author$project$Main$CU2 = function (a) {
 	return {$: 'CU2', a: a};
 };
+var $author$project$Main$CU3 = function (a) {
+	return {$: 'CU3', a: a};
+};
+var $author$project$Main$Meaning = function (a) {
+	return {$: 'Meaning', a: a};
+};
+var $author$project$Main$Presentation = function (a) {
+	return {$: 'Presentation', a: a};
+};
 var $author$project$Experiment$CU1$ServerRespondedWith = function (a) {
 	return {$: 'ServerRespondedWith', a: a};
 };
 var $author$project$Experiment$CU2$ServerRespondedWith = function (a) {
 	return {$: 'ServerRespondedWith', a: a};
 };
+var $author$project$Experiment$CU3$ServerRespondedWith = function (a) {
+	return {$: 'ServerRespondedWith', a: a};
+};
+var $author$project$Experiment$Meaning$ServerRespondedWith = function (a) {
+	return {$: 'ServerRespondedWith', a: a};
+};
+var $author$project$Experiment$Presentation$ServerRespondedWith = function (a) {
+	return {$: 'ServerRespondedWith', a: a};
+};
+var $author$project$Experiment$Spelling3$ServerRespondedWith = function (a) {
+	return {$: 'ServerRespondedWith', a: a};
+};
+var $author$project$Experiment$Translation$ServerRespondedWith = function (a) {
+	return {$: 'ServerRespondedWith', a: a};
+};
+var $author$project$Experiment$YN$ServerRespondedWith = function (a) {
+	return {$: 'ServerRespondedWith', a: a};
+};
 var $author$project$Main$ServerRespondedWithAcceptabilityTrials = function (a) {
 	return {$: 'ServerRespondedWithAcceptabilityTrials', a: a};
-};
-var $author$project$Main$ServerRespondedWithMeaningInput = function (a) {
-	return {$: 'ServerRespondedWithMeaningInput', a: a};
 };
 var $author$project$Main$ServerRespondedWithScrabbleTrials = function (a) {
 	return {$: 'ServerRespondedWithScrabbleTrials', a: a};
@@ -10935,8 +11159,14 @@ var $author$project$Main$ServerRespondedWithSpellingTrials = function (a) {
 var $author$project$Main$ServerRespondedWithSynonymTrials = function (a) {
 	return {$: 'ServerRespondedWithSynonymTrials', a: a};
 };
-var $author$project$Main$ServerRespondedWithTranslationTrials = function (a) {
-	return {$: 'ServerRespondedWithTranslationTrials', a: a};
+var $author$project$Main$Spelling3 = function (a) {
+	return {$: 'Spelling3', a: a};
+};
+var $author$project$Main$Translation = function (a) {
+	return {$: 'Translation', a: a};
+};
+var $author$project$Main$YN = function (a) {
+	return {$: 'YN', a: a};
 };
 var $author$project$Experiment$Acceptability$Trial = F4(
 	function (uid, sentence, isCorrect, duration) {
@@ -11333,11 +11563,11 @@ var $author$project$Data$getTrialsFromServer_ = F4(
 var $author$project$Experiment$Acceptability$getTrialsFromServer = function (callbackMsg) {
 	return A4($author$project$Data$getTrialsFromServer_, 'acceptability', 'all', callbackMsg, $author$project$Experiment$Acceptability$decodeAcceptabilityTrials);
 };
-var $author$project$Experiment$CU1$Trial = F7(
-	function (uid, text, target, distractor1, distractor2, distractor3, isTraining) {
-		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, target: target, text: text, uid: uid};
+var $author$project$Experiment$CU1$Trial = F8(
+	function (uid, text, target, distractor1, distractor2, distractor3, definition, isTraining) {
+		return {definition: definition, distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, target: target, text: text, uid: uid};
 	});
-var $author$project$Data$decodeBool = function () {
+var $author$project$Data$decodeBool = function (fieldname) {
 	var stringToBoolDecoder = function (str) {
 		if (str === 'true') {
 			return $elm$json$Json$Decode$succeed(true);
@@ -11349,35 +11579,41 @@ var $author$project$Data$decodeBool = function () {
 		A2(
 			$elm$json$Json$Decode$andThen,
 			stringToBoolDecoder,
-			A2($elm$json$Json$Decode$field, 'isTraining', $elm$json$Json$Decode$string)));
-}();
+			A2($elm$json$Json$Decode$field, fieldname, $elm$json$Json$Decode$string)));
+};
 var $author$project$Experiment$CU1$decodeTranslationInput = function () {
-	var decoder = $author$project$Data$decodeBool(
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'isTraining',
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'Distractor_3_CU_Lvl1',
+			'Definition',
 			$elm$json$Json$Decode$string,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'Distractor_2_CU_Lvl1',
+				'Distractor_3_CU_Lvl1',
 				$elm$json$Json$Decode$string,
 				A3(
 					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'Distractor_1_CU_Lvl1',
+					'Distractor_2_CU_Lvl1',
 					$elm$json$Json$Decode$string,
 					A3(
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'Word_Text',
+						'Distractor_1_CU_Lvl1',
 						$elm$json$Json$Decode$string,
 						A3(
 							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'Text_To_Complete',
+							'Word_Text',
 							$elm$json$Json$Decode$string,
 							A3(
 								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'UID',
+								'Text_To_Complete',
 								$elm$json$Json$Decode$string,
-								$elm$json$Json$Decode$succeed($author$project$Experiment$CU1$Trial))))))));
+								A3(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+									'UID',
+									$elm$json$Json$Decode$string,
+									$elm$json$Json$Decode$succeed($author$project$Experiment$CU1$Trial)))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
 var $author$project$Experiment$CU1$getTrialsFromServer = function (msgHandler) {
@@ -11431,7 +11667,9 @@ var $author$project$Data$decodeAudioFiles = A2(
 		$elm$core$List$head),
 	$elm$json$Json$Decode$list($author$project$Data$audioDecoder));
 var $author$project$Experiment$CU2$decodeTranslationInput = function () {
-	var decoder = $author$project$Data$decodeBool(
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'isTraining',
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Feedback_CU_Lvl2',
@@ -11475,34 +11713,119 @@ var $author$project$Experiment$CU2$decodeTranslationInput = function () {
 var $author$project$Experiment$CU2$getTrialsFromServer = function (msgHandler) {
 	return A4($author$project$Data$getTrialsFromServer_, 'input', 'SpellingLvl2', msgHandler, $author$project$Experiment$CU2$decodeTranslationInput);
 };
-var $author$project$Experiment$Experiment$TrialMeaning = F8(
-	function (uid, writtenWord, definition, option1, option2, option3, feedbackCorrect, feedbackIncorrect) {
-		return {definition: definition, feedbackCorrect: feedbackCorrect, feedbackIncorrect: feedbackIncorrect, option1: option1, option2: option2, option3: option3, uid: uid, writtenWord: writtenWord};
+var $author$project$Experiment$CU3$Trial = F7(
+	function (uid, writtenWord, audioSentence, context, amorce, feedback, isTraining) {
+		return {amorce: amorce, audioSentence: audioSentence, context: context, feedback: feedback, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
 	});
-var $author$project$Experiment$Meaning$decodeMeaningInput = function () {
-	var decoder = A3(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'Feedback_Correct_Meaning',
-		$elm$json$Json$Decode$string,
+var $author$project$Experiment$CU3$decodeTranslationInput = function () {
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'isTraining',
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'Feedback_Incorrect_Meaning',
+			'CU_Lvl3_Feedback',
 			$elm$json$Json$Decode$string,
-			A4(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-				'Distractor_3_Meaning',
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'CU_Lvl3_TextToComplete_amorce',
 				$elm$json$Json$Decode$string,
-				'MISSING',
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'CU_Lvl3_Presentation',
+					$elm$json$Json$Decode$string,
+					A4(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+						'CU_Lv3_Audio',
+						$author$project$Data$decodeAudioFiles,
+						A2($author$project$Data$AudioFile, '', ''),
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'Word_Text',
+							$elm$json$Json$Decode$string,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'UID',
+								$elm$json$Json$Decode$string,
+								$elm$json$Json$Decode$succeed($author$project$Experiment$CU3$Trial))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Experiment$CU3$getTrialsFromServer = function (msgHandler) {
+	return A4($author$project$Data$getTrialsFromServer_, 'input', 'ContextUnderstandingLvl3', msgHandler, $author$project$Experiment$CU3$decodeTranslationInput);
+};
+var $author$project$Experiment$Meaning$Trial = F9(
+	function (uid, writtenWord, target, distractor1, distractor2, distractor3, feedbackCorrect, feedbackIncorrect, isTraining) {
+		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, feedbackCorrect: feedbackCorrect, feedbackIncorrect: feedbackIncorrect, isTraining: isTraining, target: target, uid: uid, writtenWord: writtenWord};
+	});
+var $author$project$Experiment$Meaning$decodeMeaningInput = function () {
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'isTraining',
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'Feedback_Correct_Meaning',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'Feedback_Incorrect_Meaning',
+				$elm$json$Json$Decode$string,
 				A4(
 					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-					'Distractor_2_Meaning',
+					'Distractor_3_Meaning',
 					$elm$json$Json$Decode$string,
 					'MISSING',
 					A4(
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-						'Distractor_1_Meaning',
+						'Distractor_2_Meaning',
 						$elm$json$Json$Decode$string,
 						'MISSING',
+						A4(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+							'Distractor_1_Meaning',
+							$elm$json$Json$Decode$string,
+							'MISSING',
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'Definition',
+								$elm$json$Json$Decode$string,
+								A3(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+									'Word_Text',
+									$elm$json$Json$Decode$string,
+									A3(
+										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+										'UID',
+										$elm$json$Json$Decode$string,
+										$elm$json$Json$Decode$succeed($author$project$Experiment$Meaning$Trial))))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Experiment$Meaning$getTrialsFromServer = function (callbackMsg) {
+	return A4($author$project$Data$getTrialsFromServer_, 'input', 'Meaning', callbackMsg, $author$project$Experiment$Meaning$decodeMeaningInput);
+};
+var $author$project$Experiment$Presentation$Trial = F8(
+	function (uid, text, definition, example, translation1, translation2, audio, isTraining) {
+		return {audio: audio, definition: definition, example: example, isTraining: isTraining, text: text, translation1: translation1, translation2: translation2, uid: uid};
+	});
+var $author$project$Experiment$Presentation$decodeTranslationInput = function () {
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'isTraining',
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'Word_Audio',
+			$author$project$Data$decodeAudioFiles,
+			A4(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+				'Translation_2',
+				$elm$json$Json$Decode$string,
+				'Missing translation 2',
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'Translation_1',
+					$elm$json$Json$Decode$string,
+					A3(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'Example',
+						$elm$json$Json$Decode$string,
 						A3(
 							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 							'Definition',
@@ -11515,36 +11838,11 @@ var $author$project$Experiment$Meaning$decodeMeaningInput = function () {
 									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 									'UID',
 									$elm$json$Json$Decode$string,
-									$elm$json$Json$Decode$succeed($author$project$Experiment$Experiment$TrialMeaning)))))))));
+									$elm$json$Json$Decode$succeed($author$project$Experiment$Presentation$Trial)))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
-var $author$project$Experiment$Experiment$apps = {sleep: 'appTEVHZLw3jNa7fU', spacing: 'appvKOc8FH0j48Hw1'};
-var $author$project$Experiment$Experiment$buildQuery = function (_v0) {
-	var app = _v0.app;
-	var base = _v0.base;
-	var view_ = _v0.view_;
-	return A2(
-		$elm$url$Url$Builder$absolute,
-		_List_fromArray(
-			['.netlify', 'functions', 'api']),
-		_List_fromArray(
-			[
-				A2($elm$url$Url$Builder$string, 'app', app),
-				A2($elm$url$Url$Builder$string, 'base', base),
-				A2($elm$url$Url$Builder$string, 'view', view_)
-			]));
-};
-var $author$project$Experiment$Experiment$getTrialsFromServer_ = F3(
-	function (tableName, callbackMsg, decoder) {
-		return $elm$http$Http$get(
-			{
-				expect: A2($elm$http$Http$expectJson, callbackMsg, decoder),
-				url: $author$project$Experiment$Experiment$buildQuery(
-					{app: $author$project$Experiment$Experiment$apps.spacing, base: 'input', view_: tableName})
-			});
-	});
-var $author$project$Experiment$Meaning$getTrialsFromServer = function (callbackMsg) {
-	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Meaning', callbackMsg, $author$project$Experiment$Meaning$decodeMeaningInput);
+var $author$project$Experiment$Presentation$getTrialsFromServer = function (msgHandler) {
+	return A4($author$project$Data$getTrialsFromServer_, 'input', 'Presentation', msgHandler, $author$project$Experiment$Presentation$decodeTranslationInput);
 };
 var $author$project$Experiment$Scrabble$Trial = F5(
 	function (uid, writtenWord, audioWord, isTraining, target) {
@@ -11555,7 +11853,9 @@ var $author$project$Experiment$Scrabble$decodeTranslationInput = function () {
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'Word_Text',
 		$elm$json$Json$Decode$string,
-		$author$project$Data$decodeBool(
+		A2(
+			$author$project$Data$decodeBool,
+			'isTraining',
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'Word_Audio',
@@ -11573,6 +11873,45 @@ var $author$project$Experiment$Scrabble$decodeTranslationInput = function () {
 }();
 var $author$project$Experiment$Scrabble$getTrialsFromServer = function (msgHandler) {
 	return A4($author$project$Data$getTrialsFromServer_, 'input', 'SpellingLvl2', msgHandler, $author$project$Experiment$Scrabble$decodeTranslationInput);
+};
+var $author$project$Experiment$Spelling3$Trial = F7(
+	function (uid, writtenWord, audioSentence, context, amorce, feedback, isTraining) {
+		return {amorce: amorce, audioSentence: audioSentence, context: context, feedback: feedback, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
+	});
+var $author$project$Experiment$Spelling3$decodeTranslationInput = function () {
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'isTraining',
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'CU_Lvl3_Feedback',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'CU_Lvl3_TextToComplete_amorce',
+				$elm$json$Json$Decode$string,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'CU_Lvl3_Presentation',
+					$elm$json$Json$Decode$string,
+					A4(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+						'CU_Lv3_Audio',
+						$author$project$Data$decodeAudioFiles,
+						A2($author$project$Data$AudioFile, '', ''),
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'Word_Text',
+							$elm$json$Json$Decode$string,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'UID',
+								$elm$json$Json$Decode$string,
+								$elm$json$Json$Decode$succeed($author$project$Experiment$Spelling3$Trial))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Experiment$Spelling3$getTrialsFromServer = function (msgHandler) {
+	return A4($author$project$Data$getTrialsFromServer_, 'input', 'ContextUnderstandingLvl3', msgHandler, $author$project$Experiment$Spelling3$decodeTranslationInput);
 };
 var $author$project$Experiment$SpellingLvl1$Trial = F7(
 	function (uid, target, distractor1, distractor2, distractor3, isTraining, audio) {
@@ -11667,24 +12006,47 @@ var $author$project$Experiment$Synonym$decodeSynonymTrials = function () {
 								$elm$json$Json$Decode$succeed($author$project$Experiment$Experiment$SynonymTrial))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
+var $author$project$Experiment$Experiment$apps = {sleep: 'appTEVHZLw3jNa7fU', spacing: 'appvKOc8FH0j48Hw1'};
+var $author$project$Experiment$Experiment$buildQuery = function (_v0) {
+	var app = _v0.app;
+	var base = _v0.base;
+	var view_ = _v0.view_;
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			['.netlify', 'functions', 'api']),
+		_List_fromArray(
+			[
+				A2($elm$url$Url$Builder$string, 'app', app),
+				A2($elm$url$Url$Builder$string, 'base', base),
+				A2($elm$url$Url$Builder$string, 'view', view_)
+			]));
+};
+var $author$project$Experiment$Experiment$getTrialsFromServer_ = F3(
+	function (tableName, callbackMsg, decoder) {
+		return $elm$http$Http$get(
+			{
+				expect: A2($elm$http$Http$expectJson, callbackMsg, decoder),
+				url: $author$project$Experiment$Experiment$buildQuery(
+					{app: $author$project$Experiment$Experiment$apps.spacing, base: 'input', view_: tableName})
+			});
+	});
 var $author$project$Experiment$Synonym$getTrialsFromServer = function (callbackMsg) {
 	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Meaning', callbackMsg, $author$project$Experiment$Synonym$decodeSynonymTrials);
 };
-var $author$project$Experiment$Experiment$TranslationInput = F9(
-	function (uid, question, translation1, translation2, distractor1, distractor2, distractor3, distractor4, word) {
-		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, distractor4: distractor4, question: question, translation1: translation1, translation2: translation2, uid: uid, word: word};
+var $author$project$Experiment$Translation$Trial = F9(
+	function (uid, question, target, translation2, distractor1, distractor2, distractor3, word, isTraining) {
+		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, question: question, target: target, translation2: translation2, uid: uid, word: word};
 	});
-var $author$project$Experiment$Translation$decodeTranslationInput = function () {
-	var decoder = A4(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-		'Word_Text',
-		$elm$json$Json$Decode$string,
-		'MISSING',
+var $author$project$Experiment$Translation$decodeTrials = function () {
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'isTraining',
 		A4(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-			'Distractor_4_Translation',
+			'Word_Text',
 			$elm$json$Json$Decode$string,
-			'missing distractor',
+			'MISSING',
 			A4(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 				'Distractor_3_Translation',
@@ -11717,18 +12079,54 @@ var $author$project$Experiment$Translation$decodeTranslationInput = function () 
 										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 										'UID',
 										$elm$json$Json$Decode$string,
-										$elm$json$Json$Decode$succeed($author$project$Experiment$Experiment$TranslationInput))))))))));
+										$elm$json$Json$Decode$succeed($author$project$Experiment$Translation$Trial))))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
 var $author$project$Experiment$Translation$getTrialsFromServer = function (msgHandler) {
-	return A3($author$project$Experiment$Experiment$getTrialsFromServer_, 'Translation', msgHandler, $author$project$Experiment$Translation$decodeTranslationInput);
+	return A4($author$project$Data$getTrialsFromServer_, 'input', 'Translation', msgHandler, $author$project$Experiment$Translation$decodeTrials);
+};
+var $author$project$Experiment$YN$Trial = F3(
+	function (uid, word, exists) {
+		return {exists: exists, uid: uid, word: word};
+	});
+var $author$project$Experiment$YN$decodeTranslationInput = function () {
+	var decoder = A2(
+		$author$project$Data$decodeBool,
+		'exists',
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'word',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'uid',
+				$elm$json$Json$Decode$string,
+				$elm$json$Json$Decode$succeed($author$project$Experiment$YN$Trial))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Experiment$YN$getTrialsFromServer = function (msgHandler) {
+	return A4($author$project$Data$getTrialsFromServer_, 'yes_no', 'all', msgHandler, $author$project$Experiment$YN$decodeTranslationInput);
 };
 var $author$project$Main$fetchData = function (route) {
 	switch (route.$) {
 		case 'Meaning':
-			return $author$project$Experiment$Meaning$getTrialsFromServer($author$project$Main$ServerRespondedWithMeaningInput);
+			return $author$project$Experiment$Meaning$getTrialsFromServer(
+				function (trials) {
+					return $author$project$Main$Meaning(
+						$author$project$Experiment$Meaning$ServerRespondedWith(trials));
+				});
+		case 'Presentation':
+			return $author$project$Experiment$Presentation$getTrialsFromServer(
+				function (trials) {
+					return $author$project$Main$Presentation(
+						$author$project$Experiment$Presentation$ServerRespondedWith(trials));
+				});
 		case 'Translation':
-			return $author$project$Experiment$Translation$getTrialsFromServer($author$project$Main$ServerRespondedWithTranslationTrials);
+			return $author$project$Experiment$Translation$getTrialsFromServer(
+				function (trials) {
+					return $author$project$Main$Translation(
+						$author$project$Experiment$Translation$ServerRespondedWith(trials));
+				});
 		case 'Synonym':
 			return $author$project$Experiment$Synonym$getTrialsFromServer($author$project$Main$ServerRespondedWithSynonymTrials);
 		case 'Scrabble':
@@ -11737,6 +12135,12 @@ var $author$project$Main$fetchData = function (route) {
 			return $author$project$Experiment$Acceptability$getTrialsFromServer($author$project$Main$ServerRespondedWithAcceptabilityTrials);
 		case 'SpellingLevel1':
 			return $author$project$Experiment$SpellingLvl1$getTrialsFromServer($author$project$Main$ServerRespondedWithSpellingTrials);
+		case 'Spelling3':
+			return $author$project$Experiment$Spelling3$getTrialsFromServer(
+				function (trials) {
+					return $author$project$Main$Spelling3(
+						$author$project$Experiment$Spelling3$ServerRespondedWith(trials));
+				});
 		case 'CULevel2':
 			return $author$project$Experiment$CU2$getTrialsFromServer(
 				function (trials) {
@@ -11748,6 +12152,18 @@ var $author$project$Main$fetchData = function (route) {
 				function (trials) {
 					return $author$project$Main$CU1(
 						$author$project$Experiment$CU1$ServerRespondedWith(trials));
+				});
+		case 'CU3':
+			return $author$project$Experiment$CU3$getTrialsFromServer(
+				function (trials) {
+					return $author$project$Main$CU3(
+						$author$project$Experiment$CU3$ServerRespondedWith(trials));
+				});
+		case 'YN':
+			return $author$project$Experiment$YN$getTrialsFromServer(
+				function (trials) {
+					return $author$project$Main$YN(
+						$author$project$Experiment$YN$ServerRespondedWith(trials));
 				});
 		default:
 			return $elm$core$Platform$Cmd$none;
@@ -11875,16 +12291,20 @@ var $elm$url$Url$Parser$parse = F2(
 	});
 var $author$project$Route$Acceptability = {$: 'Acceptability'};
 var $author$project$Route$CU1 = {$: 'CU1'};
+var $author$project$Route$CU3 = {$: 'CU3'};
 var $author$project$Route$CULevel2 = {$: 'CULevel2'};
 var $author$project$Route$CloudWords = {$: 'CloudWords'};
 var $author$project$Route$ExperimentStart = {$: 'ExperimentStart'};
 var $author$project$Route$Home = {$: 'Home'};
 var $author$project$Route$LogIn = {$: 'LogIn'};
 var $author$project$Route$Meaning = {$: 'Meaning'};
+var $author$project$Route$Presentation = {$: 'Presentation'};
 var $author$project$Route$Scrabble = {$: 'Scrabble'};
+var $author$project$Route$Spelling3 = {$: 'Spelling3'};
 var $author$project$Route$SpellingLevel1 = {$: 'SpellingLevel1'};
 var $author$project$Route$Synonym = {$: 'Synonym'};
 var $author$project$Route$Translation = {$: 'Translation'};
+var $author$project$Route$YN = {$: 'YN'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
@@ -12009,12 +12429,28 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$s('spelling')),
 			A2(
 			$elm$url$Url$Parser$map,
+			$author$project$Route$Spelling3,
+			$elm$url$Url$Parser$s('spelling3')),
+			A2(
+			$elm$url$Url$Parser$map,
 			$author$project$Route$CULevel2,
 			$elm$url$Url$Parser$s('cu-lvl2')),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$CU1,
-			$elm$url$Url$Parser$s('cu1'))
+			$elm$url$Url$Parser$s('cu1')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$CU3,
+			$elm$url$Url$Parser$s('cu3')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$YN,
+			$elm$url$Url$Parser$s('yn')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Presentation,
+			$elm$url$Url$Parser$s('presentation'))
 		]));
 var $author$project$Route$fromUrl = function (url) {
 	return A2(
@@ -12030,10 +12466,29 @@ var $author$project$ExperimentInfo$Sens = {$: 'Sens'};
 var $author$project$ExperimentInfo$Session1 = {$: 'Session1'};
 var $author$project$ExperimentInfo$Session2 = {$: 'Session2'};
 var $author$project$ExperimentInfo$Session3 = {$: 'Session3'};
-var $author$project$ExperimentInfo$Task = F9(
-	function (uid, session, type_, name, url, description, instructions, instructions_short, end) {
-		return {description: description, end: end, instructions: instructions, instructions_short: instructions_short, name: name, session: session, type_: type_, uid: uid, url: url};
-	});
+var $author$project$ExperimentInfo$Task = function (uid) {
+	return function (session) {
+		return function (type_) {
+			return function (name) {
+				return function (url) {
+					return function (description) {
+						return function (instructions) {
+							return function (instructions_short) {
+								return function (feedback_correct) {
+									return function (feedback_incorrect) {
+										return function (end) {
+											return {description: description, end: end, feedback_correct: feedback_correct, feedback_incorrect: feedback_incorrect, instructions: instructions, instructions_short: instructions_short, name: name, session: session, type_: type_, uid: uid, url: url};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var $author$project$ExperimentInfo$decode = function () {
 	var mapToType_ = function (str) {
 		switch (str) {
@@ -12067,41 +12522,49 @@ var $author$project$ExperimentInfo$decode = function () {
 		$elm$json$Json$Decode$string,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'Instructions_short',
+			'feedback_incorrect',
 			$elm$json$Json$Decode$string,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'Instructions',
+				'feedback_correct',
 				$elm$json$Json$Decode$string,
 				A3(
 					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'Description',
+					'Instructions_short',
 					$elm$json$Json$Decode$string,
 					A3(
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'Demo_Link',
+						'Instructions',
 						$elm$json$Json$Decode$string,
 						A3(
 							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'Name',
+							'Description',
 							$elm$json$Json$Decode$string,
-							A2(
-								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-								A2(
-									$elm$json$Json$Decode$andThen,
-									mapToType_,
-									A2($elm$json$Json$Decode$field, 'Type', $elm$json$Json$Decode$string)),
-								A2(
-									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'Demo_Link',
+								$elm$json$Json$Decode$string,
+								A3(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+									'Name',
+									$elm$json$Json$Decode$string,
 									A2(
-										$elm$json$Json$Decode$andThen,
-										mapToSession,
-										A2($elm$json$Json$Decode$field, 'Session', $elm$json$Json$Decode$string)),
-									A3(
-										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-										'UID',
-										$elm$json$Json$Decode$string,
-										$elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Task))))))))));
+										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+										A2(
+											$elm$json$Json$Decode$andThen,
+											mapToType_,
+											A2($elm$json$Json$Decode$field, 'Type', $elm$json$Json$Decode$string)),
+										A2(
+											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+											A2(
+												$elm$json$Json$Decode$andThen,
+												mapToSession,
+												A2($elm$json$Json$Decode$field, 'Session', $elm$json$Json$Decode$string)),
+											A3(
+												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+												'UID',
+												$elm$json$Json$Decode$string,
+												$elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Task))))))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
 var $author$project$ExperimentInfo$getInfos = function (toMsg) {
@@ -13079,21 +13542,25 @@ var $author$project$Main$init = F3(
 				acceptabilityTask: $author$project$Experiment$Acceptability$NotStarted,
 				cloudWords: $elm$core$Dict$fromList($author$project$Experiment$CloudWords$words),
 				cu1: $author$project$PsychTask$NotStartedYet,
+				cu3: $author$project$PsychTask$NotStartedYet,
 				cuLvl2: $author$project$PsychTask$NotStartedYet,
 				dnd: $author$project$Main$system.model,
 				infos: $krisajenkins$remotedata$RemoteData$Loading,
 				key: key,
-				meaningTask: $author$project$Experiment$Experiment$NotStarted,
+				meaningBis: $author$project$PsychTask$NotStartedYet,
 				optionsOrder: _List_fromArray(
 					[0, 1, 2, 3]),
+				presentation: $author$project$PsychTask$NotStartedYet,
 				route: route,
 				scrabbleTask: $author$project$PsychTask$NotStartedYet,
+				spelling3: $author$project$PsychTask$NotStartedYet,
 				spellingLvl1: $author$project$PsychTask$NotStartedYet,
 				synonymTask: $author$project$Experiment$Experiment$NotStarted,
-				translationTask: $author$project$Experiment$Experiment$NotStarted,
+				translationTask: $author$project$PsychTask$NotStartedYet,
 				user: $elm$core$Maybe$Nothing,
 				userEmail: '',
-				userFirstName: ''
+				userFirstName: '',
+				yn: $author$project$PsychTask$NotStartedYet
 			},
 			$elm$core$Platform$Cmd$batch(
 				_List_fromArray(
@@ -13137,9 +13604,6 @@ var $author$project$User$Ano = function (a) {
 var $author$project$User$Authenticated = function (a) {
 	return {$: 'Authenticated', a: a};
 };
-var $author$project$Experiment$Experiment$DoingMeaning = function (a) {
-	return {$: 'DoingMeaning', a: a};
-};
 var $author$project$Experiment$Experiment$DoingSynonym = function (a) {
 	return {$: 'DoingSynonym', a: a};
 };
@@ -13147,9 +13611,6 @@ var $author$project$Experiment$Acceptability$DoingTask = F4(
 	function (a, b, c, d) {
 		return {$: 'DoingTask', a: a, b: b, c: c, d: d};
 	});
-var $author$project$Experiment$Experiment$DoingTranslation = function (a) {
-	return {$: 'DoingTranslation', a: a};
-};
 var $author$project$Experiment$Acceptability$Failure = function (a) {
 	return {$: 'Failure', a: a};
 };
@@ -13165,9 +13626,6 @@ var $author$project$Experiment$Experiment$MainLoop = F4(
 	function (a, b, c, d) {
 		return {$: 'MainLoop', a: a, b: b, c: c, d: d};
 	});
-var $author$project$Experiment$Experiment$MeaningState = function (a) {
-	return {$: 'MeaningState', a: a};
-};
 var $author$project$PsychTask$Over = {$: 'Over'};
 var $author$project$Main$RuntimeShuffledOptionsOrder = function (a) {
 	return {$: 'RuntimeShuffledOptionsOrder', a: a};
@@ -13180,9 +13638,6 @@ var $author$project$Main$Shuffled = function (a) {
 };
 var $author$project$Experiment$Experiment$SynonymStateType = function (a) {
 	return {$: 'SynonymStateType', a: a};
-};
-var $author$project$Experiment$Experiment$TranslationState = function (a) {
-	return {$: 'TranslationState', a: a};
 };
 var $author$project$Main$UserClickedNextTrial = function (a) {
 	return {$: 'UserClickedNextTrial', a: a};
@@ -13466,8 +13921,14 @@ var $author$project$Experiment$Acceptability$getState = function (task) {
 	}
 };
 var $author$project$Experiment$Experiment$DummyType = {$: 'DummyType'};
+var $author$project$Experiment$Experiment$MeaningState = function (a) {
+	return {$: 'MeaningState', a: a};
+};
 var $author$project$Experiment$Experiment$ScrabbleStateType = function (a) {
 	return {$: 'ScrabbleStateType', a: a};
+};
+var $author$project$Experiment$Experiment$TranslationState = function (a) {
+	return {$: 'TranslationState', a: a};
 };
 var $author$project$Experiment$Experiment$getState = function (experiment) {
 	_v0$4:
@@ -13549,16 +14010,31 @@ var $author$project$Experiment$CU2$State = F2(
 		return {uid: uid, userAnswer: userAnswer};
 	});
 var $author$project$Experiment$CU2$initState = A2($author$project$Experiment$CU2$State, 'DefaultUid', '');
-var $author$project$Experiment$Experiment$StateMeaning = F3(
-	function (inputUid, userUID, userAnswer) {
-		return {inputUid: inputUid, userAnswer: userAnswer, userUID: userUID};
+var $author$project$Experiment$CU3$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
 	});
-var $author$project$Experiment$Meaning$initState = A3($author$project$Experiment$Experiment$StateMeaning, 'DefaultTrialUID', 'DefaultUserUID', '');
+var $author$project$Experiment$CU3$initState = A2($author$project$Experiment$CU3$State, 'DefaultUid', '');
+var $author$project$Experiment$Meaning$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Experiment$Meaning$initState = A2($author$project$Experiment$Meaning$State, 'DefaultTrialUID', '');
+var $author$project$Experiment$Presentation$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Experiment$Presentation$initState = A2($author$project$Experiment$Presentation$State, 'DefaultUid', '');
 var $author$project$Experiment$Scrabble$State = F3(
 	function (uid, userAnswer, scrambledLetter) {
 		return {scrambledLetter: scrambledLetter, uid: uid, userAnswer: userAnswer};
 	});
 var $author$project$Experiment$Scrabble$initState = A3($author$project$Experiment$Scrabble$State, 'DefaultUid', '', _List_Nil);
+var $author$project$Experiment$Spelling3$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Experiment$Spelling3$initState = A2($author$project$Experiment$Spelling3$State, 'DefaultUid', '');
 var $author$project$Experiment$SpellingLvl1$State = F3(
 	function (inputUid, userUID, userAnswer) {
 		return {inputUid: inputUid, userAnswer: userAnswer, userUID: userUID};
@@ -13569,7 +14045,12 @@ var $author$project$Experiment$Experiment$SynonymState = F3(
 		return {inputUid: inputUid, userAnswer: userAnswer, userUID: userUID};
 	});
 var $author$project$Experiment$Synonym$initState = A3($author$project$Experiment$Experiment$SynonymState, 'DefaultTrialUID', 'DefaultUserUID', '');
-var $author$project$Experiment$Experiment$initTranslationState = {inputUid: '', userAnswer: '', userUID: ''};
+var $author$project$Experiment$Translation$initState = {uid: '', userAnswer: ''};
+var $author$project$Experiment$YN$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Experiment$YN$initState = A2($author$project$Experiment$YN$State, 'DefaultUid', '');
 var $elm$http$Http$jsonBody = function (value) {
 	return A2(
 		_Http_pair,
@@ -13786,8 +14267,14 @@ var $author$project$Experiment$Acceptability$nextTrial = F2(
 			return task;
 		}
 	});
+var $author$project$Experiment$Experiment$DoingMeaning = function (a) {
+	return {$: 'DoingMeaning', a: a};
+};
 var $author$project$Experiment$Experiment$DoingScrabble = function (a) {
 	return {$: 'DoingScrabble', a: a};
+};
+var $author$project$Experiment$Experiment$DoingTranslation = function (a) {
+	return {$: 'DoingTranslation', a: a};
 };
 var $author$project$Experiment$Experiment$End = function (a) {
 	return {$: 'End', a: a};
@@ -14541,19 +15028,11 @@ var $author$project$Experiment$Experiment$updateState = F2(
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var currentTranslationState = function () {
-			var _v17 = $author$project$Experiment$Experiment$getState(model.translationTask);
-			if (_v17.$ === 'TranslationState') {
-				var x = _v17.a;
-				return x;
-			} else {
-				return $author$project$Experiment$Experiment$initTranslationState;
-			}
-		}();
+		var currentTranslationState = $author$project$PsychTask$getState(model.translationTask);
 		var currentSynonymState = function () {
-			var _v16 = $author$project$Experiment$Experiment$getState(model.synonymTask);
-			if (_v16.$ === 'SynonymStateType') {
-				var x = _v16.a;
+			var _v21 = $author$project$Experiment$Experiment$getState(model.synonymTask);
+			if (_v21.$ === 'SynonymStateType') {
+				var x = _v21.a;
 				return x;
 			} else {
 				return $author$project$Experiment$Synonym$initState;
@@ -14561,34 +15040,26 @@ var $author$project$Main$update = F2(
 		}();
 		var currentSpellingState = $author$project$PsychTask$getState(model.spellingLvl1);
 		var currentScrabbleState = function () {
-			var _v15 = $author$project$PsychTask$getState(model.scrabbleTask);
-			if (_v15.$ === 'Just') {
-				var x = _v15.a;
+			var _v20 = $author$project$PsychTask$getState(model.scrabbleTask);
+			if (_v20.$ === 'Just') {
+				var x = _v20.a;
 				return x;
 			} else {
 				return $author$project$Experiment$Scrabble$initState;
 			}
 		}();
-		var currentMeaningState = function () {
-			var _v14 = $author$project$Experiment$Experiment$getState(model.meaningTask);
-			if (_v14.$ === 'MeaningState') {
-				var x = _v14.a;
-				return x;
-			} else {
-				return $author$project$Experiment$Meaning$initState;
-			}
-		}();
+		var currentMeaningState = $author$project$PsychTask$getState(model.meaningBis);
 		switch (msg.$) {
 			case 'BrowserChangedUrl':
 				var url = msg.a;
 				var _v1 = $author$project$Route$fromUrl(url);
 				switch (_v1.$) {
-					case 'Meaning':
+					case 'Presentation':
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
-									meaningTask: $author$project$Experiment$Experiment$Loading,
+									presentation: $author$project$PsychTask$NotStartedYet,
 									route: $author$project$Route$fromUrl(url)
 								}),
 							$author$project$Main$fetchData(
@@ -14599,7 +15070,7 @@ var $author$project$Main$update = F2(
 								model,
 								{
 									route: $author$project$Route$fromUrl(url),
-									translationTask: $author$project$Experiment$Experiment$Loading
+									translationTask: $author$project$PsychTask$NotStartedYet
 								}),
 							$author$project$Main$fetchData(
 								$author$project$Route$fromUrl(url)));
@@ -14609,7 +15080,7 @@ var $author$project$Main$update = F2(
 								model,
 								{
 									route: $author$project$Route$fromUrl(url),
-									translationTask: $author$project$Experiment$Experiment$Loading
+									synonymTask: $author$project$Experiment$Experiment$Loading
 								}),
 							$author$project$Main$fetchData(
 								$author$project$Route$fromUrl(url)));
@@ -14623,12 +15094,32 @@ var $author$project$Main$update = F2(
 								}),
 							$author$project$Main$fetchData(
 								$author$project$Route$fromUrl(url)));
+					case 'CU1':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									cu1: $author$project$PsychTask$NotStartedYet,
+									route: $author$project$Route$fromUrl(url)
+								}),
+							$author$project$Main$fetchData(
+								$author$project$Route$fromUrl(url)));
 					case 'CULevel2':
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
 									cuLvl2: $author$project$PsychTask$NotStartedYet,
+									route: $author$project$Route$fromUrl(url)
+								}),
+							$author$project$Main$fetchData(
+								$author$project$Route$fromUrl(url)));
+					case 'CU3':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									cu3: $author$project$PsychTask$NotStartedYet,
 									route: $author$project$Route$fromUrl(url)
 								}),
 							$author$project$Main$fetchData(
@@ -14652,6 +15143,15 @@ var $author$project$Main$update = F2(
 							$author$project$Main$fetchData(
 								$author$project$Route$fromUrl(url)));
 					case 'SpellingLevel1':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									route: $author$project$Route$fromUrl(url)
+								}),
+							$author$project$Main$fetchData(
+								$author$project$Route$fromUrl(url)));
+					case 'Spelling3':
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -14687,23 +15187,9 @@ var $author$project$Main$update = F2(
 				}
 			case 'Shuffled':
 				var message = msg.a;
-				_v3$6:
+				_v3$4:
 				while (true) {
 					switch (message.$) {
-						case 'ServerRespondedWithMeaningInput':
-							if (message.a.$ === 'Ok') {
-								var data = message.a.a;
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											meaningTask: $author$project$Experiment$Experiment$DoingMeaning(
-												A4($author$project$Experiment$Experiment$MainLoop, data, $author$project$Experiment$Meaning$initState, 0, false))
-										}),
-									$elm$core$Platform$Cmd$none);
-							} else {
-								break _v3$6;
-							}
 						case 'ServerRespondedWithSpellingTrials':
 							if (message.a.$ === 'Ok') {
 								var data = message.a.a;
@@ -14729,21 +15215,7 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$6;
-							}
-						case 'ServerRespondedWithTranslationTrials':
-							if (message.a.$ === 'Ok') {
-								var data = message.a.a;
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											translationTask: $author$project$Experiment$Experiment$DoingTranslation(
-												A4($author$project$Experiment$Experiment$MainLoop, data, $author$project$Experiment$Experiment$initTranslationState, 0, false))
-										}),
-									$elm$core$Platform$Cmd$none);
-							} else {
-								break _v3$6;
+								break _v3$4;
 							}
 						case 'ServerRespondedWithSynonymTrials':
 							if (message.a.$ === 'Ok') {
@@ -14757,7 +15229,7 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$6;
+								break _v3$4;
 							}
 						case 'ServerRespondedWithAcceptabilityTrials':
 							if (message.a.$ === 'Ok') {
@@ -14770,7 +15242,7 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$6;
+								break _v3$4;
 							}
 						case 'ServerRespondedWithScrabbleTrials':
 							if (message.a.$ === 'Ok') {
@@ -14809,36 +15281,13 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v3$6;
+								break _v3$4;
 							}
 						default:
-							break _v3$6;
+							break _v3$4;
 					}
 				}
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			case 'ServerRespondedWithTranslationTrials':
-				if (msg.a.$ === 'Err') {
-					var reason = msg.a.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								translationTask: $author$project$Experiment$Experiment$Failure(reason)
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					var data = msg.a.a;
-					return _Utils_Tuple2(
-						model,
-						A2(
-							$elm$random$Random$generate,
-							function (shuffledData) {
-								return $author$project$Main$Shuffled(
-									$author$project$Main$ServerRespondedWithTranslationTrials(
-										$elm$core$Result$Ok(shuffledData)));
-							},
-							$elm_community$random_extra$Random$List$shuffle(data)));
-				}
 			case 'ServerRespondedWithSynonymTrials':
 				if (msg.a.$ === 'Err') {
 					var reason = msg.a.a;
@@ -14966,29 +15415,6 @@ var $author$project$Main$update = F2(
 										$elm$core$Result$Ok(shuffledData)));
 							},
 							shuffleLetters));
-				}
-			case 'ServerRespondedWithMeaningInput':
-				if (msg.a.$ === 'Ok') {
-					var data = msg.a.a;
-					return _Utils_Tuple2(
-						model,
-						A2(
-							$elm$random$Random$generate,
-							function (shuffledData) {
-								return $author$project$Main$Shuffled(
-									$author$project$Main$ServerRespondedWithMeaningInput(
-										$elm$core$Result$Ok(shuffledData)));
-							},
-							$elm_community$random_extra$Random$List$shuffle(data)));
-				} else {
-					var reason = msg.a.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								meaningTask: $author$project$Experiment$Experiment$Failure(reason)
-							}),
-						$elm$core$Platform$Cmd$none);
 				}
 			case 'UserClickedStartSynonym':
 				var trials = msg.a;
@@ -15244,28 +15670,12 @@ var $author$project$Main$update = F2(
 									scrabbleTask: $author$project$PsychTask$toggle(model.scrabbleTask)
 								}),
 							$elm$core$Platform$Cmd$none);
-					case 'Meaning':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									meaningTask: $author$project$Experiment$Experiment$toggleFeedback(model.meaningTask)
-								}),
-							$elm$core$Platform$Cmd$none);
 					case 'Synonym':
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
 									synonymTask: $author$project$Experiment$Experiment$toggleFeedback(model.synonymTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'Translation':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									translationTask: $author$project$Experiment$Experiment$toggleFeedback(model.translationTask)
 								}),
 							$elm$core$Platform$Cmd$none);
 					case 'SpellingLevel1':
@@ -15290,24 +15700,6 @@ var $author$project$Main$update = F2(
 									scrabbleTask: $author$project$PsychTask$toggle(model.scrabbleTask)
 								}),
 							$elm$core$Platform$Cmd$none);
-					case 'Meaning':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									meaningTask: $author$project$Experiment$Experiment$nextTrial(
-										A2(
-											$author$project$Experiment$Experiment$updateState,
-											$author$project$Experiment$Experiment$MeaningState(
-												_Utils_update(
-													currentMeaningState,
-													{userAnswer: ''})),
-											$author$project$Experiment$Experiment$toggleFeedback(model.meaningTask)))
-								}),
-							A2(
-								$elm$random$Random$generate,
-								$author$project$Main$RuntimeShuffledOptionsOrder,
-								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
 					case 'Synonym':
 						return _Utils_Tuple2(
 							_Utils_update(
@@ -15321,21 +15713,6 @@ var $author$project$Main$update = F2(
 													currentSynonymState,
 													{userAnswer: ''})),
 											$author$project$Experiment$Experiment$toggleFeedback(model.synonymTask)))
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'Translation':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									translationTask: $author$project$Experiment$Experiment$nextTrial(
-										A2(
-											$author$project$Experiment$Experiment$updateState,
-											$author$project$Experiment$Experiment$TranslationState(
-												_Utils_update(
-													currentTranslationState,
-													{userAnswer: ''})),
-											$author$project$Experiment$Experiment$toggleFeedback(model.translationTask)))
 								}),
 							$elm$core$Platform$Cmd$none);
 					case 'SpellingLevel1':
@@ -15366,63 +15743,34 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 1253, column: 21},
-								end: {line: 1253, column: 31}
+								start: {line: 1136, column: 21},
+								end: {line: 1136, column: 31}
 							})('Other contexts when next trial is clicked');
 				}
 			case 'UserClickedRadioButton':
 				var context = msg.a;
 				var newChoice = msg.b;
-				switch (context.$) {
-					case 'Meaning':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									meaningTask: A2(
-										$author$project$Experiment$Experiment$updateState,
-										$author$project$Experiment$Experiment$MeaningState(
-											_Utils_update(
-												currentMeaningState,
-												{userAnswer: newChoice})),
-										model.meaningTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'Translation':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									translationTask: A2(
-										$author$project$Experiment$Experiment$updateState,
-										$author$project$Experiment$Experiment$TranslationState(
-											_Utils_update(
-												currentMeaningState,
-												{userAnswer: newChoice})),
-										model.translationTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'Synonym':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									synonymTask: A2(
-										$author$project$Experiment$Experiment$updateState,
-										$author$project$Experiment$Experiment$SynonymStateType(
-											_Utils_update(
-												currentSynonymState,
-												{userAnswer: newChoice})),
-										model.synonymTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					default:
-						return _Debug_todo(
-							'Main',
+				if (context.$ === 'Synonym') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
 							{
-								start: {line: 1285, column: 21},
-								end: {line: 1285, column: 31}
-							})('other contexts when radio button is clicked');
+								synonymTask: A2(
+									$author$project$Experiment$Experiment$updateState,
+									$author$project$Experiment$Experiment$SynonymStateType(
+										_Utils_update(
+											currentSynonymState,
+											{userAnswer: newChoice})),
+									model.synonymTask)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Debug_todo(
+						'Main',
+						{
+							start: {line: 1150, column: 21},
+							end: {line: 1150, column: 31}
+						})('other contexts when radio button is clicked');
 				}
 			case 'CU2':
 				var message = msg.a;
@@ -15434,7 +15782,10 @@ var $author$project$Main$update = F2(
 								{
 									cuLvl2: A2($author$project$PsychTask$next, $author$project$Experiment$CU2$initState, model.cuLvl2)
 								}),
-							$elm$core$Platform$Cmd$none);
+							A2(
+								$elm$random$Random$generate,
+								$author$project$Main$RuntimeShuffledOptionsOrder,
+								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
 					case 'UserClickedToggleFeedback':
 						return _Utils_Tuple2(
 							_Utils_update(
@@ -15482,8 +15833,8 @@ var $author$project$Main$update = F2(
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 1309, column: 21},
-									end: {line: 1309, column: 31}
+									start: {line: 1174, column: 21},
+									end: {line: 1174, column: 31}
 								})('');
 						}
 					case 'UserClickedStartIntro':
@@ -15491,8 +15842,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 1312, column: 21},
-								end: {line: 1312, column: 31}
+								start: {line: 1177, column: 21},
+								end: {line: 1177, column: 31}
 							})('');
 					default:
 						var trials = message.a;
@@ -15504,7 +15855,7 @@ var $author$project$Main$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'CU1':
 				var message = msg.a;
 				switch (message.$) {
 					case 'UserClickedNextTrial':
@@ -15514,7 +15865,10 @@ var $author$project$Main$update = F2(
 								{
 									cu1: A2($author$project$PsychTask$next, $author$project$Experiment$CU1$initState, model.cu1)
 								}),
-							$elm$core$Platform$Cmd$none);
+							A2(
+								$elm$random$Random$generate,
+								$author$project$Main$RuntimeShuffledOptionsOrder,
+								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
 					case 'UserClickedToggleFeedback':
 						return _Utils_Tuple2(
 							_Utils_update(
@@ -15566,8 +15920,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 1342, column: 21},
-								end: {line: 1342, column: 31}
+								start: {line: 1207, column: 21},
+								end: {line: 1207, column: 31}
 							})('');
 					default:
 						var trials = message.a;
@@ -15579,10 +15933,436 @@ var $author$project$Main$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 				}
+			case 'CU3':
+				var message = msg.a;
+				switch (message.$) {
+					case 'UserClickedNextTrial':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									cu3: A2($author$project$PsychTask$next, $author$project$Experiment$CU1$initState, model.cu3)
+								}),
+							A2(
+								$elm$random$Random$generate,
+								$author$project$Main$RuntimeShuffledOptionsOrder,
+								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
+					case 'UserClickedToggleFeedback':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									cu3: $author$project$PsychTask$toggle(model.cu3)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'UserClickedRadioButton':
+						var newChoice = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									cu3: A2(
+										$author$project$PsychTask$update,
+										{uid: '', userAnswer: newChoice},
+										model.cu3)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'ServerRespondedWith':
+						if (message.a.$ === 'Ok') {
+							var results = message.a.a;
+							var trainingTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return datum.isTraining;
+								},
+								results);
+							var mainTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return !datum.isTraining;
+								},
+								results);
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										cu3: A3($author$project$PsychTask$startIntro, trainingTrials, mainTrials, $author$project$Experiment$CU3$initState)
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							var reason = message.a.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					case 'UserClickedStartIntro':
+						var trials = message.a;
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 1237, column: 21},
+								end: {line: 1237, column: 31}
+							})('');
+					case 'UserClickedStartMain':
+						var trials = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									cu3: A2($author$project$PsychTask$startMain, trials, $author$project$Experiment$CU3$initState)
+								}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						var _new = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									cu3: A2(
+										$author$project$PsychTask$update,
+										{uid: '', userAnswer: _new},
+										model.cu3)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
+			case 'Spelling3':
+				var message = msg.a;
+				switch (message.$) {
+					case 'UserClickedNextTrial':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									spelling3: A2($author$project$PsychTask$next, $author$project$Experiment$CU1$initState, model.spelling3)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'UserClickedToggleFeedback':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									spelling3: $author$project$PsychTask$toggle(model.spelling3)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'ServerRespondedWith':
+						if (message.a.$ === 'Ok') {
+							var results = message.a.a;
+							var trainingTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return datum.isTraining;
+								},
+								results);
+							var mainTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return !datum.isTraining;
+								},
+								results);
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										spelling3: A3($author$project$PsychTask$startIntro, trainingTrials, mainTrials, $author$project$Experiment$Spelling3$initState)
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							var reason = message.a.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					case 'UserClickedStartIntro':
+						var trials = message.a;
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 1267, column: 21},
+								end: {line: 1267, column: 31}
+							})('');
+					case 'UserClickedStartMain':
+						var trials = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									spelling3: A2($author$project$PsychTask$startMain, trials, $author$project$Experiment$Spelling3$initState)
+								}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						var _new = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									spelling3: A2(
+										$author$project$PsychTask$update,
+										{uid: '', userAnswer: _new},
+										model.spelling3)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
+			case 'YN':
+				var message = msg.a;
+				switch (message.$) {
+					case 'UserClickedNextTrial':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									yn: A2($author$project$PsychTask$next, $author$project$Experiment$CU1$initState, model.yn)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'UserClickedToggleFeedback':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									yn: $author$project$PsychTask$toggle(model.yn)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'ServerRespondedWith':
+						if (message.a.$ === 'Ok') {
+							var results = message.a.a;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										yn: A3($author$project$PsychTask$startIntro, _List_Nil, results, $author$project$Experiment$YN$initState)
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							var reason = message.a.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					case 'UserClickedStartIntro':
+						var trials = message.a;
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 1290, column: 21},
+								end: {line: 1290, column: 31}
+							})('');
+					case 'UserClickedStartMain':
+						var trials = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									yn: A2($author$project$PsychTask$startMain, trials, $author$project$Experiment$YN$initState)
+								}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						var _new = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									yn: A2(
+										$author$project$PsychTask$update,
+										{uid: '', userAnswer: _new},
+										model.yn)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
+			case 'Presentation':
+				var message = msg.a;
+				switch (message.$) {
+					case 'UserClickedNextTrial':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									presentation: A2($author$project$PsychTask$next, $author$project$Experiment$Presentation$initState, model.presentation)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'ServerRespondedWith':
+						if (message.a.$ === 'Ok') {
+							var results = message.a.a;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										presentation: A3($author$project$PsychTask$startIntro, _List_Nil, results, $author$project$Experiment$Presentation$initState)
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							var reason = message.a.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					case 'UserClickedStartIntro':
+						var trials = message.a;
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 1310, column: 21},
+								end: {line: 1310, column: 31}
+							})('Start intro');
+					default:
+						var trials = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									presentation: A2($author$project$PsychTask$startMain, trials, $author$project$Experiment$Presentation$initState)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
+			case 'Meaning':
+				var message = msg.a;
+				switch (message.$) {
+					case 'UserClickedNextTrial':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									meaningBis: A2($author$project$PsychTask$next, $author$project$Experiment$Meaning$initState, model.meaningBis)
+								}),
+							A2(
+								$elm$random$Random$generate,
+								$author$project$Main$RuntimeShuffledOptionsOrder,
+								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
+					case 'UserClickedToggleFeedback':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									meaningBis: $author$project$PsychTask$toggle(model.meaningBis)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'UserClickedRadioButton':
+						var newChoice = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									meaningBis: A2(
+										$author$project$PsychTask$update,
+										{uid: '', userAnswer: newChoice},
+										model.meaningBis)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'ServerRespondedWith':
+						if (message.a.$ === 'Ok') {
+							var results = message.a.a;
+							var trainingTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return datum.isTraining;
+								},
+								results);
+							var mainTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return !datum.isTraining;
+								},
+								results);
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										meaningBis: A3($author$project$PsychTask$startIntro, trainingTrials, mainTrials, $author$project$Experiment$Meaning$initState)
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							var reason = message.a.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					case 'UserClickedStartIntro':
+						var trials = message.a;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					default:
+						var trials = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									meaningBis: A2($author$project$PsychTask$startMain, trials, $author$project$Experiment$Meaning$initState)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
+			default:
+				var message = msg.a;
+				switch (message.$) {
+					case 'UserClickedNextTrial':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									translationTask: A2($author$project$PsychTask$next, $author$project$Experiment$Translation$initState, model.translationTask)
+								}),
+							A2(
+								$elm$random$Random$generate,
+								$author$project$Main$RuntimeShuffledOptionsOrder,
+								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
+					case 'UserClickedToggleFeedback':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									translationTask: $author$project$PsychTask$toggle(model.translationTask)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'UserClickedRadioButton':
+						var newChoice = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									translationTask: A2(
+										$author$project$PsychTask$update,
+										{uid: '', userAnswer: newChoice},
+										model.translationTask)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'ServerRespondedWith':
+						if (message.a.$ === 'Ok') {
+							var results = message.a.a;
+							var trainingTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return datum.isTraining;
+								},
+								results);
+							var mainTrials = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return !datum.isTraining;
+								},
+								results);
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										translationTask: A3($author$project$PsychTask$startIntro, trainingTrials, mainTrials, $author$project$Experiment$Translation$initState)
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							var reason = message.a.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					case 'UserClickedStartIntro':
+						var trials = message.a;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					default:
+						var trials = message.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									translationTask: A2($author$project$PsychTask$startMain, trials, $author$project$Experiment$Translation$initState)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Main$PlaysoundInJS = function (a) {
 	return {$: 'PlaysoundInJS', a: a};
+};
+var $author$project$Experiment$CU3$UserChangedInput = function (a) {
+	return {$: 'UserChangedInput', a: a};
+};
+var $author$project$Experiment$Spelling3$UserChangedInput = function (a) {
+	return {$: 'UserChangedInput', a: a};
+};
+var $author$project$Experiment$YN$UserChangedInput = function (a) {
+	return {$: 'UserChangedInput', a: a};
 };
 var $author$project$Main$UserChangedInputInSynonym = function (a) {
 	return {$: 'UserChangedInputInSynonym', a: a};
@@ -15593,10 +16373,22 @@ var $author$project$Main$UserClickedFeedbackButton = function (a) {
 };
 var $author$project$Experiment$CU1$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
 var $author$project$Experiment$CU2$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Experiment$CU3$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Experiment$Meaning$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Experiment$Presentation$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Experiment$Spelling3$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Experiment$Translation$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Experiment$YN$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
 var $author$project$Experiment$CU1$UserClickedRadioButton = function (a) {
 	return {$: 'UserClickedRadioButton', a: a};
 };
 var $author$project$Experiment$CU2$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
+};
+var $author$project$Experiment$Meaning$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
+};
+var $author$project$Experiment$Translation$UserClickedRadioButton = function (a) {
 	return {$: 'UserClickedRadioButton', a: a};
 };
 var $author$project$Main$UserClickedRadioButtonInSpellingLvl1 = function (a) {
@@ -15608,6 +16400,24 @@ var $author$project$Experiment$CU1$UserClickedStartMain = function (a) {
 var $author$project$Experiment$CU2$UserClickedStartMain = function (a) {
 	return {$: 'UserClickedStartMain', a: a};
 };
+var $author$project$Experiment$CU3$UserClickedStartMain = function (a) {
+	return {$: 'UserClickedStartMain', a: a};
+};
+var $author$project$Experiment$Meaning$UserClickedStartMain = function (a) {
+	return {$: 'UserClickedStartMain', a: a};
+};
+var $author$project$Experiment$Presentation$UserClickedStartMain = function (a) {
+	return {$: 'UserClickedStartMain', a: a};
+};
+var $author$project$Experiment$Spelling3$UserClickedStartMain = function (a) {
+	return {$: 'UserClickedStartMain', a: a};
+};
+var $author$project$Experiment$Translation$UserClickedStartMain = function (a) {
+	return {$: 'UserClickedStartMain', a: a};
+};
+var $author$project$Experiment$YN$UserClickedStartMain = function (a) {
+	return {$: 'UserClickedStartMain', a: a};
+};
 var $author$project$Main$UserClickedStartMainloopInSpellingLvl1 = function (a) {
 	return {$: 'UserClickedStartMainloopInSpellingLvl1', a: a};
 };
@@ -15616,6 +16426,11 @@ var $author$project$Main$UserClickedStartSynonym = function (a) {
 };
 var $author$project$Experiment$CU1$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
 var $author$project$Experiment$CU2$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$Experiment$CU3$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$Experiment$Meaning$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$Experiment$Spelling3$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$Experiment$Translation$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$Experiment$YN$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
 var $author$project$Main$UserUpdatedEmailFieldInLogIn = function (a) {
 	return {$: 'UserUpdatedEmailFieldInLogIn', a: a};
 };
@@ -17618,143 +18433,53 @@ var $author$project$View$button = function (_v0) {
 				$rtfeldman$elm_css$Html$Styled$text(txt)
 			]));
 };
-var $author$project$Experiment$CU1$view = function (input) {
-	var _v0 = _Utils_Tuple2(input.task, input.infos);
-	if (_v0.b.$ === 'Nothing') {
-		var _v1 = _v0.b;
+var $elm$core$String$dropRight = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3($elm$core$String$slice, 0, -n, string);
+	});
+var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(
+	function (replacements, _v0) {
+		var match = _v0.match;
+		var ordinalString = A2(
+			$elm$core$Basics$composeL,
+			$elm$core$String$dropLeft(1),
+			$elm$core$String$dropRight(1))(match);
 		return A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
-				]));
-	} else {
-		switch (_v0.a.$) {
-			case 'NotStartedYet':
-				var _v2 = _v0.a;
-				var info = _v0.b.a;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
-						]));
-			case 'Intr':
-				var trainingTrials = _v0.a.a.trainingTrials;
-				var mainTrials = _v0.a.a.mainTrials;
-				var current = _v0.a.a.current;
-				var state = _v0.a.a.state;
-				var feedback = _v0.a.a.feedback;
-				var history = _v0.a.a.history;
-				var info = _v0.b.a;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
-				} else {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
-								$author$project$View$button(
-								{
-									isDisabled: false,
-									message: input.startMainMsg(mainTrials),
-									txt: 'Start'
-								})
-							]));
-				}
-			case 'IntroOver':
-				var _v4 = _v0.a;
-				var info = _v0.b.a;
-				return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
-			case 'Main':
-				var mainTrials = _v0.a.a.mainTrials;
-				var current = _v0.a.a.current;
-				var state = _v0.a.a.state;
-				var feedback = _v0.a.a.feedback;
-				var history = _v0.a.a.history;
-				var info = _v0.b.a;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
-				} else {
-					return $rtfeldman$elm_css$Html$Styled$text(info.end);
-				}
-			default:
-				var _v6 = _v0.a;
-				var info = _v0.b.a;
-				return $rtfeldman$elm_css$Html$Styled$text('I\'m over');
-		}
-	}
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$andThen,
+				function (value) {
+					return A2($elm$core$Array$get, value, replacements);
+				},
+				$elm$core$String$toInt(ordinalString)));
+	});
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
 };
-var $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode = $rtfeldman$elm_css$VirtualDom$Styled$Unstyled;
-var $rtfeldman$elm_css$Html$Styled$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode;
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
-var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
-var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
-var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
-var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $author$project$Icons$svgFeatherIcon = function (className) {
-	return $elm$svg$Svg$svg(
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$class('feather feather-' + className),
-				$elm$svg$Svg$Attributes$fill('none'),
-				$elm$svg$Svg$Attributes$stroke('currentColor'),
-				$elm$svg$Svg$Attributes$strokeLinecap('round'),
-				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
-				$elm$svg$Svg$Attributes$strokeWidth('2'),
-				$elm$svg$Svg$Attributes$viewBox('0 0 24 24'),
-				$elm$svg$Svg$Attributes$width('100%'),
-				$elm$svg$Svg$Attributes$class('cursor-pointer hover:opacity-75')
-			]));
-};
-var $author$project$Icons$music = A2(
-	$author$project$Icons$svgFeatherIcon,
-	'music',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$path,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$d('M9 18V5l12-2v13')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx('6'),
-					$elm$svg$Svg$Attributes$cy('18'),
-					$elm$svg$Svg$Attributes$r('3')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx('18'),
-					$elm$svg$Svg$Attributes$cy('16'),
-					$elm$svg$Svg$Attributes$r('3')
-				]),
-			_List_Nil)
-		]));
+var $elm$regex$Regex$never = _Regex_never;
+var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2(
+	$elm$core$Maybe$withDefault,
+	$elm$regex$Regex$never,
+	$elm$regex$Regex$fromString('\\{\\d+\\}'));
+var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(
+	function (string, args) {
+		var asArray = $elm$core$Array$fromList(args);
+		return A3(
+			$elm$regex$Regex$replace,
+			$lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex,
+			$lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray),
+			string);
+	});
 var $elm$core$Tuple$pair = F2(
 	function (a, b) {
 		return _Utils_Tuple2(a, b);
@@ -17930,6 +18655,304 @@ var $author$project$View$viewTraining = F2(
 					$author$project$View$trainingBox(content)
 				]));
 	});
+var $author$project$Experiment$CU1$view = function (task) {
+	var _v0 = _Utils_Tuple2(task.task, task.infos);
+	if (_v0.b.$ === 'Nothing') {
+		var _v1 = _v0.b;
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
+				]));
+	} else {
+		switch (_v0.a.$) {
+			case 'NotStartedYet':
+				var _v2 = _v0.a;
+				var info = _v0.b.a;
+				return A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
+						]));
+			case 'Intr':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v3 = data.current;
+				if (_v3.$ === 'Just') {
+					var trial = _v3.a;
+					var _v4 = function () {
+						var _v5 = A2($elm$core$String$split, '/', trial.text);
+						if (_v5.b) {
+							if (_v5.b.b) {
+								var x = _v5.a;
+								var _v6 = _v5.b;
+								var y = _v6.a;
+								return _Utils_Tuple2(x, y);
+							} else {
+								var x = _v5.a;
+								return _Utils_Tuple2(x, 'defaultPost');
+							}
+						} else {
+							return _Utils_Tuple2('defautpre', 'defaultpOst');
+						}
+					}();
+					var pre = _v4.a;
+					var post = _v4.b;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$author$project$View$viewTraining,
+								info.instructions,
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(pre)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2 col-start-2 col-span-4')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(data.state.userAnswer)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(post)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+											]),
+										A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder)),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+											]),
+										data.feedback ? _List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(
+												_Utils_eq(data.state.userAnswer, trial.target) ? A2(
+													$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+													info.feedback_correct,
+													_List_fromArray(
+														[trial.target, trial.definition])) : A2(
+													$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+													info.feedback_incorrect,
+													_List_fromArray(
+														[trial.target, trial.definition]))),
+												$author$project$View$button(
+												{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Training Item'})
+											]) : _List_fromArray(
+											[
+												$author$project$View$button(
+												{isDisabled: false, message: task.toggleFeedbackMsg, txt: 'Check my answer'})
+											]))
+									]))
+							]));
+				} else {
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
+								$author$project$View$button(
+								{
+									isDisabled: false,
+									message: task.startMainMsg(data.mainTrials),
+									txt: 'Start'
+								})
+							]));
+				}
+			case 'IntroOver':
+				var _v7 = _v0.a;
+				var info = _v0.b.a;
+				return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
+			case 'Main':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v8 = data.current;
+				if (_v8.$ === 'Just') {
+					var trial = _v8.a;
+					var _v9 = function () {
+						var _v10 = A2($elm$core$String$split, '/', trial.text);
+						if (_v10.b) {
+							if (_v10.b.b) {
+								var x = _v10.a;
+								var _v11 = _v10.b;
+								var y = _v11.a;
+								return _Utils_Tuple2(x, y);
+							} else {
+								var x = _v10.a;
+								return _Utils_Tuple2(x, 'defaultPost');
+							}
+						} else {
+							return _Utils_Tuple2('defautpre', 'defaultpOst');
+						}
+					}();
+					var pre = _v9.a;
+					var post = _v9.b;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text(pre),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lgz')
+									]),
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(data.state.userAnswer)
+									])),
+								$rtfeldman$elm_css$Html$Styled$text(post),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder)),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								data.feedback ? _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										_Utils_eq(data.state.userAnswer, trial.target) ? A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_correct,
+											_List_fromArray(
+												[trial.target, trial.definition])) : A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_incorrect,
+											_List_fromArray(
+												[trial.target, trial.definition]))),
+										$author$project$View$button(
+										{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Item'})
+									]) : _List_fromArray(
+									[
+										$author$project$View$button(
+										{isDisabled: false, message: task.toggleFeedbackMsg, txt: 'Check my answer'})
+									]))
+							]));
+				} else {
+					return $rtfeldman$elm_css$Html$Styled$text(info.end);
+				}
+			default:
+				var _v12 = _v0.a;
+				var info = _v0.b.a;
+				return $rtfeldman$elm_css$Html$Styled$text('I\'m over');
+		}
+	}
+};
+var $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode = $rtfeldman$elm_css$VirtualDom$Styled$Unstyled;
+var $rtfeldman$elm_css$Html$Styled$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode;
+var $elm_explorations$markdown$Markdown$defaultOptions = {
+	defaultHighlighting: $elm$core$Maybe$Nothing,
+	githubFlavored: $elm$core$Maybe$Just(
+		{breaks: false, tables: false}),
+	sanitize: true,
+	smartypants: false
+};
+var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
+var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
+var $author$project$View$fromMarkdown = A2(
+	$elm$core$Basics$composeL,
+	$rtfeldman$elm_css$Html$Styled$fromUnstyled,
+	$elm_explorations$markdown$Markdown$toHtml(_List_Nil));
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
+var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
+var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $author$project$Icons$svgFeatherIcon = function (className) {
+	return $elm$svg$Svg$svg(
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$class('feather feather-' + className),
+				$elm$svg$Svg$Attributes$fill('none'),
+				$elm$svg$Svg$Attributes$stroke('currentColor'),
+				$elm$svg$Svg$Attributes$strokeLinecap('round'),
+				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
+				$elm$svg$Svg$Attributes$strokeWidth('2'),
+				$elm$svg$Svg$Attributes$viewBox('0 0 24 24'),
+				$elm$svg$Svg$Attributes$width('100%'),
+				$elm$svg$Svg$Attributes$class('cursor-pointer hover:opacity-75')
+			]));
+};
+var $author$project$Icons$music = A2(
+	$author$project$Icons$svgFeatherIcon,
+	'music',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M9 18V5l12-2v13')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('6'),
+					$elm$svg$Svg$Attributes$cy('18'),
+					$elm$svg$Svg$Attributes$r('3')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('18'),
+					$elm$svg$Svg$Attributes$cy('16'),
+					$elm$svg$Svg$Attributes$r('3')
+				]),
+			_List_Nil)
+		]));
 var $author$project$Experiment$CU2$view = F4(
 	function (exp, infos, optionsOrder, _v0) {
 		var userClickedAudio = _v0.userClickedAudio;
@@ -17980,52 +19003,56 @@ var $author$project$Experiment$CU2$view = F4(
 									_List_fromArray(
 										[
 											A2(
-											$rtfeldman$elm_css$Html$Styled$span,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('I\'m training wheel')
-												])),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$span,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text(trial.context)
-												])),
-											A2(
 											$rtfeldman$elm_css$Html$Styled$div,
 											_List_fromArray(
 												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('h-12 w-12'),
-													$rtfeldman$elm_css$Html$Styled$Events$onClick(
-													userClickedAudio(trial.audioSentence.url))
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4 pt-8 pb-8')
 												]),
 											_List_fromArray(
 												[
-													$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
+													A2(
+													$rtfeldman$elm_css$Html$Styled$span,
+													_List_Nil,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$text(trial.context)
+														])),
+													A2(
+													$rtfeldman$elm_css$Html$Styled$div,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$class('h-8 w-8 pt-4'),
+															$rtfeldman$elm_css$Html$Styled$Events$onClick(
+															userClickedAudio(trial.audioSentence.url))
+														]),
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
+														]))
 												])),
 											A2(
 											$rtfeldman$elm_css$Html$Styled$div,
-											_List_Nil,
 											_List_fromArray(
 												[
-													$rtfeldman$elm_css$Html$Styled$text('What did you understand ?')
-												])),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_Nil,
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+												]),
 											A5($author$project$View$shuffledOptions, state, feedback, radioMsg, trial, optionsOrder)),
-											feedback ? A2(
+											A2(
 											$rtfeldman$elm_css$Html$Styled$div,
-											_List_Nil,
 											_List_fromArray(
 												[
-													$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4 pb-8')
+												]),
+											feedback ? _List_fromArray(
+												[
+													$author$project$View$fromMarkdown(trial.feedback),
 													$author$project$View$button(
 													{isDisabled: false, message: nextTrialMsg, txt: 'Next Training Item'})
-												])) : $author$project$View$button(
-											{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
+												]) : _List_fromArray(
+												[
+													$author$project$View$button(
+													{isDisabled: false, message: toggleFeedback, txt: 'Check my answer'})
+												]))
 										]))
 								]));
 					} else {
@@ -18061,7 +19088,7 @@ var $author$project$Experiment$CU2$view = F4(
 							_List_Nil,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$text(info.instructions_short),
+									$author$project$View$fromMarkdown(info.instructions_short),
 									A2(
 									$rtfeldman$elm_css$Html$Styled$span,
 									_List_Nil,
@@ -18090,11 +19117,12 @@ var $author$project$Experiment$CU2$view = F4(
 									_List_Nil,
 									_List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+											$rtfeldman$elm_css$Html$Styled$fromUnstyled(
+											A2($elm_explorations$markdown$Markdown$toHtml, _List_Nil, trial.feedback)),
 											$author$project$View$button(
 											{isDisabled: false, message: nextTrialMsg, txt: 'Next Item'})
 										])) : $author$project$View$button(
-									{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
+									{isDisabled: false, message: toggleFeedback, txt: 'Check my answer'})
 								]));
 					} else {
 						return $rtfeldman$elm_css$Html$Styled$text(info.end);
@@ -18106,1373 +19134,6 @@ var $author$project$Experiment$CU2$view = F4(
 			}
 		}
 	});
-var $rtfeldman$elm_css$Html$Styled$fieldset = $rtfeldman$elm_css$Html$Styled$node('fieldset');
-var $author$project$View$pct = F2(
-	function (trialn, trials) {
-		return (trialn / $elm$core$List$length(trials)) * 100;
-	});
-var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
-var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
-var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
-var $author$project$Progressbar$progressBar = function (percentage) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$div,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class('shadow max-w-xl bg-gray-300 mt-2')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$rtfeldman$elm_css$Html$Styled$div,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-indigo-600 text-sm font-bold leading-none py-1 text-center text-white '),
-						$rtfeldman$elm_css$Html$Styled$Attributes$css(
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Css$width(
-								$rtfeldman$elm_css$Css$pct(percentage))
-							]))
-					]),
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text(
-						$elm$core$String$fromInt(
-							$elm$core$Basics$round(percentage)) + '%')
-					]))
-			]));
-};
-var $rtfeldman$elm_css$Html$Styled$audio = $rtfeldman$elm_css$Html$Styled$node('audio');
-var $rtfeldman$elm_css$Html$Styled$Attributes$autoplay = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('autoplay');
-var $rtfeldman$elm_css$Html$Styled$Attributes$controls = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('controls');
-var $rtfeldman$elm_css$Html$Styled$Attributes$width = function (n) {
-	return A2(
-		$rtfeldman$elm_css$VirtualDom$Styled$attribute,
-		'width',
-		$elm$core$String$fromInt(n));
-};
-var $author$project$View$simpleAudioPlayer = function (src) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$audio,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$controls(true),
-				$rtfeldman$elm_css$Html$Styled$Attributes$src(src),
-				$rtfeldman$elm_css$Html$Styled$Attributes$autoplay(true),
-				$rtfeldman$elm_css$Html$Styled$Attributes$width(300)
-			]),
-		_List_Nil);
-};
-var $author$project$Experiment$SpellingLvl1$trainingBox = $rtfeldman$elm_css$Html$Styled$div(
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center ')
-		]));
-var $author$project$View$viewFeedbackInSingleChoice = F3(
-	function (isVisible, state, trial) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$p,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class(
-					'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
-				]),
-			_Utils_eq(state.userAnswer, trial.target) ? _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('✔️ Correct Answer ! ')
-				]) : _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('❌ The correct definition is : '),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$span,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('font-medium italic')
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(trial.target)
-						]))
-				]));
-	});
-var $author$project$Experiment$SpellingLvl1$viewInstructions = A2(
-	$rtfeldman$elm_css$Html$Styled$div,
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$rtfeldman$elm_css$Html$Styled$h2,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-				]),
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('Instructions')
-				])),
-			A2(
-			$rtfeldman$elm_css$Html$Styled$p,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 pb-8 font-medium')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$pre,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Focus on the word in the box in each sentence.\u200B\nIt’s a synonym for one of the words you are learning.\u200B\nClick on the word in the box to type your synonym.')
-						]))
-				])),
-			A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg text-green-500 font-bold pb-2')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$span,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Practice here !')
-						]))
-				]))
-		]));
-var $author$project$View$viewQuestion = F3(
-	function (trialn, trial, instructions) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$h3,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(
-							$elm$core$String$fromInt(trialn + 1) + ('. ' + instructions)),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$span,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
-								]),
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text(trial.target)
-								]))
-						]))
-				]));
-	});
-var $author$project$Experiment$SpellingLvl1$view = F3(
-	function (exp, optionsOrder, _v0) {
-		var radioMsg = _v0.radioMsg;
-		var nextTrialMsg = _v0.nextTrialMsg;
-		var toggleFeedbackMsg = _v0.toggleFeedbackMsg;
-		var startMainloopMsg = _v0.startMainloopMsg;
-		switch (exp.$) {
-			case 'Over':
-				return $rtfeldman$elm_css$Html$Styled$text('I\'m over');
-			case 'NotStartedYet':
-				return $rtfeldman$elm_css$Html$Styled$text('I\'m not started yet');
-			case 'Intr':
-				var trainingTrials = exp.a.trainingTrials;
-				var mainTrials = exp.a.mainTrials;
-				var current = exp.a.current;
-				var state = exp.a.state;
-				var feedback = exp.a.feedback;
-				var history = exp.a.history;
-				if (current.$ === 'Just') {
-					var x = current.a;
-					var isCorrect = function (optionN) {
-						return _Utils_eq(optionN, x.target);
-					};
-					var option = function (id) {
-						return A5(
-							$author$project$View$radio,
-							id,
-							_Utils_eq(state.userAnswer, id),
-							isCorrect(id),
-							feedback,
-							radioMsg(id));
-					};
-					var options = _List_fromArray(
-						[
-							option(x.distractor1),
-							option(x.distractor2),
-							option(x.distractor3),
-							option(x.target)
-						]);
-					var ordoredOptions = A2(
-						$elm$core$List$map,
-						$elm$core$Tuple$second,
-						A2(
-							$elm$core$List$sortBy,
-							$elm$core$Tuple$first,
-							A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$author$project$Experiment$SpellingLvl1$viewInstructions,
-								$author$project$Experiment$SpellingLvl1$trainingBox(
-								_List_fromArray(
-									[
-										A3(
-										$author$project$View$viewQuestion,
-										$elm$core$List$length(history),
-										x,
-										'Choose the correct spelling for the word :'),
-										$author$project$View$simpleAudioPlayer(x.audio.url),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
-												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedback)
-											]),
-										_List_fromArray(
-											[
-												A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, ordoredOptions)
-											])),
-										$author$project$View$button(
-										(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Is it correct?'} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
-											]),
-										_List_fromArray(
-											[
-												A3($author$project$View$viewFeedbackInSingleChoice, feedback, state, x)
-											]))
-									]))
-							]));
-				} else {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Ready to start the real experiment?'),
-								$author$project$View$button(
-								{
-									isDisabled: false,
-									message: startMainloopMsg(mainTrials),
-									txt: 'Click here to start'
-								})
-							]));
-				}
-			case 'IntroOver':
-				return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
-			default:
-				var mainTrials = exp.a.mainTrials;
-				var current = exp.a.current;
-				var state = exp.a.state;
-				var feedback = exp.a.feedback;
-				var history = exp.a.history;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					var trialn = $elm$core$List$length(history) + 1;
-					var isCorrect = function (optionN) {
-						return _Utils_eq(optionN, trial.target);
-					};
-					var option = function (id) {
-						return A5(
-							$author$project$View$radio,
-							id,
-							_Utils_eq(state.userAnswer, id),
-							isCorrect(id),
-							feedback,
-							radioMsg(id));
-					};
-					var options = _List_fromArray(
-						[
-							option(trial.distractor1),
-							option(trial.distractor2),
-							option(trial.distractor3),
-							option(trial.target)
-						]);
-					var ordoredOptions = A2(
-						$elm$core$List$map,
-						$elm$core$Tuple$second,
-						A2(
-							$elm$core$List$sortBy,
-							$elm$core$Tuple$first,
-							A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
-									]),
-								_List_fromArray(
-									[
-										$author$project$Progressbar$progressBar(
-										A2(
-											$author$project$View$pct,
-											trialn,
-											_Utils_ap(
-												mainTrials,
-												A2($elm$core$List$map, $elm$core$Tuple$first, history)))),
-										A3($author$project$View$viewQuestion, trialn, trial, 'Choose the correct spelling for the word :'),
-										$author$project$View$simpleAudioPlayer(trial.audio.url),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
-												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedback)
-											]),
-										_List_fromArray(
-											[
-												A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, ordoredOptions)
-											])),
-										$author$project$View$button(
-										(!feedback) ? {
-											isDisabled: $elm$core$String$isEmpty(state.userAnswer),
-											message: toggleFeedbackMsg,
-											txt: 'Is it correct?'
-										} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
-											]),
-										_List_fromArray(
-											[
-												A3($author$project$View$viewFeedbackInSingleChoice, feedback, state, trial)
-											]))
-									]))
-							]));
-				} else {
-					return $rtfeldman$elm_css$Html$Styled$text('Experiment is over');
-				}
-		}
-	});
-var $author$project$Main$UserToggledInCloudWords = function (a) {
-	return {$: 'UserToggledInCloudWords', a: a};
-};
-var $author$project$Main$viewCloud = function (model) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$div,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class('grid grid-flow-col grid-rows-4 auto-cols-max gap-4 ')
-			]),
-		A2(
-			$elm$core$List$map,
-			function (word) {
-				var value = A2($elm$core$Dict$get, word, model.cloudWords);
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$label,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2 text-black align-baseline flex flex-row')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$input,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$type_('checkbox'),
-									$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-									A2($elm$core$Maybe$withDefault, false, value)),
-									$rtfeldman$elm_css$Html$Styled$Events$onClick(
-									$author$project$Main$UserToggledInCloudWords(word))
-								]),
-							_List_Nil),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$span,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4')
-								]),
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text(word)
-								]))
-						]));
-			},
-			$elm$core$Dict$keys(model.cloudWords)));
-};
-var $author$project$Main$UserClickedRadioButton = F2(
-	function (a, b) {
-		return {$: 'UserClickedRadioButton', a: a, b: b};
-	});
-var $author$project$Experiment$Experiment$defaultTrial = {definition: 'MISSING', feedbackCorrect: 'MISSING', feedbackIncorrect: 'MISSING', option1: 'MISSING', option2: 'MISSING', option3: 'MISSING', uid: 'MISSING', writtenWord: 'MISSING'};
-var $author$project$View$keyValue = F2(
-	function (key, value) {
-		return _List_fromArray(
-			[
-				A2(
-				$rtfeldman$elm_css$Html$Styled$span,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('inline-block mr-6 w-12'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('text-gray-600 text-right text-xs uppercase')
-					]),
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text(key)
-					])),
-				A2(
-				$rtfeldman$elm_css$Html$Styled$span,
-				_List_fromArray(
-					[
-						A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-value', key)
-					]),
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text(value)
-					]))
-			]);
-	});
-var $author$project$Experiment$Experiment$defaultTranslationTrial = {distractor1: '', distractor2: '', distractor3: '', distractor4: '', question: 'String', translation1: 'String', translation2: 'String', uid: '', word: 'String'};
-var $author$project$Experiment$Meaning$defaultTrial = {definition: 'MISSING', feedbackCorrect: 'MISSING', feedbackIncorrect: 'MISSING', option1: 'MISSING', option2: 'MISSING', option3: 'MISSING', uid: 'MISSING', writtenWord: 'MISSING'};
-var $author$project$Experiment$Synonym$defaultTrial = {isTraining: false, post: 'postMissing', pre: 'preMissing', radical: 'defaultRadical', stimulus: 'stimulusMissing', target: 'targetMISSING', uid: 'uidMISSING'};
-var $author$project$Experiment$Meaning$view = F4(
-	function (exp, options, toggleFeedbackMsg, nextTrialMsg) {
-		_v0$4:
-		while (true) {
-			switch (exp.$) {
-				case 'DoingMeaning':
-					switch (exp.a.$) {
-						case 'MainLoop':
-							var _v1 = exp.a;
-							var trials = _v1.a;
-							var state = _v1.b;
-							var trialn = _v1.c;
-							var isfeedback = _v1.d;
-							var trial = A2(
-								$elm$core$Maybe$withDefault,
-								$author$project$Experiment$Meaning$defaultTrial,
-								A2(
-									$elm$core$Array$get,
-									trialn,
-									$elm$core$Array$fromList(trials)));
-							var viewFeedback = function (isVisible) {
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$p,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class(
-											'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
-										]),
-									_Utils_eq(state.userAnswer, trial.definition) ? _List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text('✔️ ' + trial.feedbackIncorrect)
-										]) : _List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text('❌ ' + trial.feedbackCorrect)
-										]));
-							};
-							var viewQuestion = A2(
-								$rtfeldman$elm_css$Html$Styled$h3,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$p,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(
-												$elm$core$String$fromInt(trialn + 1) + '. '),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$span,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text(trial.writtenWord)
-													]))
-											]))
-									]));
-							var pct = (trialn / $elm$core$List$length(trials)) * 100;
-							return A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
-											]),
-										_List_fromArray(
-											[
-												$author$project$Progressbar$progressBar(pct),
-												viewQuestion,
-												A2(
-												$rtfeldman$elm_css$Html$Styled$div,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
-														$rtfeldman$elm_css$Html$Styled$Attributes$disabled(isfeedback)
-													]),
-												_List_fromArray(
-													[
-														A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, options)
-													])),
-												$author$project$View$button(
-												(!isfeedback) ? {
-													isDisabled: $elm$core$String$isEmpty(state.userAnswer),
-													message: toggleFeedbackMsg,
-													txt: 'Check my answer'
-												} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$div,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
-													]),
-												_List_fromArray(
-													[
-														viewFeedback(isfeedback)
-													]))
-											]))
-									]));
-						case 'End':
-							var txt = exp.a.a;
-							return A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$h1,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('Merci de votre participation !🎉')
-											])),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$p,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('Vous trouverez dans l\'e-mail que vous avez reçu les liens pour la suite de l\'expérience.')
-											]))
-									]));
-						default:
-							break _v0$4;
-					}
-				case 'DoingTranslation':
-					if (exp.a.$ === 'MainLoop') {
-						var _v2 = exp.a;
-						var trials = _v2.a;
-						var state = _v2.b;
-						var trialn = _v2.c;
-						var feedback = _v2.d;
-						var trial = A2(
-							$elm$core$Maybe$withDefault,
-							$author$project$Experiment$Experiment$defaultTranslationTrial,
-							A2(
-								$elm$core$Array$get,
-								trialn,
-								$elm$core$Array$fromList(trials)));
-						var viewFeedback = function (isVisible) {
-							return A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class(
-										'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
-									]),
-								(_Utils_eq(state.userAnswer, trial.translation1) || _Utils_eq(state.userAnswer, trial.translation2)) ? _List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('✔️ Correct Answer ! ')
-									]) : _List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('❌ The correct translation is : '),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$span,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-medium italic')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(trial.translation1)
-											]))
-									]));
-						};
-						var viewQuestion = A2(
-							$rtfeldman$elm_css$Html$Styled$h3,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$p,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text(
-											$elm$core$String$fromInt(trialn + 1) + ('. ' + 'Choose the best translation for the word: ')),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$span,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
-												]),
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text(trial.word)
-												]))
-										]))
-								]));
-						var pct = (trialn / $elm$core$List$length(trials)) * 100;
-						return A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
-										]),
-									_List_fromArray(
-										[
-											$author$project$Progressbar$progressBar(pct),
-											viewQuestion,
-											A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
-													$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedback)
-												]),
-											_List_fromArray(
-												[
-													A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, options)
-												])),
-											$author$project$View$button(
-											(!feedback) ? {
-												isDisabled: $elm$core$String$isEmpty(state.userAnswer),
-												message: toggleFeedbackMsg,
-												txt: 'Check my answer'
-											} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
-												]),
-											_List_fromArray(
-												[
-													viewFeedback(feedback)
-												]))
-										]))
-								]));
-					} else {
-						break _v0$4;
-					}
-				case 'DoingSynonym':
-					if (exp.a.$ === 'MainLoop') {
-						var _v3 = exp.a;
-						var trials = _v3.a;
-						var state = _v3.b;
-						var trialn = _v3.c;
-						var feedback = _v3.d;
-						var trial = A2(
-							$elm$core$Maybe$withDefault,
-							$author$project$Experiment$Synonym$defaultTrial,
-							A2(
-								$elm$core$Array$get,
-								trialn,
-								$elm$core$Array$fromList(trials)));
-						var viewFeedback = function (isVisible) {
-							return A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class(
-										'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
-									]),
-								_Utils_eq(state.userAnswer, trial.target) ? _List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('✔️ Correct Answer ! ')
-									]) : _List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('❌ The correct translation is : '),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$span,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-medium italic')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(trial.target)
-											]))
-									]));
-						};
-						var viewQuestion = A2(
-							$rtfeldman$elm_css$Html$Styled$h3,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$p,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text(
-											$elm$core$String$fromInt(trialn + 1) + ('. ' + 'Choose the best synonym for the word: ')),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$span,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
-												]),
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text(
-													_Utils_ap(
-														trial.pre,
-														_Utils_ap(trial.stimulus, trial.post)))
-												]))
-										]))
-								]));
-						var pct = (trialn / $elm$core$List$length(trials)) * 100;
-						return A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
-										]),
-									_List_fromArray(
-										[
-											$author$project$Progressbar$progressBar(pct),
-											viewQuestion,
-											A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
-													$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedback)
-												]),
-											_List_fromArray(
-												[
-													A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, options)
-												])),
-											$author$project$View$button(
-											(!feedback) ? {
-												isDisabled: $elm$core$String$isEmpty(state.userAnswer),
-												message: toggleFeedbackMsg,
-												txt: 'Check my answer'
-											} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
-												]),
-											_List_fromArray(
-												[
-													viewFeedback(feedback)
-												]))
-										]))
-								]));
-					} else {
-						break _v0$4;
-					}
-				default:
-					break _v0$4;
-			}
-		}
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('Todo : Intro, Pause ??')
-				]));
-	});
-var $author$project$Main$viewExperiment = function (model) {
-	var item = F2(
-		function (key, value) {
-			return A2(
-				$rtfeldman$elm_css$Html$Styled$li,
-				_List_Nil,
-				A2($author$project$View$keyValue, key, value));
-		});
-	var content = function (attributes) {
-		return $rtfeldman$elm_css$Html$Styled$ul(
-			_Utils_ap(
-				_List_fromArray(
-					[
-						A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-test', 'package'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-8 flex flex-col justify-center max-w-2xl h-48'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-transition rounded'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-10 font-semibold leading-loose')
-					]),
-				attributes));
-	};
-	var _v0 = model.meaningTask;
-	_v0$5:
-	while (true) {
-		switch (_v0.$) {
-			case 'NotStarted':
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('NotStarted')
-							]))
-					]);
-			case 'Loading':
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('loading')
-							]))
-					]);
-			case 'Failure':
-				var reason = _v0.a;
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$p,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-							]))
-					]);
-			case 'DoingMeaning':
-				switch (_v0.a.$) {
-					case 'MainLoop':
-						var _v1 = _v0.a;
-						var trials = _v1.a;
-						var state = _v1.b;
-						var trialn = _v1.c;
-						var feedback = _v1.d;
-						var trial = A2(
-							$elm$core$Maybe$withDefault,
-							$author$project$Experiment$Experiment$defaultTrial,
-							A2(
-								$elm$core$Array$get,
-								trialn,
-								$elm$core$Array$fromList(trials)));
-						var isCorrect = function (optionN) {
-							return _Utils_eq(optionN, trial.definition);
-						};
-						var option = function (id) {
-							return A5(
-								$author$project$View$radio,
-								id,
-								_Utils_eq(state.userAnswer, id),
-								isCorrect(id),
-								feedback,
-								A2($author$project$Main$UserClickedRadioButton, model.route, id));
-						};
-						var options = A2(
-							$elm$core$List$map,
-							$elm$core$Tuple$second,
-							A2(
-								$elm$core$List$sortBy,
-								$elm$core$Tuple$first,
-								A3(
-									$elm$core$List$map2,
-									$elm$core$Tuple$pair,
-									model.optionsOrder,
-									_List_fromArray(
-										[
-											option(trial.option1),
-											option(trial.option2),
-											option(trial.option3),
-											option(trial.definition)
-										]))));
-						return _List_fromArray(
-							[
-								A4(
-								$author$project$Experiment$Meaning$view,
-								model.meaningTask,
-								options,
-								$author$project$Main$UserClickedFeedbackButton(model.route),
-								$author$project$Main$UserClickedNextTrial(model.route))
-							]);
-					case 'End':
-						var txt = _v0.a.a;
-						return _List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$h1,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Merci de votre participation !🎉')
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Vous trouverez dans l\'e-mail que vous avez reçu les liens pour la suite de l\'expérience.')
-									]))
-							]);
-					default:
-						break _v0$5;
-				}
-			default:
-				break _v0$5;
-		}
-	}
-	return _List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$text('Unexpected view. You can take it in account in Main.viewExperiment')
-		]);
-};
-var $author$project$Main$UserClickedNextTrialButtonInScrabble = function (a) {
-	return {$: 'UserClickedNextTrialButtonInScrabble', a: a};
-};
-var $author$project$Main$UserClickedStartMainloopInScrabble = function (a) {
-	return {$: 'UserClickedStartMainloopInScrabble', a: a};
-};
-var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
-	function (key, val) {
-		return A3(
-			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2($elm$virtual_dom$VirtualDom$style, key, val),
-			_List_Nil,
-			'');
-	});
-var $rtfeldman$elm_css$Html$Styled$Attributes$style = $rtfeldman$elm_css$VirtualDom$Styled$style;
-var $author$project$Main$containerStyles = _List_fromArray(
-	[
-		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex'),
-		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'flex-wrap', 'wrap'),
-		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'align-items', 'center'),
-		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'padding-top', '2em'),
-		$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold text-lg')
-	]);
-var $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute = function (prop) {
-	return A3($rtfeldman$elm_css$VirtualDom$Styled$Attribute, prop, _List_Nil, '');
-};
-var $rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute;
-var $author$project$Main$ghostGreen = '#2f804e';
-var $author$project$Main$itemStyles = function (color) {
-	return _List_fromArray(
-		[
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'width', '5rem'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'height', '5rem'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'background-color', color),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'border-radius', '8px'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'color', 'white'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'cursor', 'pointer'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'margin', '0 2em 2em 0'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'align-items', 'center'),
-			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'justify-content', 'center')
-		]);
-};
-var $elm$core$String$toUpper = _String_toUpper;
-var $author$project$Main$ghostView = F2(
-	function (dnd, items) {
-		var maybeDragItem = A2(
-			$elm$core$Maybe$andThen,
-			function (_v2) {
-				var dragIndex = _v2.dragIndex;
-				return $elm$core$List$head(
-					A2($elm$core$List$drop, dragIndex, items));
-			},
-			$author$project$Main$system.info(dnd));
-		if (maybeDragItem.$ === 'Just') {
-			var _v1 = maybeDragItem.a;
-			var item = _v1.b;
-			return A2(
-				$rtfeldman$elm_css$Html$Styled$div,
-				_Utils_ap(
-					$author$project$Main$itemStyles($author$project$Main$ghostGreen),
-					A2(
-						$elm$core$List$map,
-						$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
-						$author$project$Main$system.ghostStyles(dnd))),
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text(
-						$elm$core$String$toUpper(item))
-					]));
-		} else {
-			return $rtfeldman$elm_css$Html$Styled$text('');
-		}
-	});
-var $author$project$Main$green = '#3da565';
-var $author$project$Main$itemView = F3(
-	function (dnd, index, _v0) {
-		var key = _v0.a;
-		var item = _v0.b;
-		var itemId = 'id-' + key;
-		var _v1 = $author$project$Main$system.info(dnd);
-		if (_v1.$ === 'Just') {
-			var dragIndex = _v1.a.dragIndex;
-			return (!_Utils_eq(dragIndex, index)) ? _Utils_Tuple2(
-				key,
-				A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					A2(
-						$elm$core$List$cons,
-						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
-						_Utils_ap(
-							$author$project$Main$itemStyles($author$project$Main$green),
-							A2(
-								$elm$core$List$map,
-								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
-								A2($author$project$Main$system.dropEvents, index, itemId)))),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(
-							$elm$core$String$toUpper(item))
-						]))) : _Utils_Tuple2(
-				key,
-				A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					A2(
-						$elm$core$List$cons,
-						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
-						$author$project$Main$itemStyles('dimgray')),
-					_List_Nil));
-		} else {
-			return _Utils_Tuple2(
-				key,
-				A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					A2(
-						$elm$core$List$cons,
-						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
-						_Utils_ap(
-							$author$project$Main$itemStyles($author$project$Main$green),
-							A2(
-								$elm$core$List$map,
-								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
-								A2($author$project$Main$system.dragEvents, index, itemId)))),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(
-							$elm$core$String$toUpper(item))
-						])));
-		}
-	});
-var $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode = F3(
-	function (a, b, c) {
-		return {$: 'KeyedNode', a: a, b: b, c: c};
-	});
-var $rtfeldman$elm_css$VirtualDom$Styled$keyedNode = $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode;
-var $rtfeldman$elm_css$Html$Styled$Keyed$node = $rtfeldman$elm_css$VirtualDom$Styled$keyedNode;
-var $author$project$Main$viewScrabbleTask = function (model) {
-	var viewLetters = function (scrambledLetters) {
-		return A3(
-			$rtfeldman$elm_css$Html$Styled$Keyed$node,
-			'div',
-			$author$project$Main$containerStyles,
-			A2(
-				$elm$core$List$indexedMap,
-				$author$project$Main$itemView(model.dnd),
-				scrambledLetters));
-	};
-	var feedback = F3(
-		function (feedback_, _v4, nextItem) {
-			var target = _v4.target;
-			var attempt = _v4.attempt;
-			var _v3 = _Utils_Tuple2(
-				feedback_,
-				_Utils_eq(target, attempt));
-			if (_v3.a) {
-				if (_v3.b) {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-green-300 m-8')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('The word you heard is spelled '),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$span,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(target)
-											]))
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
-									]),
-								_List_fromArray(
-									[
-										$author$project$View$button(
-										{
-											isDisabled: false,
-											message: $author$project$Main$UserClickedNextTrialButtonInScrabble(nextItem),
-											txt: 'Next'
-										})
-									]))
-							]));
-				} else {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-red-300 m-8')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('The word you heard is spelled '),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$span,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(target)
-											]))
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
-									]),
-								_List_fromArray(
-									[
-										$author$project$View$button(
-										{
-											isDisabled: false,
-											message: $author$project$Main$UserClickedNextTrialButtonInScrabble(nextItem),
-											txt: 'Next'
-										})
-									]))
-							]));
-				}
-			} else {
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$author$project$View$button(
-							{
-								isDisabled: false,
-								message: $author$project$Main$UserClickedFeedbackButton(model.route),
-								txt: 'Next item '
-							})
-						]));
-			}
-		});
-	var audioButton = function (url) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Events$onClick(
-					$author$project$Main$PlaysoundInJS(url)),
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4 h-8 w-8')
-				]),
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
-				]));
-	};
-	var _v0 = model.scrabbleTask;
-	switch (_v0.$) {
-		case 'NotStartedYet':
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('NotAsked')
-				]);
-		case 'Main':
-			var data = _v0.a;
-			var _v1 = data.current;
-			if (_v1.$ === 'Just') {
-				var currentTrial = _v1.a;
-				return _List_fromArray(
-					[
-						audioButton(currentTrial.audioWord.url),
-						(!data.feedback) ? A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
-									]),
-								_List_fromArray(
-									[
-										viewLetters(data.state.scrambledLetter)
-									])),
-								A2($author$project$Main$ghostView, model.dnd, data.state.scrambledLetter)
-							])) : A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil),
-						A3(
-						feedback,
-						data.feedback,
-						{attempt: data.state.userAnswer, target: currentTrial.target},
-						data.next)
-					]);
-			} else {
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text(' Main is over')
-					]);
-			}
-		case 'Intr':
-			var data = _v0.a;
-			var _v2 = data.current;
-			if (_v2.$ === 'Just') {
-				var currentTrial = _v2.a;
-				return _List_fromArray(
-					[
-						A2(
-						$author$project$View$viewTraining,
-						'Are you ready to test your spelling?\nClick to hear the word. Then move the letters to spell it correctly. ',
-						_List_fromArray(
-							[
-								audioButton(currentTrial.audioWord.url),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
-									]),
-								_List_fromArray(
-									[
-										viewLetters(data.state.scrambledLetter)
-									])),
-								A2($author$project$Main$ghostView, model.dnd, data.state.scrambledLetter),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4 pb-4')
-									]),
-								_List_fromArray(
-									[
-										A3(
-										feedback,
-										data.feedback,
-										{attempt: data.state.userAnswer, target: currentTrial.target},
-										data.next)
-									]))
-							]))
-					]);
-			} else {
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
-						$author$project$View$button(
-						{
-							isDisabled: false,
-							message: $author$project$Main$UserClickedStartMainloopInScrabble(data.mainTrials),
-							txt: 'Commencer l\'expérience '
-						})
-					]);
-			}
-		case 'Over':
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('cette tâche est finie merci beaucoup')
-				]);
-		default:
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini')
-				]);
-	}
-};
-var $rtfeldman$elm_css$Html$Styled$h4 = $rtfeldman$elm_css$Html$Styled$node('h4');
 var $rtfeldman$elm_css$Css$absolute = {position: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
 var $rtfeldman$elm_css$Css$backgroundColor = function (c) {
 	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.value);
@@ -19885,6 +19546,8 @@ var $rtfeldman$elm_css$Css$Transitions$durationTransition = F2(
 	});
 var $rtfeldman$elm_css$Css$Transitions$opacity = $rtfeldman$elm_css$Css$Transitions$durationTransition($rtfeldman$elm_css$Css$Transitions$Opacity);
 var $rtfeldman$elm_css$Css$padding = $rtfeldman$elm_css$Css$prop1('padding');
+var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
+var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
 var $rtfeldman$elm_css$Css$pointerEvents = $rtfeldman$elm_css$Css$prop1('pointer-events');
 var $rtfeldman$elm_css$Css$position = $rtfeldman$elm_css$Css$prop1('position');
 var $rtfeldman$elm_css$Css$PxUnits = {$: 'PxUnits'};
@@ -20286,6 +19949,2058 @@ var $author$project$View$floatingLabel = F4(
 						]))
 				]));
 	});
+var $author$project$Experiment$CU3$view = F3(
+	function (exp, infos, _v0) {
+		var userClickedAudio = _v0.userClickedAudio;
+		var toggleFeedback = _v0.toggleFeedback;
+		var nextTrialMsg = _v0.nextTrialMsg;
+		var startMainMsg = _v0.startMainMsg;
+		var userChangedInput = _v0.userChangedInput;
+		var _v1 = _Utils_Tuple2(exp, infos);
+		if (_v1.b.$ === 'Nothing') {
+			var _v2 = _v1.b;
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
+					]));
+		} else {
+			switch (_v1.a.$) {
+				case 'NotStartedYet':
+					var _v3 = _v1.a;
+					var info = _v1.b.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
+							]));
+				case 'Intr':
+					var trainingTrials = _v1.a.a.trainingTrials;
+					var mainTrials = _v1.a.a.mainTrials;
+					var current = _v1.a.a.current;
+					var state = _v1.a.a.state;
+					var feedback = _v1.a.a.feedback;
+					var history = _v1.a.a.history;
+					var info = _v1.b.a;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$author$project$View$viewTraining,
+									info.instructions,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(trial.context),
+											$rtfeldman$elm_css$Html$Styled$text(trial.amorce),
+											A4($author$project$View$floatingLabel, '', state.userAnswer, userChangedInput, feedback),
+											feedback ? A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+													$author$project$View$button(
+													{isDisabled: false, message: nextTrialMsg, txt: 'Next Training Item'})
+												])) : $author$project$View$button(
+											{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
+										]))
+								]));
+					} else {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
+									$author$project$View$button(
+									{
+										isDisabled: false,
+										message: startMainMsg(mainTrials),
+										txt: 'Start'
+									})
+								]));
+					}
+				case 'IntroOver':
+					var _v5 = _v1.a;
+					var info = _v1.b.a;
+					return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
+				case 'Main':
+					var mainTrials = _v1.a.a.mainTrials;
+					var current = _v1.a.a.current;
+					var state = _v1.a.a.state;
+					var feedback = _v1.a.a.feedback;
+					var history = _v1.a.a.history;
+					var info = _v1.b.a;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(trial.context),
+									$rtfeldman$elm_css$Html$Styled$text(trial.amorce),
+									A4($author$project$View$floatingLabel, 'type the word here', state.userAnswer, userChangedInput, feedback),
+									feedback ? A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+											$author$project$View$button(
+											{isDisabled: false, message: nextTrialMsg, txt: 'Next Training Item'})
+										])) : $author$project$View$button(
+									{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
+								]));
+					} else {
+						return $rtfeldman$elm_css$Html$Styled$text(info.end);
+					}
+				default:
+					var _v7 = _v1.a;
+					var info = _v1.b.a;
+					return $rtfeldman$elm_css$Html$Styled$text('I\'m over');
+			}
+		}
+	});
+var $author$project$Experiment$Meaning$viewQuestion = F2(
+	function (word, trialn) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$h3,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$fromInt(trialn + 1) + '. '),
+							A2(
+							$rtfeldman$elm_css$Html$Styled$span,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(word)
+								]))
+						]))
+				]));
+	});
+var $author$project$Experiment$Meaning$view = function (task) {
+	var _v0 = _Utils_Tuple2(task.task, task.infos);
+	if (_v0.b.$ === 'Nothing') {
+		var _v1 = _v0.b;
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
+				]));
+	} else {
+		switch (_v0.a.$) {
+			case 'Intr':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v2 = data.current;
+				if (_v2.$ === 'Just') {
+					var trial = _v2.a;
+					return A2(
+						$author$project$View$viewTraining,
+						info.instructions,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Experiment$Meaning$viewQuestion,
+										trial.writtenWord,
+										$elm$core$List$length(data.history))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2 col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
+											]),
+										A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								data.feedback ? _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										_Utils_eq(data.state.userAnswer, trial.target) ? A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_correct,
+											_List_fromArray(
+												[trial.target])) : A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_incorrect,
+											_List_fromArray(
+												[trial.target]))),
+										$author$project$View$button(
+										{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Training Item'})
+									]) : _List_fromArray(
+									[
+										$author$project$View$button(
+										{isDisabled: false, message: task.toggleFeedbackMsg, txt: 'Check my answer'})
+									]))
+							]));
+				} else {
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$author$project$View$button(
+								{
+									isDisabled: false,
+									message: task.startMainMsg(data.mainTrials),
+									txt: 'Start'
+								})
+							]));
+				}
+			case 'IntroOver':
+				var _v3 = _v0.a;
+				var info = _v0.b.a;
+				return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+			case 'Main':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v4 = data.current;
+				if (_v4.$ === 'Just') {
+					var trial = _v4.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Experiment$Meaning$viewQuestion,
+										trial.writtenWord,
+										$elm$core$List$length(data.history))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2 col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
+											]),
+										A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								data.feedback ? _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										_Utils_eq(data.state.userAnswer, trial.target) ? A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_correct,
+											_List_fromArray(
+												[trial.target])) : A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_incorrect,
+											_List_fromArray(
+												[trial.target]))),
+										$author$project$View$button(
+										{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Item'})
+									]) : _List_fromArray(
+									[
+										$author$project$View$button(
+										{isDisabled: false, message: task.toggleFeedbackMsg, txt: 'Check my answer'})
+									]))
+							]));
+				} else {
+					return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+				}
+			case 'Over':
+				var _v5 = _v0.a;
+				var info = _v0.b.a;
+				return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+			default:
+				var _v6 = _v0.a;
+				var info = _v0.b.a;
+				return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+		}
+	}
+};
+var $author$project$Experiment$Presentation$sep = A2(
+	$rtfeldman$elm_css$Html$Styled$div,
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$Attributes$class('w-32 h-1 bg-gray-300 mt-4 mb-4')
+		]),
+	_List_Nil);
+var $author$project$Experiment$Presentation$view = function (task) {
+	var _v0 = _Utils_Tuple2(task.task, task.infos);
+	if (_v0.b.$ === 'Nothing') {
+		var _v1 = _v0.b;
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
+				]));
+	} else {
+		switch (_v0.a.$) {
+			case 'NotStartedYet':
+				var _v2 = _v0.a;
+				var info = _v0.b.a;
+				return A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
+						]));
+			case 'Intr':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v3 = data.current;
+				if (_v3.$ === 'Just') {
+					var trial = _v3.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$author$project$View$viewTraining,
+								info.instructions,
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+											]),
+										_List_Nil),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2 col-start-2 col-span-4')
+											]),
+										_List_Nil),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+											]),
+										_List_Nil),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+											]),
+										_List_fromArray(
+											[
+												$author$project$View$button(
+												{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Training Item'})
+											]))
+									]))
+							]));
+				} else {
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
+								$author$project$View$button(
+								{
+									isDisabled: false,
+									message: task.startMainMsg(data.mainTrials),
+									txt: 'Start'
+								})
+							]));
+				}
+			case 'IntroOver':
+				var _v4 = _v0.a;
+				var info = _v0.b.a;
+				return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
+			case 'Main':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v5 = data.current;
+				if (_v5.$ === 'Just') {
+					var trial = _v5.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4 text-3xl font-bold flex flex-row')
+									]),
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(trial.text),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('h-6 w-6'),
+												$rtfeldman$elm_css$Html$Styled$Events$onClick(
+												task.userClickedAudio(trial.audio.url))
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
+											]))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Definition: ')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.definition)
+											]))
+									])),
+								$author$project$Experiment$Presentation$sep,
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Example: ')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.example)
+											]))
+									])),
+								$author$project$Experiment$Presentation$sep,
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('1. Translation: ')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.translation1)
+											]))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('2. Translation: ')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.translation2)
+											]))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$button(
+										{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Item'})
+									]))
+							]));
+				} else {
+					return $rtfeldman$elm_css$Html$Styled$text(info.end);
+				}
+			default:
+				var _v6 = _v0.a;
+				var info = _v0.b.a;
+				return $rtfeldman$elm_css$Html$Styled$text('I\'m over');
+		}
+	}
+};
+var $author$project$Experiment$Spelling3$view = F3(
+	function (exp, infos, _v0) {
+		var userClickedAudio = _v0.userClickedAudio;
+		var toggleFeedback = _v0.toggleFeedback;
+		var nextTrialMsg = _v0.nextTrialMsg;
+		var startMainMsg = _v0.startMainMsg;
+		var userChangedInput = _v0.userChangedInput;
+		var _v1 = _Utils_Tuple2(exp, infos);
+		if (_v1.b.$ === 'Nothing') {
+			var _v2 = _v1.b;
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
+					]));
+		} else {
+			switch (_v1.a.$) {
+				case 'NotStartedYet':
+					var _v3 = _v1.a;
+					var info = _v1.b.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
+							]));
+				case 'Intr':
+					var trainingTrials = _v1.a.a.trainingTrials;
+					var mainTrials = _v1.a.a.mainTrials;
+					var current = _v1.a.a.current;
+					var state = _v1.a.a.state;
+					var feedback = _v1.a.a.feedback;
+					var history = _v1.a.a.history;
+					var info = _v1.b.a;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$author$project$View$viewTraining,
+									info.instructions,
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(trial.context)
+												])),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('h-12 w-12'),
+													$rtfeldman$elm_css$Html$Styled$Events$onClick(
+													userClickedAudio(trial.audioSentence.url))
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
+												])),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(trial.amorce),
+													A4($author$project$View$floatingLabel, '', state.userAnswer, userChangedInput, feedback)
+												])),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+												]),
+											feedback ? _List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+													$author$project$View$button(
+													{isDisabled: false, message: nextTrialMsg, txt: 'Next Training Item'})
+												]) : _List_fromArray(
+												[
+													$author$project$View$button(
+													{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
+												]))
+										]))
+								]));
+					} else {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
+									$author$project$View$button(
+									{
+										isDisabled: false,
+										message: startMainMsg(mainTrials),
+										txt: 'Start'
+									})
+								]));
+					}
+				case 'IntroOver':
+					var _v5 = _v1.a;
+					var info = _v1.b.a;
+					return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
+				case 'Main':
+					var mainTrials = _v1.a.a.mainTrials;
+					var current = _v1.a.a.current;
+					var state = _v1.a.a.state;
+					var feedback = _v1.a.a.feedback;
+					var history = _v1.a.a.history;
+					var info = _v1.b.a;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(trial.context),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('h-12 w-12'),
+											$rtfeldman$elm_css$Html$Styled$Events$onClick(
+											userClickedAudio(trial.audioSentence.url))
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$span,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('pr-4')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(trial.amorce)
+												])),
+											A4($author$project$View$floatingLabel, '', state.userAnswer, userChangedInput, feedback)
+										])),
+									feedback ? A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+											$author$project$View$button(
+											{isDisabled: false, message: nextTrialMsg, txt: 'Next Item'})
+										])) : $author$project$View$button(
+									{isDisabled: false, message: toggleFeedback, txt: 'Check my answer'})
+								]));
+					} else {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$h1,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text('Congrats 🎉️')
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(info.end)
+										]))
+								]));
+					}
+				default:
+					var _v7 = _v1.a;
+					var info = _v1.b.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Congrats')
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(info.end)
+									]))
+							]));
+			}
+		}
+	});
+var $rtfeldman$elm_css$Html$Styled$fieldset = $rtfeldman$elm_css$Html$Styled$node('fieldset');
+var $author$project$View$pct = F2(
+	function (trialn, trials) {
+		return (trialn / $elm$core$List$length(trials)) * 100;
+	});
+var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
+var $author$project$Progressbar$progressBar = function (percentage) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('shadow max-w-xl bg-gray-300 mt-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-indigo-600 text-sm font-bold leading-none py-1 text-center text-white '),
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Css$width(
+								$rtfeldman$elm_css$Css$pct(percentage))
+							]))
+					]),
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text(
+						$elm$core$String$fromInt(
+							$elm$core$Basics$round(percentage)) + '%')
+					]))
+			]));
+};
+var $rtfeldman$elm_css$Html$Styled$audio = $rtfeldman$elm_css$Html$Styled$node('audio');
+var $rtfeldman$elm_css$Html$Styled$Attributes$autoplay = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('autoplay');
+var $rtfeldman$elm_css$Html$Styled$Attributes$controls = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('controls');
+var $rtfeldman$elm_css$Html$Styled$Attributes$width = function (n) {
+	return A2(
+		$rtfeldman$elm_css$VirtualDom$Styled$attribute,
+		'width',
+		$elm$core$String$fromInt(n));
+};
+var $author$project$View$simpleAudioPlayer = function (src) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$audio,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$controls(true),
+				$rtfeldman$elm_css$Html$Styled$Attributes$src(src),
+				$rtfeldman$elm_css$Html$Styled$Attributes$autoplay(true),
+				$rtfeldman$elm_css$Html$Styled$Attributes$width(300)
+			]),
+		_List_Nil);
+};
+var $author$project$Experiment$SpellingLvl1$trainingBox = $rtfeldman$elm_css$Html$Styled$div(
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center ')
+		]));
+var $author$project$View$viewFeedbackInSingleChoice = F3(
+	function (isVisible, state, trial) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$p,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class(
+					'font-medium py-4 w-full' + (' ' + (isVisible ? 'visible' : 'invisible')))
+				]),
+			_Utils_eq(state.userAnswer, trial.target) ? _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('✔️ Correct Answer ! ')
+				]) : _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('❌ The correct definition is : '),
+					A2(
+					$rtfeldman$elm_css$Html$Styled$span,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('font-medium italic')
+						]),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(trial.target)
+						]))
+				]));
+	});
+var $author$project$Experiment$SpellingLvl1$viewInstructions = A2(
+	$rtfeldman$elm_css$Html$Styled$div,
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$rtfeldman$elm_css$Html$Styled$h2,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
+				]),
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Instructions')
+				])),
+			A2(
+			$rtfeldman$elm_css$Html$Styled$p,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 pb-8 font-medium')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$pre,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('Focus on the word in the box in each sentence.\u200B\nIt’s a synonym for one of the words you are learning.\u200B\nClick on the word in the box to type your synonym.')
+						]))
+				])),
+			A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg text-green-500 font-bold pb-2')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('Practice here !')
+						]))
+				]))
+		]));
+var $author$project$View$viewQuestion = F3(
+	function (trialn, trial, instructions) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$h3,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$fromInt(trialn + 1) + ('. ' + instructions)),
+							A2(
+							$rtfeldman$elm_css$Html$Styled$span,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(trial.target)
+								]))
+						]))
+				]));
+	});
+var $author$project$Experiment$SpellingLvl1$view = F3(
+	function (exp, optionsOrder, _v0) {
+		var radioMsg = _v0.radioMsg;
+		var nextTrialMsg = _v0.nextTrialMsg;
+		var toggleFeedbackMsg = _v0.toggleFeedbackMsg;
+		var startMainloopMsg = _v0.startMainloopMsg;
+		switch (exp.$) {
+			case 'Over':
+				return $rtfeldman$elm_css$Html$Styled$text('I\'m over');
+			case 'NotStartedYet':
+				return $rtfeldman$elm_css$Html$Styled$text('I\'m not started yet');
+			case 'Intr':
+				var trainingTrials = exp.a.trainingTrials;
+				var mainTrials = exp.a.mainTrials;
+				var current = exp.a.current;
+				var state = exp.a.state;
+				var feedback = exp.a.feedback;
+				var history = exp.a.history;
+				if (current.$ === 'Just') {
+					var x = current.a;
+					var isCorrect = function (optionN) {
+						return _Utils_eq(optionN, x.target);
+					};
+					var option = function (id) {
+						return A5(
+							$author$project$View$radio,
+							id,
+							_Utils_eq(state.userAnswer, id),
+							isCorrect(id),
+							feedback,
+							radioMsg(id));
+					};
+					var options = _List_fromArray(
+						[
+							option(x.distractor1),
+							option(x.distractor2),
+							option(x.distractor3),
+							option(x.target)
+						]);
+					var ordoredOptions = A2(
+						$elm$core$List$map,
+						$elm$core$Tuple$second,
+						A2(
+							$elm$core$List$sortBy,
+							$elm$core$Tuple$first,
+							A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$author$project$Experiment$SpellingLvl1$viewInstructions,
+								$author$project$Experiment$SpellingLvl1$trainingBox(
+								_List_fromArray(
+									[
+										A3(
+										$author$project$View$viewQuestion,
+										$elm$core$List$length(history),
+										x,
+										'Choose the correct spelling for the word :'),
+										$author$project$View$simpleAudioPlayer(x.audio.url),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedback)
+											]),
+										_List_fromArray(
+											[
+												A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, ordoredOptions)
+											])),
+										$author$project$View$button(
+										(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Is it correct?'} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
+											]),
+										_List_fromArray(
+											[
+												A3($author$project$View$viewFeedbackInSingleChoice, feedback, state, x)
+											]))
+									]))
+							]));
+				} else {
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Ready to start the real experiment?'),
+								$author$project$View$button(
+								{
+									isDisabled: false,
+									message: startMainloopMsg(mainTrials),
+									txt: 'Click here to start'
+								})
+							]));
+				}
+			case 'IntroOver':
+				return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
+			default:
+				var mainTrials = exp.a.mainTrials;
+				var current = exp.a.current;
+				var state = exp.a.state;
+				var feedback = exp.a.feedback;
+				var history = exp.a.history;
+				if (current.$ === 'Just') {
+					var trial = current.a;
+					var trialn = $elm$core$List$length(history) + 1;
+					var isCorrect = function (optionN) {
+						return _Utils_eq(optionN, trial.target);
+					};
+					var option = function (id) {
+						return A5(
+							$author$project$View$radio,
+							id,
+							_Utils_eq(state.userAnswer, id),
+							isCorrect(id),
+							feedback,
+							radioMsg(id));
+					};
+					var options = _List_fromArray(
+						[
+							option(trial.distractor1),
+							option(trial.distractor2),
+							option(trial.distractor3),
+							option(trial.target)
+						]);
+					var ordoredOptions = A2(
+						$elm$core$List$map,
+						$elm$core$Tuple$second,
+						A2(
+							$elm$core$List$sortBy,
+							$elm$core$Tuple$first,
+							A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap items-center')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8')
+									]),
+								_List_fromArray(
+									[
+										$author$project$Progressbar$progressBar(
+										A2(
+											$author$project$View$pct,
+											trialn,
+											_Utils_ap(
+												mainTrials,
+												A2($elm$core$List$map, $elm$core$Tuple$first, history)))),
+										A3($author$project$View$viewQuestion, trialn, trial, 'Choose the correct spelling for the word :'),
+										$author$project$View$simpleAudioPlayer(trial.audio.url),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedback)
+											]),
+										_List_fromArray(
+											[
+												A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, ordoredOptions)
+											])),
+										$author$project$View$button(
+										(!feedback) ? {
+											isDisabled: $elm$core$String$isEmpty(state.userAnswer),
+											message: toggleFeedbackMsg,
+											txt: 'Is it correct?'
+										} : {isDisabled: false, message: nextTrialMsg, txt: 'Next '}),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-4 max-w-xl w-full')
+											]),
+										_List_fromArray(
+											[
+												A3($author$project$View$viewFeedbackInSingleChoice, feedback, state, trial)
+											]))
+									]))
+							]));
+				} else {
+					return $rtfeldman$elm_css$Html$Styled$text('Experiment is over');
+				}
+		}
+	});
+var $author$project$Experiment$Translation$viewQuestion = F2(
+	function (word, trialn) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$h3,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$fromInt(trialn + 1) + '. '),
+							A2(
+							$rtfeldman$elm_css$Html$Styled$span,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('italic')
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(word)
+								]))
+						]))
+				]));
+	});
+var $author$project$Experiment$Translation$view = function (task) {
+	var _v0 = _Utils_Tuple2(task.task, task.infos);
+	if (_v0.b.$ === 'Nothing') {
+		var _v1 = _v0.b;
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
+				]));
+	} else {
+		switch (_v0.a.$) {
+			case 'Intr':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v2 = data.current;
+				if (_v2.$ === 'Just') {
+					var trial = _v2.a;
+					return A2(
+						$author$project$View$viewTraining,
+						info.instructions,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Experiment$Translation$viewQuestion,
+										trial.word,
+										$elm$core$List$length(data.history))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2 col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
+											]),
+										A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								data.feedback ? _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										_Utils_eq(data.state.userAnswer, trial.target) ? A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_correct,
+											_List_fromArray(
+												[trial.target])) : A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_incorrect,
+											_List_fromArray(
+												[trial.target]))),
+										$author$project$View$button(
+										{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Training Item'})
+									]) : _List_fromArray(
+									[
+										$author$project$View$button(
+										{isDisabled: false, message: task.toggleFeedbackMsg, txt: 'Check my answer'})
+									]))
+							]));
+				} else {
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$author$project$View$button(
+								{
+									isDisabled: false,
+									message: task.startMainMsg(data.mainTrials),
+									txt: 'Start'
+								})
+							]));
+				}
+			case 'IntroOver':
+				var _v3 = _v0.a;
+				var info = _v0.b.a;
+				return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+			case 'Main':
+				var data = _v0.a.a;
+				var info = _v0.b.a;
+				var _v4 = data.current;
+				if (_v4.$ === 'Just') {
+					var trial = _v4.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Experiment$Translation$viewQuestion,
+										trial.word,
+										$elm$core$List$length(data.history))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2 col-start-2 col-span-4')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+												$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
+											]),
+										A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+									]),
+								data.feedback ? _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										_Utils_eq(data.state.userAnswer, trial.target) ? A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_correct,
+											_List_fromArray(
+												[trial.target])) : A2(
+											$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+											info.feedback_incorrect,
+											_List_fromArray(
+												[trial.target]))),
+										$author$project$View$button(
+										{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Item'})
+									]) : _List_fromArray(
+									[
+										$author$project$View$button(
+										{isDisabled: false, message: task.toggleFeedbackMsg, txt: 'Check my answer'})
+									]))
+							]));
+				} else {
+					return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+				}
+			case 'Over':
+				var _v5 = _v0.a;
+				var info = _v0.b.a;
+				return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+			default:
+				var _v6 = _v0.a;
+				var info = _v0.b.a;
+				return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+		}
+	}
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$for = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('htmlFor');
+var $author$project$Experiment$YN$view = F3(
+	function (exp, infos, _v0) {
+		var toggleFeedback = _v0.toggleFeedback;
+		var nextTrialMsg = _v0.nextTrialMsg;
+		var startMainMsg = _v0.startMainMsg;
+		var userChangedInput = _v0.userChangedInput;
+		var _v1 = _Utils_Tuple2(exp, infos);
+		if (_v1.b.$ === 'Nothing') {
+			var _v2 = _v1.b;
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Error : I can\'t find the task\'s infos')
+					]));
+		} else {
+			switch (_v1.a.$) {
+				case 'NotStartedYet':
+					var _v3 = _v1.a;
+					var info = _v1.b.a;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
+							]));
+				case 'Intr':
+					var trainingTrials = _v1.a.a.trainingTrials;
+					var mainTrials = _v1.a.a.mainTrials;
+					var current = _v1.a.a.current;
+					var state = _v1.a.a.state;
+					var feedback = _v1.a.a.feedback;
+					var history = _v1.a.a.history;
+					var info = _v1.b.a;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$author$project$View$viewTraining,
+									info.instructions,
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_Nil,
+											feedback ? _List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+													$author$project$View$button(
+													{isDisabled: false, message: nextTrialMsg, txt: 'Next Training Item'})
+												]) : _List_fromArray(
+												[
+													$author$project$View$button(
+													{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
+												]))
+										]))
+								]));
+					} else {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
+									$author$project$View$button(
+									{
+										isDisabled: false,
+										message: startMainMsg(mainTrials),
+										txt: 'Start'
+									})
+								]));
+					}
+				case 'IntroOver':
+					var _v5 = _v1.a;
+					var info = _v1.b.a;
+					return $rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini');
+				case 'Main':
+					var mainTrials = _v1.a.a.mainTrials;
+					var current = _v1.a.a.current;
+					var state = _v1.a.a.state;
+					var feedback = _v1.a.a.feedback;
+					var history = _v1.a.a.history;
+					var info = _v1.b.a;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$span,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(trial.word)
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$fieldset,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_Nil,
+											_List_fromArray(
+												[
+													A2(
+													$rtfeldman$elm_css$Html$Styled$input,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+															$rtfeldman$elm_css$Html$Styled$Attributes$value('true'),
+															$rtfeldman$elm_css$Html$Styled$Attributes$checked(state.userAnswer === 'true'),
+															$rtfeldman$elm_css$Html$Styled$Events$onInput(userChangedInput),
+															$rtfeldman$elm_css$Html$Styled$Attributes$id('truecb')
+														]),
+													_List_Nil),
+													A2(
+													$rtfeldman$elm_css$Html$Styled$label,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$for('truecb'),
+															$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 hover:underline')
+														]),
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$text('Exists')
+														]))
+												])),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_Nil,
+											_List_fromArray(
+												[
+													A2(
+													$rtfeldman$elm_css$Html$Styled$input,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+															$rtfeldman$elm_css$Html$Styled$Attributes$value('false'),
+															$rtfeldman$elm_css$Html$Styled$Attributes$checked(state.userAnswer === 'false'),
+															$rtfeldman$elm_css$Html$Styled$Events$onInput(userChangedInput),
+															$rtfeldman$elm_css$Html$Styled$Attributes$id('falsecb')
+														]),
+													_List_Nil),
+													A2(
+													$rtfeldman$elm_css$Html$Styled$label,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$for('falsecb'),
+															$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 hover:underline')
+														]),
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$text('Does not exist')
+														]))
+												]))
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$author$project$View$button(
+											{isDisabled: false, message: nextTrialMsg, txt: 'Next Item'})
+										]))
+								]));
+					} else {
+						return $rtfeldman$elm_css$Html$Styled$text(info.end);
+					}
+				default:
+					var _v7 = _v1.a;
+					var info = _v1.b.a;
+					return $rtfeldman$elm_css$Html$Styled$text('I\'m over');
+			}
+		}
+	});
+var $author$project$Main$UserToggledInCloudWords = function (a) {
+	return {$: 'UserToggledInCloudWords', a: a};
+};
+var $author$project$Main$viewCloud = function (model) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('grid grid-flow-col grid-rows-4 auto-cols-max gap-4 ')
+			]),
+		A2(
+			$elm$core$List$map,
+			function (word) {
+				var value = A2($elm$core$Dict$get, word, model.cloudWords);
+				return A2(
+					$rtfeldman$elm_css$Html$Styled$label,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2 text-black align-baseline flex flex-row')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$rtfeldman$elm_css$Html$Styled$input,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$type_('checkbox'),
+									$rtfeldman$elm_css$Html$Styled$Attributes$checked(
+									A2($elm$core$Maybe$withDefault, false, value)),
+									$rtfeldman$elm_css$Html$Styled$Events$onClick(
+									$author$project$Main$UserToggledInCloudWords(word))
+								]),
+							_List_Nil),
+							A2(
+							$rtfeldman$elm_css$Html$Styled$span,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4')
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(word)
+								]))
+						]));
+			},
+			$elm$core$Dict$keys(model.cloudWords)));
+};
+var $author$project$Main$UserClickedNextTrialButtonInScrabble = function (a) {
+	return {$: 'UserClickedNextTrialButtonInScrabble', a: a};
+};
+var $author$project$Main$UserClickedStartMainloopInScrabble = function (a) {
+	return {$: 'UserClickedStartMainloopInScrabble', a: a};
+};
+var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
+	function (key, val) {
+		return A3(
+			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2($elm$virtual_dom$VirtualDom$style, key, val),
+			_List_Nil,
+			'');
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$style = $rtfeldman$elm_css$VirtualDom$Styled$style;
+var $author$project$Main$containerStyles = _List_fromArray(
+	[
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex'),
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'flex-wrap', 'wrap'),
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'align-items', 'center'),
+		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'padding-top', '2em'),
+		$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold text-lg')
+	]);
+var $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute = function (prop) {
+	return A3($rtfeldman$elm_css$VirtualDom$Styled$Attribute, prop, _List_Nil, '');
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute;
+var $author$project$Main$ghostGreen = '#2f804e';
+var $author$project$Main$itemStyles = function (color) {
+	return _List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'width', '5rem'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'height', '5rem'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'background-color', color),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'border-radius', '8px'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'color', 'white'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'cursor', 'pointer'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'margin', '0 2em 2em 0'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'align-items', 'center'),
+			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'justify-content', 'center')
+		]);
+};
+var $elm$core$String$toUpper = _String_toUpper;
+var $author$project$Main$ghostView = F2(
+	function (dnd, items) {
+		var maybeDragItem = A2(
+			$elm$core$Maybe$andThen,
+			function (_v2) {
+				var dragIndex = _v2.dragIndex;
+				return $elm$core$List$head(
+					A2($elm$core$List$drop, dragIndex, items));
+			},
+			$author$project$Main$system.info(dnd));
+		if (maybeDragItem.$ === 'Just') {
+			var _v1 = maybeDragItem.a;
+			var item = _v1.b;
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_Utils_ap(
+					$author$project$Main$itemStyles($author$project$Main$ghostGreen),
+					A2(
+						$elm$core$List$map,
+						$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
+						$author$project$Main$system.ghostStyles(dnd))),
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text(
+						$elm$core$String$toUpper(item))
+					]));
+		} else {
+			return $rtfeldman$elm_css$Html$Styled$text('');
+		}
+	});
+var $author$project$Main$green = '#3da565';
+var $author$project$Main$itemView = F3(
+	function (dnd, index, _v0) {
+		var key = _v0.a;
+		var item = _v0.b;
+		var itemId = 'id-' + key;
+		var _v1 = $author$project$Main$system.info(dnd);
+		if (_v1.$ === 'Just') {
+			var dragIndex = _v1.a.dragIndex;
+			return (!_Utils_eq(dragIndex, index)) ? _Utils_Tuple2(
+				key,
+				A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					A2(
+						$elm$core$List$cons,
+						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
+						_Utils_ap(
+							$author$project$Main$itemStyles($author$project$Main$green),
+							A2(
+								$elm$core$List$map,
+								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
+								A2($author$project$Main$system.dropEvents, index, itemId)))),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$toUpper(item))
+						]))) : _Utils_Tuple2(
+				key,
+				A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					A2(
+						$elm$core$List$cons,
+						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
+						$author$project$Main$itemStyles('dimgray')),
+					_List_Nil));
+		} else {
+			return _Utils_Tuple2(
+				key,
+				A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					A2(
+						$elm$core$List$cons,
+						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
+						_Utils_ap(
+							$author$project$Main$itemStyles($author$project$Main$green),
+							A2(
+								$elm$core$List$map,
+								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
+								A2($author$project$Main$system.dragEvents, index, itemId)))),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$toUpper(item))
+						])));
+		}
+	});
+var $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode = F3(
+	function (a, b, c) {
+		return {$: 'KeyedNode', a: a, b: b, c: c};
+	});
+var $rtfeldman$elm_css$VirtualDom$Styled$keyedNode = $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode;
+var $rtfeldman$elm_css$Html$Styled$Keyed$node = $rtfeldman$elm_css$VirtualDom$Styled$keyedNode;
+var $author$project$Main$viewScrabbleTask = F2(
+	function (info, model) {
+		var viewLetters = function (scrambledLetters) {
+			return A3(
+				$rtfeldman$elm_css$Html$Styled$Keyed$node,
+				'div',
+				$author$project$Main$containerStyles,
+				A2(
+					$elm$core$List$indexedMap,
+					$author$project$Main$itemView(model.dnd),
+					scrambledLetters));
+		};
+		var feedback = F5(
+			function (pre_correct, pre_incorrect, feedback_, _v8, nextItem) {
+				var target = _v8.target;
+				var attempt = _v8.attempt;
+				var _v7 = _Utils_Tuple2(
+					feedback_,
+					_Utils_eq(target, attempt));
+				if (_v7.a) {
+					if (_v7.b) {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-green-300 m-8')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(pre_correct),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$span,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(target)
+												]))
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$button(
+											{
+												isDisabled: false,
+												message: $author$project$Main$UserClickedNextTrialButtonInScrabble(nextItem),
+												txt: 'Next'
+											})
+										]))
+								]));
+					} else {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-red-300 m-8')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(pre_incorrect),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$span,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text('target')
+												]))
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$button(
+											{
+												isDisabled: false,
+												message: $author$project$Main$UserClickedNextTrialButtonInScrabble(nextItem),
+												txt: 'Next'
+											})
+										]))
+								]));
+					}
+				} else {
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$author$project$View$button(
+								{
+									isDisabled: false,
+									message: $author$project$Main$UserClickedFeedbackButton(model.route),
+									txt: 'Next item '
+								})
+							]));
+				}
+			});
+		var audioButton = function (url) {
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Events$onClick(
+						$author$project$Main$PlaysoundInJS(url)),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4 h-8 w-8')
+					]),
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
+					]));
+		};
+		var _v0 = _Utils_Tuple2(model.scrabbleTask, info);
+		_v0$1:
+		while (true) {
+			switch (_v0.a.$) {
+				case 'NotStartedYet':
+					var _v1 = _v0.a;
+					return _List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('NotAsked')
+						]);
+				case 'Main':
+					if (_v0.b.$ === 'Nothing') {
+						break _v0$1;
+					} else {
+						var data = _v0.a.a;
+						var info_ = _v0.b.a;
+						var _v3 = data.current;
+						if (_v3.$ === 'Just') {
+							var currentTrial = _v3.a;
+							return _List_fromArray(
+								[
+									audioButton(currentTrial.audioWord.url),
+									(!data.feedback) ? A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+												]),
+											_List_fromArray(
+												[
+													viewLetters(data.state.scrambledLetter)
+												])),
+											A2($author$project$Main$ghostView, model.dnd, data.state.scrambledLetter)
+										])) : A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil),
+									A5(
+									feedback,
+									info_.feedback_correct,
+									info_.feedback_incorrect,
+									data.feedback,
+									{attempt: data.state.userAnswer, target: currentTrial.target},
+									data.next)
+								]);
+						} else {
+							return _List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(' Main is over')
+								]);
+						}
+					}
+				case 'Intr':
+					if (_v0.b.$ === 'Nothing') {
+						break _v0$1;
+					} else {
+						var data = _v0.a.a;
+						var info_ = _v0.b.a;
+						var _v4 = data.current;
+						if (_v4.$ === 'Just') {
+							var currentTrial = _v4.a;
+							return _List_fromArray(
+								[
+									A2(
+									$author$project$View$viewTraining,
+									info_.instructions,
+									_List_fromArray(
+										[
+											audioButton(currentTrial.audioWord.url),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+												]),
+											_List_fromArray(
+												[
+													viewLetters(data.state.scrambledLetter)
+												])),
+											A2($author$project$Main$ghostView, model.dnd, data.state.scrambledLetter),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4 pb-4')
+												]),
+											_List_fromArray(
+												[
+													A5(
+													feedback,
+													info_.feedback_correct,
+													info_.feedback_incorrect,
+													data.feedback,
+													{attempt: data.state.userAnswer, target: currentTrial.target},
+													data.next)
+												]))
+										]))
+								]);
+						} else {
+							return _List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
+									$author$project$View$button(
+									{
+										isDisabled: false,
+										message: $author$project$Main$UserClickedStartMainloopInScrabble(data.mainTrials),
+										txt: 'Commencer l\'expérience '
+									})
+								]);
+						}
+					}
+				case 'Over':
+					if (_v0.b.$ === 'Nothing') {
+						break _v0$1;
+					} else {
+						var _v5 = _v0.a;
+						return _List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('cette tâche est finie merci beaucoup')
+							]);
+					}
+				default:
+					if (_v0.b.$ === 'Nothing') {
+						break _v0$1;
+					} else {
+						var _v6 = _v0.a;
+						return _List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('L\'entrainement est fini')
+							]);
+					}
+			}
+		}
+		var _v2 = _v0.b;
+		return _List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$text('I could not find any info on this task. Please report this issue')
+			]);
+	});
+var $rtfeldman$elm_css$Html$Styled$h4 = $rtfeldman$elm_css$Html$Styled$node('h4');
 var $author$project$View$sentenceInSynonym = F4(
 	function (t, state, msg, feedback_) {
 		return A2(
@@ -20406,7 +22121,8 @@ var $author$project$View$tooltip = function (text_) {
 											]))
 									]))
 							]))
-					]))
+					])),
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('h-12 w-12')
 			]),
 		_List_fromArray(
 			[
@@ -20891,170 +22607,6 @@ var $author$project$Experiment$Synonym$viewTask = F3(
 				$rtfeldman$elm_css$Html$Styled$text('Synonym est fini')
 			]);
 	});
-var $author$project$Main$startButton = A2($author$project$View$navIn, 'Go to Meaning >', '/meaning');
-var $author$project$Main$viewTranslationTask = function (model) {
-	var item = F2(
-		function (key, value) {
-			return A2(
-				$rtfeldman$elm_css$Html$Styled$li,
-				_List_Nil,
-				A2($author$project$View$keyValue, key, value));
-		});
-	var content = function (attributes) {
-		return $rtfeldman$elm_css$Html$Styled$ul(
-			_Utils_ap(
-				_List_fromArray(
-					[
-						A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'data-test', 'package'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('mt-8 flex flex-col justify-center max-w-2xl h-48'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-transition rounded'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-10 font-semibold leading-loose')
-					]),
-				attributes));
-	};
-	var _v0 = model.translationTask;
-	_v0$4:
-	while (true) {
-		switch (_v0.$) {
-			case 'NotStarted':
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('NotStarted')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$p,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[$author$project$Main$startButton]))
-					]);
-			case 'Loading':
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('loading')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$p,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$button,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('w-56 cursor-wait'),
-										$rtfeldman$elm_css$Html$Styled$Attributes$disabled(true)
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Loading...')
-									]))
-							]))
-					]);
-			case 'Failure':
-				var reason = _v0.a;
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Failure')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$p,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-							]))
-					]);
-			case 'DoingTranslation':
-				if (_v0.a.$ === 'MainLoop') {
-					var _v1 = _v0.a;
-					var trials = _v1.a;
-					var state = _v1.b;
-					var trialn = _v1.c;
-					var feedback = _v1.d;
-					var trial = A2(
-						$elm$core$Maybe$withDefault,
-						$author$project$Experiment$Experiment$defaultTranslationTrial,
-						A2(
-							$elm$core$Array$get,
-							trialn,
-							$elm$core$Array$fromList(trials)));
-					var isCorrect = function (optionN) {
-						return _Utils_eq(optionN, trial.translation1) || _Utils_eq(optionN, trial.translation2);
-					};
-					var option = function (id) {
-						return A5(
-							$author$project$View$radio,
-							id,
-							_Utils_eq(state.userAnswer, id),
-							isCorrect(id),
-							feedback,
-							A2($author$project$Main$UserClickedRadioButton, model.route, id));
-					};
-					return _List_fromArray(
-						[
-							A4(
-							$author$project$Experiment$Meaning$view,
-							model.translationTask,
-							_List_fromArray(
-								[
-									option(trial.distractor1),
-									option(trial.distractor2),
-									option(trial.distractor3),
-									option(trial.translation1)
-								]),
-							$author$project$Main$UserClickedFeedbackButton(model.route),
-							$author$project$Main$UserClickedNextTrial(model.route))
-						]);
-				} else {
-					break _v0$4;
-				}
-			default:
-				break _v0$4;
-		}
-	}
-	return _List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$text('impossible case you should change the data model')
-		]);
-};
 var $author$project$Main$body = function (model) {
 	return _List_fromArray(
 		[
@@ -21078,214 +22630,244 @@ var $author$project$Main$body = function (model) {
 								function (info) {
 									return _Utils_Tuple2(
 										info.name,
-										{description: info.description, end: info.end, instructions: info.instructions, instructions_short: info.instructions_short, name: info.name, session: info.session, type_: info.type_, uid: info.uid, url: info.url});
+										{description: info.description, end: info.end, feedback_correct: info.feedback_correct, feedback_incorrect: info.feedback_incorrect, instructions: info.instructions, instructions_short: info.instructions_short, name: info.name, session: info.session, type_: info.type_, uid: info.uid, url: info.url});
 								},
 								infos));
-						var _v1 = _Utils_Tuple2(model.route, model.user);
-						switch (_v1.a.$) {
+						var _v1 = model.route;
+						switch (_v1.$) {
 							case 'ExperimentStart':
-								if (_v1.b.$ === 'Just') {
-									var _v2 = _v1.a;
-									var user = _v1.b.a;
-									var toCard = function (info) {
-										return A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-13')
-												]),
-											_List_fromArray(
-												[
-													A2(
-													$rtfeldman$elm_css$Html$Styled$article,
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$Attributes$class('overflow-hidden rounded-lg shadow-lg')
-														]),
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$img,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$class('block h-auto w-full'),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$src('https://picsum.photos/600/400/?random')
-																]),
-															_List_Nil),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$header,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$class('flex items-center justify-between leading-tight p-2 md:p4')
-																]),
-															_List_fromArray(
-																[
-																	A2(
-																	$rtfeldman$elm_css$Html$Styled$h1,
-																	_List_fromArray(
-																		[
-																			$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
-																		]),
-																	_List_fromArray(
-																		[
-																			A2(
-																			$rtfeldman$elm_css$Html$Styled$a,
-																			_List_fromArray(
-																				[
-																					$rtfeldman$elm_css$Html$Styled$Attributes$href(info.url)
-																				]),
-																			_List_fromArray(
-																				[
-																					$rtfeldman$elm_css$Html$Styled$text(info.name)
-																				]))
-																		]))
-																])),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$p,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$class('px-2 overflow-ellipsis')
-																]),
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text(info.description)
-																])),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$footer,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$class('flex items-center justify-between leading-none p-2 md:p-4')
-																]),
-															_List_fromArray(
-																[
-																	A2(
-																	$rtfeldman$elm_css$Html$Styled$div,
-																	_List_fromArray(
-																		[
-																			$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-green-500 rounded-lg p-2 text-white')
-																		]),
-																	_List_fromArray(
-																		[
-																			$rtfeldman$elm_css$Html$Styled$text(
-																			$author$project$ExperimentInfo$typeToString(info.type_))
-																		])),
-																	A2(
-																	$rtfeldman$elm_css$Html$Styled$div,
-																	_List_fromArray(
-																		[
-																			$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-blue-500 rounded-lg p-2 text-white')
-																		]),
-																	_List_fromArray(
-																		[
-																			$rtfeldman$elm_css$Html$Styled$text(
-																			$author$project$ExperimentInfo$sessionToString(info.session))
-																		]))
-																]))
-														]))
-												]));
-									};
-									var viewCard = function (_with) {
-										return A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap -mx-1 px-4 md:px-12')
-												]),
-											A2(
-												$elm$core$List$map,
-												toCard,
-												A2($elm$core$List$filter, _with, infos)));
-									};
-									return _List_fromArray(
-										[
-											A2(
-											$rtfeldman$elm_css$Html$Styled$h1,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
-												])),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$p,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
-												]),
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
-												])),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$h2,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Session 1')
-												])),
-											viewCard(
-											function (info) {
-												return _Utils_eq(info.session, $author$project$ExperimentInfo$Session1);
-											}),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$h2,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Session 2')
-												])),
-											viewCard(
-											function (info) {
-												return _Utils_eq(info.session, $author$project$ExperimentInfo$Session2);
-											}),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$h2,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Session 3')
-												])),
-											viewCard(
-											function (info) {
-												return _Utils_eq(info.session, $author$project$ExperimentInfo$Session3);
-											}),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$h2,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Pretests')
-												])),
-											viewCard(
-											function (info) {
-												return _Utils_eq(info.session, $author$project$ExperimentInfo$Pretest);
-											})
-										]);
-								} else {
-									var _v3 = _v1.a;
-									var _v4 = _v1.b;
-									return _List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text('Welcome maybe you should login ?'),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$a,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$href('/login')
-												]),
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Log here')
-												]))
-										]);
-								}
+								var toCard = function (info) {
+									return A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-13')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$article,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('overflow-hidden rounded-lg shadow-lg')
+													]),
+												_List_fromArray(
+													[
+														A2(
+														$rtfeldman$elm_css$Html$Styled$img,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('block h-auto w-full'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$src('https://picsum.photos/600/400/?random')
+															]),
+														_List_Nil),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$header,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('flex items-center justify-between leading-tight p-2 md:p4')
+															]),
+														_List_fromArray(
+															[
+																A2(
+																$rtfeldman$elm_css$Html$Styled$h1,
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
+																	]),
+																_List_fromArray(
+																	[
+																		A2(
+																		$rtfeldman$elm_css$Html$Styled$a,
+																		_List_fromArray(
+																			[
+																				$rtfeldman$elm_css$Html$Styled$Attributes$href(info.url)
+																			]),
+																		_List_fromArray(
+																			[
+																				$rtfeldman$elm_css$Html$Styled$text(info.name)
+																			]))
+																	]))
+															])),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$p,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('px-2 overflow-ellipsis')
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text(info.description)
+															])),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$footer,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('flex items-center justify-between leading-none p-2 md:p-4')
+															]),
+														_List_fromArray(
+															[
+																A2(
+																$rtfeldman$elm_css$Html$Styled$div,
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-green-500 rounded-lg p-2 text-white')
+																	]),
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$text(
+																		$author$project$ExperimentInfo$typeToString(info.type_))
+																	])),
+																A2(
+																$rtfeldman$elm_css$Html$Styled$div,
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-blue-500 rounded-lg p-2 text-white')
+																	]),
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Html$Styled$text(
+																		$author$project$ExperimentInfo$sessionToString(info.session))
+																	]))
+															]))
+													]))
+											]));
+								};
+								var viewCard = function (_with) {
+									return A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-wrap -mx-1 px-4 md:px-12')
+											]),
+										A2(
+											$elm$core$List$map,
+											toCard,
+											A2($elm$core$List$filter, _with, infos)));
+								};
+								return _List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Apprentissage et Espacement')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-xl text-xl mb-8')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Une expérience visant à mieux comprendre l\'acquisition de nouvelles structures grammaticales en langue anglaise. ')
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$h2,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Session 1')
+											])),
+										viewCard(
+										function (info) {
+											return _Utils_eq(info.session, $author$project$ExperimentInfo$Session1);
+										}),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$h2,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Session 2')
+											])),
+										viewCard(
+										function (info) {
+											return _Utils_eq(info.session, $author$project$ExperimentInfo$Session2);
+										}),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$h2,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Session 3')
+											])),
+										viewCard(
+										function (info) {
+											return _Utils_eq(info.session, $author$project$ExperimentInfo$Session3);
+										}),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$h2,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Pretests')
+											])),
+										viewCard(
+										function (info) {
+											return _Utils_eq(info.session, $author$project$ExperimentInfo$Pretest);
+										})
+									]);
 							case 'Meaning':
-								var _v5 = _v1.a;
-								return $author$project$Main$viewExperiment(model);
+								var infos_ = A2($elm$core$Dict$get, 'Meaning', infosAsDict);
+								return _List_fromArray(
+									[
+										$author$project$Experiment$Meaning$view(
+										{
+											infos: infos_,
+											nextTrialMsg: $author$project$Main$Meaning($author$project$Experiment$Meaning$UserClickedNextTrial),
+											optionsOrder: model.optionsOrder,
+											radioMsg: function (val) {
+												return $author$project$Main$Meaning(
+													$author$project$Experiment$Meaning$UserClickedRadioButton(val));
+											},
+											startMainMsg: function (trials) {
+												return $author$project$Main$Meaning(
+													$author$project$Experiment$Meaning$UserClickedStartMain(trials));
+											},
+											task: model.meaningBis,
+											toggleFeedbackMsg: $author$project$Main$Meaning($author$project$Experiment$Meaning$UserClickedToggleFeedback)
+										})
+									]);
 							case 'Translation':
-								var _v6 = _v1.a;
-								return $author$project$Main$viewTranslationTask(model);
+								var infos_ = A2($elm$core$Dict$get, 'Translation', infosAsDict);
+								return _List_fromArray(
+									[
+										$author$project$Experiment$Translation$view(
+										{
+											infos: infos_,
+											nextTrialMsg: $author$project$Main$Translation($author$project$Experiment$Translation$UserClickedNextTrial),
+											optionsOrder: model.optionsOrder,
+											radioMsg: function (val) {
+												return $author$project$Main$Translation(
+													$author$project$Experiment$Translation$UserClickedRadioButton(val));
+											},
+											startMainMsg: function (trials) {
+												return $author$project$Main$Translation(
+													$author$project$Experiment$Translation$UserClickedStartMain(trials));
+											},
+											task: model.translationTask,
+											toggleFeedbackMsg: $author$project$Main$Translation($author$project$Experiment$Translation$UserClickedToggleFeedback)
+										})
+									]);
+							case 'Presentation':
+								var synonymInfos = A2($elm$core$Dict$get, 'Presentation', infosAsDict);
+								return _List_fromArray(
+									[
+										$author$project$Experiment$Presentation$view(
+										{
+											infos: synonymInfos,
+											nextTrialMsg: $author$project$Main$Presentation($author$project$Experiment$Presentation$UserClickedNextTrial),
+											startMainMsg: function (trials) {
+												return $author$project$Main$Presentation(
+													$author$project$Experiment$Presentation$UserClickedStartMain(trials));
+											},
+											task: model.presentation,
+											userClickedAudio: $author$project$Main$PlaysoundInJS
+										})
+									]);
 							case 'Synonym':
-								var _v7 = _v1.a;
 								var synonymInfos = A2($elm$core$Dict$get, 'Synonym', infosAsDict);
 								return A3(
 									$author$project$Experiment$Synonym$viewTask,
@@ -21299,10 +22881,9 @@ var $author$project$Main$body = function (model) {
 										updateInputMsg: $author$project$Main$UserChangedInputInSynonym
 									});
 							case 'Scrabble':
-								var _v8 = _v1.a;
-								return $author$project$Main$viewScrabbleTask(model);
+								var info = A2($elm$core$Dict$get, 'Spelling level 2', infosAsDict);
+								return A2($author$project$Main$viewScrabbleTask, info, model);
 							case 'CULevel2':
-								var _v9 = _v1.a;
 								var cu2Infos = A2($elm$core$Dict$get, 'Context Understanding level 2', infosAsDict);
 								return _List_fromArray(
 									[
@@ -21327,38 +22908,54 @@ var $author$project$Main$body = function (model) {
 										})
 									]);
 							case 'CU1':
-								var _v10 = _v1.a;
 								var cu1Infos = A2($elm$core$Dict$get, 'Context Understanding level 1', infosAsDict);
 								return _List_fromArray(
 									[
 										$author$project$Experiment$CU1$view(
 										{
 											infos: cu1Infos,
-											inputChangedMsg: $elm$core$Maybe$Nothing,
 											nextTrialMsg: $author$project$Main$CU1($author$project$Experiment$CU1$UserClickedNextTrial),
-											optionsOrder: $elm$core$Maybe$Just(model.optionsOrder),
-											radioMsg: $elm$core$Maybe$Just(
-												function (id) {
-													return $author$project$Main$CU1(
-														$author$project$Experiment$CU1$UserClickedRadioButton(id));
-												}),
+											optionsOrder: model.optionsOrder,
+											radioMsg: function (id) {
+												return $author$project$Main$CU1(
+													$author$project$Experiment$CU1$UserClickedRadioButton(id));
+											},
 											startMainMsg: function (trials) {
 												return $author$project$Main$CU1(
 													$author$project$Experiment$CU1$UserClickedStartMain(trials));
 											},
 											task: model.cu1,
-											toggleFeedbackMsg: $author$project$Main$CU1($author$project$Experiment$CU1$UserClickedToggleFeedback),
-											userClickedAudio: $elm$core$Maybe$Nothing
+											toggleFeedbackMsg: $author$project$Main$CU1($author$project$Experiment$CU1$UserClickedToggleFeedback)
+										})
+									]);
+							case 'CU3':
+								var cu3Infos = A2($elm$core$Dict$get, 'Context Understanding level 3', infosAsDict);
+								return _List_fromArray(
+									[
+										A3(
+										$author$project$Experiment$CU3$view,
+										model.cu3,
+										cu3Infos,
+										{
+											nextTrialMsg: $author$project$Main$CU3($author$project$Experiment$CU3$UserClickedNextTrial),
+											startMainMsg: function (trials) {
+												return $author$project$Main$CU3(
+													$author$project$Experiment$CU3$UserClickedStartMain(trials));
+											},
+											toggleFeedback: $author$project$Main$CU3($author$project$Experiment$CU3$UserClickedToggleFeedback),
+											userChangedInput: function (_new) {
+												return $author$project$Main$CU3(
+													$author$project$Experiment$CU3$UserChangedInput(_new));
+											},
+											userClickedAudio: $author$project$Main$PlaysoundInJS
 										})
 									]);
 							case 'CloudWords':
-								var _v11 = _v1.a;
 								return _List_fromArray(
 									[
 										$author$project$Main$viewCloud(model)
 									]);
 							case 'Acceptability':
-								var _v12 = _v1.a;
 								return _List_fromArray(
 									[
 										A2(
@@ -21369,114 +22966,91 @@ var $author$project$Main$body = function (model) {
 										})
 									]);
 							case 'Home':
-								var _v13 = _v1.a;
 								return _List_fromArray(
 									[
 										$rtfeldman$elm_css$Html$Styled$text('home ?')
 									]);
 							case 'LogIn':
-								if (_v1.b.$ === 'Nothing') {
-									var _v14 = _v1.a;
-									var _v15 = _v1.b;
-									var fieldStyle = function (_v16) {
-										var fieldType = _v16.fieldType;
-										var placeholder = _v16.placeholder;
-										var id = _v16.id;
-										var name = _v16.name;
-										var value = _v16.value;
-										var msg = _v16.msg;
-										return _List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$placeholder(placeholder),
-												$rtfeldman$elm_css$Html$Styled$Attributes$type_(fieldType),
-												$rtfeldman$elm_css$Html$Styled$Attributes$required(true),
-												$rtfeldman$elm_css$Html$Styled$Attributes$name(name),
-												$rtfeldman$elm_css$Html$Styled$Attributes$id(id),
-												$rtfeldman$elm_css$Html$Styled$Attributes$value(value),
-												$rtfeldman$elm_css$Html$Styled$Events$onInput(msg)
-											]);
-									};
-									var firstNameField = A2(
-										$rtfeldman$elm_css$Html$Styled$input,
-										fieldStyle(
-											{fieldType: 'text', id: 'firstName', msg: $author$project$Main$UserUpdatedFirstNameFieldInLogIn, name: 'firstName', placeholder: 'John', value: model.userFirstName}),
-										_List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$label,
-												_List_Nil,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('Your first name')
-													]))
-											]));
-									var emailField = A2(
-										$rtfeldman$elm_css$Html$Styled$input,
-										fieldStyle(
-											{fieldType: 'email', id: 'email', msg: $author$project$Main$UserUpdatedEmailFieldInLogIn, name: 'email', placeholder: 'john.doe@anydomain.com', value: model.userEmail}),
-										_List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$label,
-												_List_Nil,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('What\'s your email address ?')
-													]))
-											]));
+								var fieldStyle = function (_v2) {
+									var fieldType = _v2.fieldType;
+									var placeholder = _v2.placeholder;
+									var id = _v2.id;
+									var name = _v2.name;
+									var value = _v2.value;
+									var msg = _v2.msg;
 									return _List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$text('C\'est ici qu\'on se connecte ! '),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$div,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-												]),
-											_List_fromArray(
-												[
-													firstNameField,
-													emailField,
-													A2(
-													$rtfeldman$elm_css$Html$Styled$button,
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$UserClickedCreateUserInLogin)
-														]),
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$label,
-															_List_Nil,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text('Create user')
-																]))
-														]))
-												]))
+											$rtfeldman$elm_css$Html$Styled$Attributes$placeholder(placeholder),
+											$rtfeldman$elm_css$Html$Styled$Attributes$type_(fieldType),
+											$rtfeldman$elm_css$Html$Styled$Attributes$required(true),
+											$rtfeldman$elm_css$Html$Styled$Attributes$name(name),
+											$rtfeldman$elm_css$Html$Styled$Attributes$id(id),
+											$rtfeldman$elm_css$Html$Styled$Attributes$value(value),
+											$rtfeldman$elm_css$Html$Styled$Events$onInput(msg)
 										]);
-								} else {
-									if (_v1.b.a.$ === 'Authenticated') {
-										var _v17 = _v1.a;
-										var user = _v1.b.a.a;
-										return _List_fromArray(
+								};
+								var firstNameField = A2(
+									$rtfeldman$elm_css$Html$Styled$input,
+									fieldStyle(
+										{fieldType: 'text', id: 'firstName', msg: $author$project$Main$UserUpdatedFirstNameFieldInLogIn, name: 'firstName', placeholder: 'John', value: model.userFirstName}),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$label,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text('Your first name')
+												]))
+										]));
+								var emailField = A2(
+									$rtfeldman$elm_css$Html$Styled$input,
+									fieldStyle(
+										{fieldType: 'email', id: 'email', msg: $author$project$Main$UserUpdatedEmailFieldInLogIn, name: 'email', placeholder: 'john.doe@anydomain.com', value: model.userEmail}),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$label,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text('What\'s your email address ?')
+												]))
+										]));
+								return _List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('C\'est ici qu\'on se connecte ! '),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
 											[
-												$rtfeldman$elm_css$Html$Styled$text('Hey ' + (user.firstName + ' we already know you. You can browse the experiments now!'))
-											]);
-									} else {
-										var _v18 = _v1.a;
-										var user = _v1.b.a.a;
-										return _List_fromArray(
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+											]),
+										_List_fromArray(
 											[
-												$rtfeldman$elm_css$Html$Styled$text('Hey ' + (user.firstName + ' you\'re anonymous. It\'s an impossible case. Please tell the developer !'))
-											]);
-									}
-								}
+												firstNameField,
+												emailField,
+												A2(
+												$rtfeldman$elm_css$Html$Styled$button,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$UserClickedCreateUserInLogin)
+													]),
+												_List_fromArray(
+													[
+														A2(
+														$rtfeldman$elm_css$Html$Styled$label,
+														_List_Nil,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text('Create user')
+															]))
+													]))
+											]))
+									]);
 							case 'NotFound':
-								var _v19 = _v1.a;
 								return $author$project$View$notFound;
-							default:
-								var _v20 = _v1.a;
+							case 'SpellingLevel1':
 								return _List_fromArray(
 									[
 										A3(
@@ -21488,6 +23062,49 @@ var $author$project$Main$body = function (model) {
 											radioMsg: $author$project$Main$UserClickedRadioButtonInSpellingLvl1,
 											startMainloopMsg: $author$project$Main$UserClickedStartMainloopInSpellingLvl1,
 											toggleFeedbackMsg: $author$project$Main$UserClickedFeedbackButton(model.route)
+										})
+									]);
+							case 'Spelling3':
+								var infos_ = A2($elm$core$Dict$get, 'Spelling level 3', infosAsDict);
+								return _List_fromArray(
+									[
+										A3(
+										$author$project$Experiment$Spelling3$view,
+										model.spelling3,
+										infos_,
+										{
+											nextTrialMsg: $author$project$Main$Spelling3($author$project$Experiment$Spelling3$UserClickedNextTrial),
+											startMainMsg: function (trials) {
+												return $author$project$Main$Spelling3(
+													$author$project$Experiment$Spelling3$UserClickedStartMain(trials));
+											},
+											toggleFeedback: $author$project$Main$Spelling3($author$project$Experiment$Spelling3$UserClickedToggleFeedback),
+											userChangedInput: function (_new) {
+												return $author$project$Main$Spelling3(
+													$author$project$Experiment$Spelling3$UserChangedInput(_new));
+											},
+											userClickedAudio: $author$project$Main$PlaysoundInJS
+										})
+									]);
+							default:
+								var infos_ = A2($elm$core$Dict$get, 'YesNo task', infosAsDict);
+								return _List_fromArray(
+									[
+										A3(
+										$author$project$Experiment$YN$view,
+										model.yn,
+										infos_,
+										{
+											nextTrialMsg: $author$project$Main$YN($author$project$Experiment$YN$UserClickedNextTrial),
+											startMainMsg: function (trials) {
+												return $author$project$Main$YN(
+													$author$project$Experiment$YN$UserClickedStartMain(trials));
+											},
+											toggleFeedback: $author$project$Main$YN($author$project$Experiment$YN$UserClickedToggleFeedback),
+											userChangedInput: function (str) {
+												return $author$project$Main$YN(
+													$author$project$Experiment$YN$UserChangedInput(str));
+											}
 										})
 									]);
 						}
@@ -22007,7 +23624,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"User.AuthenticatedInfo":{"args":[],"type":"{ uid : String.String, firstName : String.String, email : String.String, role : User.Role }"},"Experiment.Experiment.SynonymTrial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, end : String.String }"},"Experiment.Experiment.TranslationInput":{"args":[],"type":"{ uid : String.String, question : String.String, translation1 : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, distractor4 : String.String, word : String.String }"},"Experiment.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, isCorrect : Basics.Bool, duration : Basics.Int }"},"Experiment.Scrabble.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Experiment.SpellingLvl1.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Experiment.Experiment.TrialMeaning":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, definition : String.String, option1 : String.String, option2 : String.String, option3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Experiment.CU1.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool }"},"Experiment.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"ServerRespondedWithMeaningInput":["Result.Result Http.Error (List.List Experiment.Experiment.TrialMeaning)"],"ServerRespondedWithTranslationTrials":["Result.Result Http.Error (List.List Experiment.Experiment.TranslationInput)"],"ServerRespondedWithScrabbleTrials":["Result.Result Http.Error (List.List Experiment.Scrabble.Trial)"],"ServerRespondedWithSynonymTrials":["Result.Result Http.Error (List.List Experiment.Experiment.SynonymTrial)"],"ServerRespondedWithAcceptabilityTrials":["Result.Result Http.Error (List.List Experiment.Acceptability.Trial)"],"ServerRespondedWithInfos":["Result.Result Http.Error (List.List ExperimentInfo.Task)"],"ServerRespondedWithUserInfo":["Result.Result Http.Error User.AuthenticatedInfo"],"ServerRespondedWithSpellingTrials":["Result.Result Http.Error (List.List Experiment.SpellingLvl1.Trial)"],"Shuffled":["Main.Msg"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedStartSynonym":["List.List Experiment.Experiment.SynonymTrial"],"UserClickedStartMainloopInSpellingLvl1":["List.List Experiment.SpellingLvl1.Trial"],"UserClickedStartMainloopInScrabble":["List.List Experiment.Scrabble.Trial"],"UserClickedNextTrialButtonInScrabble":["Maybe.Maybe Experiment.Scrabble.Trial"],"UserClickedCreateUserInLogin":[],"UserChangedInputInSynonym":["String.String"],"UserUpdatedFirstNameFieldInLogIn":["String.String"],"UserUpdatedEmailFieldInLogIn":["String.String"],"UserValidatedInputInSynonym":[],"UserToggledInCloudWords":["String.String"],"UserDragsLetter":["DnDList.Msg"],"UserPressedKey":["Experiment.Acceptability.Evaluation"],"WithTime":["Main.Msg","Time.Posix"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedRadioButtonInSpellingLvl1":["String.String"],"PlaysoundInJS":["String.String"],"UserClickedFeedbackButton":["Route.Route"],"UserClickedNextTrial":["Route.Route"],"UserClickedRadioButton":["Route.Route","String.String"],"CU1":["Experiment.CU1.CU1Msg"],"CU2":["Experiment.CU2.CU2Msg"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Experiment.CU1.CU1Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.CU1.Trial)"],"UserClickedStartIntro":["List.List Experiment.CU1.Trial"],"UserClickedStartMain":["List.List Experiment.CU1.Trial"]}},"Experiment.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.CU2.Trial)"],"UserClickedStartIntro":["List.List Experiment.CU2.Trial"],"UserClickedStartMain":["List.List Experiment.CU2.Trial"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Experiment.Acceptability.Evaluation":{"args":[],"tags":{"NoEvaluation":[],"SentenceCorrect":[],"SentenceIncorrect":[],"EvaluationTimeOut":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"User.Role":{"args":[],"tags":{"Volunteer":[],"Admin":[]}},"Route.Route":{"args":[],"tags":{"ExperimentStart":[],"Home":[],"Meaning":[],"Translation":[],"Scrabble":[],"CloudWords":[],"Acceptability":[],"NotFound":[],"Synonym":[],"LogIn":[],"SpellingLevel1":[],"CULevel2":[],"CU1":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[]}},"String.String":{"args":[],"tags":{"String":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"User.AuthenticatedInfo":{"args":[],"type":"{ uid : String.String, firstName : String.String, email : String.String, role : User.Role }"},"Experiment.Experiment.SynonymTrial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String }"},"Experiment.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, isCorrect : Basics.Bool, duration : Basics.Int }"},"Experiment.Scrabble.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Experiment.SpellingLvl1.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Experiment.CU1.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Experiment.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Experiment.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Experiment.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Experiment.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Experiment.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Experiment.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Experiment.YN.Trial":{"args":[],"type":"{ uid : String.String, word : String.String, exists : Basics.Bool }"}},"unions":{"Main.Msg":{"args":[],"tags":{"BrowserChangedUrl":["Url.Url"],"ServerRespondedWithScrabbleTrials":["Result.Result Http.Error (List.List Experiment.Scrabble.Trial)"],"ServerRespondedWithSynonymTrials":["Result.Result Http.Error (List.List Experiment.Experiment.SynonymTrial)"],"ServerRespondedWithAcceptabilityTrials":["Result.Result Http.Error (List.List Experiment.Acceptability.Trial)"],"ServerRespondedWithInfos":["Result.Result Http.Error (List.List ExperimentInfo.Task)"],"ServerRespondedWithUserInfo":["Result.Result Http.Error User.AuthenticatedInfo"],"ServerRespondedWithSpellingTrials":["Result.Result Http.Error (List.List Experiment.SpellingLvl1.Trial)"],"Shuffled":["Main.Msg"],"UserClickedLink":["Browser.UrlRequest"],"UserClickedStartSynonym":["List.List Experiment.Experiment.SynonymTrial"],"UserClickedStartMainloopInSpellingLvl1":["List.List Experiment.SpellingLvl1.Trial"],"UserClickedStartMainloopInScrabble":["List.List Experiment.Scrabble.Trial"],"UserClickedNextTrialButtonInScrabble":["Maybe.Maybe Experiment.Scrabble.Trial"],"UserClickedCreateUserInLogin":[],"UserChangedInputInSynonym":["String.String"],"UserUpdatedFirstNameFieldInLogIn":["String.String"],"UserUpdatedEmailFieldInLogIn":["String.String"],"UserValidatedInputInSynonym":[],"UserToggledInCloudWords":["String.String"],"UserDragsLetter":["DnDList.Msg"],"UserPressedKey":["Experiment.Acceptability.Evaluation"],"WithTime":["Main.Msg","Time.Posix"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedRadioButtonInSpellingLvl1":["String.String"],"PlaysoundInJS":["String.String"],"UserClickedFeedbackButton":["Route.Route"],"UserClickedNextTrial":["Route.Route"],"UserClickedRadioButton":["Route.Route","String.String"],"CU1":["Experiment.CU1.CU1Msg"],"CU2":["Experiment.CU2.CU2Msg"],"CU3":["Experiment.CU3.Msg"],"Spelling3":["Experiment.Spelling3.Msg"],"YN":["Experiment.YN.Msg"],"Presentation":["Experiment.Presentation.Msg"],"Meaning":["Experiment.Meaning.Msg"],"Translation":["Experiment.Translation.Msg"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Experiment.CU1.CU1Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.CU1.Trial)"],"UserClickedStartIntro":["List.List Experiment.CU1.Trial"],"UserClickedStartMain":["List.List Experiment.CU1.Trial"]}},"Experiment.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.CU2.Trial)"],"UserClickedStartIntro":["List.List Experiment.CU2.Trial"],"UserClickedStartMain":["List.List Experiment.CU2.Trial"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Experiment.Acceptability.Evaluation":{"args":[],"tags":{"NoEvaluation":[],"SentenceCorrect":[],"SentenceIncorrect":[],"EvaluationTimeOut":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Experiment.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.CU3.Trial)"],"UserClickedStartIntro":["List.List Experiment.CU3.Trial"],"UserClickedStartMain":["List.List Experiment.CU3.Trial"],"UserChangedInput":["String.String"]}},"Experiment.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.Meaning.Trial)"],"UserClickedStartIntro":["List.List Experiment.Meaning.Trial"],"UserClickedStartMain":["List.List Experiment.Meaning.Trial"]}},"Experiment.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.Presentation.Trial)"],"UserClickedStartIntro":["List.List Experiment.Presentation.Trial"],"UserClickedStartMain":["List.List Experiment.Presentation.Trial"]}},"Experiment.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.Spelling3.Trial)"],"UserClickedStartIntro":["List.List Experiment.Spelling3.Trial"],"UserClickedStartMain":["List.List Experiment.Spelling3.Trial"],"UserChangedInput":["String.String"]}},"Experiment.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.Translation.Trial)"],"UserClickedStartIntro":["List.List Experiment.Translation.Trial"],"UserClickedStartMain":["List.List Experiment.Translation.Trial"]}},"Experiment.YN.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"ServerRespondedWith":["Result.Result Http.Error (List.List Experiment.YN.Trial)"],"UserClickedStartIntro":["List.List Experiment.YN.Trial"],"UserClickedStartMain":["List.List Experiment.YN.Trial"],"UserChangedInput":["String.String"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"User.Role":{"args":[],"tags":{"Volunteer":[],"Admin":[]}},"Route.Route":{"args":[],"tags":{"ExperimentStart":[],"Home":[],"Meaning":[],"Translation":[],"Scrabble":[],"CloudWords":[],"Acceptability":[],"NotFound":[],"Synonym":[],"LogIn":[],"SpellingLevel1":[],"Spelling3":[],"CULevel2":[],"CU1":[],"CU3":[],"YN":[],"Presentation":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[]}},"String.String":{"args":[],"tags":{"String":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
@@ -25896,7 +27513,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35723" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "32951" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

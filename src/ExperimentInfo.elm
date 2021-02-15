@@ -69,6 +69,8 @@ type alias Task =
     , description : String
     , instructions : String
     , instructions_short : String
+    , feedback_correct : String
+    , feedback_incorrect : String
     , end : String
     }
 
@@ -119,6 +121,8 @@ decode =
                 |> required "Description" Decode.string
                 |> required "Instructions" Decode.string
                 |> required "Instructions_short" Decode.string
+                |> required "feedback_correct" Decode.string
+                |> required "feedback_incorrect" Decode.string
                 |> required "End" Decode.string
     in
     Data.decodeRecords decoder

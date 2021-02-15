@@ -1,4 +1,4 @@
-module Experiment.CU2 exposing (..)
+module Experiment.YN exposing (..)
 
 import Data
 import ExperimentInfo
@@ -9,12 +9,11 @@ import Http exposing (Error)
 import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
-import Markdown
 import PsychTask
 import View
 
 
-view exp infos optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg, startMainMsg } =
+view exp infos { toggleFeedback, nextTrialMsg, startMainMsg, userChangedInput } =
     case ( exp, infos ) of
         ( _, Nothing ) ->
             div [] [ text "Error : I can't find the task's infos" ]
@@ -27,14 +26,9 @@ view exp infos optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTr
                 Just trial ->
                     div []
                         [ View.viewTraining info.instructions
-                            [ div [ class "col-start-2 col-span-4 pt-8 pb-8" ]
-                                [ span [] [ text trial.context ]
-                                , div [ class "h-8 w-8 pt-4", Html.Styled.Events.onClick (userClickedAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
-                                ]
-                            , div [ class "col-start-2 col-span-4" ] <| View.shuffledOptions state feedback radioMsg trial optionsOrder
-                            , div [ class "col-start-2 col-span-4 pb-8" ] <|
+                            [ div [] <|
                                 if feedback then
-                                    [ View.fromMarkdown trial.feedback
+                                    [ text "I'm feedback"
                                     , View.button
                                         { message = nextTrialMsg
                                         , isDisabled = False
@@ -46,7 +40,7 @@ view exp infos optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTr
                                     [ View.button
                                         { message = toggleFeedback
                                         , isDisabled = False
-                                        , txt = "Check my answer"
+                                        , txt = "togglefeedback"
                                         }
                                     ]
                             ]
@@ -69,26 +63,38 @@ view exp infos optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTr
             case current of
                 Just trial ->
                     div []
-                        [ View.fromMarkdown info.instructions_short
-                        , span [] [ text trial.context ]
-                        , div [ class "h-12 w-12", Html.Styled.Events.onClick (userClickedAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
-                        , div [] <| View.shuffledOptions state feedback radioMsg trial optionsOrder
-                        , if feedback then
-                            div []
-                                [ fromUnstyled <| Markdown.toHtml [] trial.feedback
-                                , View.button
-                                    { message = nextTrialMsg
-                                    , isDisabled = False
-                                    , txt = "Next Item"
-                                    }
+                        [ span [ class "text-lg" ] [ text trial.word ]
+                        , Html.fieldset [ class "flex flex-col" ]
+                            [ div []
+                                [ Html.input
+                                    [ Html.Styled.Attributes.type_ "radio"
+                                    , Html.Styled.Attributes.value "true"
+                                    , Html.Styled.Attributes.checked (state.userAnswer == "true")
+                                    , Html.Styled.Events.onInput userChangedInput
+                                    , Html.Styled.Attributes.id "truecb"
+                                    ]
+                                    []
+                                , Html.label [ Html.Styled.Attributes.for "truecb", class "pl-4 hover:underline" ] [ text "Exists" ]
                                 ]
-
-                          else
-                            View.button
-                                { message = toggleFeedback
+                            , div []
+                                [ Html.input
+                                    [ Html.Styled.Attributes.type_ "radio"
+                                    , Html.Styled.Attributes.value "false"
+                                    , Html.Styled.Attributes.checked (state.userAnswer == "false")
+                                    , Html.Styled.Events.onInput userChangedInput
+                                    , Html.Styled.Attributes.id "falsecb"
+                                    ]
+                                    []
+                                , Html.label [ Html.Styled.Attributes.for "falsecb", class "pl-4 hover:underline" ] [ text "Does not exist" ]
+                                ]
+                            ]
+                        , div [] <|
+                            [ View.button
+                                { message = nextTrialMsg
                                 , isDisabled = False
-                                , txt = "Check my answer"
+                                , txt = "Next Item"
                                 }
+                            ]
                         ]
 
                 Nothing ->
@@ -98,18 +104,18 @@ view exp infos optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTr
             text "I'm over"
 
 
-type CU2Msg
+type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
-    | UserClickedRadioButton String
     | ServerRespondedWith (Result Http.Error (List Trial))
     | UserClickedStartIntro (List Trial)
     | UserClickedStartMain (List Trial)
+    | UserChangedInput String
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
 getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "SpellingLvl2" msgHandler decodeTranslationInput
+    Data.getTrialsFromServer_ "yes_no" "all" msgHandler decodeTranslationInput
 
 
 decodeTranslationInput : Decoder (List Trial)
@@ -117,16 +123,9 @@ decodeTranslationInput =
     let
         decoder =
             Decode.succeed Trial
-                |> required "UID" string
-                |> required "Word_Text" string
-                |> optional "Audio_Understanding" Data.decodeAudioFiles (Data.AudioFile "" "")
-                |> required "CU_Lvl1_Context" string
-                |> required "CU_Lvl2_target" string
-                |> required "CU_Lvl2_Distractor_1" string
-                |> required "CU_Lvl2_Distractor_2" string
-                |> required "CU_Lvl2_Distractor_3" string
-                |> required "Feedback_CU_Lvl2" string
-                |> Data.decodeBool "isTraining"
+                |> required "uid" string
+                |> required "word" string
+                |> Data.decodeBool "exists"
     in
     Data.decodeRecords decoder
 
@@ -138,20 +137,16 @@ initState =
 
 defaultTrial : Trial
 defaultTrial =
-    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" False
+    { uid = ""
+    , word = "String"
+    , exists = False
+    }
 
 
 type alias Trial =
     { uid : String
-    , writtenWord : String
-    , audioSentence : Data.AudioFile
-    , context : String
-    , target : String
-    , distractor1 : String
-    , distractor2 : String
-    , distractor3 : String
-    , feedback : String
-    , isTraining : Bool
+    , word : String
+    , exists : Bool
     }
 
 

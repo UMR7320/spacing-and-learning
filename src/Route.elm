@@ -19,8 +19,12 @@ type Route
     | Synonym
     | LogIn
     | SpellingLevel1
+    | Spelling3
     | CULevel2
     | CU1
+    | CU3
+    | YN
+    | Presentation
 
 
 type Level
@@ -43,8 +47,12 @@ parser =
         , map Acceptability (s "acceptability")
         , map LogIn (s "login")
         , map SpellingLevel1 (s "spelling")
+        , map Spelling3 (s "spelling3")
         , map CULevel2 (s "cu-lvl2")
         , map CU1 (s "cu1")
+        , map CU3 (s "cu3")
+        , map YN (s "yn")
+        , map Presentation (s "presentation")
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)

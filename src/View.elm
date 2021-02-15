@@ -2,6 +2,7 @@ module View exposing
     ( button
     , container
     , floatingLabel
+    , fromMarkdown
     , header
     , keyValue
     , navIn
@@ -9,7 +10,6 @@ module View exposing
     , notFound
     , pct
     , radio
-    , renderTask
     , sentenceInSynonym
     , shuffledOptions
     , simpleAudioPlayer
@@ -43,61 +43,8 @@ import Html.Styled.Attributes
         )
 import Html.Styled.Events exposing (onClick)
 import Icons
+import Markdown
 import PsychTask
-
-
-renderTask :
-    { task : PsychTask.Task t s
-    , infos : Maybe ExperimentInfo.Task
-    , optionsOrder : Maybe (List comparable)
-    , nextTrialMsg : msg
-    , userClickedAudio : Maybe (String -> msg)
-    , radioMsg : Maybe (String -> msg)
-    , toggleFeedbackMsg : msg
-    , startMainMsg : List t -> msg
-    , inputChangedMsg : Maybe (String -> msg)
-    }
-    -> List (Html msg)
-    -> List (Html msg)
-    -> List (Html msg)
-    -> Html msg
-renderTask { task, infos, startMainMsg } intro main error =
-    case ( task, infos ) of
-        ( _, Nothing ) ->
-            div [] error
-
-        ( PsychTask.NotStartedYet, Just info ) ->
-            div [] [ text "loading" ]
-
-        ( PsychTask.Intr { trainingTrials, mainTrials, current, state, feedback, history }, Just info ) ->
-            case current of
-                Just trial ->
-                    div [] intro
-
-                Nothing ->
-                    div []
-                        [ text "Intro is over"
-                        , button
-                            { message = startMainMsg mainTrials
-                            , isDisabled = False
-                            , txt = "Start"
-                            }
-                        ]
-
-        ( PsychTask.IntroOver, Just info ) ->
-            text "L'entrainement est fini"
-
-        ( PsychTask.Main { mainTrials, current, state, feedback, history }, Just info ) ->
-            case current of
-                Just trial ->
-                    div []
-                        main
-
-                Nothing ->
-                    text info.end
-
-        ( PsychTask.Over, Just info ) ->
-            text "I'm over"
 
 
 shuffledOptions state fb radioMsg trial optionsOrder =
@@ -393,6 +340,10 @@ radio value isChecked isCorrect feedbackMode msg =
         ]
 
 
+fromMarkdown =
+    fromUnstyled << Markdown.toHtml []
+
+
 floatingLabel : String -> String -> (String -> msg) -> Bool -> Html msg
 floatingLabel stim val msg givenIsFeedback =
     Html.Styled.div
@@ -453,6 +404,7 @@ tooltip text_ =
                     ]
                 ]
             ]
+        , Html.Styled.Attributes.class "h-12 w-12"
         ]
         [ Html.Styled.div
             [ Html.Styled.Attributes.class "tooltip__content"
