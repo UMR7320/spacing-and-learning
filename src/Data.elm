@@ -41,7 +41,8 @@ getTrialsFromServer_ baseName viewName callbackMsg decoder =
         }
 
 
-decodeBool =
+decodeBool : String -> Decoder (Bool -> b) -> Decoder b
+decodeBool fieldname =
     let
         stringToBoolDecoder : String -> Decode.Decoder Bool
         stringToBoolDecoder str =
@@ -52,7 +53,7 @@ decodeBool =
                 _ ->
                     Decode.succeed False
     in
-    custom (Decode.field "isTraining" Decode.string |> Decode.andThen stringToBoolDecoder)
+    custom (Decode.field fieldname Decode.string |> Decode.andThen stringToBoolDecoder)
 
 
 sendUserData : Http.Body -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
