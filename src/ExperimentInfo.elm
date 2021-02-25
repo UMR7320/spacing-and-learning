@@ -1,10 +1,10 @@
 module ExperimentInfo exposing (..)
 
 import Data
+import Dict
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (custom, optional, required)
-import Url.Builder
 
 
 getInfos : (Result Http.Error (List Task) -> msg) -> Cmd msg
@@ -60,6 +60,29 @@ type alias Description =
     String
 
 
+toDict newInfos =
+    newInfos
+        |> List.map
+            (\info ->
+                ( info.uid
+                , { uid = info.uid
+                  , session = info.session
+                  , type_ = info.type_
+                  , name = info.name
+                  , url = info.url
+                  , description = info.description
+                  , instructions = info.instructions
+                  , instructions_short = info.instructions_short
+                  , end = info.end
+                  , feedback_correct = info.feedback_correct
+                  , feedback_incorrect = info.feedback_incorrect
+                  , trainingWheel = info.trainingWheel
+                  }
+                )
+            )
+        |> Dict.fromList
+
+
 type alias Task =
     { uid : String
     , session : Session
@@ -72,6 +95,7 @@ type alias Task =
     , feedback_correct : String
     , feedback_incorrect : String
     , end : String
+    , trainingWheel : String
     }
 
 
@@ -124,5 +148,22 @@ decode =
                 |> required "feedback_correct" Decode.string
                 |> required "feedback_incorrect" Decode.string
                 |> required "End" Decode.string
+                |> optional "trainingWheels" Decode.string "Missing training wheel"
     in
     Data.decodeRecords decoder
+
+
+getRecords =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "tasks"
+                , view_ = "allTasksGrid"
+                }
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decode
+        , timeout = Just 5000
+        }

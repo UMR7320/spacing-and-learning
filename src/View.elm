@@ -1,20 +1,26 @@
 module View exposing
     ( button
     , container
+    , end
     , floatingLabel
     , fromMarkdown
+    , genericNeutralFeedback
+    , genericSingleChoiceFeedback
     , header
+    , introToMain
     , keyValue
     , navIn
     , navOut
+    , navigationButton
     , notFound
     , pct
+    , play
     , radio
     , sentenceInSynonym
     , shuffledOptions
     , simpleAudioPlayer
     , tooltip
-    , viewFeedbackInSingleChoice
+    , trainingWheelsGeneric
     , viewInstructions
     , viewQuestion
     , viewTraining
@@ -43,8 +49,9 @@ import Html.Styled.Attributes
         )
 import Html.Styled.Events exposing (onClick)
 import Icons
+import Logic
 import Markdown
-import PsychTask
+import String.Interpolate exposing (interpolate)
 
 
 shuffledOptions state fb radioMsg trial optionsOrder =
@@ -76,6 +83,37 @@ shuffledOptions state fb radioMsg trial optionsOrder =
     ordoredOptions
 
 
+end endInfo saveDataMsg =
+    div [ class "flex flex-col" ]
+        [ h2 [] [ text "Congrats " ]
+        , text endInfo
+        , button
+            { message = saveDataMsg
+            , isDisabled = False
+            , txt = "Save your data"
+            }
+        ]
+
+
+play msg url =
+    div [ class "h-8 w-8 pt-4", Html.Styled.Events.onClick (msg url) ] [ fromUnstyled <| Icons.music ]
+
+
+navigationButton toggleFeedbackMsg nextTrialMsg feedback =
+    button <|
+        if not feedback then
+            { message = toggleFeedbackMsg
+            , txt = "Check my answer"
+            , isDisabled = False
+            }
+
+        else
+            { message = nextTrialMsg
+            , txt = "Next item "
+            , isDisabled = False
+            }
+
+
 viewQuestion : Int -> { a | target : String } -> String -> Html msg
 viewQuestion trialn trial instructions =
     h3 []
@@ -86,11 +124,12 @@ viewQuestion trialn trial instructions =
         ]
 
 
-viewFeedbackInSingleChoice : Bool -> { a | userAnswer : String } -> { b | target : String } -> Html msg
-viewFeedbackInSingleChoice isVisible state trial =
+
+{--viewFeedbackInSingleChoice : Bool -> { a | userAnswer : String } -> { b | target : String } -> Html msg
+viewFeedbackInSingleChoice isVisible state trial  =
     p
         [ class
-            ("font-medium py-4 w-full"
+            ("font-medium py-4 w-full text-white"
                 ++ " "
                 ++ (if isVisible then
                         "visible"
@@ -101,13 +140,88 @@ viewFeedbackInSingleChoice isVisible state trial =
             )
         ]
         (if state.userAnswer == trial.target then
-            [ text "✔️ Correct Answer ! " ]
+            [ text <| "✔️ " ++ String.Interpolate.interpolate pattern_ variables ]
 
          else
             [ text "❌ The correct definition is : "
             , span [ class "font-medium italic" ] [ text trial.target ]
             ]
-        )
+    --}
+
+
+genericSingleChoiceFeedback : { isVisible : Bool, userAnswer : String, target : String, feedback_Correct : ( String, List String ), feedback_Incorrect : ( String, List String ), button : Html msg } -> Html msg
+genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
+    div
+        [ class
+            ("max-w-xl w-full rounded-md text-center object-center  mb-8 "
+                ++ (if data.isVisible && data.userAnswer == data.target then
+                        "bg-green-500"
+
+                    else if data.isVisible && data.userAnswer /= data.target then
+                        "bg-red-500"
+
+                    else if data.isVisible == False then
+                        ""
+
+                    else
+                        ""
+                   )
+            )
+        ]
+        [ p
+            [ class
+                ("font-medium py-4 w-full text-white"
+                    ++ " "
+                    ++ (if data.isVisible then
+                            "visible"
+
+                        else
+                            "invisible"
+                       )
+                )
+            ]
+            (if data.userAnswer == data.target then
+                [ text <| "✔️ " ++ String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
+
+             else
+                [ text <| "❌ " ++ String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
+                ]
+            )
+        , div [ class "p-4" ] [ data.button ]
+        ]
+
+
+genericNeutralFeedback : { isVisible : Bool, feedback_Correct : ( String, List String ), button : Html msg } -> Html msg
+genericNeutralFeedback ({ feedback_Correct } as data) =
+    div
+        [ class
+            ("max-w-xl w-full rounded-md text-center object-center  mb-8 "
+                ++ (if data.isVisible then
+                        "bg-indigo-800"
+
+                    else if data.isVisible == False then
+                        ""
+
+                    else
+                        ""
+                   )
+            )
+        ]
+        [ p
+            [ class
+                ("font-medium py-4 w-full text-white"
+                    ++ " "
+                    ++ (if data.isVisible then
+                            "visible"
+
+                        else
+                            "invisible"
+                       )
+                )
+            ]
+            [ fromMarkdown (String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct)) ]
+        , div [ class "p-4" ] [ data.button ]
+        ]
 
 
 
@@ -124,7 +238,7 @@ viewInstructions instructions =
     div [ class "flex flex-col" ]
         [ h2 [ class "font-bold" ] [ text "Instructions" ]
         , p [ class "pt-8 pb-8 font-medium" ]
-            [ pre [] [ text instructions ]
+            [ pre [] [ fromMarkdown instructions ]
             ]
         , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
         ]
@@ -143,6 +257,20 @@ trainingWheels trialn radical target =
                     ]
                 , span [] [ text "Type it here and you're good to go!" ]
                 ]
+    in
+    case trialn of
+        0 ->
+            helpSentence
+
+        _ ->
+            div [] []
+
+
+trainingWheelsGeneric : Int -> String -> List String -> Html msg
+trainingWheelsGeneric trialn pattern_ variables =
+    let
+        helpSentence =
+            div [ class "flex flex-col pt-4 italic text-xl" ] [ p [] [ text <| interpolate pattern_ variables ] ]
     in
     case trialn of
         0 ->
@@ -337,6 +465,19 @@ radio value isChecked isCorrect feedbackMode msg =
                 []
             , span [ class "pl-4 " ] [ text value ]
             ]
+        ]
+
+
+introToMain : msg -> Html msg
+introToMain msg =
+    div [ class "flex flex-col" ]
+        [ h2 [] [ text "The Training is Over 👍️ " ]
+        , text "Now you understand the activity, let's try our target words."
+        , button
+            { message = msg
+            , txt = "Start"
+            , isDisabled = False
+            }
         ]
 
 

@@ -1,64 +1,128 @@
 module Route exposing
-    ( Route(..)
+    ( PosttestTask(..)
+    , PretestTask(..)
+    , Route(..)
+    , Session1Task(..)
+    , Session2Task(..)
+    , Session3Task(..)
     , fromUrl
     )
 
 import Url
-import Url.Parser as Parser exposing ((</>), Parser, int, map, oneOf, s, top)
+import Url.Parser as Parser exposing ((</>), Parser, int, map, oneOf, s, string, top)
 
 
 type Route
-    = ExperimentStart
-    | Home
-    | Meaning
-    | Translation
-    | Scrabble
-    | CloudWords
-    | Acceptability
+    = Home
     | NotFound
-    | Synonym
-    | LogIn
+    | Pretest PretestTask
+    | Session1 Session1Task
+    | AuthenticatedSession2 UserId Session2Task
+    | AuthenticatedSession3 UserId Session3Task
+    | Posttest PosttestTask
+
+
+type alias UserId =
+    String
+
+
+type Session1Task
+    = Meaning
     | SpellingLevel1
-    | Spelling3
-    | CULevel2
-    | CU1
-    | CU3
-    | YN
     | Presentation
+    | CU1
 
 
-type Level
-    = Level1
-    | Level2
-    | Level3
+type Session2Task
+    = Translation
+    | Scrabble
+    | CULevel2
+
+
+type PretestTask
+    = YN
+
+
+
+--| Acceptability
+
+
+type PosttestTask
+    = CloudWords
+
+
+type Session3Task
+    = CU3
+    | Spelling3
+    | Synonym
 
 
 parser : Parser (Route -> a) a
 parser =
     oneOf
-        [ map ExperimentStart top
-        , map Home (s "index.html")
-        , map Scrabble (s "scrabble")
-        , map ExperimentStart (s "start")
-        , map Meaning (s "meaning")
-        , map Translation (s "translation")
-        , map CloudWords (s "cloudwords")
-        , map Synonym (s "synonym")
-        , map Acceptability (s "acceptability")
-        , map LogIn (s "login")
-        , map SpellingLevel1 (s "spelling")
-        , map Spelling3 (s "spelling3")
-        , map CULevel2 (s "cu-lvl2")
-        , map CU1 (s "cu1")
-        , map CU3 (s "cu3")
-        , map YN (s "yn")
-        , map Presentation (s "presentation")
+        [ map Home top
+        , map Pretest
+            (s "pretest"
+                </> oneOf
+                        [ map YN (s "yesno-task") ]
+            )
+        , map Pretest
+            (s "posttest"
+                </> oneOf
+                        [ map YN (s "cloud-words") ]
+            )
+        , map Session1
+            (s "session1"
+                </> oneOf
+                        [ map Meaning (s "meaning")
+                        , map SpellingLevel1 (s "spelling")
+                        , map Presentation (s "presentation")
+                        , map CU1 (s "context-understanding")
+                        ]
+            )
+        , map AuthenticatedSession2
+            (s "user"
+                </> string
+                </> s "session2"
+                </> oneOf
+                        [ map Scrabble (s "spelling")
+                        , map Translation (s "translation")
+                        , map CULevel2 (s "context-understanding")
+                        ]
+            )
+        , map AuthenticatedSession3
+            (s "user"
+                </> string
+                </> s "session3"
+                </> oneOf
+                        [ map CU3 (s "context-understanding")
+                        , map Spelling3 (s "spelling")
+                        , map Synonym (s "synonym")
+                        ]
+            )
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)
         --  , map BlogQuery (s "blog" <?> Query.string "q")
         --  Learn more: https://guide.elm-lang.org/webapps/url_parsing.html
         ]
+
+
+
+--translationPath : Parser (String -> a) a
+
+
+translationPath =
+    s "user" </> string |> map User
+
+
+type alias User =
+    { userId : String }
+
+
+
+--userAndTask : a -> b -> c -> d -> e -> f -> g -> h -> i -> Url.Url -> Route
+--spacing-and-learning.netlify.app/user/userId/task/scrabble
 
 
 fromUrl : Url.Url -> Route

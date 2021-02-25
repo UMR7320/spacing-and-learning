@@ -1,8 +1,6 @@
-module Icons exposing (helpCircle, music)
+module Icons exposing (..)
 
 import Html exposing (Html)
-import Html.Attributes
-import Html.Events
 import Svg exposing (Svg, svg)
 import Svg.Attributes exposing (..)
 
@@ -39,4 +37,18 @@ music =
         [ Svg.path [ d "M9 18V5l12-2v13" ] []
         , Svg.circle [ cx "6", cy "18", r "3" ] []
         , Svg.circle [ cx "18", cy "16", r "3" ] []
+        ]
+
+
+chevronRight : Html msg
+chevronRight =
+    svgFeatherIcon "chevron-right"
+        [ Svg.polyline [ points "9 18 15 12 9 6" ] []
+        ]
+
+
+chevronDown : Html msg
+chevronDown =
+    svgFeatherIcon "chevron-down"
+        [ Svg.polyline [ points "6 9 12 15 18 9" ] []
         ]

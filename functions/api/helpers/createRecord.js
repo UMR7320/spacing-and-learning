@@ -10,9 +10,9 @@ module.exports = async (event) => {
   const fields = JSON.parse(event.body);
   try {
     const base = Airtable.base(event.queryStringParameters.app);
-    const createdRecord = await base(event.queryStringParameters.base).create([
-      { fields },
-    ]);
+    const createdRecord = await base(event.queryStringParameters.base).create(
+      fields
+    );
     const formattedRecord = createdRecord.map((datum) => ({
       id: datum.id,
       ...datum.fields,
