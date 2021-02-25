@@ -1,9 +1,121 @@
 module Data exposing (..)
 
 import Http
-import Json.Decode as Decode exposing (Decoder, string)
-import Json.Decode.Pipeline exposing (custom, optional, required)
+import Json.Decode as Decode exposing (..)
+import Json.Decode.Pipeline exposing (custom)
+import Json.Encode as Encode
+import Process
+import Task
+import Task.Parallel as Para
 import Url.Builder
+
+
+splitIn : Int -> List a -> List (List a)
+splitIn k xs =
+    if k == 0 then
+        [ [] ]
+
+    else if k < 0 then
+        []
+
+    else if List.length xs > k then
+        List.take k xs :: splitIn k (List.drop k xs)
+
+    else
+        [ xs ]
+
+
+{--}
+sendInBatch : (List history -> Encode.Value) -> Decoder id -> String -> String -> List history -> Task.Task Http.Error (List id)
+sendInBatch historyEncoder callbackDecoder taskId userId history =
+    let
+        chuncks =
+            splitIn 10 history
+
+        fieldsToUpdate =
+            Encode.object [ ( "tasks", Encode.list Encode.string [ taskId ] ) ]
+    in
+    chuncks
+        |> List.map
+            (\sublist ->
+                Process.sleep 200
+                    |> Task.andThen
+                        (\_ -> postRecordsBatch (Http.jsonBody <| historyEncoder sublist) callbackDecoder)
+            )
+        |> (::)
+            (updateUserCompletedTasks
+                (Http.jsonBody <|
+                    Encode.object
+                        [ ( "id", Encode.string userId )
+                        , ( "fields", fieldsToUpdate )
+                        ]
+                )
+                callbackDecoder
+            )
+        |> Task.sequence
+
+
+
+--|> Task.map List.concat
+--}
+
+
+postRecordsBatch : Http.Body -> Decoder id -> Task.Task Http.Error id
+postRecordsBatch payload decode =
+    Http.task
+        { method = "POST"
+        , headers = []
+        , url =
+            buildQuery
+                { app = apps.spacing
+                , base = "output"
+                , view_ = "all"
+                }
+        , body = payload
+        , resolver = Http.stringResolver <| handleJsonResponse <| decode
+        , timeout = Just 5000
+        }
+
+
+updateUserCompletedTasks : Http.Body -> Decoder id -> Task.Task Http.Error id
+updateUserCompletedTasks payload decode =
+    Http.task
+        { method = "PATCH"
+        , headers = []
+        , url =
+            buildQuery
+                { app = apps.spacing
+                , base = "users"
+                , view_ = "all"
+                }
+        , body = payload
+        , resolver = Http.stringResolver <| handleJsonResponse <| decode
+        , timeout = Just 5000
+        }
+
+
+handleJsonResponse : Decoder a -> Http.Response String -> Result Http.Error a
+handleJsonResponse decoder response =
+    case response of
+        Http.BadUrl_ url ->
+            Err (Http.BadUrl url)
+
+        Http.Timeout_ ->
+            Err Http.Timeout
+
+        Http.BadStatus_ { statusCode } _ ->
+            Err (Http.BadStatus statusCode)
+
+        Http.NetworkError_ ->
+            Err Http.NetworkError
+
+        Http.GoodStatus_ _ body ->
+            case Decode.decodeString decoder body of
+                Err _ ->
+                    Err (Http.BadBody body)
+
+                Ok result ->
+                    Ok result
 
 
 buildErrorMessage : Http.Error -> String
