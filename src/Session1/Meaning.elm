@@ -4,7 +4,6 @@ import Browser
 import Css exposing (visibility)
 import Data exposing (decodeRecords)
 import Dict
-import Experiment.Experiment as E
 import ExperimentInfo exposing (Task)
 import Html
 import Html.Styled
@@ -30,10 +29,8 @@ import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Progressbar
-import Session3.Synonym as Synonym
 import String.Interpolate exposing (interpolate)
 import Url exposing (Url)
-import Url.Builder
 import View
 
 
@@ -115,15 +112,13 @@ type alias State =
 viewQuestion word trialn =
     h3 []
         [ p []
-            [ text <| String.fromInt (trialn + 1) ++ ". "
-            , span [ class "italic" ] [ text word ]
+            [ span [ class "italic" ] [ text word ]
             ]
         ]
 
 
 view :
     { task : Logic.Task Trial State
-    , infos : Maybe ExperimentInfo.Task
     , radioMsg : String -> msg
     , toggleFeedbackMsg : msg
     , nextTrialMsg : msg
@@ -144,58 +139,40 @@ view task =
             case data.current of
                 Just trial ->
                     View.viewTraining data.infos.instructions
-                        [ p [ class "col-start-2 col-span-4" ] [ viewQuestion trial.writtenWord (List.length data.history) ]
-                        , div [ class "p-2 col-start-2 col-span-4" ]
-                            [ div
-                                [ class "pt-6 max-w-xl ", disabled data.feedback ]
-                              <|
-                                View.shuffledOptions
-                                    data.state
-                                    data.feedback
-                                    task.radioMsg
-                                    trial
-                                    task.optionsOrder
+                        [ p [] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.writtenWord, View.bold trial.target ] ]
+                        , p [] [ viewQuestion trial.writtenWord (List.length data.history) ]
+                        , div
+                            [ class "pt-6 max-w-xl ", disabled data.feedback ]
+                          <|
+                            View.shuffledOptions
+                                data.state
+                                data.feedback
+                                task.radioMsg
+                                trial
+                                task.optionsOrder
+                        , div [] <|
+                            [ View.genericSingleChoiceFeedback
+                                { isVisible = data.feedback
+                                , userAnswer = data.state.userAnswer
+                                , target = trial.target
+                                , feedback_Correct = ( trial.feedbackIncorrect, [] )
+                                , feedback_Incorrect = ( trial.feedbackCorrect, [] )
+                                , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                                }
                             ]
-                        , div [ class "col-start-2 col-span-4" ] <|
-                            if data.feedback then
-                                [ if data.state.userAnswer /= trial.target then
-                                    View.fromMarkdown trial.feedbackCorrect
-
-                                  else
-                                    View.fromMarkdown trial.feedbackIncorrect
-                                , View.button
-                                    { message = task.nextTrialMsg
-                                    , isDisabled = False
-                                    , txt = "Next Training Item"
-                                    }
-                                ]
-
-                            else
-                                [ View.button
-                                    { message = task.toggleFeedbackMsg
-                                    , isDisabled = False
-                                    , txt = "Check my answer"
-                                    }
-                                ]
                         ]
 
                 Nothing ->
-                    div [ class "flex flex-col" ]
-                        [ h2 [] [ text "The Training is Over 👍️ " ]
-                        , text "Now you understand the activity, let's try our target words."
-                        , View.button
-                            { message = task.startMainMsg data.mainTrials data.infos
-                            , txt = "Start"
-                            , isDisabled = False
-                            }
-                        ]
+                    View.introToMain (task.startMainMsg data.mainTrials data.infos)
 
         Logic.Main data ->
             case data.current of
                 Just trial ->
-                    div []
-                        [ p [ class "col-start-2 col-span-4" ] [ viewQuestion trial.writtenWord (List.length data.history) ]
-                        , div [ class "p-2 col-start-2 col-span-4" ]
+                    div [ class "container flex flex-col items-center justify-center w-full" ]
+                        [ Progressbar.progressBar data.history data.mainTrials
+                        , View.tooltip data.infos.instructions_short
+                        , p [ class "col-start-2 col-span-4" ] [ viewQuestion trial.writtenWord (List.length data.history) ]
+                        , div [ class "col-start-2 col-span-4" ]
                             [ div
                                 [ class "pt-6 max-w-xl ", disabled data.feedback ]
                               <|
@@ -207,30 +184,19 @@ view task =
                                     task.optionsOrder
                             ]
                         , div [ class "col-start-2 col-span-4" ] <|
-                            if data.feedback then
-                                [ if data.state.userAnswer /= trial.target then
-                                    View.fromMarkdown trial.feedbackCorrect
-
-                                  else
-                                    View.fromMarkdown trial.feedbackIncorrect
-                                , View.button
-                                    { message = task.nextTrialMsg
-                                    , isDisabled = False
-                                    , txt = "Next Item"
-                                    }
-                                ]
-
-                            else
-                                [ View.button
-                                    { message = task.toggleFeedbackMsg
-                                    , isDisabled = False
-                                    , txt = "Check my answer"
-                                    }
-                                ]
+                            [ View.genericSingleChoiceFeedback
+                                { isVisible = data.feedback
+                                , userAnswer = data.state.userAnswer
+                                , target = trial.target
+                                , feedback_Correct = ( trial.feedbackIncorrect, [] )
+                                , feedback_Incorrect = ( trial.feedbackCorrect, [] )
+                                , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                                }
+                            ]
                         ]
 
                 Nothing ->
-                    View.end data.infos.end task.saveDataMsg
+                    View.end data.infos.end task.saveDataMsg "spelling"
 
         Logic.NotStarted ->
             div [] [ text "I did not start yet." ]

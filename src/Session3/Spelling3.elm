@@ -1,6 +1,7 @@
 module Session3.Spelling3 exposing (..)
 
 import Data
+import Dict
 import ExperimentInfo exposing (Task)
 import Html.Styled as Html exposing (Html, div, fromUnstyled, h1, p, span, text)
 import Html.Styled.Attributes exposing (class)
@@ -13,8 +14,19 @@ import Logic
 import View
 
 
-view : Logic.Task Trial State -> { e | userClickedAudio : String -> msg, toggleFeedback : msg, nextTrialMsg : msg, startMainMsg : List Trial -> ExperimentInfo.Task -> msg, userChangedInput : String -> msg } -> Html msg
-view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userChangedInput } =
+view :
+    Logic.Task Trial State
+    ->
+        { e
+            | userClickedAudio : String -> msg
+            , toggleFeedback : msg
+            , nextTrialMsg : msg
+            , startMainMsg : List Trial -> ExperimentInfo.Task -> msg
+            , userChangedInput : String -> msg
+            , saveData : msg
+        }
+    -> Html msg
+view exp { userClickedAudio, toggleFeedback, nextTrialMsg, saveData, startMainMsg, userChangedInput } =
     case exp of
         Logic.NotStarted ->
             div [] [ text "experiment did not start yet" ]
@@ -24,21 +36,17 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userCha
                 Just trial ->
                     div []
                         [ View.viewTraining data.infos.instructions
-                            [ div [ class "col-start-2 col-span-4" ] [ View.trainingWheelsGeneric (List.length history) data.infos.trainingWheel [] ]
-                            , div [ class "h-12 w-12 col-start-2 col-span-4", Html.Styled.Events.onClick (userClickedAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
-                            , div [ class "col-start-2 col-span-4" ]
-                                [ View.floatingLabel "" state.userAnswer userChangedInput feedback
-                                ]
-                            , div [ class "col-start-2 col-span-4" ] <|
-                                [ View.genericSingleChoiceFeedback
-                                    { isVisible = feedback
-                                    , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
-                                    , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.writtenWord ] )
-                                    , userAnswer = state.userAnswer |> String.trim |> String.toLower
-                                    , target = trial.writtenWord
-                                    , button = View.navigationButton toggleFeedback nextTrialMsg feedback
-                                    }
-                                ]
+                            [ View.trainingWheelsGeneric (List.length history) data.infos.trainingWheel []
+                            , View.audioButton userClickedAudio trial.audioSentence.url "word"
+                            , div [ class "p-8" ] [ View.floatingLabel "" state.userAnswer userChangedInput feedback ]
+                            , View.genericSingleChoiceFeedback
+                                { isVisible = feedback
+                                , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
+                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.writtenWord ] )
+                                , userAnswer = state.userAnswer |> String.trim |> String.toLower
+                                , target = trial.writtenWord
+                                , button = View.navigationButton toggleFeedback nextTrialMsg feedback
+                                }
                             ]
                         ]
 
@@ -62,7 +70,7 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userCha
                         ]
 
                 Nothing ->
-                    div [] [ h1 [] [ text "Congrats 🎉️" ], p [] [ text data.infos.end ] ]
+                    View.end data.infos.end saveData "context-understanding"
 
         Logic.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
@@ -77,6 +85,8 @@ type Msg
     | UserClickedStartIntro (List Trial)
     | UserClickedStartMain (List Trial) Task
     | UserChangedInput String
+    | UserClickedSaveData
+    | ServerRespondedWithLastRecords (Result Http.Error (List String))
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -126,7 +136,7 @@ type alias State =
 
 
 taskId =
-    "recf5HANE632FLKbc"
+    "recJucOXEZzJj6Uui"
 
 
 getRecords =
@@ -143,3 +153,15 @@ getRecords =
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
         , timeout = Just 5000
         }
+
+
+start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start info trials =
+    let
+        relatedInfos =
+            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+    in
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState

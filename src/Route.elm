@@ -1,5 +1,6 @@
 module Route exposing
-    ( PosttestTask(..)
+    ( AcceptabilityRoute(..)
+    , PosttestTask(..)
     , PretestTask(..)
     , Route(..)
     , Session1Task(..)
@@ -16,9 +17,10 @@ type Route
     = Home
     | NotFound
     | Pretest PretestTask
-    | Session1 Session1Task
+    | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
+    | Pilote UserId AcceptabilityRoute
     | Posttest PosttestTask
 
 
@@ -31,6 +33,7 @@ type Session1Task
     | SpellingLevel1
     | Presentation
     | CU1
+    | TopSession1
 
 
 type Session2Task
@@ -41,6 +44,14 @@ type Session2Task
 
 type PretestTask
     = YN
+    | GeneralInfos
+    | EmailSent
+    | PiloteInfos --AcceptabilityRoute
+
+
+type AcceptabilityRoute
+    = AcceptabilityInstructions
+    | AcceptabilityStart
 
 
 
@@ -64,7 +75,21 @@ parser =
         , map Pretest
             (s "pretest"
                 </> oneOf
-                        [ map YN (s "yesno-task") ]
+                        [ map YN (s "yesno-task")
+                        , map GeneralInfos (s "informations")
+                        , map EmailSent (s "email-sent")
+                        , map PiloteInfos (s "pilote-informations")
+                        ]
+            )
+        , map Pilote
+            (s "user"
+                </> string
+                </> s "pilote"
+                </> s "acceptability"
+                </> oneOf
+                        [ map AcceptabilityInstructions (s "instructions")
+                        , map AcceptabilityStart (s "start")
+                        ]
             )
         , map Pretest
             (s "posttest"
@@ -72,12 +97,15 @@ parser =
                         [ map YN (s "cloud-words") ]
             )
         , map Session1
-            (s "session1"
+            (s "user"
+                </> string
+                </> s "session1"
                 </> oneOf
                         [ map Meaning (s "meaning")
                         , map SpellingLevel1 (s "spelling")
                         , map Presentation (s "presentation")
                         , map CU1 (s "context-understanding")
+                        , map TopSession1 top
                         ]
             )
         , map AuthenticatedSession2

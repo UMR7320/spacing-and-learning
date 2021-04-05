@@ -106,11 +106,34 @@ start info trials =
     let
         relatedInfos =
             Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+
+        nextTrial =
+            trials
+                |> List.filter .isTraining
+                |> List.head
     in
-    Logic.startIntro relatedInfos
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
+    case nextTrial of
+        Just x ->
+            Logic.startIntro relatedInfos
+                (List.filter .isTraining trials)
+                (List.filter (not << .isTraining) trials)
+                { initState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord }
+
+        Nothing ->
+            Logic.Err "I tried to initate the state with the first trial but I couldn't find a first trial. Please report this error."
+
+
+toItems : String -> List KeyedItem
+toItems string =
+    string
+        |> String.toList
+        |> List.map String.fromChar
+        |> toKeyedItem
+
+
+toKeyedItem : List String -> List ( String, String )
+toKeyedItem letters =
+    List.map (\( lett, rec ) -> ( "key-" ++ lett ++ String.fromInt rec, lett )) (dedupe letters)
 
 
 taskId =

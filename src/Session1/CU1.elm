@@ -11,6 +11,7 @@ import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
+import Progressbar
 import String.Interpolate exposing (interpolate)
 import View
 
@@ -21,6 +22,14 @@ import View
 
 taskId =
     "recsN8oyy3LIC8URx"
+
+
+paragraphWithInput pre userAnswer post =
+    p [ class "max-w-3xl text-lg p-4" ]
+        [ text pre
+        , span [ class "border-4 w-24 h-2 pl-4 pr-4 font-bold" ] [ text userAnswer ]
+        , text post
+        ]
 
 
 view :
@@ -59,32 +68,19 @@ view task =
                     in
                     div []
                         [ View.viewTraining data.infos.instructions
-                            [ p [ class "col-start-2 col-span-4 pt-4" ] [ text pre ]
-                            , div [ class "p-2 col-start-2 col-span-4 border-2 h-12" ] [ text data.state.userAnswer ]
-                            , p [ class "col-start-2 col-span-4" ] [ text post ]
-                            , div [ class "col-start-2 col-span-4" ] <| View.shuffledOptions data.state data.feedback task.radioMsg trial task.optionsOrder
+                            [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.target ]
+                            , paragraphWithInput pre data.state.userAnswer post
+                            , div [ class "w-full max-w-2xl" ] <| View.shuffledOptions data.state data.feedback task.radioMsg trial task.optionsOrder
                             , div [ class "col-start-2 col-span-4" ] <|
-                                if data.feedback then
-                                    [ text <|
-                                        if data.state.userAnswer == trial.target then
-                                            interpolate data.infos.feedback_correct [ trial.target, trial.definition ]
-
-                                        else
-                                            interpolate data.infos.feedback_incorrect [ trial.target, trial.definition ]
-                                    , View.button
-                                        { message = task.nextTrialMsg
-                                        , isDisabled = False
-                                        , txt = "Next Training Item"
-                                        }
-                                    ]
-
-                                else
-                                    [ View.button
-                                        { message = task.toggleFeedbackMsg
-                                        , isDisabled = False
-                                        , txt = "Check my answer"
-                                        }
-                                    ]
+                                [ View.genericSingleChoiceFeedback
+                                    { isVisible = data.feedback
+                                    , userAnswer = data.state.userAnswer
+                                    , target = trial.target
+                                    , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
+                                    , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
+                                    , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                                    }
+                                ]
                             ]
                         ]
 
@@ -106,45 +102,23 @@ view task =
                                 [] ->
                                     ( "defautpre", "defaultpOst" )
                     in
-                    div []
-                        [ text pre
-                        , div [ class "text-lg border-2 h-12 w-32 justify-center items-center" ] [ text data.state.userAnswer ]
-                        , text post
-                        , div [] <| View.shuffledOptions data.state data.feedback task.radioMsg trial task.optionsOrder
-                        , div [ class "col-start-2 col-span-4 flex flex-col" ] <|
-                            if data.feedback then
-                                [ text <|
-                                    if data.state.userAnswer == trial.target then
-                                        interpolate data.infos.feedback_correct [ trial.target, trial.definition ]
-
-                                    else
-                                        interpolate data.infos.feedback_incorrect [ trial.target, trial.definition ]
-                                , View.button
-                                    { message = task.nextTrialMsg
-                                    , isDisabled = False
-                                    , txt = "Next Item"
-                                    }
-                                ]
-
-                            else
-                                [ View.button
-                                    { message = task.toggleFeedbackMsg
-                                    , isDisabled = False
-                                    , txt = "Check my answer"
-                                    }
-                                ]
+                    div [ class "container flex flex-col w-full w-max-3xl items-center justify-center " ]
+                        [ Progressbar.progressBar data.history data.mainTrials
+                        , View.tooltip data.infos.instructions_short
+                        , paragraphWithInput pre data.state.userAnswer post
+                        , div [ class "w-full max-w-xl" ] <| View.shuffledOptions data.state data.feedback task.radioMsg trial task.optionsOrder
+                        , View.genericSingleChoiceFeedback
+                            { isVisible = data.feedback
+                            , userAnswer = data.state.userAnswer
+                            , target = trial.target
+                            , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
+                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
+                            , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                            }
                         ]
 
                 Nothing ->
-                    div [ class "flex flex-col" ]
-                        [ h2 [] [ text "Congrats " ]
-                        , text data.infos.end
-                        , View.button
-                            { message = task.userClickedSaveData
-                            , isDisabled = False
-                            , txt = "Save your data"
-                            }
-                        ]
+                    View.end data.infos.end task.userClickedSaveData "./"
 
         Logic.Loading ->
             text "Loading..."

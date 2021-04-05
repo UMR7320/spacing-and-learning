@@ -18,7 +18,14 @@ svgFeatherIcon className =
         , strokeWidth "2"
         , viewBox "0 0 24 24"
         , width "100%"
-        , class "cursor-pointer hover:opacity-75"
+        ]
+
+
+checkCircle : Html msg
+checkCircle =
+    svgFeatherIcon "check-circle"
+        [ Svg.path [ d "M22 11.08V12a10 10 0 1 1-5.93-9.14" ] []
+        , Svg.polyline [ points "22 4 12 14.01 9 11.01" ] []
         ]
 
 
@@ -33,10 +40,18 @@ helpCircle =
 
 music : Html msg
 music =
-    svgFeatherIcon "music"
-        [ Svg.path [ d "M9 18V5l12-2v13" ] []
-        , Svg.circle [ cx "6", cy "18", r "3" ] []
-        , Svg.circle [ cx "18", cy "16", r "3" ] []
+    svgFeatherIcon "play-circle"
+        [ Svg.circle [ cx "12", cy "12", r "10" ] []
+        , Svg.polygon [ points "10 8 16 12 10 16 10 8" ] []
+        ]
+
+
+xCircle : Html msg
+xCircle =
+    svgFeatherIcon "x-circle"
+        [ Svg.circle [ cx "12", cy "12", r "10" ] []
+        , Svg.line [ x1 "15", y1 "9", x2 "9", y2 "15" ] []
+        , Svg.line [ x1 "9", y1 "9", x2 "15", y2 "15" ] []
         ]
 
 

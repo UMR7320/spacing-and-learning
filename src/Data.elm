@@ -1,5 +1,6 @@
 module Data exposing (..)
 
+import Dict
 import Http
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (custom)
@@ -23,6 +24,46 @@ splitIn k xs =
 
     else
         [ xs ]
+
+
+tasksIds =
+    [ "rec9fDmVOpqDJktmQ"
+    , "recf5HANE632FLKbc"
+    , "recB3kUQW4jNTlou6"
+    , "recJOpE5pMTCHJOSV"
+    , "recSL8cthViyXRx8u"
+    , "recJucOXEZzJj6Uui"
+    , "recsN8oyy3LIC8URx"
+    , "recwxsmowpB18bpLj"
+    , "recFEtKbtuBSolHnI"
+    , "rec4LrrQtHVQqnHQp"
+    , "rechYdq4MyLcb2nRG"
+    , "recR8areYkKRvQ6lU"
+    , "reczQs5ZD6g1x5F29"
+    , "rec8eKMwCMFFtKVKD"
+    ]
+
+
+tasksLabels =
+    [ "Meaning"
+    , "Translation"
+    , "Synonym"
+    , "Spelling level 1"
+    , "Spelling level 2"
+    , "Spelling level 3"
+    , "Context Understanding level 1"
+    , "Context Understanding level 2"
+    , "Context Understanding level 3"
+    , "CloudWords"
+    , "YesNo task"
+    , "acceptability"
+    , "Pretest Sentence Completion"
+    , "Presentation"
+    ]
+
+
+tasks =
+    List.map2 Tuple.pair tasksLabels tasksIds |> Dict.fromList
 
 
 {--}

@@ -11,12 +11,58 @@ import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
+import Progressbar exposing (progressBar)
+import Session3.Synonym exposing (Msg(..))
 import String.Interpolate exposing (interpolate)
+import Task
 import View
 
 
+type Entry
+    = Definition
+    | Example
+    | Translation
 
---view : { a | task : Logic.Task t s, optionsOrder : Maybe (List comparable), nextTrialMsg : f, userClickedAudio : String -> f, radioMsg : String -> f, toggleFeedbackMsg : f, startMainMsg : List t -> f, inputChangedMsg : String -> f } -> Html msg
+
+viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
+viewEntry key { txt, elements } toggledEntries =
+    if Dict.get key toggledEntries |> Maybe.withDefault False then
+        elements |> List.map (\el -> div [ class "p-4" ] [ text el ]) |> div [ class "flex flex-col" ]
+
+    else
+        [] |> List.map text |> div []
+
+
+
+--entries : List String -> List String -> List String -> List ( String, { txt : String, elements : List String } )
+
+
+entries : List String -> List String -> List String -> (String -> msg) -> Dict String Bool -> List (Html msg)
+entries d e t msg toggledEntries =
+    let
+        arrow key =
+            if Dict.get key toggledEntries |> Maybe.withDefault False then
+                span [ class "text-lg font-bold" ] [ text "⌄" ]
+
+            else
+                span [ class "text-lg font-bold" ] [ text "›" ]
+    in
+    [ ( "definition"
+      , { txt = "Definition: "
+        , elements = d
+        }
+      )
+    , ( "example", { txt = "Example: ", elements = e } )
+    , ( "translation", { txt = "Translation: ", elements = List.filter ((/=) "missing") t } )
+    ]
+        |> List.map
+            (\( key, { txt, elements } as val ) ->
+                p [ class "flex flex-col", Html.Styled.Events.onClick (msg key) ]
+                    [ div [ class "text-lg hover:underline cursor-pointer" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
+                    , span [ class "p-2" ] [ viewEntry key val toggledEntries ]
+                    ]
+            )
+        |> List.intersperse sep
 
 
 view :
@@ -26,6 +72,7 @@ view :
     , userClickedAudio : String -> msg
     , startMainMsg : List Trial -> Task -> msg
     , userToggledElementOfEntry : String -> msg
+    , saveDataMsg : msg
     }
     -> Html msg
 view task =
@@ -42,113 +89,13 @@ view task =
         Logic.Intr data ->
             case data.current of
                 Just trial ->
-                    let
-                        viewEntry key val =
-                            if Dict.get key data.state.toggledEntries |> Maybe.withDefault False then
-                                text val
-
-                            else
-                                text ""
-
-                        arrow key =
-                            if Dict.get key data.state.toggledEntries |> Maybe.withDefault False then
-                                fromUnstyled <| Icons.chevronDown
-
-                            else
-                                fromUnstyled <| Icons.chevronRight
-
-                        entries =
-                            [ ( "Définition: ", trial.definition )
-                            , ( "Example: ", trial.example )
-                            , ( "1. Translation: ", trial.translation1 )
-                            , ( "2. Translation: ", trial.translation2 )
-                            ]
-                                |> List.map
-                                    (\( key, val ) ->
-                                        p [ class "flex flex-col", Html.Styled.Events.onClick (task.userToggledElementOfEntry key) ]
-                                            [ span [ class "cursor-pointer flex flex-row" ] [ div [ class "h-4 w-4" ] [ arrow key ], text key ]
-                                            , span [ class "p-2" ] [ viewEntry key val ]
-                                            ]
-                                    )
-                                |> List.intersperse sep
-                    in
-                    div []
-                        [ View.viewTraining data.infos.instructions
-                            [ div [ class "container items-center justify-center w-full flex flex-col" ]
-                                [ div [ class "pb-4 text-3xl font-bold flex flex-row" ]
-                                    [ text trial.text
-                                    , div
-                                        [ class "h-6 w-6"
-                                        , Html.Styled.Events.onClick (task.userClickedAudio trial.audio.url)
-                                        ]
-                                        [ fromUnstyled <| Icons.music ]
-                                    ]
-                                , div [] entries
-                                , div [ class "col-start-2 col-span-4" ]
-                                    [ View.button
-                                        { message = task.nextTrialMsg
-                                        , isDisabled = False
-                                        , txt = "Next Item"
-                                        }
-                                    ]
-                                ]
-                            ]
-                        ]
-
-                Nothing ->
-                    div []
-                        [ text "Intro is over"
-                        , View.button
-                            { message = task.startMainMsg data.mainTrials data.infos
-                            , isDisabled = False
-                            , txt = "Start"
-                            }
-                        ]
-
-        Logic.Main data ->
-            case data.current of
-                Just trial ->
-                    let
-                        viewEntry key val =
-                            if Dict.get key data.state.toggledEntries |> Maybe.withDefault False then
-                                text val
-
-                            else
-                                text ""
-
-                        arrow key =
-                            if Dict.get key data.state.toggledEntries |> Maybe.withDefault False then
-                                fromUnstyled <| Icons.chevronDown
-
-                            else
-                                fromUnstyled <| Icons.chevronRight
-
-                        entries =
-                            [ ( "Définition: ", trial.definition )
-                            , ( "Example: ", trial.example )
-                            , ( "1. Translation: ", trial.translation1 )
-                            , ( "2. Translation: ", trial.translation2 )
-                            ]
-                                |> List.map
-                                    (\( key, val ) ->
-                                        p [ class "flex flex-col", Html.Styled.Events.onClick (task.userToggledElementOfEntry key) ]
-                                            [ span [ class "cursor-pointer flex flex-row" ] [ div [ class "h-4 w-4" ] [ arrow key ], text key ]
-                                            , span [ class "p-2" ] [ viewEntry key val ]
-                                            ]
-                                    )
-                                |> List.intersperse sep
-                    in
-                    div [ class "flex flex-col" ]
-                        [ div [ class "pb-4 text-3xl font-bold flex flex-row" ]
+                    View.viewTraining data.infos.instructions
+                        [ div [ class <| "pb-4 pt-4 text-3xl font-bold flex flex-row" ]
                             [ text trial.text
-                            , div
-                                [ class "h-6 w-6"
-                                , Html.Styled.Events.onClick (task.userClickedAudio trial.audio.url)
-                                ]
-                                [ fromUnstyled <| Icons.music ]
                             ]
-                        , div [] entries
-                        , div [ class "col-start-2 col-span-4" ]
+                        , View.audioButton task.userClickedAudio trial.audio.url "Pronunciation"
+                        , div [ class "w-56 pt-8" ] <| entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] task.userToggledElementOfEntry data.state.toggledEntries
+                        , div [ class "pb-8" ]
                             [ View.button
                                 { message = task.nextTrialMsg
                                 , isDisabled = False
@@ -158,7 +105,30 @@ view task =
                         ]
 
                 Nothing ->
-                    text data.infos.end
+                    View.introToMain (task.startMainMsg data.mainTrials data.infos)
+
+        Logic.Main data ->
+            case data.current of
+                Just trial ->
+                    div [ class "flex flex-col items-center" ]
+                        [ progressBar data.history data.mainTrials
+                        , div [ class "pb-4 text-3xl font-bold flex flex-row" ]
+                            [ text trial.text
+                            ]
+                        , div [ class "w-1/3" ] <|
+                            View.audioButton task.userClickedAudio trial.audio.url "Pronunciation"
+                                :: entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] task.userToggledElementOfEntry data.state.toggledEntries
+                        , div [ class "" ]
+                            [ View.button
+                                { message = task.nextTrialMsg
+                                , isDisabled = False
+                                , txt = "Next Item"
+                                }
+                            ]
+                        ]
+
+                Nothing ->
+                    View.end data.infos.end task.saveDataMsg "meaning"
 
 
 type Msg
@@ -168,8 +138,9 @@ type Msg
     | UserToggleElementOfEntry String
 
 
+sep : Html msg
 sep =
-    div [ class "w-32 h-1 bg-gray-300 mt-4 mb-4" ] []
+    div [ class "w-32 h-1 mt-4 mb-4" ] []
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -187,13 +158,14 @@ decodeTranslationInput =
                 |> required "Definition" string
                 |> required "Example" string
                 |> required "Translation_1" string
-                |> optional "Translation_2" string "Missing translation 2"
+                |> optional "Translation_2" string "missing"
                 |> required "Word_Audio" Data.decodeAudioFiles
                 |> Data.decodeBool "isTraining"
     in
     Data.decodeRecords decoder
 
 
+getRecords : Task.Task Error (List Trial)
 getRecords =
     Http.task
         { method = "GET"
@@ -214,10 +186,9 @@ initState : State
 initState =
     State "DefaultUid"
         (Dict.fromList
-            [ ( "Définition: ", False )
-            , ( "Example: ", False )
-            , ( "1. Translation: ", False )
-            , ( "2. Translation: ", False )
+            [ ( "definition", False )
+            , ( "example", False )
+            , ( "translation", False )
             ]
         )
 
@@ -265,5 +236,6 @@ start info trials =
         initState
 
 
+taskId : String
 taskId =
     "rec8eKMwCMFFtKVKD"

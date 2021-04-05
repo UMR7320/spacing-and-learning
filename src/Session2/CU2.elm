@@ -12,6 +12,7 @@ import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Markdown
+import Progressbar exposing (progressBar)
 import Session1.CU1 exposing (CU1Msg(..))
 import View
 
@@ -32,28 +33,17 @@ view exp optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg
                 Just trial ->
                     div []
                         [ View.viewTraining data.infos.instructions
-                            [ div [ class "col-start-2 col-span-4 pt-8 pb-8" ]
-                                [ span [] [ text trial.context ]
-                                , div [ class "h-8 w-8 pt-4", Html.Styled.Events.onClick (userClickedAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
-                                ]
-                            , div [ class "col-start-2 col-span-4" ] <| View.shuffledOptions state feedback radioMsg trial optionsOrder
-                            , div [ class "col-start-2 col-span-4 pb-8" ] <|
-                                if feedback then
-                                    [ View.fromMarkdown trial.feedback
-                                    , View.button
-                                        { message = nextTrialMsg
-                                        , isDisabled = False
-                                        , txt = "Next Training Item"
-                                        }
-                                    ]
-
-                                else
-                                    [ View.button
-                                        { message = toggleFeedback
-                                        , isDisabled = False
-                                        , txt = "Check my answer"
-                                        }
-                                    ]
+                            [ Html.p [ class "p-4" ] [ text trial.context ]
+                            , View.audioButton userClickedAudio trial.audioSentence.url "dialog"
+                            , div [] <| View.shuffledOptions state feedback radioMsg trial optionsOrder
+                            , View.genericSingleChoiceFeedback
+                                { isVisible = feedback
+                                , userAnswer = state.userAnswer
+                                , target = trial.target
+                                , feedback_Correct = ( trial.feedback, [] )
+                                , feedback_Incorrect = ( trial.feedback, [] )
+                                , button = View.navigationButton toggleFeedback nextTrialMsg feedback
+                                }
                             ]
                         ]
 
@@ -63,31 +53,24 @@ view exp optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg
         Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
-                    div []
-                        [ View.fromMarkdown data.infos.instructions_short
-                        , span [ class "pb-4" ] [ text trial.context ]
-                        , div [ class "h-6 w-6", Html.Styled.Events.onClick (userClickedAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
+                    div [ class "flex flex-col w-full items-center" ]
+                        [ View.tooltip data.infos.instructions_short
+                        , progressBar history mainTrials
+                        , Html.p [ class "p-8 text-lg" ] [ text trial.context ]
+                        , View.audioButton userClickedAudio trial.audioSentence.url "dialog"
                         , div [ class "max-w-2xl pt-4" ] <| View.shuffledOptions state feedback radioMsg trial optionsOrder
-                        , if feedback then
-                            div []
-                                [ fromUnstyled <| Markdown.toHtml [] trial.feedback
-                                , View.button
-                                    { message = nextTrialMsg
-                                    , isDisabled = False
-                                    , txt = "Next Item"
-                                    }
-                                ]
-
-                          else
-                            View.button
-                                { message = toggleFeedback
-                                , isDisabled = False
-                                , txt = "Check my answer"
-                                }
+                        , View.genericSingleChoiceFeedback
+                            { isVisible = feedback
+                            , userAnswer = state.userAnswer
+                            , target = trial.target
+                            , feedback_Correct = ( trial.feedback, [] )
+                            , feedback_Incorrect = ( trial.feedback, [] )
+                            , button = View.navigationButton toggleFeedback nextTrialMsg feedback
+                            }
                         ]
 
                 Nothing ->
-                    View.end data.infos.end saveData
+                    View.end data.infos.end saveData "/"
 
 
 type CU2Msg

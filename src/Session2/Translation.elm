@@ -4,7 +4,6 @@ import Browser
 import Css exposing (visibility)
 import Data exposing (decodeRecords)
 import Dict
-import Experiment.Experiment as E
 import ExperimentInfo exposing (Task)
 import Html.Styled
     exposing
@@ -79,15 +78,6 @@ defaultTrial =
     }
 
 
-viewQuestion word trialn =
-    h3 []
-        [ p []
-            [ text <| String.fromInt (trialn + 1) ++ ". "
-            , span [ class "italic" ] [ text word ]
-            ]
-        ]
-
-
 type alias State =
     { uid : String
     , userAnswer : String
@@ -132,6 +122,30 @@ payload history =
     Encode.list encodeHistory history
 
 
+renderTask task trial data history allTrials =
+    div [ class "text-2xl w-1/2 p-2" ]
+        [ Progressbar.progressBar history allTrials
+        , View.fromMarkdown trial.question
+        , div
+            [ class "w-full max-w-1/3 pt-8", disabled data.feedback ]
+          <|
+            View.shuffledOptions
+                data.state
+                data.feedback
+                task.radioMsg
+                trial
+                task.optionsOrder
+        , View.genericSingleChoiceFeedback
+            { isVisible = data.feedback
+            , userAnswer = data.state.userAnswer
+            , target = trial.target
+            , feedback_Correct = ( data.infos.feedback_correct, [ trial.target ] )
+            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.target ] )
+            , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+            }
+        ]
+
+
 view :
     { task : Logic.Task Trial State
     , infos : Maybe ExperimentInfo.Task
@@ -149,29 +163,8 @@ view task =
             case data.current of
                 Just trial ->
                     View.viewTraining data.infos.instructions
-                        [ div [ class "col-start-2 col-span-4" ] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ trial.target ] ]
-                        , p [ class "col-start-2 col-span-4" ] [ View.fromMarkdown trial.question ]
-                        , div [ class "p-2 col-start-2 col-span-4" ]
-                            [ div
-                                [ class "pt-6 max-w-xl ", disabled data.feedback ]
-                              <|
-                                View.shuffledOptions
-                                    data.state
-                                    data.feedback
-                                    task.radioMsg
-                                    trial
-                                    task.optionsOrder
-                            ]
-                        , div [ class "col-start-2 col-span-4" ]
-                            [ View.genericSingleChoiceFeedback
-                                { isVisible = data.feedback
-                                , userAnswer = data.state.userAnswer
-                                , target = trial.target
-                                , feedback_Correct = ( data.infos.feedback_correct, [ trial.target ] )
-                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.target ] )
-                                , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
-                                }
-                            ]
+                        [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ trial.target ]
+                        , renderTask task trial data data.history data.trainingTrials
                         ]
 
                 Nothing ->
@@ -180,34 +173,12 @@ view task =
         Logic.Main data ->
             case data.current of
                 Just trial ->
-                    div []
-                        [ div [ class "col-start-2 col-span-4" ] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ trial.target ] ]
-                        , p [ class "col-start-2 col-span-4" ] [ View.fromMarkdown trial.question ]
-                        , div [ class "p-2 col-start-2 col-span-4" ]
-                            [ div
-                                [ class "pt-6 max-w-xl ", disabled data.feedback ]
-                              <|
-                                View.shuffledOptions
-                                    data.state
-                                    data.feedback
-                                    task.radioMsg
-                                    trial
-                                    task.optionsOrder
-                            ]
-                        , div [ class "col-start-2 col-span-4" ]
-                            [ View.genericSingleChoiceFeedback
-                                { isVisible = data.feedback
-                                , userAnswer = data.state.userAnswer
-                                , target = trial.target
-                                , feedback_Correct = ( data.infos.feedback_correct, [ trial.target ] )
-                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.target ] )
-                                , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
-                                }
-                            ]
+                    div [ class "flex flex-col items-center" ]
+                        [ renderTask task trial data data.history data.mainTrials
                         ]
 
                 Nothing ->
-                    View.end data.infos.end task.saveDataMsg
+                    View.end data.infos.end task.saveDataMsg "spelling"
 
         Logic.Loading ->
             div [] [ text "Loading" ]

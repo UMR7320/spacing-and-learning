@@ -1,28 +1,39 @@
-port module Main exposing (main)
+port module Main exposing
+    ( isNextSentence
+    , main
+    , organizeAcceptabilityTrials
+    , removesItems
+    , toEvaluation
+    )
 
 import Browser
+import Browser.Dom
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation as Nav
 import Data
+import Delay
 import Dict
 import DnDList
 import DnDList.Groups exposing (Model)
-import Experiment.Experiment as E
 import ExperimentInfo exposing (Session(..), Task)
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (class, type_)
+import Html.Styled.Attributes exposing (class, for, href, id, type_)
 import Html.Styled.Events
 import Html.Styled.Keyed as Keyed
 import Http
 import Icons
 import Json.Decode
+import Json.Decode.Pipeline
+import Json.Encode
+import List.Extra
 import Logic
 import Postest.CloudWords as CloudWords
 import Postest.YN as YN
-import Pretest.Acceptability as Acceptability exposing (nextTrial)
+import Pretest.Acceptability as Acceptability
+import Pretest.GeneralInfos
 import Random
 import Random.Extra
-import Random.List
+import Random.List exposing (shuffle)
 import RemoteData exposing (RemoteData)
 import Result exposing (Result)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
@@ -30,6 +41,7 @@ import Session1.CU1 as CU1
 import Session1.Meaning as Meaning
 import Session1.Presentation as Presentation
 import Session1.SpellingLvl1 as SpellingLvl1
+import Session1.Top
 import Session2.CU2 as CU2
 import Session2.Scrabble as Scrabble
 import Session2.Translation as Translation
@@ -52,29 +64,57 @@ type alias Flags =
 port playAudio : String -> Cmd msg
 
 
+port audioEnded : (InboundAudioInfos -> msg) -> Sub msg
+
+
+type alias InboundAudioInfos =
+    { endedAt : Int, audioName : String }
+
+
+decodeAudioInfos =
+    Json.Decode.succeed InboundAudioInfos
+        |> Json.Decode.Pipeline.required "endedAt" Json.Decode.int
+        |> Json.Decode.Pipeline.required "audioName" Json.Decode.string
+
+
+mapAudioInfos json =
+    case Json.Decode.decodeValue decodeAudioInfos json of
+        Ok decodedAudioInfos ->
+            Acceptability (Acceptability.AudioEnded decodedAudioInfos)
+
+        Err reason ->
+            let
+                _ =
+                    Debug.log "Error in mapAudioInfos :" reason
+            in
+            NoOp
+
+
 
 -- MODEL
 
 
-type Session1
-    = Loading (Para.State5 Msg (List Meaning.Trial) (List SpellingLvl1.Trial) (List CU1.Trial) (List Presentation.Trial) (List ExperimentInfo.Task))
+type Session a
+    = Loading a
     | FailedToLoad String
     | Ready
     | NotAsked
 
 
-type Session2
-    = LoadingSession2 (Para.State4 Msg (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Task))
-    | FailedToLoadSession2 String
-    | ReadySession2
-    | NotAskedSession2
+type alias Session1 =
+    Session (Para.State5 Msg (List Meaning.Trial) (List SpellingLvl1.Trial) (List CU1.Trial) (List Presentation.Trial) (List ExperimentInfo.Task))
 
 
-type Session3
-    = LoadingSession3 (Para.State4 Msg (List CU3.Trial) (List Spelling3.Trial) (List E.SynonymTrial) (List ExperimentInfo.Task))
-    | FailedToLoadSession3 String
-    | ReadySession3
-    | NotAskedSession3
+type alias Session2 =
+    Session (Para.State4 Msg (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Task))
+
+
+type alias Session3 =
+    Session (Para.State4 Msg (List CU3.Trial) (List Spelling3.Trial) (List Synonym.Trial) (List ExperimentInfo.Task))
+
+
+type alias Pilote =
+    Session (Para.State2 Msg (List Acceptability.Trial) (List ExperimentInfo.Task))
 
 
 type alias Model =
@@ -86,15 +126,18 @@ type alias Model =
     , route : Route.Route
     , optionsOrder : List Int
 
-    -- dnd is for drag-and-drop
+    -- dnd stands for drag-and-drop
     , dnd : DnDList.Model
 
     --                                                                  88""Yb 88""Yb 888888 888888 888888 .dP"Y8 888888
     --                                                                  88__dP 88__dP 88__     88   88__   `Ybo."   88
     --                                                                  88"""  88"Yb  88""     88   88""   o.`Y8b   88
     --                                                                  88     88  Yb 888888   88   888888 8bodP'   88
+    -- yn stands for yes-no
     , yn : Logic.Task YN.Trial YN.State
-    , acceptabilityTask : Acceptability.Task
+    , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
+    , informations : Pretest.GeneralInfos.Model
+    , pilote : Pilote
 
     --
     --                                                                  ## ###  ##  ## ###  #  ###      #
@@ -105,6 +148,8 @@ type alias Model =
     , session1 : Session1
     , meaning : Logic.Task Meaning.Trial Meaning.State
     , spellingLvl1 : Logic.Task SpellingLvl1.Trial SpellingLvl1.State
+
+    --cu1 stands for context-understanding-1
     , cu1 : Logic.Task CU1.Trial CU1.State
     , presentation : Logic.Task Presentation.Trial Presentation.State
 
@@ -123,14 +168,14 @@ type alias Model =
     --                                                               8bodP' 888888 8bodP' 8bodP' 88  YbodP  88  Y8     YbodP
     , spelling3 : Logic.Task Spelling3.Trial Spelling3.State
     , cu3 : Logic.Task CU3.Trial CU3.State
-    , synonymTask : E.Experiment
+    , synonymTask : Logic.Task Synonym.Trial Synonym.State
     , session3 : Session3
 
     --                                                              88""Yb  dP"Yb  .dP"Y8 888888 888888 .dP"Y8 888888
     --                                                              88__dP dP   Yb `Ybo."   88   88__   `Ybo."   88
     --                                                              88"""  Yb   dP o.`Y8b   88   88""   o.`Y8b   88
     --                                                              88      YbodP  8bodP'   88   888888 8bodP'   88
-    , cloudWords : Dict.Dict String Bool
+    , cloudWords : Dict.Dict String CloudWords.WordKnowledge
 
     --                                                             .dP"Y8 88  88    db    88""Yb 888888 8888b.
     --                                                             `Ybo." 88  88   dPYb   88__dP 88__    8I  Yb
@@ -138,6 +183,13 @@ type alias Model =
     --                                                             8bodP' 88  88 dP""""Yb 88  Yb 888888 8888Y"
     , infos : RemoteData Http.Error (Dict.Dict String ExperimentInfo.Task)
     , user : Maybe String
+    , errorTracking : List Http.Error
+    , isStudent : Bool
+    , whichDegree : String
+    , whichLanguages : String
+    , age : Int
+    , gender : String
+    , dominantHand : String
     }
 
 
@@ -181,6 +233,15 @@ init _ url key =
                 , onSuccess = ServerRespondedWithAllSession3Data
                 }
 
+        ( loadingStatePilote, fetchPretest ) =
+            Para.attempt2
+                { task1 = Acceptability.getRecords
+                , task2 = ExperimentInfo.getRecords
+                , onUpdates = ServerRespondedWithSomePretestData
+                , onFailure = ServerRespondedWithSomeError
+                , onSuccess = ServerRespondedWithAllPretestData
+                }
+
         defaultInit =
             { key = key
             , route = route
@@ -197,17 +258,19 @@ init _ url key =
             , translationTask = Logic.NotStarted
             , cuLvl2 = Logic.NotStarted
             , scrabbleTask = Logic.NotStarted
-            , session2 = NotAskedSession2
+            , session2 = NotAsked
 
             -- SESSION 3
-            , synonymTask = E.NotStarted
+            , synonymTask = Logic.NotStarted
             , spelling3 = Logic.NotStarted
             , cu3 = Logic.NotStarted
-            , session3 = NotAskedSession3
+            , session3 = NotAsked
 
             -- PRETEST
             , yn = Logic.Loading
-            , acceptabilityTask = Acceptability.NotStarted
+            , acceptabilityTask = Logic.NotStarted
+            , informations = ""
+            , pilote = NotAsked
 
             -- POSTEST
             , cloudWords = Dict.fromList CloudWords.words
@@ -216,17 +279,24 @@ init _ url key =
             , user = url.query
             , optionsOrder = [ 0, 1, 2, 3 ]
             , infos = RemoteData.Loading
+            , errorTracking = []
+            , isStudent = False
+            , whichDegree = ""
+            , whichLanguages = ""
+            , age = 0
+            , gender = ""
+            , dominantHand = ""
             }
     in
     case route of
-        Route.Session1 _ ->
+        Route.Session1 userId _ ->
             ( { defaultInit
                 | -- SESSION 1
                   meaning = Logic.Loading
                 , spellingLvl1 = Logic.Loading
                 , cu1 = Logic.Loading
                 , presentation = Logic.Loading
-                , user = Nothing
+                , user = Just userId
                 , session1 = Loading loadingState
               }
             , fetchCmd
@@ -252,7 +322,7 @@ init _ url key =
                 , cuLvl2 = Logic.Loading
                 , scrabbleTask = Logic.Loading
                 , user = Just userid
-                , session2 = LoadingSession2 loadingStateSession2
+                , session2 = Loading loadingStateSession2
               }
             , fetchSession2
             )
@@ -260,16 +330,38 @@ init _ url key =
         Route.AuthenticatedSession3 userid _ ->
             ( { defaultInit
                 | -- SESSION 3
-                  synonymTask = E.Loading
+                  synonymTask = Logic.Loading
                 , spelling3 = Logic.Loading
                 , cu3 = Logic.Loading
-                , session3 = LoadingSession3 loadingStateSession3
+                , user = Just userid
+                , session3 = Loading loadingStateSession3
               }
             , fetchSession3
             )
 
-        _ ->
-            Debug.todo ""
+        Route.Pretest _ ->
+            ( { defaultInit
+                | yn = Logic.Loading
+                , acceptabilityTask = Logic.Loading
+                , pilote = Loading loadingStatePilote
+              }
+            , fetchPretest
+            )
+
+        Route.Pilote userid _ ->
+            ( { defaultInit
+                | acceptabilityTask = Logic.Loading
+                , pilote = Loading loadingStatePilote
+                , user = Just userid
+              }
+            , fetchPretest
+            )
+
+        Posttest _ ->
+            pure defaultInit
+
+        NotFound ->
+            pure { defaultInit | route = NotFound }
 
 
 main : Program Flags Model Msg
@@ -291,11 +383,6 @@ view model =
     }
 
 
-
---Acceptability ->
---[ Acceptability.view model.acceptabilityTask { nextTrialMsg = Acceptability Acceptability.UserClickedNextTrial } ]
-
-
 body : Model -> List (Html Msg)
 body model =
     let
@@ -308,14 +395,16 @@ body model =
                     Dict.empty
     in
     [ View.header
-        [ navIn "L'expérience" "/meaning"
-        , navOut "BCL" "https://bcl.cnrs.fr/"
+        [ navOut "BCL" "https://bcl.cnrs.fr/"
         , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
         ]
     , View.container <|
         case model.route of
-            Route.Session1 task ->
+            Route.Session1 _ task ->
                 case task of
+                    Route.TopSession1 ->
+                        Session1.Top.view infos
+
                     Route.Meaning ->
                         let
                             infos_ =
@@ -323,7 +412,6 @@ body model =
                         in
                         [ Meaning.view
                             { task = model.meaning
-                            , infos = infos_
                             , radioMsg = \val -> Meaning (Meaning.UserClickedRadioButton val)
                             , toggleFeedbackMsg = Meaning Meaning.UserClickedToggleFeedback
                             , nextTrialMsg = Meaning Meaning.UserClickedNextTrial
@@ -345,6 +433,7 @@ body model =
                             , startMainMsg = \trials informations -> Presentation (Presentation.UserClickedStartMain trials informations)
                             , userClickedAudio = PlaysoundInJS
                             , userToggledElementOfEntry = \entryId -> Presentation (Presentation.UserToggleElementOfEntry entryId)
+                            , saveDataMsg = NoOp
                             }
                         ]
 
@@ -440,15 +529,14 @@ body model =
                     Route.Synonym ->
                         let
                             synonymInfos =
-                                Dict.get "Synonym" infos
+                                Dict.get "recB3kUQW4jNTlou6" infos
                         in
                         Synonym.viewTask model.synonymTask
-                            synonymInfos
                             { toggleFeedbackMsg = Synonym Synonym.UserClickedFeedback
-                            , inputValidationMsg = Synonym Synonym.UserValidatedInput
                             , nextTrialMsg = Synonym Synonym.UserClickedNextTrial
-                            , toMainloopMsg = \trials -> Synonym (Synonym.UserClickedStartMainloop trials)
+                            , toMainloopMsg = \trials inf -> Synonym (Synonym.UserClickedStartMainloop trials inf)
                             , updateInputMsg = \input -> Synonym (Synonym.UserChangedInput input)
+                            , saveDataMsg = Synonym Synonym.SaveDataMsg
                             }
 
                     Route.Spelling3 ->
@@ -462,6 +550,7 @@ body model =
                             , nextTrialMsg = Spelling3 Spelling3.UserClickedNextTrial
                             , startMainMsg = \trials informations -> Spelling3 (Spelling3.UserClickedStartMain trials informations)
                             , userChangedInput = \new -> Spelling3 (Spelling3.UserChangedInput new)
+                            , saveData = Spelling3 Spelling3.UserClickedSaveData
                             }
                         ]
 
@@ -469,6 +558,36 @@ body model =
                 case task of
                     Route.CloudWords ->
                         [ viewCloud model ]
+
+            Route.Pilote _ task ->
+                case task of
+                    Route.AcceptabilityStart ->
+                        Acceptability.view model.acceptabilityTask
+                            { startTraining = Acceptability Acceptability.StartTraining
+                            , startMainMsg = \informations trials -> Acceptability (Acceptability.StartMain trials informations)
+                            , saveDataMsg = Acceptability Acceptability.UserClickedSaveMsg
+                            }
+
+                    Route.AcceptabilityInstructions ->
+                        case model.infos of
+                            RemoteData.Success informations ->
+                                let
+                                    taskInfo =
+                                        Dict.get "recR8areYkKRvQ6lU" informations |> Maybe.map .instructions |> Maybe.withDefault "I couldn't find the infos of the task : recR8areYkKRvQ6lU "
+                                in
+                                [ h1 [ class "flex flex-col w-full items-center justify-center" ] [ text "Instructions" ]
+                                , p [ class "max-w-2xl text-xl text-center mb-8" ] [ View.fromMarkdown taskInfo ]
+                                , View.button { message = Acceptability Acceptability.StartTraining, txt = "String", isDisabled = False }
+                                ]
+
+                            RemoteData.Failure reason ->
+                                [ p [] [ text "I couldn't find the tasks infos. Please report this error." ] ]
+
+                            RemoteData.Loading ->
+                                []
+
+                            RemoteData.NotAsked ->
+                                []
 
             Route.Pretest task ->
                 case task of
@@ -485,40 +604,33 @@ body model =
                             }
                         ]
 
-            Home ->
-                let
-                    toCard =
-                        \info ->
-                            div [ class "my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-13" ]
-                                [ Html.Styled.article [ class "overflow-hidden rounded-lg shadow-lg" ]
-                                    [ Html.Styled.img [ class "block h-auto w-full", Html.Styled.Attributes.src "https://picsum.photos/600/400/?random" ] []
-                                    , Html.Styled.header [ class "flex items-center justify-between leading-tight p-2 md:p4" ]
-                                        [ h1 [ class "text-lg" ] [ a [ Html.Styled.Attributes.href info.url ] [ text info.name ] ]
-                                        ]
-                                    , p [ class "px-2 overflow-ellipsis" ] [ text info.description ]
-                                    , Html.Styled.footer
-                                        [ class "flex items-center justify-between leading-none p-2 md:p-4" ]
-                                        [ div [ class "bg-green-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.typeToString info.type_) ]
-                                        , div [ class "bg-blue-500 rounded-lg p-2 text-white" ] [ text (ExperimentInfo.sessionToString info.session) ]
-                                        ]
+                    Route.EmailSent ->
+                        [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
+
+                    Route.PiloteInfos ->
+                        [ form [ class "w-full max-w-lg" ]
+                            [ div [ class "flex flex-wrap -mx-3 mb-6" ]
+                                [ div [ class "w-full md:w-1/2 px-3 mb-6 md:mb-0" ]
+                                    [ label [ for "is-student" ]
+                                        [ text "Are you a student" ]
+                                    , input [ id "is-student", type_ "radio" ] []
                                     ]
                                 ]
+                            ]
+                        ]
 
-                    viewCard with =
-                        infos
-                            |> Dict.toList
-                            |> List.map Tuple.second
-                            |> List.filter with
-                            |> List.map toCard
-                            |> div [ class "flex flex-wrap -mx-1 px-4 md:px-12" ]
-                in
-                [ h1 [] [ text "Apprentissage et Espacement" ]
-                , p
-                    [ class "max-w-xl text-xl mb-8" ]
-                    [ text "Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. "
+                    Route.GeneralInfos ->
+                        [ Pretest.GeneralInfos.view model.informations (\input -> Informations <| Pretest.GeneralInfos.UserUpdatedEmailField input) (\email -> Informations <| Pretest.GeneralInfos.UserClickedSendData email) ]
+
+            Home ->
+                [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
+                    [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
+                    , p
+                        [ class "max-w-2xl text-xl text-center mb-8" ]
+                        [ text "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n Sapien et ligula ullamcorper malesuada proin libero nunc consequat. Sed sed risus pretium quam vulputate dignissim. Aliquam sem fringilla ut morbi tincidunt augue interdum velit euismod. Ultrices tincidunt arcu non sodales neque."
+                        ]
+                    , a [ href "/pretest/informations" ] [ View.button { message = NoOp, txt = "Commencer les prétests", isDisabled = False } ]
                     ]
-                , h2 [] [ text "Session 1" ]
-                , viewCard (\info -> info.session == ExperimentInfo.Session1)
                 ]
 
             NotFound ->
@@ -526,24 +638,20 @@ body model =
     ]
 
 
+type alias ShuffledSession1 =
+    { meaning : List Meaning.Trial, spelling : List SpellingLvl1.Trial, cu1 : List CU1.Trial, presentation : List Presentation.Trial, infos_ : List ExperimentInfo.Task }
 
---words : List (Html msg)
--- UPDATE
-{--Meaning.getRecords
-                        , task2 = SpellingLvl1.getRecords
-                        , task3 = CU1.getRecords
-                        , task4 = Presentation.getRecords
-                        , task5 = ExperimentInfo.getRecords
-                        , onUpdate = ServerRespondedWithSomeSession1Data
-                        , onFailure = ServerRespondedWithSomeError
-                        , onSuccess = ServerRespondedWithAllSession1Data} --}
+
+type alias ShuffledSession2 =
+    { cu : List CU2.Trial, spelling : List Scrabble.Trial, translation : List Translation.Trial, infos : List ExperimentInfo.Task }
+
+
+type alias ShuffledSession3 =
+    { cu : List CU3.Trial, spelling : List Spelling3.Trial, synonym : List Synonym.Trial, infos : List ExperimentInfo.Task }
 
 
 type Msg
-    = ServerRespondedWithSynonymTrials (Result Http.Error (List E.SynonymTrial))
-    | ServerRespondedWithAcceptabilityTrials (Result Http.Error (List Acceptability.Trial))
-    | ServerRespondedWithUserInfo (Result Http.Error User.AuthenticatedInfo)
-    | UserClickedStartSynonym (List E.SynonymTrial)
+    = ServerRespondedWithUserInfo (Result Http.Error User.AuthenticatedInfo)
     | UserToggledInCloudWords String
       --
       --                                                           # # ### ### #    ##
@@ -554,10 +662,11 @@ type Msg
     | PlaysoundInJS String
     | WithTime Msg Time.Posix
     | RuntimeShuffledOptionsOrder (List Int)
-    | Shuffled Msg
     | UserDragsLetter DnDList.Msg
     | UserClickedLink Browser.UrlRequest
     | BrowserChangedUrl Url
+    | NewTick Time.Posix
+    | NoOp
       --
       --                                                          ##  ##  ### ### ###  ## ###
       --                                                          # # # # #    #  #   #    #
@@ -565,7 +674,11 @@ type Msg
       --                                                          #   # # #    #  #     #  #
       --                                                          #   # # ###  #  ### ##   #
     | Acceptability Acceptability.Msg
-    | UserPressedKey Acceptability.Evaluation
+    | UserPressedKey (Maybe Bool)
+    | Informations Pretest.GeneralInfos.Msg
+    | ServerRespondedWithSomePretestData (Para.Msg2 (List Acceptability.Trial) (List ExperimentInfo.Task))
+    | ServerRespondedWithAllPretestData (List Acceptability.Trial) (List ExperimentInfo.Task)
+    | ToNextStep Acceptability.Step
       --
       --                                                          ## ###  ##  ## ###  #  ###      #
       --                                                         #   #   #   #    #  # # # #     ##
@@ -579,6 +692,7 @@ type Msg
     | ServerRespondedWithSomeSession1Data (Para.Msg5 (List Meaning.Trial) (List SpellingLvl1.Trial) (List CU1.Trial) (List Presentation.Trial) (List ExperimentInfo.Task))
     | ServerRespondedWithSomeError Http.Error
     | ServerRespondedWithAllSession1Data (List Meaning.Trial) (List SpellingLvl1.Trial) (List CU1.Trial) (List Presentation.Trial) (List ExperimentInfo.Task)
+    | StartSession1 ShuffledSession1
       --
       --                                                          ## ###  ##  ## ###  #  ###     ###
       --                                                         #   #   #   #    #  # # # #       #
@@ -590,6 +704,7 @@ type Msg
     | Translation Translation.Msg
     | ServerRespondedWithSomeSession2Data (Para.Msg4 (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Task))
     | ServerRespondedWithAllSession2Data (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Task)
+    | StartSession2 ShuffledSession2
       --
       --                                                           ## ###  ##  ## ###  #  ###     ###
       --                                                          #   #   #   #    #  # # # #       #
@@ -600,29 +715,18 @@ type Msg
     | Spelling3 Spelling3.Msg
     | YN YN.Msg
     | Synonym Synonym.Msg
-    | ServerRespondedWithSomeSession3Data (Para.Msg4 (List CU3.Trial) (List Spelling3.Trial) (List E.SynonymTrial) (List ExperimentInfo.Task))
-    | ServerRespondedWithAllSession3Data (List CU3.Trial) (List Spelling3.Trial) (List E.SynonymTrial) (List ExperimentInfo.Task)
+    | ServerRespondedWithSomeSession3Data (Para.Msg4 (List CU3.Trial) (List Spelling3.Trial) (List Synonym.Trial) (List ExperimentInfo.Task))
+    | ServerRespondedWithAllSession3Data (List CU3.Trial) (List Spelling3.Trial) (List Synonym.Trial) (List ExperimentInfo.Task)
+    | StartSession3 ShuffledSession3
 
 
-
---| GetTimeAndThen (Time.Posix -> Msg)
+pure model =
+    ( model, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        --currentMeaningState =
-        --    Logic.getState model.meaning
-        --currentTranslationState =
-        --  Logic.getState model.translationTask
-        currentSynonymState =
-            case E.getState model.synonymTask of
-                E.SynonymStateType x ->
-                    x
-
-                _ ->
-                    Synonym.initState
-
         currentScrabbleState =
             case Logic.getState model.scrabbleTask of
                 Just x ->
@@ -633,15 +737,15 @@ update msg model =
 
         currentSpellingState =
             Logic.getState model.spellingLvl1
-
-        --infos id =
-        --  RemoteData.unwrap (Result.Err "I tried to unwrap the data contained in the tasks' infos but something is stopping me. Maybe the data were still loading?") (\info -> Dict.get id info |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ id)) model.infos
     in
     case msg of
         BrowserChangedUrl url ->
             ( { model | route = Route.fromUrl url }
             , Cmd.none
             )
+
+        NoOp ->
+            pure model
 
         UserClickedLink urlRequest ->
             case urlRequest of
@@ -667,16 +771,53 @@ update msg model =
             in
             ( { model | session1 = updte }, cmd )
 
-        ServerRespondedWithSomeError _ ->
-            ( model, Cmd.none )
+        ServerRespondedWithSomeError error ->
+            ( { model | errorTracking = error :: model.errorTracking }, Cmd.none )
+
+        Informations message ->
+            case message of
+                Pretest.GeneralInfos.UserClickedSendData email ->
+                    let
+                        body_ =
+                            Json.Encode.object [ ( "Email", Json.Encode.string email ) ] |> Http.jsonBody
+
+                        doRequest =
+                            Http.post
+                                { url =
+                                    Data.buildQuery
+                                        { app = Data.apps.spacing
+                                        , base = "users"
+                                        , view_ = "all"
+                                        }
+                                , body = body_
+                                , expect = Http.expectWhatever (\result -> Informations (Pretest.GeneralInfos.UserCreated result))
+                                }
+                    in
+                    ( model, doRequest )
+
+                Pretest.GeneralInfos.UserUpdatedEmailField email ->
+                    pure { model | informations = email }
+
+                Pretest.GeneralInfos.UserCreated _ ->
+                    ( { model | route = Route.Pretest Route.EmailSent }, Nav.pushUrl model.key "email-sent" )
 
         ServerRespondedWithAllSession1Data meaning spelling cu1 presentation infos_ ->
+            let
+                randomize =
+                    Random.generate StartSession1 (Random.map5 ShuffledSession1 (shuffle meaning) (shuffle spelling) (shuffle cu1) (shuffle presentation) (Random.constant infos_))
+            in
             ( { model
-                | meaning = Meaning.start infos_ meaning
-                , spellingLvl1 = SpellingLvl1.start infos_ spelling
-                , cu1 = CU1.start infos_ cu1
-                , presentation = Presentation.start infos_ presentation
-                , infos = RemoteData.Success (ExperimentInfo.toDict infos_)
+                | infos = RemoteData.Success (ExperimentInfo.toDict infos_)
+              }
+            , randomize
+            )
+
+        StartSession1 ({ infos_ } as tasks) ->
+            ( { model
+                | meaning = Meaning.start infos_ tasks.meaning
+                , spellingLvl1 = SpellingLvl1.start infos_ tasks.spelling
+                , cu1 = CU1.start infos_ tasks.cu1
+                , presentation = Presentation.start infos_ tasks.presentation
                 , session1 = Ready
               }
             , Cmd.none
@@ -686,8 +827,8 @@ update msg model =
             let
                 ( updte, cmd ) =
                     case model.session2 of
-                        LoadingSession2 downloadState ->
-                            Para.update4 downloadState downloadMsg |> Tuple.mapFirst LoadingSession2
+                        Loading downloadState ->
+                            Para.update4 downloadState downloadMsg |> Tuple.mapFirst Loading
 
                         _ ->
                             ( model.session2, Cmd.none )
@@ -719,95 +860,233 @@ update msg model =
                             )
                         |> Random.Extra.sequence
                         |> Random.andThen Random.List.shuffle
+
+                randomizeTrials =
+                    Random.generate StartSession2 (Random.map4 ShuffledSession2 (shuffle cu) shuffleLetters (shuffle translation) (Random.constant infos_))
             in
+            ( model
+            , Cmd.batch [ randomizeTrials ]
+              -- ( model, Random.generate (\shuffledData -> Shuffled (ServerRespondedWithScrabbleTrials (Result.Ok shuffledData))) shuffleLetters
+            )
+
+        StartSession2 { cu, spelling, translation, infos } ->
             ( { model
-                | translationTask = Translation.start infos_ translation
-                , cuLvl2 = CU2.start infos_ cu
-                , scrabbleTask = Scrabble.start infos_ spelling
-                , session2 = ReadySession2
+                | translationTask = Translation.start infos translation
+                , cuLvl2 = CU2.start infos cu
+                , scrabbleTask = Scrabble.start infos spelling
+                , session2 = Ready
               }
             , Cmd.none
-              -- ( model, Random.generate (\shuffledData -> Shuffled (ServerRespondedWithScrabbleTrials (Result.Ok shuffledData))) shuffleLetters
             )
 
         ServerRespondedWithSomeSession3Data downloadMsg ->
             let
                 ( updte, cmd ) =
                     case model.session3 of
-                        LoadingSession3 downloadState ->
-                            Para.update4 downloadState downloadMsg |> Tuple.mapFirst LoadingSession3
+                        Loading downloadState ->
+                            Para.update4 downloadState downloadMsg |> Tuple.mapFirst Loading
 
                         _ ->
                             ( model.session3, Cmd.none )
             in
             ( { model | session3 = updte }, cmd )
 
-        ServerRespondedWithAllSession3Data _ _ _ _ ->
-            Debug.todo ""
-
-        Shuffled message ->
-            case message of
-                ServerRespondedWithSynonymTrials (Result.Ok data) ->
-                    ( { model | synonymTask = E.DoingSynonym (E.Intro data Synonym.initState 0 False "Instructions de synonyme") }, Cmd.none )
-
-                ServerRespondedWithAcceptabilityTrials (Result.Ok trials) ->
-                    ( { model | acceptabilityTask = Acceptability.DoingTask trials Acceptability.initState 0 [] }, Cmd.none )
-
-                ServerRespondedWithAllSession2Data cu spelling translation infos_ ->
-                    let
-                        trainingItems =
-                            List.filter (\datum -> datum.isTraining) spelling
-
-                        mainItems =
-                            List.filter (\datum -> not datum.isTraining) spelling
-
-                        firstTrialWord =
-                            trainingItems
-                                |> List.head
-                                |> Maybe.withDefault Scrabble.defaultTrial
-                                |> .writtenWord
-                    in
-                    ( { model
-                        | scrabbleTask = model.scrabbleTask
-
-                        --Logic.startIntro (infos "recSL8cthViyXRx8u") trainingItems mainItems { currentScrabbleState | userAnswer = firstTrialWord, scrambledLetter = toItems firstTrialWord }
-                      }
-                    , Cmd.none
-                    )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        ServerRespondedWithSynonymTrials (Result.Err reason) ->
-            ( { model | synonymTask = E.Failure reason }, Cmd.none )
-
-        ServerRespondedWithSynonymTrials (Result.Ok data) ->
+        ServerRespondedWithAllSession3Data cu spelling synonym infos ->
+            let
+                randomize =
+                    Random.generate StartSession3 (Random.map4 ShuffledSession3 (shuffle cu) (shuffle spelling) (shuffle synonym) (Random.constant infos))
+            in
             ( model
-            , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithSynonymTrials (Result.Ok shuffledData))) (Random.List.shuffle data)
+            , randomize
             )
 
-        ServerRespondedWithAcceptabilityTrials (Result.Ok trials) ->
-            ( model
-            , Random.generate (\shuffledData -> Shuffled (ServerRespondedWithAcceptabilityTrials (Result.Ok shuffledData))) (Random.List.shuffle trials)
+        StartSession3 { cu, spelling, synonym, infos } ->
+            ( { model
+                | synonymTask = Synonym.start infos synonym
+                , spelling3 = Spelling3.start infos spelling
+                , cu3 = CU3.start infos cu
+                , session3 = Ready
+                , infos = RemoteData.Success (ExperimentInfo.toDict infos)
+              }
+            , Cmd.none
             )
 
         ServerRespondedWithUserInfo (Result.Ok _) ->
-            --( { model | user = Just (User.Authenticated info) }, User.encoder (User.Authenticated info) |> Encode.encode 0 |> User.storeInfo )
             ( model, Cmd.none )
 
         ServerRespondedWithUserInfo (Result.Err _) ->
             ( model, Cmd.none )
 
-        ServerRespondedWithAcceptabilityTrials (Result.Err reason) ->
-            ( { model | acceptabilityTask = Acceptability.Failure reason }
-            , Cmd.none
-            )
+        ToNextStep newStep ->
+            ( { model | acceptabilityTask = model.acceptabilityTask }, Cmd.none )
 
-        Acceptability _ ->
-            Debug.todo "acceptability messages"
+        NewTick float ->
+            let
+                prevState =
+                    Logic.getState model.acceptabilityTask
+            in
+            case prevState of
+                Just state ->
+                    ( model, Cmd.none )
 
-        UserClickedStartSynonym trials ->
-            ( { model | synonymTask = E.DoingSynonym (E.MainLoop trials Synonym.initState 0 False) }, Cmd.none )
+                Nothing ->
+                    pure model
+
+        Acceptability message ->
+            let
+                prevState =
+                    Logic.getState model.acceptabilityTask
+
+                toNextStep int step =
+                    Delay.after int (Acceptability (Acceptability.NextStepCinematic step))
+
+                getTrial =
+                    Logic.getTrial model.acceptabilityTask
+            in
+            case ( prevState, getTrial ) of
+                ( Just pState, Just trial ) ->
+                    case message of
+                        Acceptability.NextStepCinematic step ->
+                            case step of
+                                Acceptability.Listening ->
+                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Listening } model.acceptabilityTask }
+                                    , Delay.after 0 (PlaysoundInJS trial.audio.url)
+                                    )
+
+                                Acceptability.Answering ->
+                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Answering } model.acceptabilityTask }, Cmd.none )
+
+                                Acceptability.End ->
+                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.End } model.acceptabilityTask |> Logic.next pState }, toNextStep 500 Acceptability.Start )
+
+                                Acceptability.Start ->
+                                    ( { model | acceptabilityTask = Logic.update Acceptability.initState model.acceptabilityTask }, Delay.after 0 playBeep )
+
+                        Acceptability.StartMain trials infos ->
+                            ( { model | acceptabilityTask = Logic.startMain infos trials Acceptability.initState }, Cmd.none )
+
+                        Acceptability.UserPressedButton maybeBool ->
+                            ( model, Task.perform (\timestamp -> Acceptability (Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp)) Time.now )
+
+                        Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp ->
+                            case maybeBool of
+                                Just bool ->
+                                    ( { model
+                                        | acceptabilityTask =
+                                            Logic.update
+                                                { pState
+                                                    | step = Acceptability.End
+                                                    , evaluation = bool
+                                                    , userAnsweredAt = Just timestamp
+                                                }
+                                                model.acceptabilityTask
+                                      }
+                                    , toNextStep 0 Acceptability.End
+                                    )
+
+                                Nothing ->
+                                    ( model, Cmd.none )
+
+                        Acceptability.AudioEnded { endedAt, audioName } ->
+                            let
+                                cinematic =
+                                    if audioName == beep then
+                                        toNextStep 500 Acceptability.Listening
+
+                                    else
+                                        toNextStep 0 Acceptability.Answering
+                            in
+                            if audioName == beep then
+                                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just (Time.millisToPosix endedAt) } model.acceptabilityTask }, toNextStep 500 Acceptability.Listening )
+
+                            else
+                                ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just (Time.millisToPosix endedAt) } model.acceptabilityTask }
+                                , toNextStep 0 Acceptability.Answering
+                                )
+
+                        Acceptability.StartTraining ->
+                            ( model, Cmd.batch [ Delay.after 0 playBeep, Task.perform (always NoOp) (Browser.Dom.setViewport 0 400), Nav.pushUrl model.key "start" ] )
+
+                        _ ->
+                            Debug.todo ""
+
+                ( _, _ ) ->
+                    let
+                        _ =
+                            Debug.log "I have no previous state"
+                    in
+                    case message of
+                        Acceptability.StartMain trials infos ->
+                            ( { model | acceptabilityTask = Logic.startMain infos trials Acceptability.initState }, Delay.after 0 playBeep )
+
+                        Acceptability.RuntimeShuffledTrials info trials ->
+                            ( { model | acceptabilityTask = Acceptability.start info trials }, Cmd.none )
+
+                        Acceptability.UserClickedSaveMsg ->
+                            let
+                                responseHandler =
+                                    \records -> Acceptability (Acceptability.ServerRespondedWithLastRecords records)
+
+                                taskId =
+                                    "recR8areYkKRvQ6lU"
+                            in
+                            ( model, Logic.saveAcceptabilityData responseHandler model.user taskId model.acceptabilityTask )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+        ServerRespondedWithAllPretestData trials info ->
+            let
+                generateOrganizedTrials =
+                    Random.List.shuffle trials
+                        |> Random.andThen
+                            (\shuffledTrials ->
+                                let
+                                    targets =
+                                        List.filter (\datum -> datum.trialType == Acceptability.Target) shuffledTrials
+
+                                    distractors =
+                                        List.filter (\datum -> datum.trialType == Acceptability.Distractor) shuffledTrials
+                                in
+                                Random.constant (organizeAcceptabilityTrials targets distractors)
+                                    |> Random.andThen
+                                        (\organizedTrials_ ->
+                                            case organizedTrials_ of
+                                                Result.Err reason ->
+                                                    let
+                                                        _ =
+                                                            Debug.log <| "Error while shuffling trials: " ++ reason
+                                                    in
+                                                    Random.constant []
+
+                                                Result.Ok tr ->
+                                                    Random.Extra.sequence (swapTargetWithOneDistractor tr)
+                                        )
+                            )
+                        |> Random.generate (\shuffledTrials -> Acceptability (Acceptability.RuntimeShuffledTrials info (List.concat <| trainingTrials :: shuffledTrials)))
+
+                trainingTrials =
+                    List.filter (\datum -> datum.trialType == Acceptability.Training) trials
+
+                swapTargetWithOneDistractor : List (List Acceptability.Trial) -> List (Random.Generator (List Acceptability.Trial))
+                swapTargetWithOneDistractor tr =
+                    List.map (\block -> Random.int 2 4 |> Random.andThen (\position -> Random.constant (List.Extra.swapAt 1 position block))) tr
+            in
+            ( { model | infos = RemoteData.Success (ExperimentInfo.toDict info) }, generateOrganizedTrials )
+
+        -- beep
+        --Delay.after 300 playBeep )
+        ServerRespondedWithSomePretestData downloadMsg ->
+            let
+                ( updte, cmd ) =
+                    case model.pilote of
+                        Loading downloadState ->
+                            Para.update2 downloadState downloadMsg |> Tuple.mapFirst Loading
+
+                        _ ->
+                            ( model.pilote, Cmd.none )
+            in
+            ( { model | pilote = updte }, cmd )
 
         UserPressedKey evaluation ->
             ( model
@@ -819,8 +1098,6 @@ update msg model =
 
         UserDragsLetter dndmsg ->
             let
-                --items_ =
-                --  toItems currentScrabbleState.userAnswer
                 ( dnd, items ) =
                     system.update dndmsg model.dnd currentScrabbleState.scrambledLetter
             in
@@ -836,20 +1113,21 @@ update msg model =
                 UserPressedKey evaluation ->
                     let
                         prevState =
-                            Acceptability.getState model.acceptabilityTask
-
-                        trial =
-                            Acceptability.getCurrentTrial model.acceptabilityTask
+                            Logic.getState model.acceptabilityTask
                     in
-                    ( { model
-                        | acceptabilityTask =
-                            model.acceptabilityTask
-                                |> Acceptability.updateState { prevState | endedAt = Just time, evaluation = evaluation, trialuid = trial.uid }
-                                |> Acceptability.recordState
-                                |> Acceptability.nextTrial time
-                      }
-                    , Cmd.none
-                    )
+                    case prevState of
+                        Just pState ->
+                            case evaluation of
+                                Just x ->
+                                    ( { model | acceptabilityTask = Logic.update { pState | evaluation = x } model.acceptabilityTask |> Logic.next Acceptability.initState }
+                                    , Delay.after 500 playBeep
+                                    )
+
+                                Nothing ->
+                                    ( model, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -950,7 +1228,7 @@ update msg model =
                             Logic.next
                                 { currentScrabbleState
                                     | userAnswer = nextTrial.writtenWord
-                                    , scrambledLetter = toItems nextTrial.writtenWord
+                                    , scrambledLetter = Scrabble.toItems nextTrial.writtenWord
                                 }
                                 model.scrabbleTask
                       }
@@ -981,7 +1259,7 @@ update msg model =
                             ( { model | scrabbleTask = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
 
                         x :: _ ->
-                            ( { model | scrabbleTask = Logic.startMain infos trials { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord } }, Cmd.none )
+                            ( { model | scrabbleTask = Logic.startMain infos trials { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = Scrabble.toItems x.writtenWord } }, Cmd.none )
 
         CU1 message ->
             let
@@ -1066,6 +1344,16 @@ update msg model =
                 Spelling3.UserChangedInput new ->
                     ( { model | spelling3 = Logic.update { uid = "", userAnswer = new } model.spelling3 }, Cmd.none )
 
+                Spelling3.UserClickedSaveData ->
+                    let
+                        responseHandler =
+                            \records -> Spelling3 (Spelling3.ServerRespondedWithLastRecords records)
+                    in
+                    ( model, Logic.saveData responseHandler model.user taskId model.scrabbleTask )
+
+                Spelling3.ServerRespondedWithLastRecords _ ->
+                    ( model, Cmd.none )
+
         YN message ->
             let
                 taskId =
@@ -1120,7 +1408,7 @@ update msg model =
                     ( { model
                         | synonymTask =
                             model.synonymTask
-                                |> E.toggleFeedback
+                                |> Logic.toggle
                       }
                     , Cmd.none
                     )
@@ -1129,13 +1417,31 @@ update msg model =
                     ( { model
                         | synonymTask =
                             model.synonymTask
-                                |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = newChoice })
+                                |> Logic.update { uid = "", userAnswer = newChoice }
                       }
                     , Cmd.none
                     )
 
-                _ ->
-                    Debug.todo "Missing Msg variants in Synonym "
+                Synonym.UserClickedNextTrial ->
+                    ( { model
+                        | synonymTask =
+                            model.synonymTask |> Logic.next Synonym.initState
+                      }
+                    , Cmd.none
+                    )
+
+                Synonym.SaveDataMsg ->
+                    let
+                        responseHandler =
+                            \records -> Synonym (Synonym.ServerRespondedWithLastRecords records)
+                    in
+                    ( model, Logic.saveData responseHandler model.user Synonym.taskId model.translationTask )
+
+                Synonym.UserClickedStartMainloop trials infos ->
+                    ( { model | synonymTask = Logic.startMain infos trials Meaning.initState }, Cmd.none )
+
+                Synonym.ServerRespondedWithLastRecords records ->
+                    ( model, Cmd.none )
 
         Meaning message ->
             let
@@ -1210,19 +1516,39 @@ update msg model =
                     ( model, Logic.saveData responseHandler model.user taskId model.translationTask )
 
 
-toItems : String -> List E.KeyedItem
-toItems string =
-    string
-        |> String.toList
-        |> List.map String.fromChar
-        |> toKeyedItem
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
+    let
+        acceptabilityState =
+            Logic.getState model.acceptabilityTask
+
+        listenToInput : Sub Msg
+        listenToInput =
+            case acceptabilityState of
+                Just state ->
+                    if state.step == Acceptability.Answering then
+                        onKeyDown keyDecoder
+
+                    else
+                        Sub.none
+
+                Nothing ->
+                    Sub.none
+
+        clock =
+            case model.acceptabilityTask of
+                Logic.Intr _ ->
+                    Browser.Events.onAnimationFrame NewTick
+
+                _ ->
+                    Sub.none
+    in
     Sub.batch
         [ system.subscriptions model.dnd
-        , onKeyDown keyDecoder
+        , listenToInput
+
+        --, clock
+        , audioEnded (\{ endedAt, audioName } -> Acceptability (Acceptability.AudioEnded { endedAt = endedAt, audioName = audioName }))
         ]
 
 
@@ -1231,17 +1557,21 @@ keyDecoder =
     Json.Decode.map toEvaluation (Json.Decode.field "key" Json.Decode.string)
 
 
-toEvaluation : String -> Msg
+
+--toEvaluation : String -> Msg
+--toEvaluation : String -> Msg
+
+
 toEvaluation x =
     case x of
-        "y" ->
-            UserPressedKey Acceptability.SentenceCorrect
+        "j" ->
+            Acceptability (Acceptability.UserPressedButton (Just True))
 
-        "n" ->
-            UserPressedKey Acceptability.SentenceIncorrect
+        "f" ->
+            Acceptability (Acceptability.UserPressedButton (Just False))
 
         _ ->
-            UserPressedKey Acceptability.NoEvaluation
+            Acceptability (Acceptability.UserPressedButton Nothing)
 
 
 green : String
@@ -1370,26 +1700,31 @@ viewScrabbleTask model =
         Logic.Main data ->
             case data.current of
                 Just currentTrial ->
-                    [ audioButton currentTrial.audioWord.url
+                    [ div [ class "flex flex-col items-center w-full" ] [ audioButton currentTrial.audioWord.url ]
                     , if not data.feedback then
-                        div []
-                            [ div [ class "col-start-2 col-span-4" ] [ viewLetters data.state.scrambledLetter ]
+                        div [ class "flex flex-col items-center w-full" ]
+                            [ viewLetters data.state.scrambledLetter
                             , ghostView model.dnd
                                 data.state.scrambledLetter
                             ]
 
                       else
                         div [] []
-                    , feedback
-                        data.infos.feedback_correct
-                        data.infos.feedback_incorrect
-                        data.feedback
-                        { target = currentTrial.target, attempt = data.state.userAnswer }
-                        data.next
+                    , View.genericSingleChoiceFeedback
+                        { isVisible = data.feedback
+                        , userAnswer = data.state.userAnswer
+                        , target = currentTrial.target
+                        , feedback_Correct =
+                            ( data.infos.feedback_correct
+                            , [ View.bold currentTrial.target ]
+                            )
+                        , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
+                        , button = View.navigationButton (Spelling2 UserClickedFeedbackButton) (Spelling2 (UserClickedNextTrial data.next)) data.feedback
+                        }
                     ]
 
                 Nothing ->
-                    [ View.end data.infos.end (Spelling2 UserClickedSaveData) ]
+                    [ View.end data.infos.end (Spelling2 UserClickedSaveData) "context-understanding" ]
 
         Logic.Intr data ->
             case data.current of
@@ -1398,14 +1733,17 @@ viewScrabbleTask model =
                         [ audioButton currentTrial.audioWord.url
                         , div [ class "col-start-2 col-span-4" ] [ viewLetters data.state.scrambledLetter ]
                         , ghostView model.dnd data.state.scrambledLetter
-                        , div [ class "col-start-2 col-span-4 pb-4" ]
-                            [ feedback
-                                data.infos.feedback_correct
-                                data.infos.feedback_incorrect
-                                data.feedback
-                                { target = currentTrial.target, attempt = data.state.userAnswer }
-                                data.next
-                            ]
+                        , View.genericSingleChoiceFeedback
+                            { isVisible = data.feedback
+                            , userAnswer = data.state.userAnswer
+                            , target = currentTrial.target
+                            , feedback_Correct =
+                                ( data.infos.feedback_correct
+                                , [ View.bold currentTrial.target ]
+                                )
+                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
+                            , button = View.navigationButton (Spelling2 UserClickedFeedbackButton) (Spelling2 (UserClickedNextTrial data.next)) data.feedback
+                            }
                         ]
                     ]
 
@@ -1419,7 +1757,7 @@ viewScrabbleTask model =
             [ text reason ]
 
 
-itemView : DnDList.Model -> Int -> E.KeyedItem -> ( String, Html Msg )
+itemView : DnDList.Model -> Int -> Scrabble.KeyedItem -> ( String, Html Msg )
 itemView dnd index ( key, item ) =
     let
         itemId : String
@@ -1456,10 +1794,10 @@ itemView dnd index ( key, item ) =
             )
 
 
-ghostView : DnDList.Model -> List E.KeyedItem -> Html Msg
+ghostView : DnDList.Model -> List Scrabble.KeyedItem -> Html Msg
 ghostView dnd items =
     let
-        maybeDragItem : Maybe E.KeyedItem
+        maybeDragItem : Maybe Scrabble.KeyedItem
         maybeDragItem =
             system.info dnd
                 |> Maybe.andThen
@@ -1479,18 +1817,10 @@ ghostView dnd items =
 
 
 --DATA
-
-
-toKeyedItem : List String -> List ( String, String )
-toKeyedItem letters =
-    List.map (\( lett, rec ) -> ( "key-" ++ lett ++ String.fromInt rec, lett )) (Scrabble.dedupe letters)
-
-
-
 -- SYSTEM
 
 
-config : DnDList.Config E.KeyedItem
+config : DnDList.Config Scrabble.KeyedItem
 config =
     { beforeUpdate = \_ _ list -> list
     , movement = DnDList.Free
@@ -1500,7 +1830,7 @@ config =
     }
 
 
-system : DnDList.System E.KeyedItem Msg
+system : DnDList.System Scrabble.KeyedItem Msg
 system =
     DnDList.create config UserDragsLetter
 
@@ -1517,7 +1847,6 @@ viewCloud model =
                 label [ class "border-2 p-2 text-black align-baseline flex flex-row" ]
                     [ input
                         [ type_ "checkbox"
-                        , Html.Styled.Attributes.checked <| Maybe.withDefault False value
                         , Html.Styled.Events.onClick <|
                             UserToggledInCloudWords word
                         ]
@@ -1527,3 +1856,117 @@ viewCloud model =
             )
             (Dict.keys model.cloudWords)
         )
+
+
+playBeep =
+    PlaysoundInJS beep
+
+
+beep =
+    "https://dl.airtable.com/.attachments/9035dbbb358fe77bebaae1a3d0863e11/c3afa1ad/salamisound-4324105-signal-beep-once-as.mp3"
+
+
+removesItemsHelp : List a -> List a -> List a -> List a
+removesItemsHelp items ls acc =
+    case ls of
+        [] ->
+            List.reverse acc
+
+        x :: xs ->
+            if List.member x items then
+                removesItemsHelp items xs acc
+
+            else
+                removesItemsHelp items xs (x :: acc)
+
+
+removesItems : List a -> List a -> List a
+removesItems items ls =
+    removesItemsHelp items ls []
+
+
+organizeAcceptabilityTrialsHelper : List Acceptability.Trial -> List Acceptability.Trial -> List (List Acceptability.Trial) -> Result.Result String (List (List Acceptability.Trial))
+organizeAcceptabilityTrialsHelper targets distractors output =
+    -- Acceptability trials must be organized in sequence of blocks containing exactly one target and 3 distractors belonging to 3 different sentence type.
+    -- After shuffling all the trials, this function is used create the proper sequence.
+    -- Because the target can't be at the first position of a sequence, we have to swap the position of the target with one of the following distractors. TODO
+    let
+        nextNewSentenceType buff dis =
+            List.member dis.sentenceType (whichSentenceTypes buff) |> not
+
+        buildBlock t =
+            List.head t
+                |> Result.fromMaybe "I couldn't find the first target"
+                |> Result.andThen
+                    (\foundTarget ->
+                        List.Extra.find (nextNewSentenceType []) distractors
+                            |> Result.fromMaybe "I couldn't find the first distractor"
+                            |> Result.andThen
+                                (\distractorFound ->
+                                    List.Extra.find (nextNewSentenceType [ distractorFound ])
+                                        (removesItems [ distractorFound ] distractors)
+                                        |> Result.fromMaybe "I couldn't find the second distractor"
+                                        |> Result.andThen
+                                            (\secondDistractorFound ->
+                                                List.Extra.find (nextNewSentenceType [ distractorFound, secondDistractorFound ]) (removesItems [ distractorFound, secondDistractorFound ] distractors)
+                                                    |> Result.fromMaybe "I couldn't find the thirdDistractor"
+                                                    |> Result.andThen
+                                                        (\thirdDistractorFound ->
+                                                            Result.Ok
+                                                                { target = foundTarget
+                                                                , firstDistractor = distractorFound
+                                                                , secondDistractor = secondDistractorFound
+                                                                , thirdDistractor = thirdDistractorFound
+                                                                , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
+                                                                }
+                                                        )
+                                            )
+                                )
+                    )
+    in
+    case targets of
+        [] ->
+            Result.Ok output
+
+        x :: xs ->
+            case buildBlock targets of
+                Result.Err reason ->
+                    Result.Err reason
+
+                Result.Ok { target, firstDistractor, secondDistractor, thirdDistractor, remainingDistractors } ->
+                    organizeAcceptabilityTrialsHelper xs remainingDistractors ([ [ target, firstDistractor, secondDistractor, thirdDistractor ] ] ++ output)
+
+
+type alias Block =
+    { target : Acceptability.Trial
+    , firstDistractor : Acceptability.Trial
+    , secondDistractor : Acceptability.Trial
+    , thirdDistractor : Acceptability.Trial
+    , remainingDistractors : List Acceptability.Trial
+    }
+
+
+areMultipleOf4 targets distractors =
+    (List.length (targets ++ distractors) |> modBy 4) == 0
+
+
+isNextSentence : { a | sentenceType : Acceptability.SentenceType } -> List { b | sentenceType : Acceptability.SentenceType } -> Bool
+isNextSentence dis blockBuffer =
+    List.member dis.sentenceType (whichSentenceTypes blockBuffer) |> not
+
+
+whichSentenceTypes : List { a | sentenceType : Acceptability.SentenceType } -> List Acceptability.SentenceType
+whichSentenceTypes sentences =
+    List.map .sentenceType sentences
+
+
+organizeAcceptabilityTrials : List Acceptability.Trial -> List Acceptability.Trial -> Result.Result String (List (List Acceptability.Trial))
+organizeAcceptabilityTrials targets distractors =
+    organizeAcceptabilityTrialsHelper targets distractors []
+
+
+jumpToBottom : String -> Cmd Msg
+jumpToBottom id =
+    Browser.Dom.getViewportOf id
+        |> Task.andThen (\info -> Browser.Dom.setViewportOf id 0 info.scene.height)
+        |> Task.attempt (always NoOp)

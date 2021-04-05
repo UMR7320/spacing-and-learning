@@ -2,7 +2,7 @@ module Session3.Synonym exposing (..)
 
 import Array
 import Data exposing (buildErrorMessage, decodeRecords)
-import Experiment.Experiment as E
+import Dict
 import ExperimentInfo
 import Html.Styled exposing (Html, div, fieldset, h1, h2, h3, h4, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, disabled)
@@ -10,29 +10,18 @@ import Http
 import Icons
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
+import Logic
 import Progressbar
 import View
-
-
-
-{--Route.Synonym ->
-                    ( { model
-                        | synonymTask =
-                            model.synonymTask
-                                |> E.toggleFeedback
-                                |> E.updateState (E.SynonymStateType { currentSynonymState | userAnswer = "" })
-                                |> E.nextTrial
-                      }
-                    , Cmd.none
-                    )--}
 
 
 type Msg
     = UserClickedFeedback
     | UserChangedInput String
     | UserClickedNextTrial
-    | UserClickedStartMainloop (List E.SynonymTrial)
-    | UserValidatedInput
+    | UserClickedStartMainloop (List Trial) ExperimentInfo.Task
+    | SaveDataMsg
+    | ServerRespondedWithLastRecords (Result Http.Error (List String))
 
 
 trainingWheels : Int -> String -> String -> Html msg
@@ -58,30 +47,29 @@ trainingWheels trialn radical target =
 
 
 viewTask :
-    E.Experiment
-    -> Maybe ExperimentInfo.Task
+    Logic.Task Trial State
     ->
         { toggleFeedbackMsg : msg
         , updateInputMsg : String -> msg
         , nextTrialMsg : msg
-        , toMainloopMsg : List E.SynonymTrial -> msg
-        , inputValidationMsg : msg
+        , toMainloopMsg : List Trial -> ExperimentInfo.Task -> msg
+        , saveDataMsg : msg
         }
     -> List (Html msg)
-viewTask experiment maybeInfos { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloopMsg, inputValidationMsg } =
-    case ( experiment, maybeInfos ) of
-        ( E.Failure reason, _ ) ->
-            [ h4 [] [ p [] [ text ("Failure" ++ buildErrorMessage reason) ] ]
+viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloopMsg, saveDataMsg } =
+    case experiment of
+        Logic.Err reason ->
+            [ h4 [] [ p [] [ text ("Failure" ++ reason) ] ]
             ]
 
-        ( E.DoingSynonym (E.Intro trials state trialn feedback instructions), Just infos ) ->
-            let
-                trainingTrial =
-                    trials
-                        |> List.filter (\datum -> datum.isTraining)
-                        |> Array.fromList
-                        |> Array.get trialn
+        Logic.NotStarted ->
+            [ text "I'm not started yet. Obviously." ]
 
+        Logic.Loading ->
+            [ text "Loading..." ]
+
+        Logic.Intr task ->
+            let
                 toggleFeedback =
                     View.button
                         { message = toggleFeedbackMsg
@@ -93,7 +81,7 @@ viewTask experiment maybeInfos { toggleFeedbackMsg, updateInputMsg, nextTrialMsg
                     div [ class "flex flex-col" ]
                         [ h2 [ class "font-bold" ] [ text "Instructions" ]
                         , p [ class "pt-8 pb-8 font-medium" ]
-                            [ pre [] [ text infos.instructions ]
+                            [ pre [] [ View.fromMarkdown task.infos.instructions ]
                             ]
                         , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
                         ]
@@ -101,12 +89,12 @@ viewTask experiment maybeInfos { toggleFeedbackMsg, updateInputMsg, nextTrialMsg
                 trainingBox =
                     div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center " ]
             in
-            case ( trainingTrial, feedback ) of
+            case ( task.current, task.feedback ) of
                 ( Just x, False ) ->
                     [ viewInstructions x
                     , trainingBox
-                        [ trainingWheels trialn x.radical x.target
-                        , div [ class "p-8" ] [ View.sentenceInSynonym x state updateInputMsg feedback ]
+                        [ trainingWheels (List.length task.history) x.radical x.target
+                        , div [ class "p-8" ] [ View.sentenceInSynonym x task.state updateInputMsg task.feedback ]
                         , div [ class "m-8" ] [ toggleFeedback ]
                         ]
                     ]
@@ -114,8 +102,8 @@ viewTask experiment maybeInfos { toggleFeedbackMsg, updateInputMsg, nextTrialMsg
                 ( Just x, True ) ->
                     [ viewInstructions x
                     , trainingBox
-                        [ trainingWheels trialn x.stimulus x.target
-                        , div [ class "m-8" ] [ View.sentenceInSynonym x state updateInputMsg feedback ]
+                        [ trainingWheels (List.length task.history) x.stimulus x.target
+                        , div [ class "m-8" ] [ View.sentenceInSynonym x task.state updateInputMsg task.feedback ]
                         , div [ class " rounded-md text-center object-center bg-green-300 m-8" ]
                             [ p [ class "p-6 text-xl text-white" ]
                                 [ text "The correct synonym for "
@@ -135,30 +123,15 @@ viewTask experiment maybeInfos { toggleFeedbackMsg, updateInputMsg, nextTrialMsg
                     ]
 
                 ( Nothing, _ ) ->
-                    [ div [ class "flex flex-col" ]
-                        [ text "Now you understand the activity, let's try our target words."
-                        , View.button
-                            { message = toMainloopMsg trials
-                            , txt = "Start"
-                            , isDisabled = False
-                            }
-                        ]
-                    ]
+                    [ View.introToMain <| toMainloopMsg task.mainTrials task.infos ]
 
-        ( E.DoingSynonym (E.MainLoop trials state trialn feedback), Just infos ) ->
-            let
-                trial =
-                    trials
-                        |> List.filter (\datum -> not datum.isTraining)
-                        |> Array.fromList
-                        |> Array.get trialn
-            in
-            case ( trial, feedback ) of
+        Logic.Main task ->
+            case ( task.current, task.feedback ) of
                 ( Just t, False ) ->
                     [ View.tooltip "Type the synonym of the word in the box"
-                    , View.sentenceInSynonym t state updateInputMsg feedback
+                    , View.sentenceInSynonym t task.state updateInputMsg task.feedback
                     , View.button
-                        { message = inputValidationMsg
+                        { message = toggleFeedbackMsg
                         , txt = "Check my answer"
                         , isDisabled = False
                         }
@@ -166,7 +139,7 @@ viewTask experiment maybeInfos { toggleFeedbackMsg, updateInputMsg, nextTrialMsg
 
                 -- TODO: Abstraire le feedback pour le partager entre la phase d'entrainement et la phase principale
                 ( Just t, True ) ->
-                    [ View.sentenceInSynonym t state updateInputMsg feedback
+                    [ View.sentenceInSynonym t task.state updateInputMsg task.feedback
                     , div [ class "p-4" ] []
                     , div [ class "flex flex-col w-full rounded-lg h-48 bg-green-300 items-center text-center" ]
                         [ p [ class "pt-8 text-lg text-white" ] [ text <| "The best synonym for " ++ t.radical ++ " is ", span [ class "font-bold" ] [ text t.target ] ]
@@ -179,19 +152,22 @@ viewTask experiment maybeInfos { toggleFeedbackMsg, updateInputMsg, nextTrialMsg
                     ]
 
                 ( Nothing, _ ) ->
-                    [ text "You've completed the meaning activity. Now let's concentrate on the form." ]
-
-        ( E.DoingSynonym (E.End txt), _ ) ->
-            [ text "Synonym est fini" ]
-
-        ( _, Nothing ) ->
-            [ text "I can't find the requested task's infos. Please report this issue." ]
-
-        _ ->
-            [ text "Unexpected view. You can take it in account in Main.viewExperiment" ]
+                    [ View.end task.infos.end saveDataMsg "spelling" ]
 
 
-decodeSynonymTrials : Decode.Decoder (List E.SynonymTrial)
+start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start info trials =
+    let
+        relatedInfos =
+            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+    in
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+decodeSynonymTrials : Decode.Decoder (List Trial)
 decodeSynonymTrials =
     let
         stringToBoolDecoder : String -> Decode.Decoder Bool
@@ -204,7 +180,7 @@ decodeSynonymTrials =
                     Decode.succeed False
 
         decoder =
-            Decode.succeed E.SynonymTrial
+            Decode.succeed Trial
                 |> required "UID" Decode.string
                 |> required "Word_Text" Decode.string
                 |> required "pre" Decode.string
@@ -216,17 +192,12 @@ decodeSynonymTrials =
     decodeRecords decoder
 
 
-getTrialsFromServer : (Result Http.Error (List E.SynonymTrial) -> msg) -> Cmd msg
-getTrialsFromServer callbackMsg =
-    E.getTrialsFromServer_ "Meaning" callbackMsg decodeSynonymTrials
-
-
-initState : E.SynonymState
+initState : State
 initState =
-    E.SynonymState "DefaultTrialUID" "DefaultUserUID" ""
+    State "DefaultUserUID" ""
 
 
-defaultTrial : E.SynonymTrial
+defaultTrial : Trial
 defaultTrial =
     { uid = "uidMISSING"
     , target = "targetMISSING"
@@ -256,3 +227,20 @@ getRecords =
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeSynonymTrials
         , timeout = Just 5000
         }
+
+
+type alias Trial =
+    { uid : String
+    , target : String
+    , pre : String
+    , stimulus : String
+    , post : String
+    , isTraining : Bool
+    , radical : String
+    }
+
+
+type alias State =
+    { uid : String
+    , userAnswer : String
+    }

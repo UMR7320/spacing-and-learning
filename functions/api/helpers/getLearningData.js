@@ -9,7 +9,7 @@ Airtable.configure({
 
 function handleTableRequest(table_name) {
   if (table_name == "users") {
-    throw Error("You can't access users' table(please?)")
+    throw Error({ statusCode: 403, error: "Forbidden", message: "You can't access the requested table" })
   } else {
     return table_name
   }
@@ -29,6 +29,6 @@ module.exports = async (event) => {
     return formattedReturn(200, { records: formattedLearningData });
   } catch (err) {
     console.error(err);
-    return formattedReturn(500, { err });
+    return formattedReturn(err.statusCode, { "error": err.error, "message": err.message });
   }
 };

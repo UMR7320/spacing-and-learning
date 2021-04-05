@@ -1,5 +1,7 @@
 module View exposing
-    ( button
+    ( audioButton
+    , bold
+    , button
     , container
     , end
     , floatingLabel
@@ -30,7 +32,6 @@ import Array
 import Css
 import Css.Global
 import Css.Transitions
-import Experiment.Experiment as E
 import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
@@ -83,15 +84,16 @@ shuffledOptions state fb radioMsg trial optionsOrder =
     ordoredOptions
 
 
-end endInfo saveDataMsg =
-    div [ class "flex flex-col" ]
-        [ h2 [] [ text "Congrats " ]
-        , text endInfo
-        , button
-            { message = saveDataMsg
-            , isDisabled = False
-            , txt = "Save your data"
-            }
+end endInfo saveDataMsg linkToNextTask =
+    div [ class "flex flex-col w-full items-center" ]
+        [ fromMarkdown endInfo
+        , a [ href linkToNextTask ]
+            [ button
+                { message = saveDataMsg
+                , isDisabled = False
+                , txt = "Click here when you are ready !"
+                }
+            ]
         ]
 
 
@@ -124,41 +126,20 @@ viewQuestion trialn trial instructions =
         ]
 
 
-
-{--viewFeedbackInSingleChoice : Bool -> { a | userAnswer : String } -> { b | target : String } -> Html msg
-viewFeedbackInSingleChoice isVisible state trial  =
-    p
-        [ class
-            ("font-medium py-4 w-full text-white"
-                ++ " "
-                ++ (if isVisible then
-                        "visible"
-
-                    else
-                        "invisible"
-                   )
-            )
-        ]
-        (if state.userAnswer == trial.target then
-            [ text <| "✔️ " ++ String.Interpolate.interpolate pattern_ variables ]
-
-         else
-            [ text "❌ The correct definition is : "
-            , span [ class "font-medium italic" ] [ text trial.target ]
-            ]
-    --}
+bold string =
+    "**" ++ string ++ "**"
 
 
 genericSingleChoiceFeedback : { isVisible : Bool, userAnswer : String, target : String, feedback_Correct : ( String, List String ), feedback_Incorrect : ( String, List String ), button : Html msg } -> Html msg
 genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
     div
         [ class
-            ("max-w-xl w-full rounded-md text-center object-center  mb-8 "
+            (" w-full max-w-2xl rounded-md text-center object-center  mb-8 "
                 ++ (if data.isVisible && data.userAnswer == data.target then
-                        "bg-green-500"
+                        "bg-green-700"
 
                     else if data.isVisible && data.userAnswer /= data.target then
-                        "bg-red-500"
+                        "bg-red-700"
 
                     else if data.isVisible == False then
                         ""
@@ -170,7 +151,7 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
         ]
         [ p
             [ class
-                ("font-medium py-4 w-full text-white"
+                ("text-xl py-4 w-full flex flex-col items-center justify-center  text-white p-2"
                     ++ " "
                     ++ (if data.isVisible then
                             "visible"
@@ -181,10 +162,11 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
                 )
             ]
             (if data.userAnswer == data.target then
-                [ text <| "✔️ " ++ String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
+                [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.checkCircle ], fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
 
              else
-                [ text <| "❌ " ++ String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
+                [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.xCircle ]
+                , fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
                 ]
             )
         , div [ class "p-4" ] [ data.button ]
@@ -230,7 +212,7 @@ genericNeutralFeedback ({ feedback_Correct } as data) =
 
 trainingBox : List (Html msg) -> Html msg
 trainingBox =
-    div [ class "grid grid-cols-6 mx-auto w-full h-full border-4 border-green-500 border-rounded-lg border-dashed " ]
+    div [ class "container flex flex-col items-center justify-center w-full h-full border-4 border-green-500 border-rounded-lg border-dashed " ]
 
 
 viewInstructions : String -> Html msg
@@ -270,7 +252,7 @@ trainingWheelsGeneric : Int -> String -> List String -> Html msg
 trainingWheelsGeneric trialn pattern_ variables =
     let
         helpSentence =
-            div [ class "flex flex-col pt-4 italic text-xl" ] [ p [] [ text <| interpolate pattern_ variables ] ]
+            div [ class "flex flex-col pt-4 pb-4 italic text-xl max-w-xl" ] [ p [] [ fromMarkdown <| interpolate pattern_ variables ] ]
     in
     case trialn of
         0 ->
@@ -329,7 +311,7 @@ feedback_ { attempt, stimulus, target } str =
 header : List (Html msg) -> Html msg
 header items =
     div
-        [ class "fixed top-0 inset-x-0 bg-white border-b border-gray-300" -- Tailwind utilities: https://tailwindcss.com
+        [ class "fixed z-7 top-0 inset-x-0 bg-white border-b border-gray-300" -- Tailwind utilities: https://tailwindcss.com
         , css [ Css.height theme.headerHeight ] -- elm-css: https://package.elm-lang.org/packages/rtfeldman/elm-css/latest
         ]
         [ div
@@ -342,11 +324,11 @@ header items =
                 , href "/"
                 ]
                 [ div
-                    [ class "bg-indigo-600 w-4 h-4 rounded-full mr-2" ]
                     []
+                    [ text "👩\u{200D}🎓️" ]
                 , p
                     [ class "font-bold uppercase text-sm text-gray-800" ]
-                    [ text "Apprentissage et Espacement" ]
+                    [ text "Lex Learn" ]
                 ]
             , ul
                 [ attribute "data-test" "menu"
@@ -433,7 +415,7 @@ radio value isChecked isCorrect feedbackMode msg =
                 ("border-solid border-2 px-4 py-4 mb-1 "
                     ++ (case ( feedbackMode, isChecked, isCorrect ) of
                             ( True, True, False ) ->
-                                "border-red-500 line-through"
+                                "border-red-500"
 
                             ( True, True, True ) ->
                                 "border-green-500"
@@ -459,6 +441,7 @@ radio value isChecked isCorrect feedbackMode msg =
                 [ type_ "radio"
                 , checked isChecked
                 , name "definition-choice"
+                , class "form-radio text-indigo-500"
                 , onClick msg
                 , Html.Styled.Attributes.disabled feedbackMode
                 ]
@@ -470,9 +453,8 @@ radio value isChecked isCorrect feedbackMode msg =
 
 introToMain : msg -> Html msg
 introToMain msg =
-    div [ class "flex flex-col" ]
-        [ h2 [] [ text "The Training is Over 👍️ " ]
-        , text "Now you understand the activity, let's try our target words."
+    div [ class "container flex flex-col w-full items-center justify-center" ]
+        [ h3 [] [ text "Now you understand the activity, let's try our target words." ]
         , button
             { message = msg
             , txt = "Start"
@@ -545,7 +527,7 @@ tooltip text_ =
                     ]
                 ]
             ]
-        , Html.Styled.Attributes.class "h-12 w-12"
+        , Html.Styled.Attributes.class "h-6 w-6"
         ]
         [ Html.Styled.div
             [ Html.Styled.Attributes.class "tooltip__content"
@@ -579,7 +561,7 @@ tooltip text_ =
             ]
             [ div [ class "border-2 p-2 bg-white" ] [ text text_ ] ]
         , Html.Styled.div
-            [ Html.Styled.Attributes.class "tooltip__trigger" ]
+            [ Html.Styled.Attributes.class "tooltip__trigger opacity-75" ]
             [ div [ class "" ] [ Html.Styled.fromUnstyled Icons.helpCircle ] ]
         ]
 
@@ -596,7 +578,7 @@ sentenceInSynonym t state msg feedback_ =
 button : { message : msg, txt : String, isDisabled : Bool } -> Html msg
 button { message, txt, isDisabled } =
     Html.Styled.button
-        [ class "max-w-xl w-full mt-6"
+        [ class "max-w-xl w-full mt-6 mb-4"
         , onClick message
         , Html.Styled.Attributes.disabled isDisabled
         , class <|
@@ -618,3 +600,11 @@ simpleAudioPlayer src =
         , Html.Styled.Attributes.width 300
         ]
         []
+
+
+audioButton msg url audioName =
+    div
+        [ class "px-4 py-4 mt-4 mb-4 hover:opacity-75 cursor-pointer border-2 flex flex-row items-center justify-center bg-green-500 rounded-md shadow-sm"
+        , Html.Styled.Events.onClick (msg url)
+        ]
+        [ div [ class "h-6 w-6 text-white" ] [ fromUnstyled <| Icons.music ], span [ class "pl-4 text-lg font-bold text-white" ] [ text <| "Listen to the " ++ audioName ] ]

@@ -49,11 +49,11 @@ updateWhenNextTrial model shuffleOptionsMsg =
     )
 
 
-viewInstructions =
+viewInstructions txt =
     div [ class "flex flex-col" ]
         [ h2 [ class "font-bold" ] [ text "Instructions" ]
         , p [ class "pt-8 pb-8 font-medium" ]
-            [ pre [] [ text "Focus on the word in the box in each sentence.\u{200B}\nIt’s a synonym for one of the words you are learning.\u{200B}\nClick on the word in the box to type your synonym." ]
+            [ pre [] [ text txt ]
             ]
         , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
         ]
@@ -61,6 +61,25 @@ viewInstructions =
 
 trainingBox =
     div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col" ]
+
+
+viewTask data currentTrial msgs ordoredOptions =
+    [ View.audioButton msgs.playAudio currentTrial.audio.url "word"
+    , div
+        [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
+        [ fieldset
+            []
+            ordoredOptions
+        , View.genericSingleChoiceFeedback
+            { isVisible = data.feedback
+            , userAnswer = data.state.userAnswer
+            , target = currentTrial.target
+            , feedback_Correct = ( data.infos.feedback_correct, [ View.bold currentTrial.target ] )
+            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
+            , button = View.navigationButton msgs.toggleFeedbackMsg msgs.nextTrialMsg data.feedback
+            }
+        ]
+    ]
 
 
 view :
@@ -75,7 +94,7 @@ view :
         , saveDataMsg : msg
         }
     -> Html msg
-view exp optionsOrder { radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloopMsg, playAudio, saveDataMsg } =
+view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloopMsg, playAudio, saveDataMsg } as msgs) =
     case exp of
         Logic.Loading ->
             text "Loading..."
@@ -86,7 +105,7 @@ view exp optionsOrder { radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloop
         Logic.Err reason ->
             text reason
 
-        Logic.Intr { trainingTrials, mainTrials, current, state, feedback, history, infos } ->
+        Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just x ->
                     let
@@ -111,31 +130,16 @@ view exp optionsOrder { radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloop
                                 |> List.map Tuple.second
                     in
                     div []
-                        [ viewInstructions
-                        , trainingBox
-                            [ View.trainingWheelsGeneric (List.length history) infos.trainingWheel [ x.target ]
-                            , View.play playAudio x.audio.url
-                            , div
-                                [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled feedback ]
-                                [ fieldset
-                                    []
-                                    ordoredOptions
-                                ]
-                            , View.genericSingleChoiceFeedback
-                                { isVisible = feedback
-                                , userAnswer = state.userAnswer
-                                , target = x.target
-                                , feedback_Correct = ( infos.feedback_correct, [ x.target ] )
-                                , feedback_Incorrect = ( infos.feedback_incorrect, [ x.target ] )
-                                , button = View.navigationButton toggleFeedbackMsg nextTrialMsg feedback
-                                }
-                            ]
+                        [ viewInstructions infos.instructions
+                        , trainingBox <|
+                            View.trainingWheelsGeneric (List.length history) data.infos.trainingWheel [ View.bold x.target ]
+                                :: viewTask data x msgs ordoredOptions
                         ]
 
                 Nothing ->
                     View.introToMain (startMainloopMsg mainTrials infos)
 
-        Logic.Main { mainTrials, current, state, feedback, history, infos } ->
+        Logic.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just trial ->
                     let
@@ -163,30 +167,17 @@ view exp optionsOrder { radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloop
                                 |> List.map Tuple.second
                     in
                     div [ class "container w-full flex flex-col justify-center items-center" ]
-                        [ div [ class "mr-8 w-full max-w-xl" ]
-                            [ Progressbar.progressBar (View.pct trialn (mainTrials ++ List.map Tuple.first history))
-                            , View.play playAudio trial.audio.url
-                            , div
-                                [ class "pt-6 max-w-xl ", disabled feedback ]
-                                [ fieldset
-                                    []
-                                    ordoredOptions
-                                ]
-
-                            --, View.navigationButton toggleFeedbackMsg nextTrialMsg feedback
-                            , View.genericSingleChoiceFeedback
-                                { isVisible = feedback
-                                , userAnswer = state.userAnswer
-                                , target = trial.target
-                                , feedback_Correct = ( infos.feedback_correct, [ trial.target ] )
-                                , feedback_Incorrect = ( infos.feedback_incorrect, [ trial.target ] )
-                                , button = View.navigationButton toggleFeedbackMsg nextTrialMsg feedback
-                                }
-                            ]
+                        [ div [ class "mr-8 w-full max-w-xl" ] <|
+                            Progressbar.progressBar history mainTrials ::
+                            viewTask
+                                data
+                                trial
+                                msgs
+                                ordoredOptions
                         ]
 
                 Nothing ->
-                    View.end infos.end saveDataMsg
+                    View.end infos.end saveDataMsg "context-understanding"
 
 
 type alias State =

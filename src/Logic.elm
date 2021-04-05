@@ -6,6 +6,7 @@ import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Task
+import Time exposing (toMillis, utc)
 
 
 type Task trial state
@@ -39,6 +40,9 @@ saveData responseHandler maybeUserId taskId task =
         history =
             getHistory task
 
+        taskId_ =
+            taskId
+
         callbackHandler =
             responseHandler
 
@@ -61,7 +65,49 @@ saveData responseHandler maybeUserId taskId task =
                 )
 
         sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder (Decode.field "id" Decode.string) taskId userId history
+            Data.sendInBatch summarizedTrialEncoder (Decode.field "id" Decode.string) taskId_ userId history
+    in
+    Task.attempt callbackHandler sendInBatch_
+
+
+saveAcceptabilityData responseHandler maybeUserId taskId task =
+    let
+        history =
+            getHistory task
+
+        taskId_ =
+            taskId
+
+        callbackHandler =
+            responseHandler
+
+        userId =
+            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        whenNothing =
+            Time.millisToPosix 1000000000
+
+        summarizedTrialEncoder =
+            Encode.list
+                (\( t, s ) ->
+                    Encode.object
+                        [ ( "fields"
+                          , Encode.object
+                                [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
+                                , ( "userUid", Encode.list Encode.string [ userId ] )
+                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
+                                , ( "evaluation", Encode.bool s.evaluation )
+                                , ( "audioEndedAt", Encode.int (toMillis utc (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "beepEndedAt", Encode.int (toMillis utc (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "userAnsweredAt", Encode.int (toMillis utc (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
+                                , ( "evaluation", Encode.bool s.evaluation )
+                                ]
+                          )
+                        ]
+                )
+
+        sendInBatch_ =
+            Data.sendInBatch summarizedTrialEncoder (Decode.field "id" Decode.string) taskId_ userId history
     in
     Task.attempt callbackHandler sendInBatch_
 
@@ -294,6 +340,19 @@ getState task =
 
         Intr { state } ->
             Just state
+
+        _ ->
+            Nothing
+
+
+getTrial : Task t s -> Maybe t
+getTrial task =
+    case task of
+        Main { current } ->
+            current
+
+        Intr { current } ->
+            current
 
         _ ->
             Nothing

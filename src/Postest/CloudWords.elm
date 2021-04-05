@@ -1,25 +1,10 @@
-module Postest.CloudWords exposing (State, toggle, words)
+module Postest.CloudWords exposing (State, WordKnowledge, toggle, words)
 
 import Browser
 import Dict
 import Html exposing (Html)
 import Html.Styled as H exposing (toUnstyled)
 import Html.Styled.Attributes as Attr
-
-
-main : Program () Model Msg
-main =
-    Browser.element
-        { init = init
-        , subscriptions = \_ -> Sub.none
-        , update = update
-        , view = view
-        }
-
-
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { words = Dict.fromList words }, Cmd.none )
 
 
 type alias Model =
@@ -34,20 +19,27 @@ type Msg
     = ToggleWord String
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        ToggleWord word ->
-            ( { model | words = toggle word model.words }, Cmd.none )
+type WordKnowledge
+    = Known
+    | NotKnown
+    | MaybeKnown
 
 
-toggle : comparable -> Dict.Dict comparable Bool -> Dict.Dict comparable Bool
+toggle : comparable -> Dict.Dict comparable WordKnowledge -> Dict.Dict comparable WordKnowledge
 toggle key =
     Dict.update key
         (\old ->
             case old of
                 Just value ->
-                    Just (not value)
+                    case value of
+                        NotKnown ->
+                            Just MaybeKnown
+
+                        MaybeKnown ->
+                            Just Known
+
+                        Known ->
+                            Just NotKnown
 
                 Nothing ->
                     Nothing
@@ -70,32 +62,7 @@ view model =
         |> toUnstyled
 
 
-words : List ( String, Bool )
+words : List ( String, WordKnowledge )
 words =
-    [ ( "crave", False )
-    , ( "curb", False )
-    , ( "dazzle", False )
-    , ( "divert", False )
-    , ( "dread", False )
-    , ( "equate", False )
-    , ( "hail", False )
-    , ( "hinder", False )
-    , ( "hum", False )
-    , ( "incur", False )
-    , ( "intrude", False )
-    , ( "juggle", False )
-    , ( "loathe", False )
-    , ( "mingle", False )
-    , ( "moan", False )
-    , ( "pinpoint", False )
-    , ( "ponder", False )
-    , ( "refrain", False )
-    , ( "relish", False )
-    , ( "saddle", False )
-    , ( "seduce", False )
-    , ( "sprinkle", False )
-    , ( "strive", False )
-    , ( "uphold", False )
-    , ( "vow", False )
-    , ( "wield", False )
+    [ ( "crave", NotKnown )
     ]
