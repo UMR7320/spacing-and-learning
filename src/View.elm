@@ -463,8 +463,12 @@ introToMain msg =
         ]
 
 
+def =
+    Markdown.defaultOptions
+
+
 fromMarkdown =
-    fromUnstyled << Markdown.toHtml []
+    fromUnstyled << Markdown.toHtmlWith { def | sanitize = False } []
 
 
 floatingLabel : String -> String -> (String -> msg) -> Bool -> Html msg

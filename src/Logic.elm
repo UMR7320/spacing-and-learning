@@ -87,6 +87,9 @@ saveAcceptabilityData responseHandler maybeUserId taskId task =
         whenNothing =
             Time.millisToPosix 1000000000
 
+        intFromMillis posix =
+            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
+
         summarizedTrialEncoder =
             Encode.list
                 (\( t, s ) ->
@@ -97,9 +100,11 @@ saveAcceptabilityData responseHandler maybeUserId taskId task =
                                 , ( "userUid", Encode.list Encode.string [ userId ] )
                                 , ( "Task_UID", Encode.list Encode.string [ taskId ] )
                                 , ( "evaluation", Encode.bool s.evaluation )
-                                , ( "audioEndedAt", Encode.int (toMillis utc (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "beepEndedAt", Encode.int (toMillis utc (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "userAnsweredAt", Encode.int (toMillis utc (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
+                                , ( "audioStartedAt", intFromMillis s.audioStartedAt )
+                                , ( "beepStartedAt", intFromMillis s.beepStartedAt )
+                                , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "beepEndedAt", Encode.int (Time.posixToMillis (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "userAnsweredAt", Encode.int (Time.posixToMillis (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
                                 , ( "evaluation", Encode.bool s.evaluation )
                                 ]
                           )
@@ -159,7 +164,7 @@ next resetedState task =
                     Main
                         { data
                             | mainTrials = []
-                            , current = Nothing
+                            , current = Just last
                             , next = Nothing
                             , history = ( last, data.state ) :: data.history
                             , feedback = not data.feedback
@@ -178,7 +183,15 @@ next resetedState task =
                         }
 
                 [] ->
-                    Err "I tried to move to the next trial but there is no more trial.  Please report this error message."
+                    Main
+                        { data
+                            | mainTrials = []
+                            , current = Nothing
+                            , next = Nothing
+                            , history = data.history
+                            , feedback = data.feedback
+                            , state = resetedState
+                        }
 
         Loading ->
             Err "You can't go to the next trial before the experiment is started. Please report this error message."
@@ -206,7 +219,7 @@ next resetedState task =
                     Intr
                         { data
                             | trainingTrials = []
-                            , current = Nothing
+                            , current = Just last
                             , next = Nothing
                             , history = ( last, data.state ) :: data.history
                             , feedback = not data.feedback
@@ -225,7 +238,15 @@ next resetedState task =
                         }
 
                 [] ->
-                    Err "There is no more trial"
+                    Intr
+                        { data
+                            | trainingTrials = []
+                            , current = Nothing
+                            , next = Nothing
+                            , history = data.history
+                            , feedback = data.feedback
+                            , state = resetedState
+                        }
 
 
 startIntro : Infos -> List t -> List t -> s -> Task t s

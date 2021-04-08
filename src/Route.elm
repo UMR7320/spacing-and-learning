@@ -10,7 +10,17 @@ module Route exposing
     )
 
 import Url
-import Url.Parser as Parser exposing ((</>), Parser, int, map, oneOf, s, string, top)
+import Url.Parser as Parser
+    exposing
+        ( (</>)
+        , Parser
+        , int
+        , map
+        , oneOf
+        , s
+        , string
+        , top
+        )
 
 
 type Route
@@ -52,6 +62,7 @@ type PretestTask
 type AcceptabilityRoute
     = AcceptabilityInstructions
     | AcceptabilityStart
+    | AcceptabilityEnd
 
 
 
@@ -89,6 +100,7 @@ parser =
                 </> oneOf
                         [ map AcceptabilityInstructions (s "instructions")
                         , map AcceptabilityStart (s "start")
+                        , map AcceptabilityEnd (s "end")
                         ]
             )
         , map Pretest

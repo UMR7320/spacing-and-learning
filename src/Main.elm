@@ -64,33 +64,17 @@ type alias Flags =
 port playAudio : String -> Cmd msg
 
 
-port audioEnded : (InboundAudioInfos -> msg) -> Sub msg
+port audioEnded : ({ eventType : String, name : String, timestamp : Int } -> msg) -> Sub msg
 
 
-type alias InboundAudioInfos =
-    { endedAt : Int, audioName : String }
 
-
+{--
 decodeAudioInfos =
     Json.Decode.succeed InboundAudioInfos
+        |> Json.Decode.Pipeline.custom (Json.Decode.field "eventType" <| Json.Decode.andThen eventTypeDecoder)
         |> Json.Decode.Pipeline.required "endedAt" Json.Decode.int
         |> Json.Decode.Pipeline.required "audioName" Json.Decode.string
-
-
-mapAudioInfos json =
-    case Json.Decode.decodeValue decodeAudioInfos json of
-        Ok decodedAudioInfos ->
-            Acceptability (Acceptability.AudioEnded decodedAudioInfos)
-
-        Err reason ->
-            let
-                _ =
-                    Debug.log "Error in mapAudioInfos :" reason
-            in
-            NoOp
-
-
-
+--}
 -- MODEL
 
 
@@ -561,6 +545,9 @@ body model =
 
             Route.Pilote _ task ->
                 case task of
+                    Route.AcceptabilityEnd ->
+                        [ p [] [ text "Thanks again for your time and your help with this project. \nContact shona.whyte@univ-cotedazur.fr if you have any questions or comments." ] ]
+
                     Route.AcceptabilityStart ->
                         Acceptability.view model.acceptabilityTask
                             { startTraining = Acceptability Acceptability.StartTraining
@@ -575,9 +562,11 @@ body model =
                                     taskInfo =
                                         Dict.get "recR8areYkKRvQ6lU" informations |> Maybe.map .instructions |> Maybe.withDefault "I couldn't find the infos of the task : recR8areYkKRvQ6lU "
                                 in
-                                [ h1 [ class "flex flex-col w-full items-center justify-center" ] [ text "Instructions" ]
-                                , p [ class "max-w-2xl text-xl text-center mb-8" ] [ View.fromMarkdown taskInfo ]
-                                , View.button { message = Acceptability Acceptability.StartTraining, txt = "String", isDisabled = False }
+                                [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
+                                    [ h1 [ class "" ] [ text "Instructions" ]
+                                    , p [ class "max-w-2xl text-xl text-center mb-8" ] [ View.fromMarkdown taskInfo ]
+                                    , View.button { message = Acceptability Acceptability.StartTraining, txt = "Let's start with four practice items", isDisabled = False }
+                                    ]
                                 ]
 
                             RemoteData.Failure reason ->
@@ -987,25 +976,26 @@ update msg model =
                                 Nothing ->
                                     ( model, Cmd.none )
 
-                        Acceptability.AudioEnded { endedAt, audioName } ->
-                            let
-                                cinematic =
-                                    if audioName == beep then
-                                        toNextStep 500 Acceptability.Listening
-
-                                    else
-                                        toNextStep 0 Acceptability.Answering
-                            in
-                            if audioName == beep then
-                                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just (Time.millisToPosix endedAt) } model.acceptabilityTask }, toNextStep 500 Acceptability.Listening )
+                        Acceptability.AudioEnded ( name, timestamp ) ->
+                            if name == beep then
+                                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask }, toNextStep 500 Acceptability.Listening )
 
                             else
-                                ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just (Time.millisToPosix endedAt) } model.acceptabilityTask }
+                                ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask }
                                 , toNextStep 0 Acceptability.Answering
                                 )
 
+                        Acceptability.AudioStarted ( name, timestamp ) ->
+                            if name == beep then
+                                ( { model | acceptabilityTask = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptabilityTask }, Cmd.none )
+
+                            else
+                                ( { model | acceptabilityTask = Logic.update { pState | audioStartedAt = Just timestamp } model.acceptabilityTask }
+                                , Cmd.none
+                                )
+
                         Acceptability.StartTraining ->
-                            ( model, Cmd.batch [ Delay.after 0 playBeep, Task.perform (always NoOp) (Browser.Dom.setViewport 0 400), Nav.pushUrl model.key "start" ] )
+                            ( model, Cmd.batch [ Nav.pushUrl model.key "start" ] )
 
                         _ ->
                             Debug.todo ""
@@ -1017,7 +1007,7 @@ update msg model =
                     in
                     case message of
                         Acceptability.StartMain trials infos ->
-                            ( { model | acceptabilityTask = Logic.startMain infos trials Acceptability.initState }, Delay.after 0 playBeep )
+                            ( { model | acceptabilityTask = Logic.startMain infos trials Acceptability.initState }, Cmd.none )
 
                         Acceptability.RuntimeShuffledTrials info trials ->
                             ( { model | acceptabilityTask = Acceptability.start info trials }, Cmd.none )
@@ -1031,6 +1021,12 @@ update msg model =
                                     "recR8areYkKRvQ6lU"
                             in
                             ( model, Logic.saveAcceptabilityData responseHandler model.user taskId model.acceptabilityTask )
+
+                        Acceptability.ServerRespondedWithLastRecords (Result.Ok records) ->
+                            Debug.todo "ServerRespondedWith Last records"
+
+                        Acceptability.ServerRespondedWithLastRecords (Result.Err reason) ->
+                            Debug.todo <| "ServerRespondedwith an error: " ++ Debug.toString reason
 
                         _ ->
                             ( model, Cmd.none )
@@ -1070,7 +1066,7 @@ update msg model =
 
                 swapTargetWithOneDistractor : List (List Acceptability.Trial) -> List (Random.Generator (List Acceptability.Trial))
                 swapTargetWithOneDistractor tr =
-                    List.map (\block -> Random.int 2 4 |> Random.andThen (\position -> Random.constant (List.Extra.swapAt 1 position block))) tr
+                    List.map (\block -> Random.int 1 3 |> Random.andThen (\position -> Random.constant (List.Extra.swapAt 0 position block))) tr
             in
             ( { model | infos = RemoteData.Success (ExperimentInfo.toDict info) }, generateOrganizedTrials )
 
@@ -1529,6 +1525,9 @@ subscriptions model =
                     if state.step == Acceptability.Answering then
                         onKeyDown keyDecoder
 
+                    else if state.step == Acceptability.Start then
+                        onKeyDown decodeSpace
+
                     else
                         Sub.none
 
@@ -1548,8 +1547,78 @@ subscriptions model =
         , listenToInput
 
         --, clock
-        , audioEnded (\{ endedAt, audioName } -> Acceptability (Acceptability.AudioEnded { endedAt = endedAt, audioName = audioName }))
+        , audioEnded toAcceptabilityMessage
         ]
+
+
+audioCallbackDecoder : Json.Decode.Decoder InboundAudioInfos
+audioCallbackDecoder =
+    Json.Decode.succeed InboundAudioInfos
+        |> Json.Decode.Pipeline.required "audio" Json.Decode.string
+        |> Json.Decode.Pipeline.required "name" Json.Decode.string
+        |> Json.Decode.Pipeline.custom (Json.Decode.field "endedAt" Json.Decode.int |> Json.Decode.map Time.millisToPosix)
+
+
+
+--toAcceptabilityMessage : Json.Decode.Decoder InboundAudioInfos -> Json.Decode.Decoder Msg
+
+
+toAcceptabilityMessage { eventType, name, timestamp } =
+    case eventType of
+        "SoundStarted" ->
+            Acceptability (Acceptability.AudioStarted ( name, Time.millisToPosix timestamp ))
+
+        "SoundEnded" ->
+            Acceptability (Acceptability.AudioEnded ( name, Time.millisToPosix timestamp ))
+
+        _ ->
+            Debug.todo ""
+
+
+type JsAudioEvent
+    = AudioStarted String Time.Posix
+    | AudioEnded String Time.Posix
+
+
+type alias InboundAudioInfos =
+    { eventType : String
+    , name : String
+    , timestamp : Time.Posix
+    }
+
+
+type EventType
+    = SoundStarted
+    | SoundEnded
+
+
+eventTypeDecoder : String -> Json.Decode.Decoder EventType
+eventTypeDecoder event =
+    case event of
+        "SoundStarted" ->
+            Json.Decode.succeed SoundStarted
+
+        "SoundEnded" ->
+            Json.Decode.succeed SoundEnded
+
+        _ ->
+            Json.Decode.fail <| "Could't parse this event Type: " ++ event
+
+
+
+--mapToEventType : String -> String -> Time.Posix -> Json.Decode.Decoder JsAudioEvent
+
+
+audioEndedDecoder =
+    Json.Decode.succeed AudioStarted
+        |> Json.Decode.Pipeline.required "audioName" Json.Decode.string
+        |> Json.Decode.Pipeline.custom (Json.Decode.field "endedAt" Json.Decode.int |> Json.Decode.andThen (\time -> Json.Decode.succeed (Time.millisToPosix time)))
+
+
+audioStartedDecoder =
+    Json.Decode.succeed AudioEnded
+        |> Json.Decode.Pipeline.required "audioName" Json.Decode.string
+        |> Json.Decode.Pipeline.custom (Json.Decode.field "endedAt" Json.Decode.int |> Json.Decode.andThen (\time -> Json.Decode.succeed (Time.millisToPosix time)))
 
 
 keyDecoder : Json.Decode.Decoder Msg
@@ -1557,11 +1626,26 @@ keyDecoder =
     Json.Decode.map toEvaluation (Json.Decode.field "key" Json.Decode.string)
 
 
+decodeSpace : Json.Decode.Decoder Msg
+decodeSpace =
+    Json.Decode.map
+        (\k ->
+            case k of
+                " " ->
+                    playBeep
+
+                _ ->
+                    NoOp
+        )
+        (Json.Decode.field "key" Json.Decode.string)
+
+
 
 --toEvaluation : String -> Msg
 --toEvaluation : String -> Msg
 
 
+toEvaluation : String -> Msg
 toEvaluation x =
     case x of
         "j" ->
@@ -1569,6 +1653,9 @@ toEvaluation x =
 
         "f" ->
             Acceptability (Acceptability.UserPressedButton (Just False))
+
+        " " ->
+            playBeep
 
         _ ->
             Acceptability (Acceptability.UserPressedButton Nothing)

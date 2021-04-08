@@ -4,8 +4,8 @@ import Array
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, div, h1, h3, p, span, text)
-import Html.Styled.Attributes exposing (class)
+import Html.Styled exposing (Html, a, div, h1, h3, p, span, text)
+import Html.Styled.Attributes exposing (class, height, src, width)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
@@ -21,7 +21,8 @@ type Msg
     = UserPressedButton (Maybe Bool)
     | UserPressedButtonWithTimestamp (Maybe Bool) Time.Posix
     | NextStepCinematic Step
-    | AudioEnded { endedAt : Int, audioName : String }
+    | AudioEnded ( String, Time.Posix )
+    | AudioStarted ( String, Time.Posix )
     | StartTraining
     | UserClickedSaveMsg
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List String))
@@ -99,6 +100,19 @@ viewInstructions data msg =
     ]
 
 
+viewTransition infos rurl msg buttontext =
+    div [ class "flex flex-col items-center justify-center" ]
+        [ p [] [ View.fromMarkdown infos ]
+        , a [ Html.Styled.Attributes.href rurl ]
+            [ View.button
+                { isDisabled = False
+                , message = msg
+                , txt = buttontext
+                }
+            ]
+        ]
+
+
 view :
     Logic.Task Trial State
     ->
@@ -108,45 +122,62 @@ view :
         }
     -> List (Html msg)
 view task { startMainMsg, startTraining, saveDataMsg } =
+    let
+        prompt =
+            div [ class "flex flex-col items-center justify-center" ] [ Html.Styled.img [ src "/acceptability.png", class "items-center justify-center", width 500, height 500 ] [] ]
+    in
     case task of
         Logic.Intr data ->
             case data.current of
                 Nothing ->
-                    [ View.introToMain (startMainMsg data.infos data.mainTrials) ]
+                    [ View.button
+                        { isDisabled = False
+                        , message = startMainMsg data.infos data.mainTrials
+                        , txt = "Now that you understand the task, let’s get started!"
+                        }
+                    ]
 
                 Just trial ->
                     case data.state.step of
                         Start ->
-                            [ viewScreen []
+                            [ if List.length data.history == 0 then
+                                View.fromMarkdown data.infos.instructions_short
+
+                              else
+                                div [] []
                             ]
 
-                        Listening ->
-                            [ viewScreen [] ]
-
-                        Answering ->
-                            [ viewScreen viewKeys ]
-
                         End ->
-                            [ viewScreen [] ]
+                            []
+
+                        _ ->
+                            [ prompt
+                            ]
 
         Logic.Main data ->
             case data.current of
                 Nothing ->
-                    [ View.end data.infos.end saveDataMsg "#" ]
+                    [ viewTransition data.infos.end "end" saveDataMsg "Click here to end this experiment"
+                    ]
 
                 Just trial ->
                     case data.state.step of
                         Start ->
-                            [ viewScreen [] ]
+                            [ if List.length data.history == 0 then
+                                View.fromMarkdown data.infos.trainingWheel
+
+                              else
+                                div [] []
+                            ]
 
                         Listening ->
-                            [ viewScreen [] ]
+                            [ prompt ]
 
                         Answering ->
-                            [ viewScreen viewKeys ]
+                            [ prompt ]
 
                         End ->
-                            [ viewScreen [] ]
+                            []
 
         Logic.Loading ->
             [ text "Loading..." ]
@@ -317,6 +348,8 @@ initState =
     { trialuid = "defaulttrialuid"
     , evaluation = False
     , beepEndedAt = Nothing
+    , beepStartedAt = Nothing
+    , audioStartedAt = Nothing
     , audioEndedAt = Nothing
     , userAnsweredAt = Nothing
     , step = Start
@@ -334,6 +367,8 @@ type alias CurrentTrialNumber =
 type alias State =
     { trialuid : String
     , evaluation : Bool
+    , beepStartedAt : Maybe Time.Posix
+    , audioStartedAt : Maybe Time.Posix
     , beepEndedAt : Maybe Time.Posix
     , audioEndedAt : Maybe Time.Posix
     , userAnsweredAt : Maybe Time.Posix

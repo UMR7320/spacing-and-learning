@@ -75,6 +75,9 @@ sendInBatch historyEncoder callbackDecoder taskId userId history =
 
         fieldsToUpdate =
             Encode.object [ ( "tasks", Encode.list Encode.string [ taskId ] ) ]
+
+        _ =
+            Debug.log "records to send" history
     in
     chuncks
         |> List.map

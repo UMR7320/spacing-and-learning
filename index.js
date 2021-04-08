@@ -20,10 +20,15 @@ app.ports.playAudio.subscribe((audio) => {
     
   });
   sound.play();
-  sound.on('end', () => {
-    let audioCallback = {"endedAt":Date.now(), "audioName":audio}
+  sound.once('play', () => {
+    let audioCallback = { "eventType": "SoundStarted","timestamp": Date.now(), "name": audio }
     app.ports.audioEnded.send(audioCallback);
-    console.log('sound is over');
+    console.log({ "sound started": audio, timestamp: Date.now() })
+  });
+  sound.once('end', () => {
+    let audioCallback = {"eventType": "SoundEnded", timestamp:Date.now(), "name":audio}
+    app.ports.audioEnded.send(audioCallback);
+    console.log({'sound is over':audio, timestamp: Date.now()});
     console.log(audio);
   } )
 })
