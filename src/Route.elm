@@ -56,7 +56,7 @@ type PretestTask
     = YN
     | GeneralInfos
     | EmailSent
-    | PiloteInfos --AcceptabilityRoute
+    | SPR
 
 
 type AcceptabilityRoute
@@ -86,10 +86,10 @@ parser =
         , map Pretest
             (s "pretest"
                 </> oneOf
-                        [ map YN (s "yesno-task")
+                        [ map SPR (s "spr")
+                        , map YN (s "yesno-task")
                         , map GeneralInfos (s "informations")
                         , map EmailSent (s "email-sent")
-                        , map PiloteInfos (s "pilote-informations")
                         ]
             )
         , map Pilote

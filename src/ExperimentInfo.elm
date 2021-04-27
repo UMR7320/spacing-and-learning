@@ -17,6 +17,8 @@ type Session
     | Session2
     | Session3
     | Pretest
+    | Posttest
+    | OtherSession
 
 
 sessionToString str =
@@ -31,7 +33,13 @@ sessionToString str =
             "Session 3"
 
         Pretest ->
-            "Pretest "
+            "Pretest"
+
+        Posttest ->
+            "Post-test"
+
+        OtherSession ->
+            "Other"
 
 
 type Type_
@@ -65,19 +73,7 @@ toDict newInfos =
         |> List.map
             (\info ->
                 ( info.uid
-                , { uid = info.uid
-                  , session = info.session
-                  , type_ = info.type_
-                  , name = info.name
-                  , url = info.url
-                  , description = info.description
-                  , instructions = info.instructions
-                  , instructions_short = info.instructions_short
-                  , end = info.end
-                  , feedback_correct = info.feedback_correct
-                  , feedback_incorrect = info.feedback_incorrect
-                  , trainingWheel = info.trainingWheel
-                  }
+                , identity info
                 )
             )
         |> Dict.fromList
@@ -117,8 +113,11 @@ decode =
                 "Prétest" ->
                     Decode.succeed Pretest
 
+                "Post-test" ->
+                    Decode.succeed Posttest
+
                 _ ->
-                    Decode.fail "I couldn't map this to a Session"
+                    Decode.succeed OtherSession
 
         mapToType_ : String -> Decode.Decoder Type_
         mapToType_ str =
@@ -140,14 +139,14 @@ decode =
                 |> required "UID" Decode.string
                 |> custom (Decode.field "Session" Decode.string |> Decode.andThen mapToSession)
                 |> custom (Decode.field "Type" Decode.string |> Decode.andThen mapToType_)
-                |> required "Name" Decode.string
-                |> required "Demo_Link" Decode.string
-                |> required "Description" Decode.string
-                |> required "Instructions" Decode.string
-                |> required "Instructions_short" Decode.string
-                |> required "feedback_correct" Decode.string
-                |> required "feedback_incorrect" Decode.string
-                |> required "End" Decode.string
+                |> optional "Name" Decode.string "Missing Name"
+                |> optional "Demo_Link" Decode.string "Missing link"
+                |> optional "Description" Decode.string "Missing Description"
+                |> optional "Instructions" Decode.string "Missing instructions"
+                |> optional "Instructions_short" Decode.string "Missing instructions short"
+                |> optional "feedback_correct" Decode.string "Missing feedback correct"
+                |> optional "feedback_incorrect" Decode.string "Missing feedback incorrect"
+                |> optional "End" Decode.string "Missing End"
                 |> optional "trainingWheels" Decode.string "Missing training wheel"
     in
     Data.decodeRecords decoder

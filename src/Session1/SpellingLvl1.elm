@@ -35,7 +35,7 @@ type Msg
     | UserClickedRadioButton String
     | UserClickedStartMainloop (List Trial) ExperimentInfo.Task
     | UserClickedSavedData
-    | ServerRespondedWithLastRecords (Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
 
 
 updateWhenNextTrial model shuffleOptionsMsg =
@@ -103,7 +103,7 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
             text "I'm not started yet"
 
         Logic.Err reason ->
-            text reason
+            text <| "Error: " ++ reason
 
         Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
@@ -168,12 +168,12 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
                     in
                     div [ class "container w-full flex flex-col justify-center items-center" ]
                         [ div [ class "mr-8 w-full max-w-xl" ] <|
-                            Progressbar.progressBar history mainTrials ::
-                            viewTask
-                                data
-                                trial
-                                msgs
-                                ordoredOptions
+                            Progressbar.progressBar history mainTrials
+                                :: viewTask
+                                    data
+                                    trial
+                                    msgs
+                                    ordoredOptions
                         ]
 
                 Nothing ->

@@ -65,7 +65,7 @@ saveData responseHandler maybeUserId taskId task =
                 )
 
         sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder (Decode.field "id" Decode.string) taskId_ userId history
+            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
     in
     Task.attempt callbackHandler sendInBatch_
 
@@ -112,7 +112,7 @@ saveAcceptabilityData responseHandler maybeUserId taskId task =
                 )
 
         sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder (Decode.field "id" Decode.string) taskId_ userId history
+            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
     in
     Task.attempt callbackHandler sendInBatch_
 
@@ -164,7 +164,7 @@ next resetedState task =
                     Main
                         { data
                             | mainTrials = []
-                            , current = Just last
+                            , current = Nothing
                             , next = Nothing
                             , history = ( last, data.state ) :: data.history
                             , feedback = not data.feedback
@@ -219,7 +219,7 @@ next resetedState task =
                     Intr
                         { data
                             | trainingTrials = []
-                            , current = Just last
+                            , current = Nothing
                             , next = Nothing
                             , history = ( last, data.state ) :: data.history
                             , feedback = not data.feedback
@@ -249,6 +249,8 @@ next resetedState task =
                         }
 
 
+{-| Init the task with infos, trainingTrials, mainTrials and the initial state
+-}
 startIntro : Infos -> List t -> List t -> s -> Task t s
 startIntro infos trainingTrials mainTrials initStat =
     case infos of
@@ -294,44 +296,49 @@ startIntro infos trainingTrials mainTrials initStat =
             Err <| "I tried to start the intro of this task but I stumbled into an error : " ++ error
 
 
-startMain : ExperimentInfo.Task -> List t -> s -> Task t s
-startMain info mainTrials initStat =
-    case mainTrials of
-        [] ->
-            Main
-                { trainingTrials = []
-                , mainTrials = []
-                , current = Nothing
-                , next = Nothing
-                , state = initStat
-                , feedback = False
-                , history = []
-                , infos = info
-                }
+startMain : Task t s -> s -> Task t s
+startMain task initState =
+    case task of
+        Intr data ->
+            case data.mainTrials of
+                x :: y :: _ ->
+                    Main
+                        { trainingTrials = []
+                        , mainTrials = data.mainTrials
+                        , current = Just x
+                        , next = Just y
+                        , state = initState
+                        , feedback = False
+                        , history = data.history
+                        , infos = data.infos
+                        }
 
-        x :: y :: ys ->
-            Main
-                { trainingTrials = []
-                , mainTrials = y :: ys
-                , current = Just x
-                , next = Just y
-                , state = initStat
-                , feedback = False
-                , history = []
-                , infos = info
-                }
+                [ x ] ->
+                    Main
+                        { trainingTrials = []
+                        , mainTrials = data.mainTrials
+                        , current = Just x
+                        , next = Nothing
+                        , state = initState
+                        , feedback = False
+                        , history = data.history
+                        , infos = data.infos
+                        }
 
-        [ x ] ->
-            Main
-                { trainingTrials = []
-                , mainTrials = mainTrials
-                , current = Just x
-                , next = Nothing
-                , state = initStat
-                , feedback = False
-                , history = []
-                , infos = info
-                }
+                [] ->
+                    Main
+                        { trainingTrials = []
+                        , mainTrials = data.mainTrials
+                        , current = Nothing
+                        , next = Nothing
+                        , state = initState
+                        , feedback = False
+                        , history = data.history
+                        , infos = data.infos
+                        }
+
+        _ ->
+            Err "I can't go to Main from here"
 
 
 toggle : Task t s -> Task t s

@@ -21,7 +21,7 @@ type Msg
     | UserClickedNextTrial
     | UserClickedStartMainloop (List Trial) ExperimentInfo.Task
     | SaveDataMsg
-    | ServerRespondedWithLastRecords (Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
 
 
 trainingWheels : Int -> String -> String -> Html msg

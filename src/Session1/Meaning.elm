@@ -45,7 +45,7 @@ type Msg
     | UserClickedStartIntro (List Trial)
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | SaveDataMsg
-    | ServerRespondedWithLastRecords (Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
 
 
 decodeMeaningInput : Decoder (List Trial)
@@ -168,13 +168,13 @@ view task =
         Logic.Main data ->
             case data.current of
                 Just trial ->
-                    div [ class "container flex flex-col items-center justify-center w-full" ]
+                    div [ class "container flex flex-col items-center justify-center" ]
                         [ Progressbar.progressBar data.history data.mainTrials
-                        , View.tooltip data.infos.instructions_short
-                        , p [ class "col-start-2 col-span-4" ] [ viewQuestion trial.writtenWord (List.length data.history) ]
-                        , div [ class "col-start-2 col-span-4" ]
-                            [ div
-                                [ class "pt-6 max-w-xl ", disabled data.feedback ]
+                        , View.tooltip (interpolate data.infos.instructions_short [ trial.writtenWord ])
+                        , div [ class "mr-8 w-full max-w-xl" ]
+                            [ viewQuestion trial.writtenWord (List.length data.history)
+                            , div
+                                [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
                               <|
                                 View.shuffledOptions
                                     data.state
@@ -182,9 +182,7 @@ view task =
                                     task.radioMsg
                                     trial
                                     task.optionsOrder
-                            ]
-                        , div [ class "col-start-2 col-span-4" ] <|
-                            [ View.genericSingleChoiceFeedback
+                            , View.genericSingleChoiceFeedback
                                 { isVisible = data.feedback
                                 , userAnswer = data.state.userAnswer
                                 , target = trial.target

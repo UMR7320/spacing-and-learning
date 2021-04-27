@@ -83,7 +83,7 @@ type Msg
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserChangedInput String
     | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg

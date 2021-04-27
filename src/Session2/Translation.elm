@@ -48,7 +48,7 @@ type Msg
     | UserClickedStartIntro (List Trial)
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | RuntimeSentData (List SummarizedTrial)
-    | ServerRespondedWithLastRecords (Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
 
 
 type alias Trial =

@@ -130,7 +130,7 @@ type CU1Msg
     | UserClickedRadioButton String
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg

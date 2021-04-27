@@ -11,10 +11,22 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Maybe
+import String.Interpolate exposing (interpolate)
 import Task
 import Time
 import Url.Builder exposing (Root(..))
 import View
+
+
+
+-- todo : feedback dans fin.
+-- création des blocs manque des blocs parfois.
+
+
+type ErrorBlock
+    = FirstDistractorMissing Bool
+    | SecondDistractorMissing Bool
+    | ThirdDistractorMissing Bool
 
 
 type Msg
@@ -25,9 +37,9 @@ type Msg
     | AudioStarted ( String, Time.Posix )
     | StartTraining
     | UserClickedSaveMsg
-    | ServerRespondedWithLastRecords (Result.Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | StartMain (List Trial) ExperimentInfo.Task
-    | RuntimeShuffledTrials (List ExperimentInfo.Task) (List Trial)
+    | RuntimeShuffledTrials (List ExperimentInfo.Task) (Result.Result ( ErrorBlock, List Trial ) (List (List Trial)))
 
 
 type alias Trial =
@@ -37,6 +49,7 @@ type alias Trial =
     , trialType : TrialType
     , isGrammatical : Bool
     , audio : Data.AudioFile
+    , feedback : String
     }
 
 
@@ -113,6 +126,15 @@ viewTransition infos rurl msg buttontext =
         ]
 
 
+grammaticalityToKey : Bool -> String
+grammaticalityToKey isGrammatical =
+    if isGrammatical then
+        "J = ACCEPTABLE: {0}."
+
+    else
+        "F = NOT ACCEPTABLE: {0}. The acceptable sentence is: {1}"
+
+
 view :
     Logic.Task Trial State
     ->
@@ -124,31 +146,37 @@ view :
 view task { startMainMsg, startTraining, saveDataMsg } =
     let
         prompt =
-            div [ class "flex flex-col items-center justify-center" ] [ Html.Styled.img [ src "/acceptability.png", class "items-center justify-center", width 500, height 500 ] [] ]
+            div [ class "flex flex-col items-center justify-center" ]
+                [ Html.Styled.img
+                    [ src "/acceptability.png"
+                    , class "items-center justify-center"
+                    , width 500
+                    , height 500
+                    ]
+                    []
+                ]
     in
     case task of
         Logic.Intr data ->
             case data.current of
                 Nothing ->
-                    [ View.button
-                        { isDisabled = False
-                        , message = startMainMsg data.infos data.mainTrials
-                        , txt = "Now that you understand the task, let’s get started!"
-                        }
+                    [ div [ class "flex flex-col items-center" ]
+                        [ View.button
+                            { isDisabled = False
+                            , message = startMainMsg data.infos data.mainTrials
+                            , txt = "That's it for the practice items"
+                            }
+                        ]
                     ]
 
                 Just trial ->
                     case data.state.step of
-                        Start ->
-                            [ if List.length data.history == 0 then
-                                View.fromMarkdown data.infos.instructions_short
-
-                              else
-                                div [] []
+                        Init ->
+                            [ p [ class "flex flex-col  text-center " ] [ View.fromMarkdown data.infos.instructions_short ]
                             ]
 
                         End ->
-                            []
+                            [ div [ class "flex flex-col items-center justify-center" ] [ View.fromMarkdown trial.feedback ] ]
 
                         _ ->
                             [ prompt
@@ -162,22 +190,15 @@ view task { startMainMsg, startTraining, saveDataMsg } =
 
                 Just trial ->
                     case data.state.step of
-                        Start ->
-                            [ if List.length data.history == 0 then
-                                View.fromMarkdown data.infos.trainingWheel
-
-                              else
-                                div [] []
+                        Init ->
+                            [ p [ class "flex flex-col  text-center " ] [ View.fromMarkdown data.infos.trainingWheel ]
                             ]
-
-                        Listening ->
-                            [ prompt ]
-
-                        Answering ->
-                            [ prompt ]
 
                         End ->
                             []
+
+                        _ ->
+                            [ prompt ]
 
         Logic.Loading ->
             [ text "Loading..." ]
@@ -185,8 +206,9 @@ view task { startMainMsg, startTraining, saveDataMsg } =
         Logic.NotStarted ->
             [ text "not started" ]
 
-        Logic.Err _ ->
-            [ text "error" ]
+        Logic.Err reason ->
+            [ p [] [ text <| "Oups, I ran into the following error: " ++ reason, text ". Try to reload the page once or twice and see if it helps?" ]
+            ]
 
 
 decodeAcceptabilityTrials : Decode.Decoder (List Trial)
@@ -198,8 +220,9 @@ decodeAcceptabilityTrials =
                 |> required "Acceptability Sentence" Decode.string
                 |> custom (Decode.field "Sentence type" Decode.string |> Decode.andThen toSentenceType)
                 |> custom (Decode.field "Trial type" Decode.string |> Decode.andThen toTrialTypeDecoder)
-                |> optional "IsGrammtical" Decode.bool False
+                |> optional "IsGrammatical" Decode.bool False
                 |> required "Acceptability Audio" Data.decodeAudioFiles
+                |> optional "Acceptability Feedback" Decode.string "no feedback"
 
         toTrialTypeDecoder str =
             case str of
@@ -352,6 +375,18 @@ initState =
     , audioStartedAt = Nothing
     , audioEndedAt = Nothing
     , userAnsweredAt = Nothing
+    , step = Init
+    }
+
+
+newLoop =
+    { trialuid = "defaulttrialuid"
+    , evaluation = False
+    , beepEndedAt = Nothing
+    , beepStartedAt = Nothing
+    , audioStartedAt = Nothing
+    , audioEndedAt = Nothing
+    , userAnsweredAt = Nothing
     , step = Start
     }
 
@@ -381,6 +416,7 @@ type Step
     | Listening
     | Answering
     | End
+    | Init
 
 
 type Evaluation

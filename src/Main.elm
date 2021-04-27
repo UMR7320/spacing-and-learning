@@ -1,6 +1,7 @@
 port module Main exposing
     ( isNextSentence
     , main
+    , nextNewSentenceType
     , organizeAcceptabilityTrials
     , removesItems
     , toEvaluation
@@ -136,6 +137,7 @@ type alias Model =
     --cu1 stands for context-understanding-1
     , cu1 : Logic.Task CU1.Trial CU1.State
     , presentation : Logic.Task Presentation.Trial Presentation.State
+    , endAcceptabilityDuration : Int
 
     --                                                                  .dP"Y8 888888 .dP"Y8 .dP"Y8 88  dP"Yb  88b 88     oP"Yb.
     --                                                                  `Ybo." 88__   `Ybo." `Ybo." 88 dP   Yb 88Yb88     "' dP'
@@ -255,6 +257,7 @@ init _ url key =
             , acceptabilityTask = Logic.NotStarted
             , informations = ""
             , pilote = NotAsked
+            , endAcceptabilityDuration = 6000
 
             -- POSTEST
             , cloudWords = Dict.fromList CloudWords.words
@@ -341,7 +344,7 @@ init _ url key =
             , fetchPretest
             )
 
-        Posttest _ ->
+        Route.Posttest _ ->
             pure defaultInit
 
         NotFound ->
@@ -565,7 +568,7 @@ body model =
                                 [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
                                     [ h1 [ class "" ] [ text "Instructions" ]
                                     , p [ class "max-w-2xl text-xl text-center mb-8" ] [ View.fromMarkdown taskInfo ]
-                                    , View.button { message = Acceptability Acceptability.StartTraining, txt = "Let's start with four practice items", isDisabled = False }
+                                    , View.button { message = Acceptability Acceptability.StartTraining, txt = "start", isDisabled = False }
                                     ]
                                 ]
 
@@ -573,10 +576,10 @@ body model =
                                 [ p [] [ text "I couldn't find the tasks infos. Please report this error." ] ]
 
                             RemoteData.Loading ->
-                                []
+                                [ text "Loading..." ]
 
                             RemoteData.NotAsked ->
-                                []
+                                [ text "Info not asked" ]
 
             Route.Pretest task ->
                 case task of
@@ -596,17 +599,28 @@ body model =
                     Route.EmailSent ->
                         [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
 
-                    Route.PiloteInfos ->
-                        [ form [ class "w-full max-w-lg" ]
-                            [ div [ class "flex flex-wrap -mx-3 mb-6" ]
-                                [ div [ class "w-full md:w-1/2 px-3 mb-6 md:mb-0" ]
-                                    [ label [ for "is-student" ]
-                                        [ text "Are you a student" ]
-                                    , input [ id "is-student", type_ "radio" ] []
+                    Route.SPR ->
+                        case model.infos of
+                            RemoteData.Success informations ->
+                                let
+                                    taskInfo =
+                                        Dict.get "rec7oxQBDY7rBTRDn" informations |> Maybe.map .instructions |> Maybe.withDefault "I couldn't find the infos of the task : recR8areYkKRvQ6lU "
+                                in
+                                [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
+                                    [ h1 [ class "" ] [ text "Instructions" ]
+                                    , p [ class "max-w-2xl text-xl text-center mb-8" ] [ View.fromMarkdown taskInfo ]
+                                    , View.button { message = Acceptability Acceptability.StartTraining, txt = "start", isDisabled = False }
                                     ]
                                 ]
-                            ]
-                        ]
+
+                            RemoteData.Failure reason ->
+                                [ p [] [ text "I couldn't find the tasks infos. Please report this error." ] ]
+
+                            RemoteData.Loading ->
+                                [ text "Loading..." ]
+
+                            RemoteData.NotAsked ->
+                                [ text "Info not asked" ]
 
                     Route.GeneralInfos ->
                         [ Pretest.GeneralInfos.view model.informations (\input -> Informations <| Pretest.GeneralInfos.UserUpdatedEmailField input) (\email -> Informations <| Pretest.GeneralInfos.UserClickedSendData email) ]
@@ -761,7 +775,14 @@ update msg model =
             ( { model | session1 = updte }, cmd )
 
         ServerRespondedWithSomeError error ->
-            ( { model | errorTracking = error :: model.errorTracking }, Cmd.none )
+            ( { model
+                | errorTracking = error :: model.errorTracking
+                , meaning = Logic.Err (Data.buildErrorMessage error)
+                , cu1 = Logic.Err (Data.buildErrorMessage error)
+                , spellingLvl1 = Logic.Err (Data.buildErrorMessage error)
+              }
+            , Cmd.none
+            )
 
         Informations message ->
             case message of
@@ -855,7 +876,6 @@ update msg model =
             in
             ( model
             , Cmd.batch [ randomizeTrials ]
-              -- ( model, Random.generate (\shuffledData -> Shuffled (ServerRespondedWithScrabbleTrials (Result.Ok shuffledData))) shuffleLetters
             )
 
         StartSession2 { cu, spelling, translation, infos } ->
@@ -939,20 +959,25 @@ update msg model =
                             case step of
                                 Acceptability.Listening ->
                                     ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Listening } model.acceptabilityTask }
-                                    , Delay.after 0 (PlaysoundInJS trial.audio.url)
+                                    , Delay.after 500 (PlaysoundInJS trial.audio.url)
                                     )
 
                                 Acceptability.Answering ->
                                     ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Answering } model.acceptabilityTask }, Cmd.none )
 
                                 Acceptability.End ->
-                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.End } model.acceptabilityTask |> Logic.next pState }, toNextStep 500 Acceptability.Start )
+                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.End } model.acceptabilityTask |> Logic.next pState }
+                                    , toNextStep 0 Acceptability.Start
+                                    )
 
                                 Acceptability.Start ->
-                                    ( { model | acceptabilityTask = Logic.update Acceptability.initState model.acceptabilityTask }, Delay.after 0 playBeep )
+                                    ( { model | acceptabilityTask = Logic.update Acceptability.newLoop model.acceptabilityTask }, Delay.after 0 (PlaysoundInJS beep) )
+
+                                _ ->
+                                    ( model, Cmd.none )
 
                         Acceptability.StartMain trials infos ->
-                            ( { model | acceptabilityTask = Logic.startMain infos trials Acceptability.initState }, Cmd.none )
+                            ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask Acceptability.initState }, Cmd.none )
 
                         Acceptability.UserPressedButton maybeBool ->
                             ( model, Task.perform (\timestamp -> Acceptability (Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp)) Time.now )
@@ -970,7 +995,7 @@ update msg model =
                                                 }
                                                 model.acceptabilityTask
                                       }
-                                    , toNextStep 0 Acceptability.End
+                                    , toNextStep model.endAcceptabilityDuration Acceptability.End
                                     )
 
                                 Nothing ->
@@ -978,7 +1003,7 @@ update msg model =
 
                         Acceptability.AudioEnded ( name, timestamp ) ->
                             if name == beep then
-                                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask }, toNextStep 500 Acceptability.Listening )
+                                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask }, Cmd.none )
 
                             else
                                 ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask }
@@ -987,7 +1012,7 @@ update msg model =
 
                         Acceptability.AudioStarted ( name, timestamp ) ->
                             if name == beep then
-                                ( { model | acceptabilityTask = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptabilityTask }, Cmd.none )
+                                ( { model | acceptabilityTask = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptabilityTask }, toNextStep 0 Acceptability.Listening )
 
                             else
                                 ( { model | acceptabilityTask = Logic.update { pState | audioStartedAt = Just timestamp } model.acceptabilityTask }
@@ -998,19 +1023,24 @@ update msg model =
                             ( model, Cmd.batch [ Nav.pushUrl model.key "start" ] )
 
                         _ ->
-                            Debug.todo ""
+                            ( model, Cmd.none )
 
                 ( _, _ ) ->
-                    let
-                        _ =
-                            Debug.log "I have no previous state"
-                    in
                     case message of
                         Acceptability.StartMain trials infos ->
-                            ( { model | acceptabilityTask = Logic.startMain infos trials Acceptability.initState }, Cmd.none )
+                            ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask Acceptability.initState, endAcceptabilityDuration = 500 }, toNextStep 0 Acceptability.Init )
 
                         Acceptability.RuntimeShuffledTrials info trials ->
-                            ( { model | acceptabilityTask = Acceptability.start info trials }, Cmd.none )
+                            case trials of
+                                Result.Ok shuffledTrials ->
+                                    if List.filter (\block -> List.length block < 4) shuffledTrials == [ [] ] then
+                                        ( { model | acceptabilityTask = Acceptability.start info (List.concat shuffledTrials) }, Cmd.none )
+
+                                    else
+                                        ( model, Delay.after 0 (ServerRespondedWithAllPretestData (List.concat shuffledTrials) info) )
+
+                                Result.Err ( reason, blockSoFar ) ->
+                                    ( { model | acceptabilityTask = Logic.Err "Error whhen I tried to shuffle trials" }, Cmd.none )
 
                         Acceptability.UserClickedSaveMsg ->
                             let
@@ -1023,10 +1053,10 @@ update msg model =
                             ( model, Logic.saveAcceptabilityData responseHandler model.user taskId model.acceptabilityTask )
 
                         Acceptability.ServerRespondedWithLastRecords (Result.Ok records) ->
-                            Debug.todo "ServerRespondedWith Last records"
+                            ( model, Cmd.none )
 
                         Acceptability.ServerRespondedWithLastRecords (Result.Err reason) ->
-                            Debug.todo <| "ServerRespondedwith an error: " ++ Debug.toString reason
+                            ( model, Cmd.none )
 
                         _ ->
                             ( model, Cmd.none )
@@ -1049,29 +1079,58 @@ update msg model =
                                         (\organizedTrials_ ->
                                             case organizedTrials_ of
                                                 Result.Err reason ->
-                                                    let
-                                                        _ =
-                                                            Debug.log <| "Error while shuffling trials: " ++ reason
-                                                    in
-                                                    Random.constant []
+                                                    Random.constant (Result.Err reason)
 
                                                 Result.Ok tr ->
                                                     Random.Extra.sequence (swapTargetWithOneDistractor tr)
+                                                        |> Random.andThen
+                                                            (\swapedTargets ->
+                                                                Random.constant
+                                                                    (--if notLeakingBlock then
+                                                                     Result.Ok
+                                                                        (trainingTrials :: swapedTargets)
+                                                                     --else
+                                                                     -- Result.Err Acceptability.FirstDistractorMissing
+                                                                    )
+                                                            )
                                         )
                             )
-                        |> Random.generate (\shuffledTrials -> Acceptability (Acceptability.RuntimeShuffledTrials info (List.concat <| trainingTrials :: shuffledTrials)))
+                        |> Random.generate
+                            (\st ->
+                                Acceptability
+                                    (Acceptability.RuntimeShuffledTrials info st)
+                            )
+
+                gatherBySentenceType =
+                    List.Extra.gatherEqualsBy .sentenceType distractors_
+
+                targets_ =
+                    List.filter (\datum -> datum.trialType == Acceptability.Target) trials
+
+                distractors_ =
+                    List.filter (\datum -> datum.trialType == Acceptability.Distractor) trials
 
                 trainingTrials =
                     List.filter (\datum -> datum.trialType == Acceptability.Training) trials
 
                 swapTargetWithOneDistractor : List (List Acceptability.Trial) -> List (Random.Generator (List Acceptability.Trial))
                 swapTargetWithOneDistractor tr =
-                    List.map (\block -> Random.int 1 3 |> Random.andThen (\position -> Random.constant (List.Extra.swapAt 0 position block))) tr
+                    List.map
+                        (\block ->
+                            Random.int 1 (List.length block - 1)
+                                |> Random.andThen
+                                    (\position ->
+                                        let
+                                            swapedTarget =
+                                                List.Extra.swapAt 0 position block
+                                        in
+                                        Random.constant (List.Extra.swapAt 0 position block)
+                                    )
+                        )
+                        tr
             in
             ( { model | infos = RemoteData.Success (ExperimentInfo.toDict info) }, generateOrganizedTrials )
 
-        -- beep
-        --Delay.after 300 playBeep )
         ServerRespondedWithSomePretestData downloadMsg ->
             let
                 ( updte, cmd ) =
@@ -1166,7 +1225,7 @@ update msg model =
                     ( { model | spellingLvl1 = Logic.next SpellingLvl1.initState model.spellingLvl1 }, Cmd.none )
 
                 SpellingLvl1.UserClickedStartMainloop trials infos ->
-                    ( { model | spellingLvl1 = Logic.startMain infos trials SpellingLvl1.iniState }, Cmd.none )
+                    ( { model | spellingLvl1 = Logic.startMain model.spellingLvl1 SpellingLvl1.iniState }, Cmd.none )
 
                 SpellingLvl1.UserClickedSavedData ->
                     let
@@ -1194,7 +1253,7 @@ update msg model =
                     ( { model | cuLvl2 = Logic.update { uid = "", userAnswer = newChoice } model.cuLvl2 }, Cmd.none )
 
                 CU2.UserClickedStartMain trials infos ->
-                    ( { model | cuLvl2 = Logic.startMain infos trials CU2.initState }, Cmd.none )
+                    ( { model | cuLvl2 = Logic.startMain model.cuLvl2 CU2.initState }, Cmd.none )
 
                 CU2.ServerRespondedWithLastRecords _ ->
                     ( model, Cmd.none )
@@ -1255,7 +1314,7 @@ update msg model =
                             ( { model | scrabbleTask = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
 
                         x :: _ ->
-                            ( { model | scrabbleTask = Logic.startMain infos trials { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = Scrabble.toItems x.writtenWord } }, Cmd.none )
+                            ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = Scrabble.toItems x.writtenWord } }, Cmd.none )
 
         CU1 message ->
             let
@@ -1273,7 +1332,7 @@ update msg model =
                     ( { model | cu1 = Logic.update { uid = "", userAnswer = newChoice } model.cu1 }, Cmd.none )
 
                 CU1.UserClickedStartMain trials infos ->
-                    ( { model | cu1 = Logic.startMain infos trials CU2.initState }, Cmd.none )
+                    ( { model | cu1 = Logic.startMain model.cu1 CU1.initState }, Cmd.none )
 
                 CU1.UserClickedSaveData ->
                     let
@@ -1304,7 +1363,7 @@ update msg model =
                     ( { model | cu3 = Logic.update { uid = "", userAnswer = newChoice } model.cu3 }, Cmd.none )
 
                 CU3.UserClickedStartMain trials infos ->
-                    ( { model | cu3 = Logic.startMain infos trials CU3.initState }, Cmd.none )
+                    ( { model | cu3 = Logic.startMain model.cu3 CU3.initState }, Cmd.none )
 
                 CU3.UserChangedInput new ->
                     ( { model | cu3 = Logic.update { uid = "", userAnswer = new } model.cu3 }, Cmd.none )
@@ -1332,10 +1391,10 @@ update msg model =
                     ( { model | spelling3 = Logic.toggle model.spelling3 }, Cmd.none )
 
                 Spelling3.UserClickedStartIntro _ ->
-                    Debug.todo ""
+                    ( model, Cmd.none )
 
                 Spelling3.UserClickedStartMain trials infos ->
-                    ( { model | spelling3 = Logic.startMain infos trials Spelling3.initState }, Cmd.none )
+                    ( { model | spelling3 = Logic.startMain model.spelling3 Spelling3.initState }, Cmd.none )
 
                 Spelling3.UserChangedInput new ->
                     ( { model | spelling3 = Logic.update { uid = "", userAnswer = new } model.spelling3 }, Cmd.none )
@@ -1363,10 +1422,10 @@ update msg model =
                     ( { model | yn = Logic.toggle model.yn }, Cmd.none )
 
                 YN.UserClickedStartIntro _ ->
-                    Debug.todo ""
+                    ( model, Cmd.none )
 
                 YN.UserClickedStartMain trials infos ->
-                    ( { model | yn = Logic.startMain infos trials YN.initState }, Cmd.none )
+                    ( { model | yn = Logic.startMain model.yn YN.initState }, Cmd.none )
 
                 YN.UserChangedInput new ->
                     ( { model | yn = Logic.update { uid = "", userAnswer = new } model.yn }, Cmd.none )
@@ -1381,10 +1440,10 @@ update msg model =
                     ( { model | presentation = Logic.next Presentation.initState model.presentation }, Cmd.none )
 
                 Presentation.UserClickedStartIntro _ ->
-                    Debug.todo "Start intro"
+                    ( model, Cmd.none )
 
                 Presentation.UserClickedStartMain trials infos ->
-                    ( { model | presentation = Logic.startMain infos trials Presentation.initState }, Cmd.none )
+                    ( { model | presentation = Logic.startMain model.presentation Presentation.initState }, Cmd.none )
 
                 Presentation.UserToggleElementOfEntry id ->
                     let
@@ -1434,7 +1493,7 @@ update msg model =
                     ( model, Logic.saveData responseHandler model.user Synonym.taskId model.translationTask )
 
                 Synonym.UserClickedStartMainloop trials infos ->
-                    ( { model | synonymTask = Logic.startMain infos trials Meaning.initState }, Cmd.none )
+                    ( { model | synonymTask = Logic.startMain model.synonymTask Meaning.initState }, Cmd.none )
 
                 Synonym.ServerRespondedWithLastRecords records ->
                     ( model, Cmd.none )
@@ -1458,14 +1517,14 @@ update msg model =
                     ( model, Cmd.none )
 
                 Meaning.UserClickedStartMain trials infos ->
-                    ( { model | meaning = Logic.startMain infos trials Meaning.initState }, Cmd.none )
+                    ( { model | meaning = Logic.startMain model.meaning Meaning.initState }, Cmd.none )
 
                 Meaning.SaveDataMsg ->
                     let
                         responseHandler =
                             \records -> Meaning (Meaning.ServerRespondedWithLastRecords records)
                     in
-                    ( model, Logic.saveData responseHandler model.user taskId model.translationTask )
+                    ( model, Logic.saveData responseHandler model.user taskId model.meaning )
 
                 Meaning.ServerRespondedWithLastRecords _ ->
                     ( model, Cmd.none )
@@ -1502,7 +1561,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 Translation.UserClickedStartMain trials infos ->
-                    ( { model | translationTask = Logic.startMain infos trials Translation.initState }, Cmd.none )
+                    ( { model | translationTask = Logic.startMain model.translationTask Translation.initState }, Cmd.none )
 
                 Translation.UserClickedSaveData ->
                     let
@@ -1525,7 +1584,7 @@ subscriptions model =
                     if state.step == Acceptability.Answering then
                         onKeyDown keyDecoder
 
-                    else if state.step == Acceptability.Start then
+                    else if state.step == Acceptability.Init then
                         onKeyDown decodeSpace
 
                     else
@@ -1533,20 +1592,10 @@ subscriptions model =
 
                 Nothing ->
                     Sub.none
-
-        clock =
-            case model.acceptabilityTask of
-                Logic.Intr _ ->
-                    Browser.Events.onAnimationFrame NewTick
-
-                _ ->
-                    Sub.none
     in
     Sub.batch
         [ system.subscriptions model.dnd
         , listenToInput
-
-        --, clock
         , audioEnded toAcceptabilityMessage
         ]
 
@@ -1572,7 +1621,7 @@ toAcceptabilityMessage { eventType, name, timestamp } =
             Acceptability (Acceptability.AudioEnded ( name, Time.millisToPosix timestamp ))
 
         _ ->
-            Debug.todo ""
+            NoOp
 
 
 type JsAudioEvent
@@ -1632,7 +1681,7 @@ decodeSpace =
         (\k ->
             case k of
                 " " ->
-                    playBeep
+                    Acceptability (Acceptability.NextStepCinematic Acceptability.Start)
 
                 _ ->
                     NoOp
@@ -1653,9 +1702,6 @@ toEvaluation x =
 
         "f" ->
             Acceptability (Acceptability.UserPressedButton (Just False))
-
-        " " ->
-            playBeep
 
         _ ->
             Acceptability (Acceptability.UserPressedButton Nothing)
@@ -1723,7 +1769,7 @@ type Spelling2Msg
     | UserClickedStartButton
     | UserClickedStartMainloop (List Scrabble.Trial) Task
     | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result Http.Error (List String))
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
 
 
 viewScrabbleTask : { a | scrabbleTask : Logic.Task Scrabble.Trial Scrabble.State, dnd : DnDList.Model, route : Route } -> List (Html Msg)
@@ -1950,7 +1996,7 @@ playBeep =
 
 
 beep =
-    "https://dl.airtable.com/.attachments/9035dbbb358fe77bebaae1a3d0863e11/c3afa1ad/salamisound-4324105-signal-beep-once-as.mp3"
+    "https://dl.airtable.com/.attachments/b000c72585c5f5145828b1cf3916c38d/88d9c821/beep.mp3"
 
 
 removesItemsHelp : List a -> List a -> List a -> List a
@@ -1972,56 +2018,124 @@ removesItems items ls =
     removesItemsHelp items ls []
 
 
-organizeAcceptabilityTrialsHelper : List Acceptability.Trial -> List Acceptability.Trial -> List (List Acceptability.Trial) -> Result.Result String (List (List Acceptability.Trial))
+organizeAcceptabilityTrialsHelper : List Acceptability.Trial -> List Acceptability.Trial -> List (List Acceptability.Trial) -> Result.Result ( Acceptability.ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
 organizeAcceptabilityTrialsHelper targets distractors output =
     -- Acceptability trials must be organized in sequence of blocks containing exactly one target and 3 distractors belonging to 3 different sentence type.
     -- After shuffling all the trials, this function is used create the proper sequence.
     -- Because the target can't be at the first position of a sequence, we have to swap the position of the target with one of the following distractors. TODO
+    -- En gros, ça va marcher tant qu'il y a le bon nombre d'items mais s'il devait y avoir un déséquilibre, cela créera une recursion infinie.
+    -- C'est le pire code de l'enfer, désolé si quelqu'un d'autre que moi voit ce massacre.
     let
-        nextNewSentenceType buff dis =
-            List.member dis.sentenceType (whichSentenceTypes buff) |> not
+        nextGrammaticalSentence buff dis =
+            dis.isGrammatical && not (List.member dis.sentenceType (getSentenceTypes buff))
 
-        buildBlock t =
-            List.head t
-                |> Result.fromMaybe "I couldn't find the first target"
-                |> Result.andThen
-                    (\foundTarget ->
-                        List.Extra.find (nextNewSentenceType []) distractors
-                            |> Result.fromMaybe "I couldn't find the first distractor"
-                            |> Result.andThen
-                                (\distractorFound ->
-                                    List.Extra.find (nextNewSentenceType [ distractorFound ])
-                                        (removesItems [ distractorFound ] distractors)
-                                        |> Result.fromMaybe "I couldn't find the second distractor"
-                                        |> Result.andThen
-                                            (\secondDistractorFound ->
-                                                List.Extra.find (nextNewSentenceType [ distractorFound, secondDistractorFound ]) (removesItems [ distractorFound, secondDistractorFound ] distractors)
-                                                    |> Result.fromMaybe "I couldn't find the thirdDistractor"
-                                                    |> Result.andThen
-                                                        (\thirdDistractorFound ->
-                                                            Result.Ok
-                                                                { target = foundTarget
-                                                                , firstDistractor = distractorFound
-                                                                , secondDistractor = secondDistractorFound
-                                                                , thirdDistractor = thirdDistractorFound
-                                                                , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
-                                                                }
-                                                        )
-                                            )
-                                )
-                    )
+        --not (List.member dis.sentenceType (getSentenceTypes buff))
+        --&& not (List.member dis.sentenceType (whichSentenceTypes buff))
+        nextUngrammaticalSentence buff dis =
+            not dis.isGrammatical && not (List.member dis.sentenceType (getSentenceTypes buff))
+
+        --List.member dis.sentenceType (getSentenceTypes buff) |> not
+        findFirstGrammaticalDistractor =
+            List.Extra.find (nextGrammaticalSentence []) distractors
+
+        findSecondGrammaticalDistractor firstDistractor =
+            List.Extra.find (nextGrammaticalSentence firstDistractor) (removesItems firstDistractor distractors)
+
+        findThirdGrammaticalDistractor firstDistractor secondDistractor =
+            List.Extra.find (nextGrammaticalSentence [ firstDistractor, secondDistractor ]) (removesItems [ firstDistractor, secondDistractor ] distractors)
+
+        firstUnGrammaticalDistractor =
+            List.Extra.find (nextUngrammaticalSentence []) distractors
+
+        findSecondUnGrammaticalDistractor firstDistractor =
+            removesItems [ firstDistractor ] distractors
+                |> List.Extra.find (nextUngrammaticalSentence [ firstDistractor ])
+
+        findThirdUnGrammaticalDistractor firstDistractor secondDistractor =
+            removesItems [ firstDistractor, secondDistractor ] distractors
+                |> List.Extra.find (nextUngrammaticalSentence [ firstDistractor, secondDistractor ])
+
+        buildBlock target =
+            if target.isGrammatical then
+                firstUnGrammaticalDistractor
+                    |> Result.fromMaybe ( Acceptability.FirstDistractorMissing False, [ target ] )
+                    |> Result.andThen
+                        (\distractorFound ->
+                            findSecondGrammaticalDistractor [ distractorFound ]
+                                |> Result.fromMaybe
+                                    ( Acceptability.SecondDistractorMissing True
+                                    , [ target, distractorFound ]
+                                    )
+                                |> Result.andThen
+                                    (\secondDistractorFound ->
+                                        findThirdUnGrammaticalDistractor distractorFound secondDistractorFound
+                                            |> Result.fromMaybe
+                                                ( Acceptability.ThirdDistractorMissing False
+                                                , [ target, distractorFound, secondDistractorFound ]
+                                                )
+                                            |> Result.andThen
+                                                (\thirdDistractorFound ->
+                                                    Result.Ok
+                                                        { target = target
+                                                        , firstDistractor = distractorFound
+                                                        , secondDistractor = secondDistractorFound
+                                                        , thirdDistractor = thirdDistractorFound
+                                                        , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
+                                                        }
+                                                )
+                                    )
+                        )
+
+            else
+                findFirstGrammaticalDistractor
+                    |> Result.fromMaybe ( Acceptability.FirstDistractorMissing True, [ target ] )
+                    |> Result.andThen
+                        (\distractorFound ->
+                            findSecondUnGrammaticalDistractor distractorFound
+                                |> Result.fromMaybe ( Acceptability.SecondDistractorMissing False, [ target, distractorFound ] )
+                                |> Result.andThen
+                                    (\secondDistractorFound ->
+                                        findThirdGrammaticalDistractor distractorFound secondDistractorFound
+                                            |> Result.fromMaybe ( Acceptability.ThirdDistractorMissing True, [ target, distractorFound, secondDistractorFound ] )
+                                            |> Result.andThen
+                                                (\thirdDistractorFound ->
+                                                    Result.Ok
+                                                        { target = target
+                                                        , firstDistractor = distractorFound
+                                                        , secondDistractor = secondDistractorFound
+                                                        , thirdDistractor = thirdDistractorFound
+                                                        , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
+                                                        }
+                                                )
+                                    )
+                        )
+
+        gatherBySentenceType =
+            List.Extra.gatherEqualsBy .sentenceType distractors
     in
     case targets of
         [] ->
-            Result.Ok output
+            let
+                notCompletBlocks =
+                    List.filter (\block -> List.length block < 4) (output ++ [ distractors ])
+            in
+            Result.Ok (output ++ [ distractors ])
 
         x :: xs ->
-            case buildBlock targets of
-                Result.Err reason ->
-                    Result.Err reason
+            case buildBlock x of
+                Result.Err ( reason, blockSoFar ) ->
+                    organizeAcceptabilityTrialsHelper xs (removesItems blockSoFar distractors) (blockSoFar :: output)
 
                 Result.Ok { target, firstDistractor, secondDistractor, thirdDistractor, remainingDistractors } ->
-                    organizeAcceptabilityTrialsHelper xs remainingDistractors ([ [ target, firstDistractor, secondDistractor, thirdDistractor ] ] ++ output)
+                    let
+                        block =
+                            [ target, firstDistractor, secondDistractor, thirdDistractor ]
+                    in
+                    organizeAcceptabilityTrialsHelper xs remainingDistractors (block :: output)
+
+
+initialSeed =
+    Random.initialSeed 18
 
 
 type alias Block =
@@ -2037,17 +2151,21 @@ areMultipleOf4 targets distractors =
     (List.length (targets ++ distractors) |> modBy 4) == 0
 
 
+nextNewSentenceType buff dis =
+    List.member dis.sentenceType (getSentenceTypes buff) |> not
+
+
 isNextSentence : { a | sentenceType : Acceptability.SentenceType } -> List { b | sentenceType : Acceptability.SentenceType } -> Bool
 isNextSentence dis blockBuffer =
-    List.member dis.sentenceType (whichSentenceTypes blockBuffer) |> not
+    List.member dis.sentenceType (getSentenceTypes blockBuffer) |> not
 
 
-whichSentenceTypes : List { a | sentenceType : Acceptability.SentenceType } -> List Acceptability.SentenceType
-whichSentenceTypes sentences =
+getSentenceTypes : List { a | sentenceType : Acceptability.SentenceType } -> List Acceptability.SentenceType
+getSentenceTypes sentences =
     List.map .sentenceType sentences
 
 
-organizeAcceptabilityTrials : List Acceptability.Trial -> List Acceptability.Trial -> Result.Result String (List (List Acceptability.Trial))
+organizeAcceptabilityTrials : List Acceptability.Trial -> List Acceptability.Trial -> Result.Result ( Acceptability.ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
 organizeAcceptabilityTrials targets distractors =
     organizeAcceptabilityTrialsHelper targets distractors []
 
