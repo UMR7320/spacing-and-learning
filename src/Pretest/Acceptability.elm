@@ -113,16 +113,14 @@ viewInstructions data msg =
     ]
 
 
-viewTransition infos rurl msg buttontext =
+viewTransition infos msg buttontext =
     div [ class "flex flex-col items-center justify-center" ]
         [ p [] [ View.fromMarkdown infos ]
-        , a [ Html.Styled.Attributes.href rurl ]
-            [ View.button
-                { isDisabled = False
-                , message = msg
-                , txt = buttontext
-                }
-            ]
+        , View.button
+            { isDisabled = False
+            , message = msg
+            , txt = buttontext
+            }
         ]
 
 
@@ -185,7 +183,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
         Logic.Main data ->
             case data.current of
                 Nothing ->
-                    [ viewTransition data.infos.end "end" saveDataMsg "Click here to end this experiment"
+                    [ viewTransition data.infos.end saveDataMsg "Click here to end this experiment"
                     ]
 
                 Just trial ->
@@ -207,7 +205,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
             [ text "not started" ]
 
         Logic.Err reason ->
-            [ p [] [ text <| "Oups, I ran into the following error: " ++ reason, text ". Try to reload the page once or twice and see if it helps?" ]
+            [ p [] [ text <| "Oups, I ran into the following error: " ++ reason ]
             ]
 
 
