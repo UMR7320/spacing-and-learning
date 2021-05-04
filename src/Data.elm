@@ -78,7 +78,7 @@ sendInBatch historyEncoder taskId userId history =
     chuncks
         |> List.map
             (\sublist ->
-                Process.sleep 200
+                Process.sleep 210
                     |> Task.andThen
                         (\_ -> postRecordsBatch (Http.jsonBody <| historyEncoder sublist))
             )
