@@ -117,7 +117,7 @@ saveAcceptabilityData responseHandler maybeUserId taskId task =
     Task.attempt callbackHandler sendInBatch_
 
 
-type alias Infos =
+type alias Info =
     Result String ExperimentInfo.Task
 
 
@@ -251,10 +251,10 @@ next resetedState task =
 
 {-| Init the task with infos, trainingTrials, mainTrials and the initial state
 -}
-startIntro : Infos -> List t -> List t -> s -> Task t s
-startIntro infos trainingTrials mainTrials initStat =
-    case infos of
-        Result.Ok info ->
+startIntro : Info -> List t -> List t -> s -> Task t s
+startIntro info trainingTrials mainTrials initStat =
+    case info of
+        Result.Ok info_ ->
             case trainingTrials of
                 [] ->
                     Intr
@@ -265,7 +265,7 @@ startIntro infos trainingTrials mainTrials initStat =
                         , state = initStat
                         , feedback = False
                         , history = []
-                        , infos = info
+                        , infos = info_
                         }
 
                 x :: y :: _ ->
@@ -277,7 +277,7 @@ startIntro infos trainingTrials mainTrials initStat =
                         , state = initStat
                         , feedback = False
                         , history = []
-                        , infos = info
+                        , infos = info_
                         }
 
                 [ x ] ->
@@ -289,7 +289,7 @@ startIntro infos trainingTrials mainTrials initStat =
                         , state = initStat
                         , feedback = False
                         , history = []
-                        , infos = info
+                        , infos = info_
                         }
 
         Result.Err error ->
