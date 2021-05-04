@@ -10,7 +10,7 @@ port module Main exposing
 import Browser
 import Browser.Dom
 import Browser.Events exposing (onKeyDown)
-import Browser.Navigation as Nav
+import Browser.Navigation as Nav exposing (pushUrl)
 import Data
 import Delay
 import Dict
@@ -32,12 +32,14 @@ import Postest.CloudWords as CloudWords
 import Postest.YN as YN
 import Pretest.Acceptability as Acceptability
 import Pretest.GeneralInfos
+import Pretest.SPR as SPR
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
 import RemoteData exposing (RemoteData)
 import Result exposing (Result)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
+import Session exposing (Session(..))
 import Session1.CU1 as CU1
 import Session1.Meaning as Meaning
 import Session1.Presentation as Presentation
@@ -69,21 +71,7 @@ port audioEnded : ({ eventType : String, name : String, timestamp : Int } -> msg
 
 
 
-{--
-decodeAudioInfos =
-    Json.Decode.succeed InboundAudioInfos
-        |> Json.Decode.Pipeline.custom (Json.Decode.field "eventType" <| Json.Decode.andThen eventTypeDecoder)
-        |> Json.Decode.Pipeline.required "endedAt" Json.Decode.int
-        |> Json.Decode.Pipeline.required "audioName" Json.Decode.string
---}
 -- MODEL
-
-
-type Session a
-    = Loading a
-    | FailedToLoad String
-    | Ready
-    | NotAsked
 
 
 type alias Session1 =
@@ -121,8 +109,11 @@ type alias Model =
     -- yn stands for yes-no
     , yn : Logic.Task YN.Trial YN.State
     , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
+    , packetsSended : Int
     , informations : Pretest.GeneralInfos.Model
     , pilote : Pilote
+    , spr : Logic.Task SPR.Trial SPR.State
+    , pretest : Para.State2 SPR.Msg (List SPR.Trial) (List ExperimentInfo.Task)
 
     --
     --                                                                  ## ###  ##  ## ###  #  ###      #
@@ -170,12 +161,6 @@ type alias Model =
     , infos : RemoteData Http.Error (Dict.Dict String ExperimentInfo.Task)
     , user : Maybe String
     , errorTracking : List Http.Error
-    , isStudent : Bool
-    , whichDegree : String
-    , whichLanguages : String
-    , age : Int
-    , gender : String
-    , dominantHand : String
     }
 
 
@@ -219,13 +204,22 @@ init _ url key =
                 , onSuccess = ServerRespondedWithAllSession3Data
                 }
 
-        ( loadingStatePilote, fetchPretest ) =
+        ( loadingStatePilote, fetchPilote ) =
             Para.attempt2
                 { task1 = Acceptability.getRecords
                 , task2 = ExperimentInfo.getRecords
                 , onUpdates = ServerRespondedWithSomePretestData
                 , onFailure = ServerRespondedWithSomeError
                 , onSuccess = ServerRespondedWithAllPretestData
+                }
+
+        ( loadingStatePretest, fetchPretest ) =
+            Para.attempt2
+                { task1 = SPR.getRecords
+                , task2 = ExperimentInfo.getRecords
+                , onUpdates = \someData -> SPR (SPR.ServerRespondedWithSomePretestData someData)
+                , onFailure = \err -> SPR (SPR.ServerRespondedWithSomeError err)
+                , onSuccess = \trials info -> SPR (SPR.ServerRespondedWithAllPretestData trials info)
                 }
 
         defaultInit =
@@ -252,12 +246,17 @@ init _ url key =
             , cu3 = Logic.NotStarted
             , session3 = NotAsked
 
+            -- PILOTE
+            , acceptabilityTask = Logic.NotStarted
+            , packetsSended = 0
+            , endAcceptabilityDuration = 6000
+            , pilote = NotAsked
+
             -- PRETEST
             , yn = Logic.Loading
-            , acceptabilityTask = Logic.NotStarted
             , informations = ""
-            , pilote = NotAsked
-            , endAcceptabilityDuration = 6000
+            , spr = Logic.NotStarted
+            , pretest = Tuple.first SPR.attempt
 
             -- POSTEST
             , cloudWords = Dict.fromList CloudWords.words
@@ -267,12 +266,6 @@ init _ url key =
             , optionsOrder = [ 0, 1, 2, 3 ]
             , infos = RemoteData.Loading
             , errorTracking = []
-            , isStudent = False
-            , whichDegree = ""
-            , whichLanguages = ""
-            , age = 0
-            , gender = ""
-            , dominantHand = ""
             }
     in
     case route of
@@ -328,11 +321,9 @@ init _ url key =
 
         Route.Pretest _ ->
             ( { defaultInit
-                | yn = Logic.Loading
-                , acceptabilityTask = Logic.Loading
-                , pilote = Loading loadingStatePilote
+                | spr = Logic.Loading
               }
-            , fetchPretest
+            , Cmd.map SPR (Tuple.second SPR.attempt)
             )
 
         Route.Pilote userid _ ->
@@ -341,7 +332,7 @@ init _ url key =
                 , pilote = Loading loadingStatePilote
                 , user = Just userid
               }
-            , fetchPretest
+            , fetchPilote
             )
 
         Route.Posttest _ ->
@@ -600,27 +591,7 @@ body model =
                         [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
 
                     Route.SPR ->
-                        case model.infos of
-                            RemoteData.Success informations ->
-                                let
-                                    taskInfo =
-                                        Dict.get "rec7oxQBDY7rBTRDn" informations |> Maybe.map .instructions |> Maybe.withDefault "I couldn't find the infos of the task : recR8areYkKRvQ6lU "
-                                in
-                                [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
-                                    [ h1 [ class "" ] [ text "Instructions" ]
-                                    , p [ class "max-w-2xl text-xl text-center mb-8" ] [ View.fromMarkdown taskInfo ]
-                                    , View.button { message = Acceptability Acceptability.StartTraining, txt = "start", isDisabled = False }
-                                    ]
-                                ]
-
-                            RemoteData.Failure reason ->
-                                [ p [] [ text "I couldn't find the tasks infos. Please report this error." ] ]
-
-                            RemoteData.Loading ->
-                                [ text "Loading..." ]
-
-                            RemoteData.NotAsked ->
-                                [ text "Info not asked" ]
+                        List.map (Html.Styled.map SPR) (SPR.view model.spr)
 
                     Route.GeneralInfos ->
                         [ Pretest.GeneralInfos.view model.informations (\input -> Informations <| Pretest.GeneralInfos.UserUpdatedEmailField input) (\email -> Informations <| Pretest.GeneralInfos.UserClickedSendData email) ]
@@ -682,6 +653,7 @@ type Msg
     | ServerRespondedWithSomePretestData (Para.Msg2 (List Acceptability.Trial) (List ExperimentInfo.Task))
     | ServerRespondedWithAllPretestData (List Acceptability.Trial) (List ExperimentInfo.Task)
     | ToNextStep Acceptability.Step
+    | SPR SPR.Msg
       --
       --                                                          ## ###  ##  ## ###  #  ###      #
       --                                                         #   #   #   #    #  # # # #     ##
@@ -941,6 +913,13 @@ update msg model =
                 Nothing ->
                     pure model
 
+        SPR submsg ->
+            let
+                ( newModel, newCmd ) =
+                    SPR.update submsg model
+            in
+            ( newModel, Cmd.map SPR newCmd )
+
         Acceptability message ->
             let
                 prevState =
@@ -1050,13 +1029,15 @@ update msg model =
                                 taskId =
                                     "recR8areYkKRvQ6lU"
                             in
-                            ( model, Logic.saveAcceptabilityData responseHandler model.user taskId model.acceptabilityTask )
+                            ( { model | acceptabilityTask = Logic.Loading }, Logic.saveAcceptabilityData responseHandler model.user taskId model.acceptabilityTask )
 
                         Acceptability.ServerRespondedWithLastRecords (Result.Ok records) ->
-                            ( model, Cmd.none )
+                            ( { model | acceptabilityTask = Logic.Loading }
+                            , pushUrl model.key "end"
+                            )
 
                         Acceptability.ServerRespondedWithLastRecords (Result.Err reason) ->
-                            ( model, Cmd.none )
+                            ( { model | acceptabilityTask = Logic.Err <| Data.buildErrorMessage reason ++ "Please report this error message to yacourt@unice.fr with a nice screenshot!" }, Cmd.none )
 
                         _ ->
                             ( model, Cmd.none )
@@ -1571,6 +1552,13 @@ update msg model =
                     ( model, Logic.saveData responseHandler model.user taskId model.translationTask )
 
 
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( SPR.Spr Model, Cmd Msg )
+updateWith toModel toMsg model ( subModel, subCmd ) =
+    ( model
+    , Cmd.map toMsg subCmd
+    )
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     let
@@ -1592,11 +1580,15 @@ subscriptions model =
 
                 Nothing ->
                     Sub.none
+
+        sprState =
+            Logic.getState model.spr
     in
     Sub.batch
         [ system.subscriptions model.dnd
         , listenToInput
         , audioEnded toAcceptabilityMessage
+        , Sub.map SPR (SPR.subscriptions sprState)
         ]
 
 
@@ -2168,10 +2160,3 @@ getSentenceTypes sentences =
 organizeAcceptabilityTrials : List Acceptability.Trial -> List Acceptability.Trial -> Result.Result ( Acceptability.ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
 organizeAcceptabilityTrials targets distractors =
     organizeAcceptabilityTrialsHelper targets distractors []
-
-
-jumpToBottom : String -> Cmd Msg
-jumpToBottom id =
-    Browser.Dom.getViewportOf id
-        |> Task.andThen (\info -> Browser.Dom.setViewportOf id 0 info.scene.height)
-        |> Task.attempt (always NoOp)
