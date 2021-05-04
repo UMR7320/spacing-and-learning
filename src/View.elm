@@ -55,6 +55,19 @@ import Markdown
 import String.Interpolate exposing (interpolate)
 
 
+shuffledOptions :
+    { a | userAnswer : String }
+    -> Bool
+    -> (String -> b)
+    ->
+        { c
+            | target : String
+            , distractor1 : String
+            , distractor2 : String
+            , distractor3 : String
+        }
+    -> List comparable
+    -> List (Html b)
 shuffledOptions state fb radioMsg trial optionsOrder =
     let
         option id =
@@ -130,7 +143,15 @@ bold string =
     "**" ++ string ++ "**"
 
 
-genericSingleChoiceFeedback : { isVisible : Bool, userAnswer : String, target : String, feedback_Correct : ( String, List String ), feedback_Incorrect : ( String, List String ), button : Html msg } -> Html msg
+genericSingleChoiceFeedback :
+    { isVisible : Bool
+    , userAnswer : String
+    , target : String
+    , feedback_Correct : ( String, List String )
+    , feedback_Incorrect : ( String, List String )
+    , button : Html msg
+    }
+    -> Html msg
 genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
     div
         [ class
