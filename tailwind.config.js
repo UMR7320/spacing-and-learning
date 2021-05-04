@@ -3,8 +3,9 @@ module.exports = {
     content: ["./src/**/*.elm", "index.js"],
   },
   theme: {
-    extend: {},
+    extend: {
+    },
   },
   variants: { borderColor: ['responsive', 'group-hover', 'group-focus', 'active'] },
-  plugins: [],
+  plugins: [require('@tailwindcss/custom-forms')],
 };

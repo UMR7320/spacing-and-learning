@@ -22,6 +22,7 @@ module.exports = async (event) => {
     const learningData = await base(handleTableRequest(event.queryStringParameters.base))
       .select({ maxRecords: 100, view: (event.queryStringParameters.view) })
       .firstPage();
+
     const formattedLearningData = learningData.map((datum) => ({
       id: datum.id,
       ...datum.fields,

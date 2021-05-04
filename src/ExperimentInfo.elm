@@ -1,10 +1,10 @@
 module ExperimentInfo exposing (..)
 
 import Data
+import Dict
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (custom, optional, required)
-import Url.Builder
 
 
 getInfos : (Result Http.Error (List Task) -> msg) -> Cmd msg
@@ -17,6 +17,8 @@ type Session
     | Session2
     | Session3
     | Pretest
+    | Posttest
+    | OtherSession
 
 
 sessionToString str =
@@ -31,7 +33,13 @@ sessionToString str =
             "Session 3"
 
         Pretest ->
-            "Pretest "
+            "Pretest"
+
+        Posttest ->
+            "Post-test"
+
+        OtherSession ->
+            "Other"
 
 
 type Type_
@@ -60,6 +68,17 @@ type alias Description =
     String
 
 
+toDict newInfos =
+    newInfos
+        |> List.map
+            (\info ->
+                ( info.uid
+                , identity info
+                )
+            )
+        |> Dict.fromList
+
+
 type alias Task =
     { uid : String
     , session : Session
@@ -69,7 +88,10 @@ type alias Task =
     , description : String
     , instructions : String
     , instructions_short : String
+    , feedback_correct : String
+    , feedback_incorrect : String
     , end : String
+    , trainingWheel : String
     }
 
 
@@ -91,8 +113,11 @@ decode =
                 "Prétest" ->
                     Decode.succeed Pretest
 
+                "Post-test" ->
+                    Decode.succeed Posttest
+
                 _ ->
-                    Decode.fail "I couldn't map this to a Session"
+                    Decode.succeed OtherSession
 
         mapToType_ : String -> Decode.Decoder Type_
         mapToType_ str =
@@ -114,11 +139,30 @@ decode =
                 |> required "UID" Decode.string
                 |> custom (Decode.field "Session" Decode.string |> Decode.andThen mapToSession)
                 |> custom (Decode.field "Type" Decode.string |> Decode.andThen mapToType_)
-                |> required "Name" Decode.string
-                |> required "Demo_Link" Decode.string
-                |> required "Description" Decode.string
-                |> required "Instructions" Decode.string
-                |> required "Instructions_short" Decode.string
-                |> required "End" Decode.string
+                |> optional "Name" Decode.string "Missing Name"
+                |> optional "Demo_Link" Decode.string "Missing link"
+                |> optional "Description" Decode.string "Missing Description"
+                |> optional "Instructions" Decode.string "Missing instructions"
+                |> optional "Instructions_short" Decode.string "Missing instructions short"
+                |> optional "feedback_correct" Decode.string "Missing feedback correct"
+                |> optional "feedback_incorrect" Decode.string "Missing feedback incorrect"
+                |> optional "End" Decode.string "Missing End"
+                |> optional "trainingWheels" Decode.string "Missing training wheel"
     in
     Data.decodeRecords decoder
+
+
+getRecords =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "tasks"
+                , view_ = "allTasksGrid"
+                }
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decode
+        , timeout = Just 5000
+        }
