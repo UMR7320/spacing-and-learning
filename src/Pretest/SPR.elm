@@ -4,16 +4,17 @@ import Browser.Events exposing (onClick, onKeyDown)
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
-import Html
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as Attr
 import Html.Styled.Events as Ev
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
+import Json.Encode as Encode
 import Logic
 import Random
 import Random.List
+import String.Interpolate exposing (interpolate)
 import Task
 import Task.Parallel as Para
 import Time
@@ -42,6 +43,7 @@ type alias Spr model =
     { model
         | spr : Logic.Task Trial State
         , pretest : Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
+        , user : Maybe String
     }
 
 
@@ -85,6 +87,18 @@ type Tag
     | SpillOver
 
 
+tagToString tag =
+    case tag of
+        NoUnit ->
+            "No unit"
+
+        Critic ->
+            "Critic"
+
+        SpillOver ->
+            "SpillOver"
+
+
 type alias TaggedSegment =
     ( Tag, String )
 
@@ -125,7 +139,7 @@ type alias TaggedSegmentStarted =
 
 
 type alias TaggedSegmentOver =
-    Maybe { taggedSegment : TaggedSegment, startedAt : Time.Posix, endedAt : Time.Posix }
+    { taggedSegment : TaggedSegment, startedAt : Time.Posix, endedAt : Time.Posix }
 
 
 initState : State
@@ -175,6 +189,73 @@ subscriptions state =
                     Sub.none
 
 
+saveSprData responseHandler maybeUserId task =
+    let
+        history =
+            Logic.getHistory task
+
+        taskId_ =
+            taskId
+
+        callbackHandler =
+            responseHandler
+
+        userId =
+            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        whenNothing =
+            Time.millisToPosix 1000000000
+
+        intFromMillis posix =
+            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
+
+        formattedData =
+            history |> List.map (\( { id }, { answer, seenSegments } ) -> { id = id, answer = answerToString answer, seenSegments = extract seenSegments })
+
+        extract seenSegments =
+            List.foldl
+                (\seg acc ->
+                    case seg of
+                        Just { taggedSegment, startedAt, endedAt } ->
+                            String.Interpolate.interpolate "{\"tag\": \"{0}\", \"segment\": \"{1}\", \"startedAt\": {2}, \"endedAt\": {3} }"
+                                [ tagToString (Tuple.first taggedSegment)
+                                , Tuple.second taggedSegment
+                                , String.fromInt (Time.posixToMillis startedAt)
+                                , String.fromInt (Time.posixToMillis endedAt)
+                                ]
+                                :: acc
+
+                        Nothing ->
+                            acc
+                )
+                []
+                seenSegments
+                |> String.join ","
+                |> String.append "["
+                |> (\f a b -> f b a) String.append "]"
+
+        summarizedTrialEncoder =
+            Encode.list
+                (\{ id, answer, seenSegments } ->
+                    Encode.object
+                        [ ( "fields"
+                          , Encode.object
+                                [ ( "sprTrialId", Encode.list Encode.string [ id ] )
+                                , ( "answer", Encode.string answer )
+                                , ( "blob", Encode.string seenSegments )
+                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
+                                , ( "userUid", Encode.list Encode.string [ userId ] )
+                                ]
+                          )
+                        ]
+                )
+
+        sendInBatch_ =
+            Data.sendInBatch summarizedTrialEncoder taskId_ userId formattedData
+    in
+    Task.attempt callbackHandler sendInBatch_
+
+
 update : Msg -> Spr model -> ( Spr model, Cmd Msg )
 update msg model =
     let
@@ -195,10 +276,14 @@ update msg model =
             ( { model | spr = Logic.next initState model.spr }, Cmd.none )
 
         UserClickedSaveData ->
-            ( model, Cmd.none )
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( { model | spr = Logic.Loading }, saveSprData responseHandler model.user model.spr )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( model, Cmd.none )
+            ( { model | spr = Logic.NotStarted }, Cmd.none )
 
         ServerRespondedWithLastRecords (Result.Err _) ->
             ( model, Cmd.none )
@@ -258,7 +343,7 @@ update msg model =
                                             , seenSegments =
                                                 Maybe.map
                                                     (\{ taggedSegment, startedAt } ->
-                                                        Just { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
+                                                        { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
                                                     )
                                                     prevState.currentSegment
                                                     :: prevState.seenSegments
@@ -274,7 +359,7 @@ update msg model =
                                             , seenSegments =
                                                 Maybe.map
                                                     (\{ taggedSegment, startedAt } ->
-                                                        Just { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
+                                                        { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
                                                     )
                                                     prevState.currentSegment
                                                     :: prevState.seenSegments
@@ -298,171 +383,123 @@ updateWithTime msg timestamp prevModel newModel =
         )
 
 
+viewTask data trial endTrialMsg =
+    case ( data.state.step, data.state.currentSegment ) of
+        ( SPR s, Just { taggedSegment } ) ->
+            case s of
+                Start ->
+                    p [ Attr.class "text-bold" ] [ text "Press space to start reading" ]
+
+                Reading segment ->
+                    div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ] [ p [ Attr.class "text-lg items-center" ] [ text (Tuple.second taggedSegment) ] ]
+
+        ( SPR s, Nothing ) ->
+            p [ Attr.class "text-lg" ] [ text "Press space to start reading" ]
+
+        ( Question, _ ) ->
+            let
+                yes =
+                    answerToString Yes
+
+                no =
+                    answerToString No
+
+                unsure =
+                    answerToString Unsure
+
+                value =
+                    answerToString data.state.answer
+            in
+            div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
+                [ Html.Styled.fieldset [ Attr.class "flex flex-col" ]
+                    [ legend [] [ text trial.question ]
+                    , div [ Attr.class "flex flex-row" ]
+                        [ input
+                            [ Attr.type_ "radio"
+                            , Attr.id yes
+                            , Attr.value yes
+                            , Attr.checked (value == yes)
+                            , Ev.onClick (UserChoseNewAnswer (answerFromString yes))
+                            ]
+                            []
+                        , label [ Attr.for yes ] [ text yes ]
+                        ]
+                    , div []
+                        [ input
+                            [ Attr.type_ "radio"
+                            , Attr.id no
+                            , Attr.value no
+                            , Attr.checked (value == no)
+                            , Ev.onClick (UserChoseNewAnswer (answerFromString no))
+                            ]
+                            []
+                        , label [ Attr.for no ] [ text no ]
+                        ]
+                    , div []
+                        [ input
+                            [ Attr.type_ "radio"
+                            , Attr.id unsure
+                            , Attr.value unsure
+                            , Attr.checked (value == unsure)
+                            , Ev.onClick (UserChoseNewAnswer (answerFromString unsure))
+                            ]
+                            []
+                        , label [ Attr.for no, Attr.value value ] [ text unsure ]
+                        ]
+                    ]
+                , View.button
+                    { message = endTrialMsg
+                    , txt =
+                        if endTrialMsg == UserClickedNextTrial then
+                            "Next item"
+
+                        else
+                            "Click here to see the feedback"
+                    , isDisabled = String.isEmpty value
+                    }
+                ]
+
+        ( Feedback, _ ) ->
+            div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ] [ View.fromMarkdown trial.feedback, View.button { message = UserClickedNextTrial, txt = "Next item", isDisabled = False } ]
+
+
 view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
 view task =
     case task of
         Logic.Loading ->
-            [ text "Loading" ]
+            [ text "Loading... Please don't exit or data may be lost" ]
 
         Logic.Intr data ->
             case data.current of
                 Just trial ->
-                    [ text data.infos.instructions
-                    , case ( data.state.step, data.state.currentSegment ) of
-                        ( SPR s, Just { taggedSegment } ) ->
-                            case s of
-                                Start ->
-                                    text "Press space to start reading"
-
-                                Reading segment ->
-                                    text (Tuple.second taggedSegment)
-
-                        ( SPR s, Nothing ) ->
-                            text "Press space to start"
-
-                        ( Question, _ ) ->
-                            let
-                                yes =
-                                    answerToString Yes
-
-                                no =
-                                    answerToString No
-
-                                unsure =
-                                    answerToString Unsure
-
-                                value =
-                                    answerToString data.state.answer
-                            in
-                            div [ Attr.class "" ]
-                                [ Html.Styled.fieldset [ Attr.class "flex flex-col" ]
-                                    [ legend [] [ text trial.question ]
-                                    , div [ Attr.class "flex flex-row" ]
-                                        [ input
-                                            [ Attr.type_ "radio"
-                                            , Attr.id yes
-                                            , Attr.value yes
-                                            , Attr.checked (value == yes)
-                                            , Ev.onClick (UserChoseNewAnswer (answerFromString yes))
-                                            ]
-                                            []
-                                        , label [ Attr.for yes ] [ text yes ]
-                                        ]
-                                    , div []
-                                        [ input
-                                            [ Attr.type_ "radio"
-                                            , Attr.id no
-                                            , Attr.value no
-                                            , Attr.checked (value == no)
-                                            , Ev.onClick (UserChoseNewAnswer (answerFromString no))
-                                            ]
-                                            []
-                                        , label [ Attr.for no ] [ text no ]
-                                        ]
-                                    , div []
-                                        [ input
-                                            [ Attr.type_ "radio"
-                                            , Attr.id unsure
-                                            , Attr.value unsure
-                                            , Attr.checked (value == unsure)
-                                            , Ev.onClick (UserChoseNewAnswer (answerFromString unsure))
-                                            ]
-                                            []
-                                        , label [ Attr.for no, Attr.value value ] [ text unsure ]
-                                        ]
-                                    ]
-                                , View.button { message = UserConfirmedChoice, txt = "feedback", isDisabled = String.isEmpty value }
-                                ]
-
-                        ( Feedback, _ ) ->
-                            div [] [ text trial.feedback, View.button { message = UserClickedNextTrial, txt = "Next trial", isDisabled = False } ]
+                    [ p [] [ text data.infos.instructions ]
+                    , viewTask data trial UserConfirmedChoice
                     ]
 
                 Nothing ->
-                    [ text "end of training", View.button { message = StartMain data.infos data.mainTrials, txt = "Start", isDisabled = False } ]
+                    [ div [ Attr.class "flex flex-col items-center" ]
+                        [ text data.infos.introToMain
+                        , View.button
+                            { message = StartMain data.infos data.mainTrials
+                            , txt = "Start"
+                            , isDisabled = False
+                            }
+                        ]
+                    ]
 
         Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ text data.infos.instructions
-                    , case ( data.state.step, data.state.currentSegment ) of
-                        ( SPR s, Just { taggedSegment } ) ->
-                            case s of
-                                Start ->
-                                    text "Press space to start reading"
-
-                                Reading segment ->
-                                    text (Tuple.second taggedSegment)
-
-                        ( SPR s, Nothing ) ->
-                            text "Press space to start"
-
-                        ( Question, _ ) ->
-                            let
-                                yes =
-                                    answerToString Yes
-
-                                no =
-                                    answerToString No
-
-                                unsure =
-                                    answerToString Unsure
-
-                                value =
-                                    answerToString data.state.answer
-                            in
-                            div [ Attr.class "" ]
-                                [ Html.Styled.fieldset [ Attr.class "flex flex-col" ]
-                                    [ legend [] [ text trial.question ]
-                                    , div [ Attr.class "flex flex-row" ]
-                                        [ input
-                                            [ Attr.type_ "radio"
-                                            , Attr.id yes
-                                            , Attr.value yes
-                                            , Attr.checked (value == yes)
-                                            , Ev.onClick (UserChoseNewAnswer (answerFromString yes))
-                                            ]
-                                            []
-                                        , label [ Attr.for yes ] [ text yes ]
-                                        ]
-                                    , div []
-                                        [ input
-                                            [ Attr.type_ "radio"
-                                            , Attr.id no
-                                            , Attr.value no
-                                            , Attr.checked (value == no)
-                                            , Ev.onClick (UserChoseNewAnswer (answerFromString no))
-                                            ]
-                                            []
-                                        , label [ Attr.for no ] [ text no ]
-                                        ]
-                                    , div []
-                                        [ input
-                                            [ Attr.type_ "radio"
-                                            , Attr.id unsure
-                                            , Attr.value unsure
-                                            , Attr.checked (value == unsure)
-                                            , Ev.onClick (UserChoseNewAnswer (answerFromString unsure))
-                                            ]
-                                            []
-                                        , label [ Attr.for no, Attr.value value ] [ text unsure ]
-                                        ]
-                                    ]
-                                , View.button { message = UserConfirmedChoice, txt = "feedback", isDisabled = String.isEmpty value }
-                                ]
-
-                        ( Feedback, _ ) ->
-                            div [] [ text trial.feedback, View.button { message = UserClickedNextTrial, txt = "Next trial", isDisabled = False } ]
-                    ]
+                    [ viewTask data trial UserClickedNextTrial ]
 
                 Nothing ->
-                    [ text "end of training", View.button { message = StartMain data.infos data.mainTrials, txt = "Start", isDisabled = False } ]
+                    [ div [ Attr.class "flex flex-col items-center" ] [ text data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here to save your data", isDisabled = False } ] ]
 
         Logic.Err reason ->
-            []
+            [ text ("I encountered the following error: " ++ reason) ]
 
         Logic.NotStarted ->
-            []
+            [ p [] [ text "Thanks for your participation !" ] ]
 
 
 init infos trials =

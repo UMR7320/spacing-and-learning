@@ -92,6 +92,7 @@ type alias Task =
     , feedback_incorrect : String
     , end : String
     , trainingWheel : String
+    , introToMain : String
     }
 
 
@@ -148,6 +149,7 @@ decode =
                 |> optional "feedback_incorrect" Decode.string "Missing feedback incorrect"
                 |> optional "End" Decode.string "Missing End"
                 |> optional "trainingWheels" Decode.string "Missing training wheel"
+                |> optional "IntroToMain" Decode.string "Missing IntroToMain text"
     in
     Data.decodeRecords decoder
 

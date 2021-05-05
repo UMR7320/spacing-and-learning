@@ -5,6 +5,7 @@ import ExperimentInfo
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
+import String.Interpolate
 import Task
 import Time exposing (toMillis, utc)
 
@@ -115,6 +116,9 @@ saveAcceptabilityData responseHandler maybeUserId taskId task =
             Data.sendInBatch summarizedTrialEncoder taskId_ userId history
     in
     Task.attempt callbackHandler sendInBatch_
+
+
+
 
 
 type alias Info =
