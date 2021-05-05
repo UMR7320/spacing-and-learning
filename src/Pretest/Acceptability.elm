@@ -19,10 +19,6 @@ import View
 
 
 
--- todo : feedback dans fin.
--- création des blocs manque des blocs parfois.
-
-
 type ErrorBlock
     = FirstDistractorMissing Bool
     | SecondDistractorMissing Bool
