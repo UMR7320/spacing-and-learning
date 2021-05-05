@@ -20874,7 +20874,7 @@ var $author$project$Pretest$Acceptability$view = F2(
 				if (_v4.$ === 'Nothing') {
 					return _List_fromArray(
 						[
-							A3($author$project$Pretest$Acceptability$viewTransition, data.infos.end, saveDataMsg, 'Click here to end this experiment')
+							A3($author$project$Pretest$Acceptability$viewTransition, data.infos.end, saveDataMsg, 'Click to save your answers')
 						]);
 				} else {
 					var trial = _v4.a;
@@ -20904,7 +20904,7 @@ var $author$project$Pretest$Acceptability$view = F2(
 			case 'Loading':
 				return _List_fromArray(
 					[
-						$rtfeldman$elm_css$Html$Styled$text('Loading...')
+						$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit this page, data might be lost.')
 					]);
 			case 'NotStarted':
 				return _List_fromArray(
@@ -30172,7 +30172,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38303" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40963" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

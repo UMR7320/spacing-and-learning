@@ -183,7 +183,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
         Logic.Main data ->
             case data.current of
                 Nothing ->
-                    [ viewTransition data.infos.end saveDataMsg "Click here to end this experiment"
+                    [ viewTransition data.infos.end saveDataMsg "Click to save your answers"
                     ]
 
                 Just trial ->
@@ -199,7 +199,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
                             [ prompt ]
 
         Logic.Loading ->
-            [ text "Loading..." ]
+            [ text "Loading... Please don't quit this page, data might be lost." ]
 
         Logic.NotStarted ->
             [ text "not started" ]
