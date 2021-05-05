@@ -260,7 +260,6 @@ decodeAcceptabilityTrials =
     in
     decodeRecords decoder
 
-
 type alias Block =
     { targetPos : Int
     , d1 : ( Int, Int )
