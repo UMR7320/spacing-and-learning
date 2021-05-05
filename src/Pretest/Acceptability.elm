@@ -199,7 +199,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
                             [ prompt ]
 
         Logic.Loading ->
-            [ text "Loading... Please don't quit this page, data might be lost." ]
+            [ text "Loading... Please don't exit this page, data may be lost." ]
 
         Logic.NotStarted ->
             [ text "not started" ]
