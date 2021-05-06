@@ -472,7 +472,7 @@ view task =
         Logic.Intr data ->
             case data.current of
                 Just trial ->
-                    [ p [] [ text data.infos.instructions ]
+                    [ p [] [ View.fromMarkdown data.infos.instructions ]
                     , viewTask data trial UserConfirmedChoice
                     ]
 
