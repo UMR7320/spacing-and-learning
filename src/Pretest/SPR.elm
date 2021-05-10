@@ -388,7 +388,7 @@ viewTask data trial endTrialMsg =
         ( SPR s, Just { taggedSegment } ) ->
             case s of
                 Start ->
-                    p [ Attr.class "text-bold" ] [ text "Press space to start reading" ]
+                    p [ Attr.class "text-bold" ] [ text "Press the space bar to start reading" ]
 
                 Reading segment ->
                     div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ] [ p [ Attr.class "text-lg items-center" ] [ text (Tuple.second taggedSegment) ] ]
