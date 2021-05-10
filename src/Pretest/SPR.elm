@@ -478,7 +478,7 @@ view task =
 
                 Nothing ->
                     [ div [ Attr.class "flex flex-col items-center" ]
-                        [ text data.infos.introToMain
+                        [ View.fromMarkdown data.infos.introToMain
                         , View.button
                             { message = StartMain data.infos data.mainTrials
                             , txt = "Start"
@@ -493,7 +493,7 @@ view task =
                     [ viewTask data trial UserClickedNextTrial ]
 
                 Nothing ->
-                    [ div [ Attr.class "flex flex-col items-center" ] [ text data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here to save your data", isDisabled = False } ] ]
+                    [ div [ Attr.class "flex flex-col items-center" ] [ View.fromMarkdown data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here to save your data", isDisabled = False } ] ]
 
         Logic.Err reason ->
             [ text ("I encountered the following error: " ++ reason) ]
