@@ -130,7 +130,7 @@ type alias State =
     , step : Step
     , remainingSegments : List TaggedSegment
     , currentSegment : Maybe TaggedSegmentStarted
-    , seenSegments : List (Maybe TaggedSegmentOver)
+    , seenSegments : List TaggedSegmentOver
     }
 
 
@@ -209,10 +209,43 @@ saveSprData responseHandler maybeUserId task =
         intFromMillis posix =
             Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
 
+        --formattedData =
+        --  history |> List.map (\( { id }, { answer, seenSegments } ) -> { id = id, answer = answerToString answer, seenSegments = extract seenSegments })
+        formattedData : List { tag : String, segment : String, startedAt : Int, endedAt : Int, id : String, answer : String }
         formattedData =
-            history |> List.map (\( { id }, { answer, seenSegments } ) -> { id = id, answer = answerToString answer, seenSegments = extract seenSegments })
+            history
+                |> List.foldl
+                    (\( { id }, { answer, seenSegments } ) acc ->
+                        List.map
+                            (\{ taggedSegment, startedAt, endedAt } ->
+                                { tag = tagToString (Tuple.first taggedSegment)
+                                , segment = Tuple.second taggedSegment
+                                , startedAt = Time.posixToMillis startedAt
+                                , endedAt = Time.posixToMillis endedAt
+                                , id = id
+                                , answer = answerToString answer
+                                }
+                            )
+                            seenSegments
+                            |> List.append acc
+                    )
+                    []
 
-        extract seenSegments =
+        {--List.concatMap
+                    (\( { id }, { answer, seenSegments } ) ->
+                        List.map
+                            (\{ taggedSegment, startedAt, endedAt } ->
+                                { tag = tagToString (Tuple.first taggedSegment)
+                                , segment = Tuple.second taggedSegment
+                                , startedAt = Time.posixToMillis startedAt
+                                , endedAt = Time.posixToMillis endedAt
+                                , id = id
+                                , answer = answerToString answer
+                                }
+                            )
+                            seenSegments
+                    )--}
+        {--extract seenSegments =
             List.foldl
                 (\seg acc ->
                     case seg of
@@ -233,16 +266,20 @@ saveSprData responseHandler maybeUserId task =
                 |> String.join ","
                 |> String.append "["
                 |> (\f a b -> f b a) String.append "]"
-
+--}
+        --List { tag : String, segment : b, startedAt : String, endedAt : String, id : c })
         summarizedTrialEncoder =
             Encode.list
-                (\{ id, answer, seenSegments } ->
+                (\{ tag, segment, startedAt, endedAt, id, answer } ->
                     Encode.object
                         [ ( "fields"
                           , Encode.object
                                 [ ( "sprTrialId", Encode.list Encode.string [ id ] )
                                 , ( "answer", Encode.string answer )
-                                , ( "blob", Encode.string seenSegments )
+                                , ( "sprStartedAt", Encode.int startedAt )
+                                , ( "sprEndedAt", Encode.int endedAt )
+                                , ( "tag", Encode.string tag )
+                                , ( "segment", Encode.string segment )
                                 , ( "Task_UID", Encode.list Encode.string [ taskId ] )
                                 , ( "userUid", Encode.list Encode.string [ userId ] )
                                 ]
@@ -341,12 +378,16 @@ update msg model =
                                         { prevState
                                             | step = Question
                                             , seenSegments =
-                                                Maybe.map
-                                                    (\{ taggedSegment, startedAt } ->
-                                                        { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
-                                                    )
-                                                    prevState.currentSegment
-                                                    :: prevState.seenSegments
+                                                case prevState.currentSegment of
+                                                    Just seg ->
+                                                        (\{ taggedSegment, startedAt } ->
+                                                            { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
+                                                        )
+                                                            seg
+                                                            :: prevState.seenSegments
+
+                                                    Nothing ->
+                                                        prevState.seenSegments
                                         }
                                         model.spr
 
@@ -357,12 +398,16 @@ update msg model =
                                             , currentSegment = Just (TaggedSegmentStarted x (Maybe.withDefault (Time.millisToPosix 0) timestamp))
                                             , remainingSegments = List.tail prevState.remainingSegments |> Maybe.withDefault []
                                             , seenSegments =
-                                                Maybe.map
-                                                    (\{ taggedSegment, startedAt } ->
-                                                        { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
-                                                    )
-                                                    prevState.currentSegment
-                                                    :: prevState.seenSegments
+                                                case prevState.currentSegment of
+                                                    Just seg ->
+                                                        (\{ taggedSegment, startedAt } ->
+                                                            { taggedSegment = taggedSegment, startedAt = startedAt, endedAt = Maybe.withDefault (Time.millisToPosix 0) timestamp }
+                                                        )
+                                                            seg
+                                                            :: prevState.seenSegments
+
+                                                    Nothing ->
+                                                        prevState.seenSegments
                                         }
                                         model.spr
                     }
