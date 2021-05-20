@@ -57,6 +57,7 @@ type PretestTask
     | GeneralInfos
     | EmailSent
     | SPR
+    | SentenceCompletion
 
 
 type AcceptabilityRoute
@@ -90,6 +91,7 @@ parser =
                         , map YN (s "yesno-task")
                         , map GeneralInfos (s "informations")
                         , map EmailSent (s "email-sent")
+                        , map SentenceCompletion (s "sentence-completion")
                         ]
             )
         , map Pilote

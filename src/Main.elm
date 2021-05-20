@@ -8,7 +8,6 @@ port module Main exposing
     )
 
 import Browser
-import Browser.Dom
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation as Nav exposing (pushUrl)
 import Data
@@ -32,7 +31,9 @@ import Postest.CloudWords as CloudWords
 import Postest.YN as YN
 import Pretest.Acceptability as Acceptability
 import Pretest.GeneralInfos
+import Pretest.Pretest as Pretest
 import Pretest.SPR as SPR
+import Pretest.SentenceCompletion as SentenceCompletion
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -106,14 +107,14 @@ type alias Model =
     --                                                                  88__dP 88__dP 88__     88   88__   `Ybo."   88
     --                                                                  88"""  88"Yb  88""     88   88""   o.`Y8b   88
     --                                                                  88     88  Yb 888888   88   888888 8bodP'   88
-    -- yn stands for yes-no
     , yn : Logic.Task YN.Trial YN.State
     , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
     , packetsSended : Int
     , informations : Pretest.GeneralInfos.Model
     , pilote : Pilote
     , spr : Logic.Task SPR.Trial SPR.State
-    , pretest : Para.State2 SPR.Msg (List SPR.Trial) (List ExperimentInfo.Task)
+    , pretest : Pretest.Pretest
+    , sentenceCompletion : Logic.Task SentenceCompletion.Trial SentenceCompletion.State
 
     --
     --                                                                  ## ###  ##  ## ###  #  ###      #
@@ -213,15 +214,14 @@ init _ url key =
                 , onSuccess = ServerRespondedWithAllPretestData
                 }
 
-        ( loadingStatePretest, fetchPretest ) =
-            Para.attempt2
-                { task1 = SPR.getRecords
-                , task2 = ExperimentInfo.getRecords
-                , onUpdates = \someData -> SPR (SPR.ServerRespondedWithSomePretestData someData)
-                , onFailure = \err -> SPR (SPR.ServerRespondedWithSomeError err)
-                , onSuccess = \trials info -> SPR (SPR.ServerRespondedWithAllPretestData trials info)
-                }
-
+        --( loadingStatePretest, fetchPretest ) =
+        --    Para.attempt2
+        --        { task1 = SPR.getRecords
+        --        , task2 = ExperimentInfo.getRecords
+        --        , onUpdates = \someData -> SPR (SPR.ServerRespondedWithSomePretestData someData)
+        --        , onFailure = \err -> SPR (SPR.ServerRespondedWithSomeError err)
+        --        , onSuccess = \trials info -> SPR (SPR.ServerRespondedWithAllPretestData trials info)
+        --        }
         defaultInit =
             { key = key
             , route = route
@@ -256,7 +256,8 @@ init _ url key =
             , yn = Logic.Loading
             , informations = ""
             , spr = Logic.NotStarted
-            , pretest = Tuple.first SPR.attempt
+            , pretest = Tuple.first Pretest.attempt
+            , sentenceCompletion = Logic.NotStarted
 
             -- POSTEST
             , cloudWords = Dict.fromList CloudWords.words
@@ -322,8 +323,9 @@ init _ url key =
         Route.Pretest _ ->
             ( { defaultInit
                 | spr = Logic.Loading
+                , sentenceCompletion = Logic.Loading
               }
-            , Cmd.map SPR (Tuple.second SPR.attempt)
+            , Cmd.map Pretest (Tuple.second Pretest.attempt)
             )
 
         Route.Pilote userid _ ->
@@ -593,6 +595,9 @@ body model =
                     Route.SPR ->
                         List.map (Html.Styled.map SPR) (SPR.view model.spr)
 
+                    Route.SentenceCompletion ->
+                        List.map (Html.Styled.map SentenceCompletion) (SentenceCompletion.view model.sentenceCompletion)
+
                     Route.GeneralInfos ->
                         [ Pretest.GeneralInfos.view model.informations (\input -> Informations <| Pretest.GeneralInfos.UserUpdatedEmailField input) (\email -> Informations <| Pretest.GeneralInfos.UserClickedSendData email) ]
 
@@ -648,12 +653,14 @@ type Msg
       --                                                          #   # # #    #  #     #  #
       --                                                          #   # # ###  #  ### ##   #
     | Acceptability Acceptability.Msg
-    | UserPressedKey (Maybe Bool)
     | Informations Pretest.GeneralInfos.Msg
-    | ServerRespondedWithSomePretestData (Para.Msg2 (List Acceptability.Trial) (List ExperimentInfo.Task))
+    | Pretest Pretest.Msg
+    | SentenceCompletion SentenceCompletion.Msg
     | ServerRespondedWithAllPretestData (List Acceptability.Trial) (List ExperimentInfo.Task)
-    | ToNextStep Acceptability.Step
+    | ServerRespondedWithSomePretestData (Para.Msg2 (List Acceptability.Trial) (List ExperimentInfo.Task))
     | SPR SPR.Msg
+    | ToNextStep Acceptability.Step
+    | UserPressedKey (Maybe Bool)
       --
       --                                                          ## ###  ##  ## ###  #  ###      #
       --                                                         #   #   #   #    #  # # # #     ##
@@ -920,6 +927,35 @@ update msg model =
             in
             ( newModel, Cmd.map SPR newCmd )
 
+        Pretest submsg ->
+            case submsg of
+                Pretest.ServerRespondedWithSomePretestData downloaded ->
+                    let
+                        ( nextState, nextCmd ) =
+                            Para.update3 model.pretest downloaded
+                    in
+                    ( { model | pretest = nextState }, Cmd.map Pretest nextCmd )
+
+                Pretest.ServerRespondedWithSomeError err ->
+                    ( { model | spr = Logic.Err (Data.buildErrorMessage err) }, Cmd.none )
+
+                Pretest.ServerRespondedWithAllPretestData sprtrials sctrials infos ->
+                    let
+                        shuffledTrials =
+                            Random.generate (\a -> SPR (SPR.RuntimeShuffledTrials a)) (Random.pair (Random.List.shuffle sprtrials) (Random.constant infos))
+
+                        scShuffledTrials =
+                            Random.generate (\a -> SentenceCompletion (SentenceCompletion.RuntimeShuffledTrials a)) (Random.pair (Random.List.shuffle sctrials) (Random.constant infos))
+                    in
+                    ( model, Cmd.batch [ shuffledTrials, scShuffledTrials ] )
+
+        SentenceCompletion submsg ->
+            let
+                ( newModel, newCmd ) =
+                    SentenceCompletion.update submsg model
+            in
+            ( newModel, Cmd.map SentenceCompletion newCmd )
+
         Acceptability message ->
             let
                 prevState =
@@ -942,7 +978,7 @@ update msg model =
                                     )
 
                                 Acceptability.Answering ->
-                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Answering } model.acceptabilityTask }, Cmd.none )
+                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Answering } model.acceptabilityTask }, Delay.after trial.timeout (Acceptability (Acceptability.UserPressedButton Nothing)) )
 
                                 Acceptability.End ->
                                     ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.End } model.acceptabilityTask |> Logic.next pState }
@@ -959,26 +995,29 @@ update msg model =
                             ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask Acceptability.initState }, Cmd.none )
 
                         Acceptability.UserPressedButton maybeBool ->
-                            ( model, Task.perform (\timestamp -> Acceptability (Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp)) Time.now )
+                            let
+                                forward =
+                                    if pState.step == Acceptability.Answering then
+                                        Task.perform (\timestamp -> Acceptability (Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp)) Time.now
+
+                                    else
+                                        Cmd.none
+                            in
+                            ( model, forward )
 
                         Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp ->
-                            case maybeBool of
-                                Just bool ->
-                                    ( { model
-                                        | acceptabilityTask =
-                                            Logic.update
-                                                { pState
-                                                    | step = Acceptability.End
-                                                    , evaluation = bool
-                                                    , userAnsweredAt = Just timestamp
-                                                }
-                                                model.acceptabilityTask
-                                      }
-                                    , toNextStep model.endAcceptabilityDuration Acceptability.End
-                                    )
-
-                                Nothing ->
-                                    ( model, Cmd.none )
+                            ( { model
+                                | acceptabilityTask =
+                                    Logic.update
+                                        { pState
+                                            | step = Acceptability.End
+                                            , evaluation = Acceptability.maybeBoolToEvaluation maybeBool
+                                            , userAnsweredAt = Just timestamp
+                                        }
+                                        model.acceptabilityTask
+                              }
+                            , toNextStep model.endAcceptabilityDuration Acceptability.End
+                            )
 
                         Acceptability.AudioEnded ( name, timestamp ) ->
                             if name == beep then
@@ -1025,11 +1064,8 @@ update msg model =
                             let
                                 responseHandler =
                                     \records -> Acceptability (Acceptability.ServerRespondedWithLastRecords records)
-
-                                taskId =
-                                    "recR8areYkKRvQ6lU"
                             in
-                            ( { model | acceptabilityTask = Logic.Loading }, Logic.saveAcceptabilityData responseHandler model.user taskId model.acceptabilityTask )
+                            ( { model | acceptabilityTask = Logic.Loading }, Acceptability.saveAcceptabilityData responseHandler model.user model.acceptabilityTask )
 
                         Acceptability.ServerRespondedWithLastRecords (Result.Ok records) ->
                             ( { model | acceptabilityTask = Logic.Loading }
@@ -1153,14 +1189,9 @@ update msg model =
                     in
                     case prevState of
                         Just pState ->
-                            case evaluation of
-                                Just x ->
-                                    ( { model | acceptabilityTask = Logic.update { pState | evaluation = x } model.acceptabilityTask |> Logic.next Acceptability.initState }
-                                    , Delay.after 500 playBeep
-                                    )
-
-                                Nothing ->
-                                    ( model, Cmd.none )
+                            ( { model | acceptabilityTask = Logic.update { pState | evaluation = Acceptability.maybeBoolToEvaluation evaluation } model.acceptabilityTask |> Logic.next Acceptability.initState }
+                            , Delay.after 500 playBeep
+                            )
 
                         _ ->
                             ( model, Cmd.none )
