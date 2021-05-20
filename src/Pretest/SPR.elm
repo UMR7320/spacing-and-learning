@@ -29,20 +29,11 @@ type alias Pretest =
     Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
 
 
-attempt =
-    Para.attempt2
-        { task1 = getRecords
-        , task2 = ExperimentInfo.getRecords
-        , onUpdates = ServerRespondedWithSomePretestData
-        , onFailure = ServerRespondedWithSomeError
-        , onSuccess = ServerRespondedWithAllPretestData
-        }
-
-
 type alias Spr model =
     { model
         | spr : Logic.Task Trial State
-        , pretest : Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
+
+        --, pretest : Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
         , user : Maybe String
     }
 
@@ -62,18 +53,21 @@ type alias Trial =
 
 
 type Msg
+
     = UserChoseNewAnswer Answer
-    | UserConfirmedChoice
-    | UserClickedNextTrial
-    | UserClickedSaveData
+    | NoOp
+    | RuntimeShuffledTrials ( List Trial, List ExperimentInfo.Task )
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | StartMain ExperimentInfo.Task (List Trial)
-    | RuntimeShuffledTrials ( List Trial, List ExperimentInfo.Task )
-    | NoOp
     | TimestampedMsg TimedMsg (Maybe Time.Posix)
-    | ServerRespondedWithSomePretestData (Para.Msg2 (List Trial) (List ExperimentInfo.Task))
-    | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllPretestData (List Trial) (List ExperimentInfo.Task)
+    | UserClickedNextTrial
+    | UserClickedSaveData
+    | UserConfirmedChoice
+
+
+--| ServerRespondedWithSomePretestData (Para.Msg2 (List Trial) (List ExperimentInfo.Task))
+--| ServerRespondedWithSomeError Http.Error
+--| ServerRespondedWithAllPretestData (List Trial) (List ExperimentInfo.Task)
 
 
 type TimedMsg
@@ -209,8 +203,6 @@ saveSprData responseHandler maybeUserId task =
         intFromMillis posix =
             Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
 
-        --formattedData =
-        --  history |> List.map (\( { id }, { answer, seenSegments } ) -> { id = id, answer = answerToString answer, seenSegments = extract seenSegments })
         formattedData : List { tag : String, segment : String, startedAt : Int, endedAt : Int, id : String, answer : String }
         formattedData =
             history
@@ -231,43 +223,6 @@ saveSprData responseHandler maybeUserId task =
                     )
                     []
 
-        {--List.concatMap
-                    (\( { id }, { answer, seenSegments } ) ->
-                        List.map
-                            (\{ taggedSegment, startedAt, endedAt } ->
-                                { tag = tagToString (Tuple.first taggedSegment)
-                                , segment = Tuple.second taggedSegment
-                                , startedAt = Time.posixToMillis startedAt
-                                , endedAt = Time.posixToMillis endedAt
-                                , id = id
-                                , answer = answerToString answer
-                                }
-                            )
-                            seenSegments
-                    )--}
-        {--extract seenSegments =
-            List.foldl
-                (\seg acc ->
-                    case seg of
-                        Just { taggedSegment, startedAt, endedAt } ->
-                            String.Interpolate.interpolate "{\"tag\": \"{0}\", \"segment\": \"{1}\", \"startedAt\": {2}, \"endedAt\": {3} }"
-                                [ tagToString (Tuple.first taggedSegment)
-                                , Tuple.second taggedSegment
-                                , String.fromInt (Time.posixToMillis startedAt)
-                                , String.fromInt (Time.posixToMillis endedAt)
-                                ]
-                                :: acc
-
-                        Nothing ->
-                            acc
-                )
-                []
-                seenSegments
-                |> String.join ","
-                |> String.append "["
-                |> (\f a b -> f b a) String.append "]"
---}
-        --List { tag : String, segment : b, startedAt : String, endedAt : String, id : c })
         summarizedTrialEncoder =
             Encode.list
                 (\{ tag, segment, startedAt, endedAt, id, answer } ->
@@ -331,6 +286,7 @@ update msg model =
         RuntimeShuffledTrials ( infos, trials ) ->
             ( { model | spr = init trials infos }, Cmd.none )
 
+        {--
         ServerRespondedWithSomePretestData downloaded ->
             let
                 ( nextState, nextCmd ) =
@@ -343,7 +299,7 @@ update msg model =
 
         ServerRespondedWithAllPretestData trials infos ->
             ( model, Random.generate RuntimeShuffledTrials (Random.pair (Random.List.shuffle trials) (Random.constant infos)) )
-
+--}
         TimestampedMsg subMsg timestamp ->
             case subMsg of
                 UserPressedSpaceToStartParagraph ->

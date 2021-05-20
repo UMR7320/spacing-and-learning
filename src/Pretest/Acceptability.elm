@@ -1,6 +1,5 @@
 module Pretest.Acceptability exposing (..)
 
-import Array
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
@@ -9,14 +8,60 @@ import Html.Styled.Attributes exposing (class, height, src, width)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
-import Logic
-import Maybe
+import Json.Encode as Encode
+import Logic exposing (Task)
 import String.Interpolate exposing (interpolate)
 import Task
 import Time
 import Url.Builder exposing (Root(..))
 import View
 
+
+saveAcceptabilityData : (Result.Result Http.Error (List ()) -> msg) -> Maybe String -> Task Trial State -> Cmd msg
+saveAcceptabilityData responseHandler maybeUserId task =
+    let
+        history =
+            Logic.getHistory task
+
+        taskId_ =
+            taskId
+
+        callbackHandler =
+            responseHandler
+
+        userId =
+            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        whenNothing =
+            Time.millisToPosix 1000000000
+
+        intFromMillis posix =
+            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
+
+        summarizedTrialEncoder =
+            Encode.list
+                (\( t, s ) ->
+                    Encode.object
+                        [ ( "fields"
+                          , Encode.object
+                                [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
+                                , ( "userUid", Encode.list Encode.string [ userId ] )
+                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
+                                , ( "audioStartedAt", intFromMillis s.audioStartedAt )
+                                , ( "beepStartedAt", intFromMillis s.beepStartedAt )
+                                , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "beepEndedAt", Encode.int (Time.posixToMillis (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "userAnsweredAt", Encode.int (Time.posixToMillis (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
+                                , ( "evaluation", Encode.string (evalToString s.evaluation) )
+                                ]
+                          )
+                        ]
+                )
+
+        sendInBatch_ =
+            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
+    in
+    Task.attempt callbackHandler sendInBatch_
 
 
 type ErrorBlock
@@ -46,6 +91,7 @@ type alias Trial =
     , isGrammatical : Bool
     , audio : Data.AudioFile
     , feedback : String
+    , timeout : Int
     }
 
 
@@ -217,6 +263,7 @@ decodeAcceptabilityTrials =
                 |> optional "IsGrammatical" Decode.bool False
                 |> required "Acceptability Audio" Data.decodeAudioFiles
                 |> optional "Acceptability Feedback" Decode.string "no feedback"
+                |> required "Timeout" Decode.int
 
         toTrialTypeDecoder str =
             case str of
@@ -259,6 +306,7 @@ decodeAcceptabilityTrials =
                     Decode.fail ("I couldn't find the corresponding SentenceType for this string :" ++ str)
     in
     decodeRecords decoder
+
 
 type alias Block =
     { targetPos : Int
@@ -362,7 +410,7 @@ sentenceTypeToString sentenceType =
 initState : State
 initState =
     { trialuid = "defaulttrialuid"
-    , evaluation = False
+    , evaluation = NoEvaluation
     , beepEndedAt = Nothing
     , beepStartedAt = Nothing
     , audioStartedAt = Nothing
@@ -372,15 +420,10 @@ initState =
     }
 
 
+newLoop : State
 newLoop =
-    { trialuid = "defaulttrialuid"
-    , evaluation = False
-    , beepEndedAt = Nothing
-    , beepStartedAt = Nothing
-    , audioStartedAt = Nothing
-    , audioEndedAt = Nothing
-    , userAnsweredAt = Nothing
-    , step = Start
+    { initState
+        | step = Start
     }
 
 
@@ -394,7 +437,7 @@ type alias CurrentTrialNumber =
 
 type alias State =
     { trialuid : String
-    , evaluation : Bool
+    , evaluation : Evaluation
     , beepStartedAt : Maybe Time.Posix
     , audioStartedAt : Maybe Time.Posix
     , beepEndedAt : Maybe Time.Posix
@@ -417,3 +460,32 @@ type Evaluation
     | SentenceCorrect
     | SentenceIncorrect
     | EvaluationTimeOut
+
+
+maybeBoolToEvaluation : Maybe Bool -> Evaluation
+maybeBoolToEvaluation maybeBool =
+    case maybeBool of
+        Nothing ->
+            EvaluationTimeOut
+
+        Just True ->
+            SentenceCorrect
+
+        Just False ->
+            SentenceIncorrect
+
+
+evalToString : Evaluation -> String
+evalToString eval =
+    case eval of
+        NoEvaluation ->
+            "No Eval"
+
+        SentenceCorrect ->
+            "Correct"
+
+        SentenceIncorrect ->
+            "Incorrect"
+
+        EvaluationTimeOut ->
+            "Timeout"

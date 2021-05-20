@@ -71,53 +71,6 @@ saveData responseHandler maybeUserId taskId task =
     Task.attempt callbackHandler sendInBatch_
 
 
-saveAcceptabilityData responseHandler maybeUserId taskId task =
-    let
-        history =
-            getHistory task
-
-        taskId_ =
-            taskId
-
-        callbackHandler =
-            responseHandler
-
-        userId =
-            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
-
-        whenNothing =
-            Time.millisToPosix 1000000000
-
-        intFromMillis posix =
-            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
-
-        summarizedTrialEncoder =
-            Encode.list
-                (\( t, s ) ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
-                                , ( "evaluation", Encode.bool s.evaluation )
-                                , ( "audioStartedAt", intFromMillis s.audioStartedAt )
-                                , ( "beepStartedAt", intFromMillis s.beepStartedAt )
-                                , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "beepEndedAt", Encode.int (Time.posixToMillis (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "userAnsweredAt", Encode.int (Time.posixToMillis (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
-                                , ( "evaluation", Encode.bool s.evaluation )
-                                ]
-                          )
-                        ]
-                )
-
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
-    in
-    Task.attempt callbackHandler sendInBatch_
-
-
 
 
 
