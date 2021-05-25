@@ -31,7 +31,10 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, saveData, startMainMs
         Logic.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
-        Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Instructions data ->
+            div [] []
+
+        Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div []
@@ -53,7 +56,7 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, saveData, startMainMs
                 Nothing ->
                     View.introToMain (startMainMsg mainTrials data.infos)
 
-        Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div [ class "container flex flex-col justify-center items-center max-w-3xl m-4 p-4" ]

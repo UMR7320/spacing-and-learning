@@ -21,6 +21,10 @@ import Time
 import View
 
 
+
+--TODO: CHANGER INTERACTION Y N K à la place du click.
+
+
 taskId =
     "rec7oxQBDY7rBTRDn"
 
@@ -53,7 +57,6 @@ type alias Trial =
 
 
 type Msg
-
     = UserChoseNewAnswer Answer
     | NoOp
     | RuntimeShuffledTrials ( List Trial, List ExperimentInfo.Task )
@@ -63,6 +66,7 @@ type Msg
     | UserClickedNextTrial
     | UserClickedSaveData
     | UserConfirmedChoice
+
 
 
 --| ServerRespondedWithSomePretestData (Para.Msg2 (List Trial) (List ExperimentInfo.Task))
@@ -286,20 +290,6 @@ update msg model =
         RuntimeShuffledTrials ( infos, trials ) ->
             ( { model | spr = init trials infos }, Cmd.none )
 
-        {--
-        ServerRespondedWithSomePretestData downloaded ->
-            let
-                ( nextState, nextCmd ) =
-                    Para.update2 model.pretest downloaded
-            in
-            ( { model | pretest = nextState }, nextCmd )
-
-        ServerRespondedWithSomeError error ->
-            ( { model | spr = Logic.Err (Data.buildErrorMessage error) }, Cmd.none )
-
-        ServerRespondedWithAllPretestData trials infos ->
-            ( model, Random.generate RuntimeShuffledTrials (Random.pair (Random.List.shuffle trials) (Random.constant infos)) )
---}
         TimestampedMsg subMsg timestamp ->
             case subMsg of
                 UserPressedSpaceToStartParagraph ->
@@ -392,10 +382,10 @@ viewTask data trial endTrialMsg =
                     p [ Attr.class "text-bold" ] [ text "Press the space bar to start reading" ]
 
                 Reading segment ->
-                    div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ] [ p [ Attr.class "text-lg items-center" ] [ text (Tuple.second taggedSegment) ] ]
+                    div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2 text-bold text-lg" ] [ p [ Attr.class "text-lg items-center" ] [ text (Tuple.second taggedSegment) ] ]
 
         ( SPR s, Nothing ) ->
-            p [ Attr.class "text-lg" ] [ text "Press space to start reading" ]
+            p [ Attr.class "text-lg" ] [ text "Press the space to start" ]
 
         ( Question, _ ) ->
             let
@@ -470,7 +460,7 @@ view task =
         Logic.Loading ->
             [ text "Loading... Please don't exit or data may be lost" ]
 
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
                     [ p [] [ View.fromMarkdown data.infos.instructions ]
@@ -488,7 +478,7 @@ view task =
                         ]
                     ]
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
                     [ viewTask data trial UserClickedNextTrial ]
@@ -501,6 +491,9 @@ view task =
 
         Logic.NotStarted ->
             [ p [] [ text "Thanks for your participation !" ] ]
+
+        Logic.Running Logic.Instructions data ->
+            []
 
 
 init infos trials =

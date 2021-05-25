@@ -26,8 +26,10 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userCha
 
         Logic.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
+        Logic.Running Logic.Instructions data ->
+            div [] []
 
-        Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div []
@@ -51,7 +53,7 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userCha
                 Nothing ->
                     View.introToMain (startMainMsg mainTrials data.infos)
 
-        Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]

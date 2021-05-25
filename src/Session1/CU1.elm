@@ -51,7 +51,7 @@ view task =
         Logic.Err reason ->
             div [] [ text reason ]
 
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
                     let
@@ -87,7 +87,7 @@ view task =
                 Nothing ->
                     View.introToMain (task.startMainMsg data.mainTrials data.infos)
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
                     let
@@ -122,6 +122,9 @@ view task =
 
         Logic.Loading ->
             text "Loading..."
+
+        Logic.Running Logic.Instructions data ->
+            text ""
 
 
 type CU1Msg

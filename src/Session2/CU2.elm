@@ -28,7 +28,10 @@ view exp optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg
         Logic.Err reason ->
             div [] [ text reason ]
 
-        Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Instructions data ->
+            div [] []
+
+        Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div []
@@ -50,7 +53,7 @@ view exp optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg
                 Nothing ->
                     View.introToMain (startMainMsg mainTrials data.infos)
 
-        Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col w-full items-center" ]

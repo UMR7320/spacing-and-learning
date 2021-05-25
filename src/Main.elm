@@ -34,6 +34,7 @@ import Pretest.GeneralInfos
 import Pretest.Pretest as Pretest
 import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
+import Pretest.VKS as VKS
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -115,6 +116,7 @@ type alias Model =
     , spr : Logic.Task SPR.Trial SPR.State
     , pretest : Pretest.Pretest
     , sentenceCompletion : Logic.Task SentenceCompletion.Trial SentenceCompletion.State
+    , vks : Logic.Task VKS.Trial VKS.State
 
     --
     --                                                                  ## ###  ##  ## ###  #  ###      #
@@ -258,6 +260,7 @@ init _ url key =
             , spr = Logic.NotStarted
             , pretest = Tuple.first Pretest.attempt
             , sentenceCompletion = Logic.NotStarted
+            , vks = Logic.NotStarted
 
             -- POSTEST
             , cloudWords = Dict.fromList CloudWords.words
@@ -601,6 +604,9 @@ body model =
                     Route.GeneralInfos ->
                         [ Pretest.GeneralInfos.view model.informations (\input -> Informations <| Pretest.GeneralInfos.UserUpdatedEmailField input) (\email -> Informations <| Pretest.GeneralInfos.UserClickedSendData email) ]
 
+                    Route.VKS ->
+                        List.map (Html.Styled.map VKS) (VKS.view model.vks)
+
             Home ->
                 [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
@@ -661,6 +667,7 @@ type Msg
     | SPR SPR.Msg
     | ToNextStep Acceptability.Step
     | UserPressedKey (Maybe Bool)
+    | VKS VKS.Msg
       --
       --                                                          ## ###  ##  ## ###  #  ###      #
       --                                                         #   #   #   #    #  # # # #     ##
@@ -955,6 +962,13 @@ update msg model =
                     SentenceCompletion.update submsg model
             in
             ( newModel, Cmd.map SentenceCompletion newCmd )
+
+        VKS submsg ->
+            let
+                ( newModel, newCmd ) =
+                    VKS.update submsg model
+            in
+            ( newModel, Cmd.map VKS newCmd )
 
         Acceptability message ->
             let
@@ -1853,7 +1867,10 @@ viewScrabbleTask model =
         Logic.NotStarted ->
             [ text "Not Asked" ]
 
-        Logic.Main data ->
+        Logic.Running Logic.Instructions data ->
+            []
+
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just currentTrial ->
                     [ div [ class "flex flex-col items-center w-full" ] [ audioButton currentTrial.audioWord.url ]
@@ -1882,7 +1899,7 @@ viewScrabbleTask model =
                 Nothing ->
                     [ View.end data.infos.end (Spelling2 UserClickedSaveData) "context-understanding" ]
 
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just currentTrial ->
                     [ View.viewTraining data.infos.instructions

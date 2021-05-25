@@ -197,7 +197,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
                 ]
     in
     case task of
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Nothing ->
                     [ div [ class "flex flex-col items-center" ]
@@ -222,7 +222,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
                             [ prompt
                             ]
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Nothing ->
                     [ viewTransition data.infos.end saveDataMsg "Click to save your answers"
@@ -249,6 +249,9 @@ view task { startMainMsg, startTraining, saveDataMsg } =
         Logic.Err reason ->
             [ p [] [ text <| "Oups, I ran into the following error: " ++ reason ]
             ]
+
+        Logic.Running Logic.Instructions data ->
+            []
 
 
 decodeAcceptabilityTrials : Decode.Decoder (List Trial)

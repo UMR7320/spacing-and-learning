@@ -24,7 +24,10 @@ view exp { toggleFeedback, nextTrialMsg, startMainMsg, userChangedInput } =
         Logic.Err reason ->
             div [] [ text reason ]
 
-        Logic.Intr { trainingTrials, mainTrials, current, state, feedback, history, infos } ->
+        Logic.Running Logic.Instructions data ->
+            div [] []
+
+        Logic.Running Logic.Training { trainingTrials, mainTrials, current, state, feedback, history, infos } ->
             case current of
                 Just trial ->
                     div []
@@ -59,7 +62,7 @@ view exp { toggleFeedback, nextTrialMsg, startMainMsg, userChangedInput } =
                             }
                         ]
 
-        Logic.Main { mainTrials, current, state, feedback, history, infos } ->
+        Logic.Running Logic.Main { mainTrials, current, state, feedback, history, infos } ->
             case current of
                 Just trial ->
                     div []

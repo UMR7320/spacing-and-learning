@@ -2,38 +2,36 @@ module Logic exposing (..)
 
 import Data
 import ExperimentInfo
-import Http
+import Html.Styled as Html
 import Json.Decode as Decode
 import Json.Encode as Encode
-import String.Interpolate
 import Task
 import Time exposing (toMillis, utc)
 
 
 type Task trial state
-    = Main
-        { mainTrials : List trial
-        , trainingTrials : List trial
-        , current : Maybe trial
-        , next : Maybe trial
-        , state : state
-        , feedback : Bool
-        , history : List ( trial, state )
-        , infos : ExperimentInfo.Task
-        }
-    | Intr
-        { trainingTrials : List trial
-        , mainTrials : List trial
-        , current : Maybe trial
-        , next : Maybe trial
-        , state : state
-        , feedback : Bool
-        , history : List ( trial, state )
-        , infos : ExperimentInfo.Task
-        }
+    = Running Step (Data trial state)
     | Err String
     | Loading
     | NotStarted
+
+
+type Step
+    = Instructions
+    | Training
+    | Main
+
+
+type alias Data trial state =
+    { trainingTrials : List trial
+    , mainTrials : List trial
+    , current : Maybe trial
+    , next : Maybe trial
+    , state : state
+    , feedback : Bool
+    , history : List ( trial, state )
+    , infos : ExperimentInfo.Task
+    }
 
 
 saveData responseHandler maybeUserId taskId task =
@@ -71,30 +69,22 @@ saveData responseHandler maybeUserId taskId task =
     Task.attempt callbackHandler sendInBatch_
 
 
-
-
-
 type alias Info =
     Result String ExperimentInfo.Task
+
+
+type alias ViewConfig t s msg =
+    { task : Task t s, instructions : List (Html.Html msg) }
 
 
 update : s -> Task t s -> Task t s
 update newState task =
     case task of
-        Main data ->
-            Main { data | state = newState }
+        Running step data ->
+            Running step { data | state = newState }
 
-        Intr data ->
-            Intr { data | state = newState }
-
-        Loading ->
-            Err "You can't update anything while loading the data. Please report this error."
-
-        Err reason ->
-            Err (reason ++ "|| You can't update anything when you are in an error state. Please reports those errors")
-
-        NotStarted ->
-            Err "You can't update anything until the task is started. Please report this error"
+        _ ->
+            Err "You can't update anything here"
 
 
 type alias Identified state =
@@ -104,65 +94,10 @@ type alias Identified state =
 next : s -> Task t s -> Task t s
 next resetedState task =
     case task of
-        Main data ->
-            case data.mainTrials of
-                x :: y :: z :: zs ->
-                    Main
-                        { data
-                            | mainTrials = y :: z :: zs
-                            , current = Just y
-                            , next = Just z
-                            , history = ( x, data.state ) :: data.history
-                            , feedback = not data.feedback
-                            , state = resetedState
-                        }
-
-                [ last ] ->
-                    Main
-                        { data
-                            | mainTrials = []
-                            , current = Nothing
-                            , next = Nothing
-                            , history = ( last, data.state ) :: data.history
-                            , feedback = not data.feedback
-                            , state = resetedState
-                        }
-
-                [ x, y ] ->
-                    Main
-                        { data
-                            | mainTrials = [ y ]
-                            , current = Just y
-                            , next = Nothing
-                            , history = ( x, data.state ) :: data.history
-                            , feedback = not data.feedback
-                            , state = resetedState
-                        }
-
-                [] ->
-                    Main
-                        { data
-                            | mainTrials = []
-                            , current = Nothing
-                            , next = Nothing
-                            , history = data.history
-                            , feedback = data.feedback
-                            , state = resetedState
-                        }
-
-        Loading ->
-            Err "You can't go to the next trial before the experiment is started. Please report this error message."
-
-        NotStarted ->
-            Err "You can't go to the next trial before the experiment is started. Please report this error message."
-
-        Err reason ->
-            Err reason
-
-        Intr data ->
+        Running Training data ->
             case data.trainingTrials of
                 x :: y :: z :: zs ->
-                    Intr
+                    Running Training
                         { data
                             | trainingTrials = y :: z :: zs
                             , current = Just y
@@ -173,7 +108,7 @@ next resetedState task =
                         }
 
                 [ last ] ->
-                    Intr
+                    Running Training
                         { data
                             | trainingTrials = []
                             , current = Nothing
@@ -184,7 +119,7 @@ next resetedState task =
                         }
 
                 [ x, y ] ->
-                    Intr
+                    Running Training
                         { data
                             | trainingTrials = [ y ]
                             , current = Just y
@@ -195,7 +130,7 @@ next resetedState task =
                         }
 
                 [] ->
-                    Intr
+                    Running Training
                         { data
                             | trainingTrials = []
                             , current = Nothing
@@ -204,6 +139,58 @@ next resetedState task =
                             , feedback = data.feedback
                             , state = resetedState
                         }
+
+        Running Main data ->
+            case data.mainTrials of
+                x :: y :: z :: zs ->
+                    Running Main
+                        { data
+                            | mainTrials = y :: z :: zs
+                            , current = Just y
+                            , next = Just z
+                            , history = ( x, data.state ) :: data.history
+                            , feedback = not data.feedback
+                            , state = resetedState
+                        }
+
+                [ last ] ->
+                    Running Main
+                        { data
+                            | mainTrials = []
+                            , current = Nothing
+                            , next = Nothing
+                            , history = ( last, data.state ) :: data.history
+                            , feedback = not data.feedback
+                            , state = resetedState
+                        }
+
+                [ x, y ] ->
+                    Running Main
+                        { data
+                            | mainTrials = [ y ]
+                            , current = Just y
+                            , next = Nothing
+                            , history = ( x, data.state ) :: data.history
+                            , feedback = not data.feedback
+                            , state = resetedState
+                        }
+
+                [] ->
+                    Running Main
+                        { data
+                            | mainTrials = []
+                            , current = Nothing
+                            , next = Nothing
+                            , history = data.history
+                            , feedback = data.feedback
+                            , state = resetedState
+                        }
+
+        Err reason ->
+            Err reason
+
+        _ ->
+            Err "There is no next trial to access"
 
 
 {-| Init the task with infos, trainingTrials, mainTrials and the initial state
@@ -214,7 +201,7 @@ startIntro info trainingTrials mainTrials initStat =
         Result.Ok info_ ->
             case trainingTrials of
                 [] ->
-                    Intr
+                    Running Instructions
                         { trainingTrials = trainingTrials
                         , mainTrials = mainTrials
                         , current = Nothing
@@ -226,7 +213,7 @@ startIntro info trainingTrials mainTrials initStat =
                         }
 
                 x :: y :: _ ->
-                    Intr
+                    Running Instructions
                         { trainingTrials = trainingTrials
                         , mainTrials = mainTrials
                         , current = Just x
@@ -238,7 +225,7 @@ startIntro info trainingTrials mainTrials initStat =
                         }
 
                 [ x ] ->
-                    Intr
+                    Running Instructions
                         { trainingTrials = trainingTrials
                         , mainTrials = mainTrials
                         , current = Just x
@@ -256,10 +243,10 @@ startIntro info trainingTrials mainTrials initStat =
 startMain : Task t s -> s -> Task t s
 startMain task initState =
     case task of
-        Intr data ->
+        Running Training data ->
             case data.mainTrials of
                 x :: y :: _ ->
-                    Main
+                    Running Main
                         { trainingTrials = []
                         , mainTrials = data.mainTrials
                         , current = Just x
@@ -271,7 +258,7 @@ startMain task initState =
                         }
 
                 [ x ] ->
-                    Main
+                    Running Main
                         { trainingTrials = []
                         , mainTrials = data.mainTrials
                         , current = Just x
@@ -283,7 +270,7 @@ startMain task initState =
                         }
 
                 [] ->
-                    Main
+                    Running Main
                         { trainingTrials = []
                         , mainTrials = data.mainTrials
                         , current = Nothing
@@ -301,29 +288,17 @@ startMain task initState =
 toggle : Task t s -> Task t s
 toggle task =
     case task of
-        Main data ->
-            Main { data | feedback = not data.feedback }
+        Running step data ->
+            Running step { data | feedback = not data.feedback }
 
-        Loading ->
+        _ ->
             Err "I tried to toggle the feedback but the task is still loading. Please report this error."
-
-        NotStarted ->
-            Err "I tried to toggle the feedback but the task is not started. Please report this error."
-
-        Err reason ->
-            Err (reason ++ "|| I tried to toggle the feedback but the task is in its error state. Please report this error.")
-
-        Intr data ->
-            Intr { data | feedback = not data.feedback }
 
 
 getState : Task t s -> Maybe s
 getState task =
     case task of
-        Main { state } ->
-            Just state
-
-        Intr { state } ->
+        Running step { state } ->
             Just state
 
         _ ->
@@ -333,10 +308,7 @@ getState task =
 getTrial : Task t s -> Maybe t
 getTrial task =
     case task of
-        Main { current } ->
-            current
-
-        Intr { current } ->
+        Running step { current } ->
             current
 
         _ ->
@@ -346,7 +318,7 @@ getTrial task =
 getHistory : Task t s -> List ( t, s )
 getHistory task =
     case task of
-        Main { history } ->
+        Running step { history } ->
             history
 
         _ ->

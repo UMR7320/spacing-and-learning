@@ -135,7 +135,7 @@ view task =
         Logic.Err reason ->
             div [] [ text reason ]
 
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
                     View.viewTraining data.infos.instructions
@@ -165,7 +165,7 @@ view task =
                 Nothing ->
                     View.introToMain (task.startMainMsg data.mainTrials data.infos)
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
                     div [ class "container flex flex-col items-center justify-center" ]
@@ -198,6 +198,9 @@ view task =
 
         Logic.NotStarted ->
             div [] [ text "I did not start yet." ]
+
+        Logic.Running Logic.Instructions data ->
+            div [] []
 
 
 getRecords =

@@ -102,10 +102,13 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
         Logic.NotStarted ->
             text "I'm not started yet"
 
+        Logic.Running Logic.Instructions data ->
+            text ""
+
         Logic.Err reason ->
             text <| "Error: " ++ reason
 
-        Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
+        Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just x ->
                     let
@@ -139,7 +142,7 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
                 Nothing ->
                     View.introToMain (startMainloopMsg mainTrials infos)
 
-        Logic.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
+        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just trial ->
                     let

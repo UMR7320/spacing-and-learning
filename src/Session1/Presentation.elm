@@ -83,10 +83,13 @@ view task =
         Logic.Err reason ->
             div [] [ text reason ]
 
+        Logic.Running Logic.Instructions data ->
+            div [] []
+
         Logic.Loading ->
             div [] [ text "Loading..." ]
 
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
                     View.viewTraining data.infos.instructions
@@ -107,7 +110,7 @@ view task =
                 Nothing ->
                     View.introToMain (task.startMainMsg data.mainTrials data.infos)
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]

@@ -68,7 +68,10 @@ viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloo
         Logic.Loading ->
             [ text "Loading..." ]
 
-        Logic.Intr task ->
+        Logic.Running Logic.Instructions data ->
+            []
+
+        Logic.Running Logic.Training task ->
             let
                 toggleFeedback =
                     View.button
@@ -125,7 +128,7 @@ viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloo
                 ( Nothing, _ ) ->
                     [ View.introToMain <| toMainloopMsg task.mainTrials task.infos ]
 
-        Logic.Main task ->
+        Logic.Running Logic.Main task ->
             case ( task.current, task.feedback ) of
                 ( Just t, False ) ->
                     [ View.tooltip "Type the synonym of the word in the box"

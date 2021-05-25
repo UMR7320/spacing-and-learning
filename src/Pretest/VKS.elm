@@ -1,4 +1,4 @@
-module Pretest.SentenceCompletion exposing (..)
+module Pretest.VKS exposing (..)
 
 import Data
 import Dict
@@ -33,37 +33,7 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    [ View.viewTraining data.infos.instructions
-                        [ p [ A.class "text-lg  m-4 p-2" ] [ text trial.context ]
-                        , Html.Styled.textarea
-                            [ A.id "firstProd"
-                            , A.class "border-2 p-2"
-
-                            --, A.value data.state.firstProduction
-                            , E.onInput (UserUpdatedField FirstProduction)
-                            , A.spellcheck False
-                            , A.placeholder trial.firstAmorce
-                            ]
-                            [ text trial.firstAmorce ]
-                        , if data.feedback then
-                            View.fromMarkdown trial.firstFeedback
-
-                          else
-                            text ""
-                        , Html.Styled.textarea
-                            [ A.id "secondProd"
-                            , A.class "border-2 p-2 m-4"
-                            , E.onInput (UserUpdatedField SecondProduction)
-                            , A.spellcheck False
-                            ]
-                            [ text trial.secondAmorce ]
-                        , if data.feedback then
-                            View.fromMarkdown trial.secondFeedback
-
-                          else
-                            text ""
-                        , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
-                        ]
+                    [ text "vks"
                     ]
 
                 Nothing ->
@@ -219,51 +189,51 @@ type Field
 
 
 type alias Model superModel =
-    { superModel | sentenceCompletion : Logic.Task Trial State, user : Maybe String }
+    { superModel | vks : Logic.Task Trial State, user : Maybe String }
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     let
         prevState =
-            Logic.getState model.sentenceCompletion |> Maybe.withDefault initState
+            Logic.getState model.vks |> Maybe.withDefault initState
     in
     case msg of
         RuntimeShuffledTrials ( trials, infos ) ->
-            ( { model | sentenceCompletion = init infos trials }, Cmd.none )
+            ( { model | vks = init infos trials }, Cmd.none )
 
         RuntimeReordedAmorces field ->
-            ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | order = field } }, Cmd.none )
+            ( { model | vks = model.vks |> Logic.update { prevState | order = field } }, Cmd.none )
 
         UserClickedNextTrial ->
-            ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.toggle |> Logic.next initState }, Random.generate RuntimeReordedAmorces (Random.uniform FirstProduction [ SecondProduction ]) )
+            ( { model | vks = model.vks |> Logic.toggle |> Logic.next initState }, Random.generate RuntimeReordedAmorces (Random.uniform FirstProduction [ SecondProduction ]) )
 
         UserClickedToggleFeedback ->
-            ( { model | sentenceCompletion = Logic.toggle model.sentenceCompletion }, Cmd.none )
+            ( { model | vks = Logic.toggle model.vks }, Cmd.none )
 
         UserClickedStartMain infos trials ->
-            ( { model | sentenceCompletion = Logic.startMain model.sentenceCompletion initState }, Cmd.none )
+            ( { model | vks = Logic.startMain model.vks initState }, Cmd.none )
 
         UserUpdatedField fieldId new ->
             case fieldId of
                 FirstProduction ->
-                    ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | firstProduction = new } }, Cmd.none )
+                    ( { model | vks = model.vks |> Logic.update { prevState | firstProduction = new } }, Cmd.none )
 
                 SecondProduction ->
-                    ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | secondProduction = new } }, Cmd.none )
+                    ( { model | vks = model.vks |> Logic.update { prevState | secondProduction = new } }, Cmd.none )
 
         UserClickedSaveData ->
             let
                 responseHandler =
                     ServerRespondedWithLastRecords
             in
-            ( { model | sentenceCompletion = Logic.Loading }, saveData responseHandler model.user model.sentenceCompletion )
+            ( { model | vks = Logic.Loading }, saveData responseHandler model.user model.vks )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( { model | sentenceCompletion = Logic.NotStarted }, Cmd.none )
+            ( { model | vks = Logic.NotStarted }, Cmd.none )
 
         ServerRespondedWithLastRecords (Result.Err reason) ->
-            ( { model | sentenceCompletion = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
+            ( { model | vks = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
