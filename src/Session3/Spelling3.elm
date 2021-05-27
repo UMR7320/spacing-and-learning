@@ -2,8 +2,8 @@ module Session3.Spelling3 exposing (..)
 
 import Data
 import Dict
-import ExperimentInfo exposing (Task)
-import Html.Styled as Html exposing (Html, div, fromUnstyled, h1, p, span, text)
+import ExperimentInfo
+import Html.Styled exposing (Html, div, fromUnstyled, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
@@ -27,7 +27,7 @@ view exp =
         Logic.Running Logic.Instructions data ->
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
-        Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Training ({ current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]

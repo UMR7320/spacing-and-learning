@@ -3,7 +3,7 @@ module ExperimentInfo exposing (..)
 import Data
 import Dict
 import Http
-import Json.Decode as Decode exposing (Decoder, string)
+import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
 
 

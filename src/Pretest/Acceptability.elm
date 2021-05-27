@@ -3,17 +3,15 @@ module Pretest.Acceptability exposing (..)
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, a, div, h1, h3, p, span, text)
+import Html.Styled exposing (Html, div, h1, p, span, text)
 import Html.Styled.Attributes exposing (class, height, src, width)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic exposing (Task)
-import String.Interpolate exposing (interpolate)
 import Task
 import Time
-import Url.Builder exposing (Root(..))
 import View
 
 
@@ -228,7 +226,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
                     [ viewTransition data.infos.end saveDataMsg "Click to save your answers"
                     ]
 
-                Just trial ->
+                Just _ ->
                     case data.state.step of
                         Init ->
                             [ p [ class "flex flex-col  text-center " ] [ View.fromMarkdown data.infos.trainingWheel ]
@@ -250,7 +248,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
             [ p [] [ text <| "Oups, I ran into the following error: " ++ reason ]
             ]
 
-        Logic.Running Logic.Instructions data ->
+        Logic.Running Logic.Instructions _ ->
             []
 
 

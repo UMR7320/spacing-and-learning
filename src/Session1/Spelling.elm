@@ -1,15 +1,14 @@
 module Session1.Spelling exposing (..)
 
-import Array
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, div, fieldset, h1, h2, h3, p, pre, span, text)
+import Html.Styled exposing (Html, div, fieldset, h2, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
-import Logic exposing (saveData)
+import Logic
 import Ports
 import Progressbar
 import Random
@@ -205,9 +204,6 @@ view exp optionsOrder =
                                 (isCorrect id)
                                 feedback
                                 (UserClickedRadioButton id)
-
-                        trialn =
-                            List.length history + 1
 
                         isCorrect optionN =
                             optionN == trial.target

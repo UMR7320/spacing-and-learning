@@ -5,11 +5,10 @@ import ExperimentInfo
 import Http
 import Logic
 import Pretest.SPR as SPR
-import Pretest.SentenceCompletion as SentenceCompletion exposing (SentenceCompletion)
+import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
 import Random
 import Random.List exposing (shuffle)
-import Session1.Meaning as Meaning
 import Task.Parallel as Para
 
 

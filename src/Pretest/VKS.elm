@@ -3,16 +3,14 @@ module Pretest.VKS exposing (..)
 import Data
 import Dict
 import ExperimentInfo
-import Html exposing (textarea)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A exposing (class, type_)
 import Html.Styled.Events as E
 import Http
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (custom, optional, required)
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
 import Logic
-import Postest.CloudWords exposing (WordKnowledge)
 import Pretest.Acceptability exposing (ErrorBlock(..))
 import Pretest.SPR exposing (Msg(..))
 import Random
@@ -33,7 +31,7 @@ view task =
     case task of
         Logic.Running Logic.Training data ->
             case data.current of
-                Just trial ->
+                Just _ ->
                     [ text "vks"
                     ]
 
@@ -168,10 +166,7 @@ type alias State =
 
 
 type Msg
-    = NoOp
-    | RuntimeShuffledTrials ( List Trial, List ExperimentInfo.Task )
-    | UserClickedToggleFeedback
-    | UserClickedNextTrial
+    = UserClickedNextTrial
     | UserClickedStartMain
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
@@ -196,17 +191,11 @@ update msg model =
             Logic.getState model.vks |> Maybe.withDefault initState
     in
     case msg of
-        RuntimeShuffledTrials ( trials, infos ) ->
-            ( { model | vks = init infos trials }, Cmd.none )
-
-        RuntimeReordedAmorces field ->
+        RuntimeReordedAmorces _ ->
             ( { model | vks = model.vks |> Logic.update prevState }, Cmd.none )
 
         UserClickedNextTrial ->
             ( { model | vks = model.vks |> Logic.toggle |> Logic.next initState }, Random.generate RuntimeReordedAmorces (Random.uniform FirstProduction [ SecondProduction ]) )
-
-        UserClickedToggleFeedback ->
-            ( { model | vks = Logic.toggle model.vks }, Cmd.none )
 
         UserClickedStartMain ->
             ( { model | vks = Logic.startMain model.vks initState }, Cmd.none )
@@ -234,9 +223,6 @@ update msg model =
 
         UserClickedNewKnowledge str ->
             ( { model | vks = model.vks |> Logic.update { prevState | knowledge = familiarityFromString str } }, Cmd.none )
-
-        NoOp ->
-            ( model, Cmd.none )
 
 
 init : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State

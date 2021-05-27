@@ -4,7 +4,6 @@ import Data
 import Dict
 import DnDList
 import ExperimentInfo
-import Html exposing (Html)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
@@ -171,7 +170,6 @@ type Msg
     | PlayAudio String
     | UserClickedFeedbackButton
     | UserClickedNextTrial (Maybe Trial)
-    | UserClickedStartButton
     | UserClickedStartMainloop (List Trial)
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
@@ -206,9 +204,6 @@ update msg model =
             ( model, Ports.playAudio url )
 
         UserClickedFeedbackButton ->
-            ( { model | scrabbleTask = Logic.toggle model.scrabbleTask }, Cmd.none )
-
-        UserClickedStartButton ->
             ( { model | scrabbleTask = Logic.toggle model.scrabbleTask }, Cmd.none )
 
         UserClickedNextTrial (Just nextTrial) ->

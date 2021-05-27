@@ -3,15 +3,12 @@ module Session2.CU2 exposing (..)
 import Data
 import Dict
 import ExperimentInfo
-import Html.Styled as Html exposing (Html, div, fromUnstyled, span, text)
+import Html.Styled as Html exposing (div, text)
 import Html.Styled.Attributes exposing (class)
-import Html.Styled.Events
 import Http exposing (Error)
-import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
-import Markdown
 import Ports
 import Progressbar exposing (progressBar)
 import Random
@@ -35,7 +32,7 @@ view exp optionsOrder =
         Logic.Running Logic.Instructions data ->
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
-        Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Training ({ mainTrials, current, state, feedback } as data) ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]

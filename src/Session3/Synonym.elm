@@ -1,17 +1,14 @@
 module Session3.Synonym exposing (..)
 
-import Array
-import Data exposing (buildErrorMessage, decodeRecords)
+import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, div, fieldset, h1, h2, h3, h4, p, pre, span, text)
-import Html.Styled.Attributes exposing (class, disabled)
+import Html.Styled exposing (Html, div, h4, p, span, text)
+import Html.Styled.Attributes exposing (class)
 import Http
-import Icons
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Logic
-import Progressbar
 import Session1.ContextUnderstanding exposing (Msg(..))
 import View
 
@@ -119,15 +116,6 @@ viewTask experiment =
                         , txt = "Check my answer"
                         , isDisabled = False
                         }
-
-                viewInstructions x =
-                    div [ class "flex flex-col" ]
-                        [ h2 [ class "font-bold" ] [ text "Instructions" ]
-                        , p [ class "pt-8 pb-8 font-medium" ]
-                            [ pre [] [ View.fromMarkdown task.infos.instructions ]
-                            ]
-                        , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
-                        ]
 
                 trainingBox =
                     div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center " ]

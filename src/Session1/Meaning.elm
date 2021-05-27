@@ -1,29 +1,19 @@
 module Session1.Meaning exposing (..)
 
-import Browser
-import Css exposing (visibility)
 import Data exposing (decodeRecords)
 import Dict
-import ExperimentInfo exposing (Task)
-import Html
+import ExperimentInfo
 import Html.Styled
     exposing
         ( Html
         , div
-        , fieldset
         , h1
-        , h2
         , h3
-        , h4
-        , h5
-        , h6
-        , input
-        , label
         , p
         , span
         , text
         )
-import Html.Styled.Attributes exposing (checked, class, disabled, for, id, type_)
+import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
@@ -33,7 +23,6 @@ import Random
 import Random.List
 import Session2.Translation exposing (Msg(..))
 import String.Interpolate exposing (interpolate)
-import Url exposing (Url)
 import View
 
 
@@ -49,7 +38,6 @@ type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
-    | UserClickedStartIntro (List Trial)
     | UserClickedStartMain
     | SaveDataMsg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
@@ -253,9 +241,6 @@ update msg model =
 
         UserClickedRadioButton newChoice ->
             ( { model | meaning = Logic.update { uid = "", userAnswer = newChoice } model.meaning }, Cmd.none )
-
-        UserClickedStartIntro _ ->
-            ( model, Cmd.none )
 
         UserClickedStartMain ->
             ( { model | meaning = Logic.startMain model.meaning initState }, Cmd.none )

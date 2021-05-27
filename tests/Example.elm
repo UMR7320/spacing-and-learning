@@ -1,11 +1,10 @@
 module Example exposing (..)
 
 import Data
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Expect
 import List.Extra
 import Main exposing (isNextSentence, nextNewSentenceType, organizeAcceptabilityTrials, removesItems)
-import Pretest.Acceptability as A exposing (..)
+import Pretest.Acceptability as A
 import Session2.Spelling exposing (dedupe)
 import Test exposing (..)
 

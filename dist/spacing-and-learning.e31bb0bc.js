@@ -13935,7 +13935,6 @@ var $author$project$Main$decodeSpace = A2(
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
 var $author$project$Logic$getState = function (task) {
 	if (task.$ === 'Running') {
-		var step = task.a;
 		var state = task.b.state;
 		return $elm$core$Maybe$Just(state);
 	} else {
@@ -14199,16 +14198,9 @@ var $author$project$Pretest$Acceptability$UserPressedButtonWithTimestamp = F2(
 	function (a, b) {
 		return {$: 'UserPressedButtonWithTimestamp', a: a, b: b};
 	});
-var $author$project$Main$UserPressedKey = function (a) {
-	return {$: 'UserPressedKey', a: a};
-};
 var $author$project$Main$VKS = function (a) {
 	return {$: 'VKS', a: a};
 };
-var $author$project$Main$WithTime = F2(
-	function (a, b) {
-		return {$: 'WithTime', a: a, b: b};
-	});
 var $elm$core$Process$sleep = _Process_sleep;
 var $andrewMacmurray$elm_delay$Delay$after = F2(
 	function (time, msg) {
@@ -14266,62 +14258,6 @@ var $elm$core$List$filter = F2(
 					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
 				}),
 			_List_Nil,
-			list);
-	});
-var $elm$core$List$partition = F2(
-	function (pred, list) {
-		var step = F2(
-			function (x, _v0) {
-				var trues = _v0.a;
-				var falses = _v0.b;
-				return pred(x) ? _Utils_Tuple2(
-					A2($elm$core$List$cons, x, trues),
-					falses) : _Utils_Tuple2(
-					trues,
-					A2($elm$core$List$cons, x, falses));
-			});
-		return A3(
-			$elm$core$List$foldr,
-			step,
-			_Utils_Tuple2(_List_Nil, _List_Nil),
-			list);
-	});
-var $elm_community$list_extra$List$Extra$gatherWith = F2(
-	function (testFn, list) {
-		var helper = F2(
-			function (scattered, gathered) {
-				if (!scattered.b) {
-					return $elm$core$List$reverse(gathered);
-				} else {
-					var toGather = scattered.a;
-					var population = scattered.b;
-					var _v1 = A2(
-						$elm$core$List$partition,
-						testFn(toGather),
-						population);
-					var gathering = _v1.a;
-					var remaining = _v1.b;
-					return A2(
-						helper,
-						remaining,
-						A2(
-							$elm$core$List$cons,
-							_Utils_Tuple2(toGather, gathering),
-							gathered));
-				}
-			});
-		return A2(helper, list, _List_Nil);
-	});
-var $elm_community$list_extra$List$Extra$gatherEqualsBy = F2(
-	function (extract, list) {
-		return A2(
-			$elm_community$list_extra$List$Extra$gatherWith,
-			F2(
-				function (a, b) {
-					return _Utils_eq(
-						extract(a),
-						extract(b));
-				}),
 			list);
 	});
 var $elm$random$Random$Generate = function (a) {
@@ -14425,7 +14361,6 @@ var $elm$random$Random$generate = F2(
 	});
 var $author$project$Logic$getTrial = function (task) {
 	if (task.$ === 'Running') {
-		var step = task.a;
 		var current = task.b.current;
 		return current;
 	} else {
@@ -14483,14 +14418,6 @@ var $elm$random$Random$int = F2(
 			});
 	});
 var $elm$browser$Browser$Navigation$load = _Browser_load;
-var $elm$core$Tuple$mapFirst = F2(
-	function (func, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		return _Utils_Tuple2(
-			func(x),
-			y);
-	});
 var $author$project$Pretest$Acceptability$EvaluationTimeOut = {$: 'EvaluationTimeOut'};
 var $author$project$Pretest$Acceptability$SentenceCorrect = {$: 'SentenceCorrect'};
 var $author$project$Pretest$Acceptability$SentenceIncorrect = {$: 'SentenceIncorrect'};
@@ -14978,22 +14905,7 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 								[target])),
 						findFirstGrammaticalDistractor));
 			};
-			var _v0 = A2(
-				$elm_community$list_extra$List$Extra$gatherEqualsBy,
-				function ($) {
-					return $.sentenceType;
-				},
-				distractors);
 			if (!targets.b) {
-				var _v2 = A2(
-					$elm$core$List$filter,
-					function (block) {
-						return $elm$core$List$length(block) < 4;
-					},
-					_Utils_ap(
-						output,
-						_List_fromArray(
-							[distractors])));
 				return $elm$core$Result$Ok(
 					_Utils_ap(
 						output,
@@ -15002,10 +14914,10 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 			} else {
 				var x = targets.a;
 				var xs = targets.b;
-				var _v3 = buildBlock(x);
-				if (_v3.$ === 'Err') {
-					var _v4 = _v3.a;
-					var blockSoFar = _v4.b;
+				var _v1 = buildBlock(x);
+				if (_v1.$ === 'Err') {
+					var _v2 = _v1.a;
+					var blockSoFar = _v2.b;
 					var $temp$targets = xs,
 						$temp$distractors = A2($author$project$Main$removesItems, blockSoFar, distractors),
 						$temp$output = A2($elm$core$List$cons, blockSoFar, output);
@@ -15014,11 +14926,11 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 					output = $temp$output;
 					continue organizeAcceptabilityTrialsHelper;
 				} else {
-					var target = _v3.a.target;
-					var firstDistractor = _v3.a.firstDistractor;
-					var secondDistractor = _v3.a.secondDistractor;
-					var thirdDistractor = _v3.a.thirdDistractor;
-					var remainingDistractors = _v3.a.remainingDistractors;
+					var target = _v1.a.target;
+					var firstDistractor = _v1.a.firstDistractor;
+					var secondDistractor = _v1.a.secondDistractor;
+					var thirdDistractor = _v1.a.thirdDistractor;
+					var remainingDistractors = _v1.a.remainingDistractors;
 					var block = _List_fromArray(
 						[target, firstDistractor, secondDistractor, thirdDistractor]);
 					var $temp$targets = xs,
@@ -15037,7 +14949,6 @@ var $author$project$Main$organizeAcceptabilityTrials = F2(
 		return A3($author$project$Main$organizeAcceptabilityTrialsHelper, targets, distractors, _List_Nil);
 	});
 var $author$project$Ports$playAudio = _Platform_outgoingPort('playAudio', $elm$json$Json$Encode$string);
-var $author$project$Main$playBeep = $author$project$Main$PlaysoundInJS($author$project$Main$beep);
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $author$project$Pretest$Acceptability$evalToString = function (_eval) {
 	switch (_eval.$) {
@@ -15053,7 +14964,6 @@ var $author$project$Pretest$Acceptability$evalToString = function (_eval) {
 };
 var $author$project$Logic$getHistory = function (task) {
 	if (task.$ === 'Running') {
-		var step = task.a;
 		var history = task.b.history;
 		return history;
 	} else {
@@ -16010,7 +15920,6 @@ var $author$project$Pretest$SPR$tagToString = function (tag) {
 };
 var $author$project$Pretest$SPR$saveSprData = F3(
 	function (responseHandler, maybeUserId, task) {
-		var whenNothing = $elm$time$Time$millisToPosix(1000000000);
 		var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', maybeUserId);
 		var taskId_ = $author$project$Pretest$SPR$taskId;
 		var summarizedTrialEncoder = $elm$json$Json$Encode$list(
@@ -16068,11 +15977,6 @@ var $author$project$Pretest$SPR$saveSprData = F3(
 									])))
 						]));
 			});
-		var intFromMillis = function (posix) {
-			return $elm$json$Json$Encode$int(
-				$elm$time$Time$posixToMillis(
-					A2($elm$core$Maybe$withDefault, whenNothing, posix)));
-		};
 		var history = $author$project$Logic$getHistory(task);
 		var formattedData = A3(
 			$elm$core$List$foldl,
@@ -16145,20 +16049,6 @@ var $author$project$Pretest$SPR$update = F2(
 			$author$project$Logic$getState(model.spr));
 		var currentTrial = $author$project$Logic$getTrial(model.spr);
 		switch (msg.$) {
-			case 'UserChoseNewAnswer':
-				var newAnswer = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: A2(
-								$author$project$Logic$update,
-								_Utils_update(
-									prevState,
-									{answer: newAnswer}),
-								model.spr)
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'UserConfirmedChoice':
 				var answer = msg.a;
 				return _Utils_Tuple2(
@@ -16208,24 +16098,11 @@ var $author$project$Pretest$SPR$update = F2(
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			case 'StartMain':
-				var task = msg.a;
-				var trials = msg.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
 							spr: A2($author$project$Logic$startMain, model.spr, $author$project$Pretest$SPR$initState)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'RuntimeShuffledTrials':
-				var _v1 = msg.a;
-				var infos = _v1.a;
-				var trials = _v1.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: A2($author$project$Pretest$SPR$init, trials, infos)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'TimestampedMsg':
@@ -16245,12 +16122,12 @@ var $author$project$Pretest$SPR$update = F2(
 										return model.spr;
 									} else {
 										var tr = currentTrial.a;
-										var _v4 = tr.taggedSegments;
-										if (!_v4.b) {
+										var _v3 = tr.taggedSegments;
+										if (!_v3.b) {
 											return model.spr;
 										} else {
-											var x = _v4.a;
-											var xs = _v4.b;
+											var x = _v3.a;
+											var xs = _v3.b;
 											return A2(
 												$author$project$Logic$update,
 												_Utils_update(
@@ -16283,22 +16160,22 @@ var $author$project$Pretest$SPR$update = F2(
 							model,
 							{
 								spr: function () {
-									var _v5 = prevState.remainingSegments;
-									if (!_v5.b) {
+									var _v4 = prevState.remainingSegments;
+									if (!_v4.b) {
 										return A2(
 											$author$project$Logic$update,
 											_Utils_update(
 												prevState,
 												{
 													seenSegments: function () {
-														var _v6 = prevState.currentSegment;
-														if (_v6.$ === 'Just') {
-															var seg = _v6.a;
+														var _v5 = prevState.currentSegment;
+														if (_v5.$ === 'Just') {
+															var seg = _v5.a;
 															return A2(
 																$elm$core$List$cons,
-																function (_v7) {
-																	var taggedSegment = _v7.taggedSegment;
-																	var startedAt = _v7.startedAt;
+																function (_v6) {
+																	var taggedSegment = _v6.taggedSegment;
+																	var startedAt = _v6.startedAt;
 																	return {
 																		endedAt: A2(
 																			$elm$core$Maybe$withDefault,
@@ -16317,8 +16194,7 @@ var $author$project$Pretest$SPR$update = F2(
 												}),
 											model.spr);
 									} else {
-										var x = _v5.a;
-										var xs = _v5.b;
+										var x = _v4.a;
 										return A2(
 											$author$project$Logic$update,
 											_Utils_update(
@@ -16337,14 +16213,14 @@ var $author$project$Pretest$SPR$update = F2(
 														_List_Nil,
 														$elm$core$List$tail(prevState.remainingSegments)),
 													seenSegments: function () {
-														var _v8 = prevState.currentSegment;
-														if (_v8.$ === 'Just') {
-															var seg = _v8.a;
+														var _v7 = prevState.currentSegment;
+														if (_v7.$ === 'Just') {
+															var seg = _v7.a;
 															return A2(
 																$elm$core$List$cons,
-																function (_v9) {
-																	var taggedSegment = _v9.taggedSegment;
-																	var startedAt = _v9.startedAt;
+																function (_v8) {
+																	var taggedSegment = _v8.taggedSegment;
+																	var startedAt = _v8.startedAt;
 																	return {
 																		endedAt: A2(
 																			$elm$core$Maybe$withDefault,
@@ -16502,17 +16378,6 @@ var $author$project$Pretest$SentenceCompletion$update = F2(
 			$author$project$Pretest$SentenceCompletion$initState,
 			$author$project$Logic$getState(model.sentenceCompletion));
 		switch (msg.$) {
-			case 'RuntimeShuffledTrials':
-				var _v1 = msg.a;
-				var trials = _v1.a;
-				var infos = _v1.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							sentenceCompletion: A2($author$project$Pretest$SentenceCompletion$init, infos, trials)
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'RuntimeReordedAmorces':
 				var field = msg.a;
 				return _Utils_Tuple2(
@@ -16554,8 +16419,6 @@ var $author$project$Pretest$SentenceCompletion$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'UserClickedStartMain':
-				var infos = msg.a;
-				var trials = msg.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -16618,7 +16481,7 @@ var $author$project$Pretest$SentenceCompletion$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
-			case 'UserClickedStartTraining':
+			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -16626,8 +16489,6 @@ var $author$project$Pretest$SentenceCompletion$update = F2(
 							sentenceCompletion: $author$project$Logic$startTraining(model.sentenceCompletion)
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Pretest$VKS$FirstProduction = {$: 'FirstProduction'};
@@ -16713,19 +16574,7 @@ var $author$project$Pretest$VKS$update = F2(
 			$author$project$Pretest$VKS$initState,
 			$author$project$Logic$getState(model.vks));
 		switch (msg.$) {
-			case 'RuntimeShuffledTrials':
-				var _v1 = msg.a;
-				var trials = _v1.a;
-				var infos = _v1.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							vks: A2($author$project$Pretest$VKS$init, infos, trials)
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'RuntimeReordedAmorces':
-				var field = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -16751,14 +16600,6 @@ var $author$project$Pretest$VKS$update = F2(
 							$author$project$Pretest$VKS$FirstProduction,
 							_List_fromArray(
 								[$author$project$Pretest$VKS$SecondProduction]))));
-			case 'UserClickedToggleFeedback':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							vks: $author$project$Logic$toggle(model.vks)
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'UserClickedStartMain':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -16822,7 +16663,7 @@ var $author$project$Pretest$VKS$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
-			case 'UserClickedNewKnowledge':
+			default:
 				var str = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -16838,8 +16679,6 @@ var $author$project$Pretest$VKS$update = F2(
 								model.vks)
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Session1$ContextUnderstanding$RuntimeShuffledOptionsOrder = function (a) {
@@ -17013,8 +16852,6 @@ var $author$project$Session1$Meaning$update = F2(
 								model.meaning)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'UserClickedStartIntro':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'UserClickedStartMain':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -17072,8 +16909,6 @@ var $author$project$Session1$Presentation$update = F2(
 							presentation: A2($author$project$Logic$next, $author$project$Session1$Presentation$initState, model.presentation)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'UserClickedStartIntro':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'UserClickedStartMain':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -17125,8 +16960,8 @@ var $author$project$Session1$Presentation$update = F2(
 				return _Debug_todo(
 					'Session1.Presentation',
 					{
-						start: {line: 229, column: 13},
-						end: {line: 229, column: 23}
+						start: {line: 222, column: 13},
+						end: {line: 222, column: 23}
 					})('');
 		}
 	});
@@ -17166,6 +17001,14 @@ var $elm$random$Random$map5 = F6(
 					A5(func, a, b, c, d, e),
 					seed5);
 			});
+	});
+var $elm$core$Tuple$mapFirst = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
 	});
 var $author$project$Session1$ContextUnderstanding$start = F2(
 	function (info, trials) {
@@ -17923,14 +17766,6 @@ var $author$project$Session2$Spelling$update = F2(
 							scrabbleTask: $author$project$Logic$toggle(model.scrabbleTask)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'UserClickedStartButton':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							scrabbleTask: $author$project$Logic$toggle(model.scrabbleTask)
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'UserClickedNextTrial':
 				if (msg.a.$ === 'Just') {
 					var nextTrial = msg.a.a;
@@ -18039,8 +17874,6 @@ var $author$project$Session2$Translation$update = F2(
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			case 'RuntimeSentData':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'UserClickedToggleFeedback':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -18123,18 +17956,6 @@ var $author$project$Session3$CU3$update = F2(
 						model,
 						{
 							cu3: $author$project$Logic$toggle(model.cu3)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'UserClickedRadioButton':
-				var newChoice = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							cu3: A2(
-								$author$project$Logic$update,
-								{uid: '', userAnswer: newChoice},
-								model.cu3)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'UserClickedStartMain':
@@ -18474,36 +18295,6 @@ var $author$project$Session3$Synonym$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $0ui$elm_task_parallel$Task$Parallel$State2 = F3(
-	function (a, b, c) {
-		return {$: 'State2', a: a, b: b, c: c};
-	});
-var $0ui$elm_task_parallel$Task$Parallel$update2 = F2(
-	function (_v0, msg) {
-		var onSuccess = _v0.a;
-		var a = _v0.b;
-		var b = _v0.c;
-		var next = F2(
-			function (a_, b_) {
-				return _Utils_Tuple2(
-					A3($0ui$elm_task_parallel$Task$Parallel$State2, onSuccess, a_, b_),
-					$0ui$elm_task_parallel$Task$Parallel$toCmd(
-						A3($elm$core$Maybe$map2, onSuccess, a_, b_)));
-			});
-		if (msg.$ === 'LoadedA2') {
-			var data = msg.a;
-			return A2(
-				next,
-				$elm$core$Maybe$Just(data),
-				b);
-		} else {
-			var data = msg.a;
-			return A2(
-				next,
-				a,
-				$elm$core$Maybe$Just(data));
-		}
-	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -18534,18 +18325,6 @@ var $author$project$Main$update = F2(
 						model,
 						$elm$browser$Browser$Navigation$load(url));
 				}
-			case 'ServerRespondedWithUserInfo':
-				if (msg.a.$ === 'Ok') {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'ToNextStep':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{acceptabilityTask: model.acceptabilityTask}),
-					$elm$core$Platform$Cmd$none);
 			case 'SPR':
 				var submsg = msg.a;
 				var _v2 = A2($author$project$Pretest$SPR$update, submsg, model);
@@ -18838,7 +18617,6 @@ var $author$project$Main$update = F2(
 											$elm$core$List$concat(shuffledTrials),
 											info)));
 							} else {
-								var _v16 = trials.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
@@ -18895,7 +18673,6 @@ var $author$project$Main$update = F2(
 							return A2(
 								$elm$random$Random$andThen,
 								function (position) {
-									var _v20 = A3($elm_community$list_extra$List$Extra$swapAt, 0, position, block);
 									return $elm$random$Random$constant(
 										A3($elm_community$list_extra$List$Extra$swapAt, 0, position, block));
 								},
@@ -18951,24 +18728,6 @@ var $author$project$Main$update = F2(
 									A2($author$project$Main$organizeAcceptabilityTrials, targets, distractors)));
 						},
 						$elm_community$random_extra$Random$List$shuffle(trials)));
-				var distractors_ = A2(
-					$elm$core$List$filter,
-					function (datum) {
-						return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Distractor);
-					},
-					trials);
-				var _v17 = A2(
-					$elm_community$list_extra$List$Extra$gatherEqualsBy,
-					function ($) {
-						return $.sentenceType;
-					},
-					distractors_);
-				var _v18 = A2(
-					$elm$core$List$filter,
-					function (datum) {
-						return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Target);
-					},
-					trials);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -18977,40 +18736,6 @@ var $author$project$Main$update = F2(
 								$author$project$ExperimentInfo$toDict(info))
 						}),
 					generateOrganizedTrials);
-			case 'ServerRespondedWithSomePretestData':
-				var downloadMsg = msg.a;
-				var _v21 = function () {
-					var _v22 = model.pilote;
-					if (_v22.$ === 'Loading') {
-						var downloadState = _v22.a;
-						return A2(
-							$elm$core$Tuple$mapFirst,
-							$author$project$Session$Loading,
-							A2($0ui$elm_task_parallel$Task$Parallel$update2, downloadState, downloadMsg));
-					} else {
-						return _Utils_Tuple2(model.pilote, $elm$core$Platform$Cmd$none);
-					}
-				}();
-				var updte = _v21.a;
-				var cmd = _v21.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{pilote: updte}),
-					cmd);
-			case 'UserPressedKey':
-				var evaluation = msg.a;
-				return _Utils_Tuple2(
-					model,
-					A2(
-						$elm$core$Task$perform,
-						function (time) {
-							return A2(
-								$author$project$Main$WithTime,
-								$author$project$Main$UserPressedKey(evaluation),
-								time);
-						},
-						$elm$time$Time$now));
 			case 'UserToggledInCloudWords':
 				var word = msg.a;
 				return _Utils_Tuple2(
@@ -19020,43 +18745,6 @@ var $author$project$Main$update = F2(
 							cloudWords: A2($author$project$Postest$CloudWords$toggle, word, model.cloudWords)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'WithTime':
-				var message = msg.a;
-				if (message.$ === 'UserPressedKey') {
-					var evaluation = message.a;
-					var prevState = $author$project$Logic$getState(model.acceptabilityTask);
-					if (prevState.$ === 'Just') {
-						var pState = prevState.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									acceptabilityTask: A2(
-										$author$project$Logic$next,
-										$author$project$Pretest$Acceptability$initState,
-										A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												pState,
-												{
-													evaluation: $author$project$Pretest$Acceptability$maybeBoolToEvaluation(evaluation)
-												}),
-											model.acceptabilityTask))
-								}),
-							A2($andrewMacmurray$elm_delay$Delay$after, 500, $author$project$Main$playBeep));
-					} else {
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					}
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'RuntimeShuffledOptionsOrder':
-				var newOrder = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{optionsOrder: newOrder}),
-					$elm$core$Platform$Cmd$none);
 			case 'PlaysoundInJS':
 				var url = msg.a;
 				return _Utils_Tuple2(
@@ -19064,55 +18752,54 @@ var $author$project$Main$update = F2(
 					$author$project$Ports$playAudio(url));
 			case 'Spelling1':
 				var message = msg.a;
-				var _v25 = A2($author$project$Session1$Spelling$update, message, model);
-				var newModel = _v25.a;
-				var newCmd = _v25.b;
+				var _v17 = A2($author$project$Session1$Spelling$update, message, model);
+				var newModel = _v17.a;
+				var newCmd = _v17.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Spelling1, newCmd));
 			case 'CU2':
 				var message = msg.a;
-				var _v26 = A2($author$project$Session2$CU2$update, message, model);
-				var newModel = _v26.a;
-				var newCmd = _v26.b;
+				var _v18 = A2($author$project$Session2$CU2$update, message, model);
+				var newModel = _v18.a;
+				var newCmd = _v18.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$CU2, newCmd));
 			case 'Spelling2':
 				var message = msg.a;
-				var _v27 = A2($author$project$Session2$Spelling$update, message, model);
-				var newModel = _v27.a;
-				var newCmd = _v27.b;
+				var _v19 = A2($author$project$Session2$Spelling$update, message, model);
+				var newModel = _v19.a;
+				var newCmd = _v19.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Spelling2, newCmd));
 			case 'CU1':
 				var submsg = msg.a;
-				var _v28 = A2($author$project$Session1$ContextUnderstanding$update, submsg, model);
-				var newModel = _v28.a;
-				var newCmd = _v28.b;
+				var _v20 = A2($author$project$Session1$ContextUnderstanding$update, submsg, model);
+				var newModel = _v20.a;
+				var newCmd = _v20.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$CU1, newCmd));
 			case 'CU3':
 				var message = msg.a;
-				var _v29 = A2($author$project$Session3$CU3$update, message, model);
-				var newModel = _v29.a;
-				var newCmd = _v29.b;
+				var _v21 = A2($author$project$Session3$CU3$update, message, model);
+				var newModel = _v21.a;
+				var newCmd = _v21.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$CU3, newCmd));
 			case 'Spelling3':
 				var message = msg.a;
-				var _v30 = A2($author$project$Session3$Spelling3$update, message, model);
-				var newModel = _v30.a;
-				var newCmd = _v30.b;
+				var _v22 = A2($author$project$Session3$Spelling3$update, message, model);
+				var newModel = _v22.a;
+				var newCmd = _v22.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Spelling3, newCmd));
 			case 'YN':
 				var message = msg.a;
-				var _v31 = 'rechYdq4MyLcb2nRG';
 				switch (message.$) {
 					case 'UserClickedNextTrial':
 						return _Utils_Tuple2(
@@ -19155,33 +18842,33 @@ var $author$project$Main$update = F2(
 				}
 			case 'Presentation':
 				var message = msg.a;
-				var _v33 = A2($author$project$Session1$Presentation$update, message, model);
-				var subModel = _v33.a;
-				var subCmd = _v33.b;
+				var _v24 = A2($author$project$Session1$Presentation$update, message, model);
+				var subModel = _v24.a;
+				var subCmd = _v24.b;
 				return _Utils_Tuple2(
 					subModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Presentation, subCmd));
 			case 'Synonym':
 				var message = msg.a;
-				var _v34 = A2($author$project$Session3$Synonym$update, message, model);
-				var newModel = _v34.a;
-				var newCmd = _v34.b;
+				var _v25 = A2($author$project$Session3$Synonym$update, message, model);
+				var newModel = _v25.a;
+				var newCmd = _v25.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Synonym, newCmd));
 			case 'Meaning':
 				var submsg = msg.a;
-				var _v35 = A2($author$project$Session1$Meaning$update, submsg, model);
-				var subModel = _v35.a;
-				var subCmd = _v35.b;
+				var _v26 = A2($author$project$Session1$Meaning$update, submsg, model);
+				var subModel = _v26.a;
+				var subCmd = _v26.b;
 				return _Utils_Tuple2(
 					subModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Meaning, subCmd));
 			default:
 				var submsg = msg.a;
-				var _v36 = A2($author$project$Session2$Translation$update, submsg, model);
-				var subModel = _v36.a;
-				var subCmd = _v36.b;
+				var _v27 = A2($author$project$Session2$Translation$update, submsg, model);
+				var subModel = _v27.a;
+				var subCmd = _v27.b;
 				return _Utils_Tuple2(
 					subModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Translation, subCmd));
@@ -21301,19 +20988,14 @@ var $author$project$Postest$YN$view = F2(
 				switch (exp.a.$) {
 					case 'Instructions':
 						var _v2 = exp.a;
-						var data = exp.b;
 						return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
 					case 'Training':
 						var _v3 = exp.a;
-						var trainingTrials = exp.b.trainingTrials;
 						var mainTrials = exp.b.mainTrials;
 						var current = exp.b.current;
-						var state = exp.b.state;
 						var feedback = exp.b.feedback;
-						var history = exp.b.history;
 						var infos = exp.b.infos;
 						if (current.$ === 'Just') {
-							var trial = current.a;
 							return A2(
 								$rtfeldman$elm_css$Html$Styled$div,
 								_List_Nil,
@@ -21356,11 +21038,8 @@ var $author$project$Postest$YN$view = F2(
 						}
 					default:
 						var _v5 = exp.a;
-						var mainTrials = exp.b.mainTrials;
 						var current = exp.b.current;
 						var state = exp.b.state;
-						var feedback = exp.b.feedback;
-						var history = exp.b.history;
 						var infos = exp.b.infos;
 						if (current.$ === 'Just') {
 							var trial = current.a;
@@ -21615,7 +21294,6 @@ var $author$project$Pretest$Acceptability$view = F2(
 									A3($author$project$Pretest$Acceptability$viewTransition, data.infos.end, saveDataMsg, 'Click to save your answers')
 								]);
 						} else {
-							var trial = _v6.a;
 							var _v7 = data.state.step;
 							switch (_v7.$) {
 								case 'Init':
@@ -21641,7 +21319,6 @@ var $author$project$Pretest$Acceptability$view = F2(
 						}
 					default:
 						var _v8 = task.a;
-						var data = task.b;
 						return _List_Nil;
 				}
 		}
@@ -21694,7 +21371,6 @@ var $author$project$Pretest$SPR$viewTask = F3(
 									$rtfeldman$elm_css$Html$Styled$text('Press the space bar to start reading')
 								]));
 					} else {
-						var segment = s.a;
 						return A2(
 							$rtfeldman$elm_css$Html$Styled$div,
 							_List_fromArray(
@@ -21716,7 +21392,6 @@ var $author$project$Pretest$SPR$viewTask = F3(
 								]));
 					}
 				} else {
-					var s = _v0.a.a;
 					var _v2 = _v0.b;
 					return A2(
 						$rtfeldman$elm_css$Html$Styled$p,
@@ -21731,10 +21406,6 @@ var $author$project$Pretest$SPR$viewTask = F3(
 				}
 			case 'Question':
 				var _v3 = _v0.a;
-				var yes = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$Yes);
-				var value = $author$project$Pretest$SPR$answerToString(data.state.answer);
-				var unsure = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$Unsure);
-				var no = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$No);
 				return A2(
 					$rtfeldman$elm_css$Html$Styled$div,
 					_List_fromArray(
@@ -22146,7 +21817,6 @@ var $author$project$Pretest$VKS$view = function (task) {
 					var data = task.b;
 					var _v2 = data.current;
 					if (_v2.$ === 'Just') {
-						var trial = _v2.a;
 						return _List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$text('vks')
@@ -24164,7 +23834,6 @@ var $author$project$Session1$Presentation$entries = F5(
 					var key = _v0.a;
 					var val = _v0.b;
 					var txt = val.txt;
-					var elements = val.elements;
 					return A2(
 						$rtfeldman$elm_css$Html$Styled$p,
 						_List_fromArray(
@@ -24529,7 +24198,6 @@ var $author$project$Session1$Spelling$view = F2(
 						var infos = data.infos;
 						if (current.$ === 'Just') {
 							var trial = current.a;
-							var trialn = $elm$core$List$length(history) + 1;
 							var isCorrect = function (optionN) {
 								return _Utils_eq(optionN, trial.target);
 							};
@@ -24827,12 +24495,10 @@ var $author$project$Session2$CU2$view = F2(
 					case 'Training':
 						var _v2 = exp.a;
 						var data = exp.b;
-						var trainingTrials = data.trainingTrials;
 						var mainTrials = data.mainTrials;
 						var current = data.current;
 						var state = data.state;
 						var feedback = data.feedback;
-						var history = data.history;
 						if (current.$ === 'Just') {
 							var trial = current.a;
 							return A2(
@@ -25275,10 +24941,9 @@ var $author$project$Session3$CU3$view = function (exp) {
 							]));
 				case 'Training':
 					var _v2 = exp.a;
-					var data = exp.b;
-					var current = data.current;
-					var state = data.state;
-					var feedback = data.feedback;
+					var current = exp.b.current;
+					var state = exp.b.state;
+					var feedback = exp.b.feedback;
 					if (current.$ === 'Just') {
 						var trial = current.a;
 						return A2(
@@ -25431,8 +25096,6 @@ var $author$project$Session3$Spelling3$view = function (exp) {
 				case 'Training':
 					var _v2 = exp.a;
 					var data = exp.b;
-					var trainingTrials = data.trainingTrials;
-					var mainTrials = data.mainTrials;
 					var current = data.current;
 					var state = data.state;
 					var feedback = data.feedback;
@@ -25574,7 +25237,6 @@ var $author$project$Main$viewCloud = function (model) {
 		A2(
 			$elm$core$List$map,
 			function (word) {
-				var _v0 = A2($elm$core$Dict$get, word, model.cloudWords);
 				return A2(
 					$rtfeldman$elm_css$Html$Styled$label,
 					_List_fromArray(
@@ -26025,59 +25687,6 @@ var $author$project$Session3$Synonym$viewTask = function (experiment) {
 				case 'Training':
 					var _v2 = experiment.a;
 					var task = experiment.b;
-					var viewInstructions = function (x) {
-						return A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$h2,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-										]),
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text('Instructions')
-										])),
-									A2(
-									$rtfeldman$elm_css$Html$Styled$p,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 pb-8 font-medium')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$rtfeldman$elm_css$Html$Styled$pre,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$author$project$View$fromMarkdown(task.infos.instructions)
-												]))
-										])),
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg text-green-500 font-bold pb-2')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$rtfeldman$elm_css$Html$Styled$span,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text('Practice here !')
-												]))
-										]))
-								]));
-					};
 					var trainingBox = $rtfeldman$elm_css$Html$Styled$div(
 						_List_fromArray(
 							[
@@ -26264,9 +25873,9 @@ var $author$project$Session3$Synonym$viewTask = function (experiment) {
 };
 var $author$project$Main$body = function (model) {
 	var infos = function () {
-		var _v12 = model.infos;
-		if (_v12.$ === 'Success') {
-			var infos_ = _v12.a;
+		var _v8 = model.infos;
+		if (_v8.$ === 'Success') {
+			var infos_ = _v8.a;
 			return infos_;
 		} else {
 			return $elm$core$Dict$empty;
@@ -26290,7 +25899,6 @@ var $author$project$Main$body = function (model) {
 							case 'TopSession1':
 								return $author$project$Session1$Top$view(infos);
 							case 'Meaning':
-								var _v2 = A2($elm$core$Dict$get, 'Meaning', infos);
 								return _List_fromArray(
 									[
 										A2(
@@ -26358,7 +25966,6 @@ var $author$project$Main$body = function (model) {
 						var task = _v0.b;
 						switch (task.$) {
 							case 'CU3':
-								var _v5 = A2($elm$core$Dict$get, 'Context Understanding level 3', infos);
 								return _List_fromArray(
 									[
 										A2(
@@ -26372,7 +25979,6 @@ var $author$project$Main$body = function (model) {
 									$rtfeldman$elm_css$Html$Styled$map($author$project$Main$Synonym),
 									$author$project$Session3$Synonym$viewTask(model.synonymTask));
 							default:
-								var _v6 = A2($elm$core$Dict$get, 'Spelling level 3', infos);
 								return _List_fromArray(
 									[
 										A2(
@@ -26415,10 +26021,10 @@ var $author$project$Main$body = function (model) {
 										startTraining: $author$project$Main$Acceptability($author$project$Pretest$Acceptability$StartTraining)
 									});
 							default:
-								var _v9 = model.infos;
-								switch (_v9.$) {
+								var _v6 = model.infos;
+								switch (_v6.$) {
 									case 'Success':
-										var informations = _v9.a;
+										var informations = _v6.a;
 										var taskInfo = A2(
 											$elm$core$Maybe$withDefault,
 											'I couldn\'t find the infos of the task : recR8areYkKRvQ6lU ',
@@ -26493,7 +26099,6 @@ var $author$project$Main$body = function (model) {
 						var task = _v0.a;
 						switch (task.$) {
 							case 'YN':
-								var _v11 = A2($elm$core$Dict$get, 'YesNo task', infos);
 								return _List_fromArray(
 									[
 										A2(
@@ -27078,7 +26683,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"User.AuthenticatedInfo":{"args":[],"type":"{ uid : String.String, firstName : String.String, email : String.String, role : User.Role }"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String, introToMain : String.String }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String, timeout : Basics.Int }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Session1.Session.LoadingMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.Spelling.Trial) (List.List Session1.ContextUnderstanding.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"},"Pretest.Pretest.ParaMsg":{"args":[],"type":"Task.Parallel.Msg4 (List.List Pretest.SPR.Trial) (List.List Pretest.SentenceCompletion.Trial) (List.List ExperimentInfo.Task) (List.List Pretest.VKS.Trial)"},"Pretest.Pretest.ShuffledPretest":{"args":[],"type":"{ spr : List.List Pretest.SPR.Trial, sc : List.List Pretest.SentenceCompletion.Trial, infos : List.List ExperimentInfo.Task, vks : List.List Pretest.VKS.Trial }"},"Session1.Session.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.Spelling.Trial, cu1 : List.List Session1.ContextUnderstanding.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Session2.Session.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Spelling.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Session3.Session.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"Session2.Translation.SummarizedTrial":{"args":[],"type":"{ trialuid : String.String, userUid : String.String, attempt : String.String }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"Postest.YN.Trial":{"args":[],"type":"{ uid : String.String, word : String.String, exists : Basics.Bool }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"},"Pretest.SentenceCompletion.Trial":{"args":[],"type":"{ id : String.String, context : String.String, firstAmorce : String.String, secondAmorce : String.String, isTraining : Basics.Bool, firstFeedback : String.String, secondFeedback : String.String }"},"Pretest.VKS.Trial":{"args":[],"type":"{ id : String.String, verb : String.String }"},"Session1.ContextUnderstanding.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.Spelling.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session2.Spelling.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"ServerRespondedWithUserInfo":["Result.Result Http.Error User.AuthenticatedInfo"],"UserToggledInCloudWords":["String.String"],"PlaysoundInJS":["String.String"],"WithTime":["Main.Msg","Time.Posix"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"Pretest":["Pretest.Pretest.Msg"],"SentenceCompletion":["Pretest.SentenceCompletion.Msg"],"ServerRespondedWithAllPretestData":["List.List Pretest.Acceptability.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomePretestData":["Task.Parallel.Msg2 (List.List Pretest.Acceptability.Trial) (List.List ExperimentInfo.Task)"],"SPR":["Pretest.SPR.Msg"],"ToNextStep":["Pretest.Acceptability.Step"],"UserPressedKey":["Maybe.Maybe Basics.Bool"],"VKS":["Pretest.VKS.Msg"],"CU1":["Session1.ContextUnderstanding.Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.Spelling.Msg"],"Session1":["Session1.Session.Msg"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Session2.Spelling.Msg"],"Translation":["Session2.Translation.Msg"],"Session2":["Session2.Session.Msg"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"YN":["Postest.YN.Msg"],"Synonym":["Session3.Synonym.Msg"],"Session3":["Session3.Session.Msg"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedAudio":["String.String"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedStartTraining":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Postest.YN.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartIntro":["List.List Postest.YN.Trial"],"UserClickedStartMain":["List.List Postest.YN.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["List.List Pretest.Acceptability.Trial","ExperimentInfo.Task"],"RuntimeShuffledTrials":["List.List ExperimentInfo.Task","Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial))"]}},"Pretest.Pretest.Msg":{"args":[],"tags":{"ServerRespondedWithSomePretestData":["Pretest.Pretest.ParaMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List Pretest.SentenceCompletion.Trial","List.List ExperimentInfo.Task","List.List Pretest.VKS.Trial"],"StartPretest":["Pretest.Pretest.ShuffledPretest"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"UserChoseNewAnswer":["Pretest.SPR.Answer"],"NoOp":[],"RuntimeShuffledTrials":["( List.List Pretest.SPR.Trial, List.List ExperimentInfo.Task )"],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"UserClickedNextTrial":["Pretest.SPR.Answer"],"UserClickedSaveData":[],"UserConfirmedChoice":["Pretest.SPR.Answer"],"UserClickedStartTraining":[]}},"Pretest.SentenceCompletion.Msg":{"args":[],"tags":{"NoOp":[],"RuntimeShuffledTrials":["( List.List Pretest.SentenceCompletion.Trial, List.List ExperimentInfo.Task )"],"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":["ExperimentInfo.Task","List.List Pretest.SentenceCompletion.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.SentenceCompletion.Field","String.String"],"RuntimeReordedAmorces":["Pretest.SentenceCompletion.Field"],"UserClickedStartTraining":[]}},"Pretest.VKS.Msg":{"args":[],"tags":{"NoOp":[],"RuntimeShuffledTrials":["( List.List Pretest.VKS.Trial, List.List ExperimentInfo.Task )"],"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.VKS.Field","String.String"],"RuntimeReordedAmorces":["Pretest.VKS.Field"],"UserClickedNewKnowledge":["String.String"]}},"Session1.ContextUnderstanding.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.ContextUnderstanding.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartIntro":["List.List Session1.Meaning.Trial"],"UserClickedStartMain":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartIntro":["List.List Session1.Presentation.Trial"],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"],"UserClickedStartAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Session1.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Session1.Session.LoadingMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllData":["List.List Session1.Meaning.Trial","List.List Session1.Spelling.Trial","List.List Session1.ContextUnderstanding.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession":["Session1.Session.ShuffledSession1"]}},"Session1.Spelling.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":[],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[]}},"Session2.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Spelling.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllData":["List.List Session2.CU2.Trial","List.List Session2.Spelling.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session2.Session.ShuffledSession2"]}},"Session2.Spelling.Msg":{"args":[],"tags":{"UserDragsLetter":["DnDList.Msg"],"PlayAudio":["String.String"],"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Spelling.Trial"],"UserClickedStartButton":[],"UserClickedStartMainloop":["List.List Session2.Spelling.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"UserClickedStartAudio":["String.String"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartTraining":[],"UserClickedStartMain":[],"RuntimeSentData":["List.List Session2.Translation.SummarizedTrial"],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session3.Session.ShuffledSession3"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartTraining":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserCLickedStartTraining":[]}},"Task.Parallel.Msg2":{"args":["a","b"],"tags":{"LoadedA2":["a"],"LoadedB2":["b"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"User.Role":{"args":[],"tags":{"Volunteer":[],"Admin":[]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Pretest.SentenceCompletion.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"Pretest.VKS.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String, introToMain : String.String }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String, timeout : Basics.Int }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Session1.Session.LoadingMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.Spelling.Trial) (List.List Session1.ContextUnderstanding.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"},"Pretest.Pretest.ParaMsg":{"args":[],"type":"Task.Parallel.Msg4 (List.List Pretest.SPR.Trial) (List.List Pretest.SentenceCompletion.Trial) (List.List ExperimentInfo.Task) (List.List Pretest.VKS.Trial)"},"Pretest.Pretest.ShuffledPretest":{"args":[],"type":"{ spr : List.List Pretest.SPR.Trial, sc : List.List Pretest.SentenceCompletion.Trial, infos : List.List ExperimentInfo.Task, vks : List.List Pretest.VKS.Trial }"},"Session1.Session.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.Spelling.Trial, cu1 : List.List Session1.ContextUnderstanding.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Session2.Session.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Spelling.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Session3.Session.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"Postest.YN.Trial":{"args":[],"type":"{ uid : String.String, word : String.String, exists : Basics.Bool }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"},"Pretest.SentenceCompletion.Trial":{"args":[],"type":"{ id : String.String, context : String.String, firstAmorce : String.String, secondAmorce : String.String, isTraining : Basics.Bool, firstFeedback : String.String, secondFeedback : String.String }"},"Pretest.VKS.Trial":{"args":[],"type":"{ id : String.String, verb : String.String }"},"Session1.ContextUnderstanding.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.Spelling.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session2.Spelling.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UserToggledInCloudWords":["String.String"],"PlaysoundInJS":["String.String"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"Pretest":["Pretest.Pretest.Msg"],"SentenceCompletion":["Pretest.SentenceCompletion.Msg"],"ServerRespondedWithAllPretestData":["List.List Pretest.Acceptability.Trial","List.List ExperimentInfo.Task"],"SPR":["Pretest.SPR.Msg"],"VKS":["Pretest.VKS.Msg"],"CU1":["Session1.ContextUnderstanding.Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.Spelling.Msg"],"Session1":["Session1.Session.Msg"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Session2.Spelling.Msg"],"Translation":["Session2.Translation.Msg"],"Session2":["Session2.Session.Msg"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"YN":["Postest.YN.Msg"],"Synonym":["Session3.Synonym.Msg"],"Session3":["Session3.Session.Msg"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedAudio":["String.String"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedStartTraining":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Postest.YN.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartIntro":["List.List Postest.YN.Trial"],"UserClickedStartMain":["List.List Postest.YN.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["List.List Pretest.Acceptability.Trial","ExperimentInfo.Task"],"RuntimeShuffledTrials":["List.List ExperimentInfo.Task","Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial))"]}},"Pretest.Pretest.Msg":{"args":[],"tags":{"ServerRespondedWithSomePretestData":["Pretest.Pretest.ParaMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List Pretest.SentenceCompletion.Trial","List.List ExperimentInfo.Task","List.List Pretest.VKS.Trial"],"StartPretest":["Pretest.Pretest.ShuffledPretest"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"NoOp":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"UserClickedNextTrial":["Pretest.SPR.Answer"],"UserClickedSaveData":[],"UserConfirmedChoice":["Pretest.SPR.Answer"],"UserClickedStartTraining":[]}},"Pretest.SentenceCompletion.Msg":{"args":[],"tags":{"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":["ExperimentInfo.Task","List.List Pretest.SentenceCompletion.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.SentenceCompletion.Field","String.String"],"RuntimeReordedAmorces":["Pretest.SentenceCompletion.Field"],"UserClickedStartTraining":[]}},"Pretest.VKS.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.VKS.Field","String.String"],"RuntimeReordedAmorces":["Pretest.VKS.Field"],"UserClickedNewKnowledge":["String.String"]}},"Session1.ContextUnderstanding.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.ContextUnderstanding.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"],"UserClickedStartAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Session1.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Session1.Session.LoadingMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllData":["List.List Session1.Meaning.Trial","List.List Session1.Spelling.Trial","List.List Session1.ContextUnderstanding.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession":["Session1.Session.ShuffledSession1"]}},"Session1.Spelling.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":[],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[]}},"Session2.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Spelling.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllData":["List.List Session2.CU2.Trial","List.List Session2.Spelling.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session2.Session.ShuffledSession2"]}},"Session2.Spelling.Msg":{"args":[],"tags":{"UserDragsLetter":["DnDList.Msg"],"PlayAudio":["String.String"],"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Spelling.Trial"],"UserClickedStartMainloop":["List.List Session2.Spelling.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"UserClickedStartAudio":["String.String"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartTraining":[],"UserClickedStartMain":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session3.Session.ShuffledSession3"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartTraining":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserCLickedStartTraining":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Pretest.SentenceCompletion.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"Pretest.VKS.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 

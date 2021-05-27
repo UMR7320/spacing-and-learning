@@ -2,19 +2,16 @@ module Session1.ContextUnderstanding exposing (..)
 
 import Data
 import Dict
-import ExperimentInfo exposing (Task)
-import Html.Styled as Html exposing (Html, div, fromUnstyled, h2, p, span, text)
+import ExperimentInfo
+import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
-import Html.Styled.Events
 import Http exposing (Error)
-import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Progressbar
 import Random
 import Random.List
-import String.Interpolate exposing (interpolate)
 import View
 
 

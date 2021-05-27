@@ -14,7 +14,6 @@ import Url.Parser as Parser
     exposing
         ( (</>)
         , Parser
-        , int
         , map
         , oneOf
         , s
@@ -154,17 +153,6 @@ parser =
 
 
 --translationPath : Parser (String -> a) a
-
-
-translationPath =
-    s "user" </> string |> map User
-
-
-type alias User =
-    { userId : String }
-
-
-
 --userAndTask : a -> b -> c -> d -> e -> f -> g -> h -> i -> Url.Url -> Route
 --spacing-and-learning.netlify.app/user/userId/task/scrabble
 

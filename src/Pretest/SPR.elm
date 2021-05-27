@@ -1,18 +1,16 @@
 module Pretest.SPR exposing (..)
 
-import Browser.Events exposing (onClick, onKeyDown)
+import Browser.Events exposing (onKeyDown)
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as Attr
-import Html.Styled.Events as Ev
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Logic
-import String.Interpolate exposing (interpolate)
 import Task
 import Task.Parallel as Para
 import Time
@@ -59,9 +57,7 @@ type alias Trial =
 
 
 type Msg
-    = UserChoseNewAnswer Answer
-    | NoOp
-    | RuntimeShuffledTrials ( List Trial, List ExperimentInfo.Task )
+    = NoOp
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | StartMain ExperimentInfo.Task (List Trial)
     | TimestampedMsg TimedMsg (Maybe Time.Posix)
@@ -254,12 +250,6 @@ saveSprData responseHandler maybeUserId task =
         userId =
             maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        whenNothing =
-            Time.millisToPosix 1000000000
-
-        intFromMillis posix =
-            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
-
         formattedData : List { tag : String, segment : String, startedAt : Int, endedAt : Int, id : String, answer : String }
         formattedData =
             history
@@ -315,9 +305,6 @@ update msg model =
             Logic.getTrial model.spr
     in
     case msg of
-        UserChoseNewAnswer newAnswer ->
-            ( { model | spr = Logic.update { prevState | answer = newAnswer } model.spr }, Cmd.none )
-
         UserConfirmedChoice answer ->
             ( { model | spr = model.spr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
 
@@ -337,11 +324,8 @@ update msg model =
         ServerRespondedWithLastRecords (Result.Err _) ->
             ( model, Cmd.none )
 
-        StartMain task trials ->
+        StartMain _ _ ->
             ( { model | spr = Logic.startMain model.spr initState }, Cmd.none )
-
-        RuntimeShuffledTrials ( infos, trials ) ->
-            ( { model | spr = init trials infos }, Cmd.none )
 
         TimestampedMsg subMsg timestamp ->
             case subMsg of
@@ -390,7 +374,7 @@ update msg model =
                                         }
                                         model.spr
 
-                                x :: xs ->
+                                x :: _ ->
                                     Logic.update
                                         { prevState
                                             | step = SPR (Reading "blo")
@@ -437,26 +421,13 @@ viewTask data trial endTrialMsg =
                 Start ->
                     p [ Attr.class "text-bold" ] [ text "Press the space bar to start reading" ]
 
-                Reading segment ->
+                Reading _ ->
                     div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2 text-bold text-lg" ] [ p [ Attr.class "text-lg items-center" ] [ text (Tuple.second taggedSegment) ] ]
 
-        ( SPR s, Nothing ) ->
+        ( SPR _, Nothing ) ->
             p [ Attr.class "text-lg" ] [ text "Press the space to start" ]
 
         ( Question, _ ) ->
-            let
-                yes =
-                    answerToString Yes
-
-                no =
-                    answerToString No
-
-                unsure =
-                    answerToString Unsure
-
-                value =
-                    answerToString data.state.answer
-            in
             div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
                 [ span [ Attr.class "text-lg" ] [ text trial.question ]
                 , text "Press Y for Yes, N for No and K for I don't know"

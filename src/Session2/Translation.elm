@@ -1,31 +1,23 @@
 module Session2.Translation exposing (..)
 
-import Browser
-import Css exposing (visibility)
-import Data exposing (decodeRecords)
+import Data
 import Dict
-import ExperimentInfo exposing (Task)
+import ExperimentInfo
 import Html.Styled
     exposing
         ( Html
         , div
-        , h3
-        , p
-        , span
         , text
         )
-import Html.Styled.Attributes exposing (checked, class, disabled, for, id, type_)
+import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
-import Process
 import Progressbar
 import Random
 import Random.List
-import String.Interpolate exposing (interpolate)
-import Url exposing (Url)
 import View
 
 
@@ -49,7 +41,6 @@ type Msg
     | UserClickedRadioButton String
     | UserClickedStartTraining
     | UserClickedStartMain
-    | RuntimeSentData (List SummarizedTrial)
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | RuntimeShuffledOptionsOrder (List Int)
 
@@ -67,9 +58,6 @@ update msg model =
             ( model, Cmd.none )
 
         ServerRespondedWithLastRecords (Err _) ->
-            ( model, Cmd.none )
-
-        RuntimeSentData _ ->
             ( model, Cmd.none )
 
         UserClickedToggleFeedback ->

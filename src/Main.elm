@@ -4,7 +4,6 @@ port module Main exposing
     , nextNewSentenceType
     , organizeAcceptabilityTrials
     , removesItems
-    , toEvaluation
     )
 
 import Browser
@@ -15,9 +14,9 @@ import Delay
 import Dict
 import DnDList
 import DnDList.Groups exposing (Model)
-import ExperimentInfo exposing (Session(..), Task)
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (class, href, id, type_)
+import Html.Styled.Attributes exposing (class, href, type_)
 import Html.Styled.Events
 import Http
 import Json.Decode
@@ -34,9 +33,9 @@ import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
 import Random
 import Random.Extra
-import Random.List exposing (shuffle)
+import Random.List
 import RemoteData exposing (RemoteData)
-import Result exposing (Result)
+import Result
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
 import Session exposing (Session(..))
 import Session1.ContextUnderstanding as CU1
@@ -58,7 +57,6 @@ import Task.Parallel as Para
 import Time
 import Url exposing (Url)
 import Url.Builder
-import User
 import View exposing (navOut)
 
 
@@ -333,10 +331,6 @@ body model =
                         Session1.Top.view infos
 
                     Route.Meaning ->
-                        let
-                            _ =
-                                Dict.get "Meaning" infos
-                        in
                         [ Html.Styled.map Meaning <|
                             Meaning.view
                                 { task = model.meaning
@@ -388,10 +382,6 @@ body model =
             Route.AuthenticatedSession3 _ task ->
                 case task of
                     Route.CU3 ->
-                        let
-                            _ =
-                                Dict.get "Context Understanding level 3" infos
-                        in
                         [ Html.Styled.map CU3 <| CU3.view model.cu3
                         ]
 
@@ -399,10 +389,6 @@ body model =
                         List.map (Html.Styled.map Synonym) <| Synonym.viewTask model.synonymTask
 
                     Route.Spelling3 ->
-                        let
-                            _ =
-                                Dict.get "Spelling level 3" infos
-                        in
                         [ Html.Styled.map Spelling3 <| Spelling3.view model.spelling3
                         ]
 
@@ -449,10 +435,6 @@ body model =
             Route.Pretest task ->
                 case task of
                     Route.YN ->
-                        let
-                            _ =
-                                Dict.get "YesNo task" infos
-                        in
                         [ YN.view model.yn
                             { toggleFeedback = YN YN.UserClickedToggleFeedback
                             , nextTrialMsg = YN YN.UserClickedNextTrial
@@ -493,8 +475,7 @@ body model =
 
 
 type Msg
-    = ServerRespondedWithUserInfo (Result Http.Error User.AuthenticatedInfo)
-    | UserToggledInCloudWords String
+    = UserToggledInCloudWords String
       --
       --                                                           # # ### ### #    ##
       --                                                           # #  #   #  #   #
@@ -502,8 +483,6 @@ type Msg
       --                                                           # #  #   #  #     #
       --                                                           ###  #  ### ### ##
     | PlaysoundInJS String
-    | WithTime Msg Time.Posix
-    | RuntimeShuffledOptionsOrder (List Int)
     | UserClickedLink Browser.UrlRequest
     | BrowserChangedUrl Url
     | NoOp
@@ -517,10 +496,7 @@ type Msg
     | Pretest Pretest.Msg
     | SentenceCompletion SentenceCompletion.Msg
     | ServerRespondedWithAllPretestData (List Acceptability.Trial) (List ExperimentInfo.Task)
-    | ServerRespondedWithSomePretestData (Para.Msg2 (List Acceptability.Trial) (List ExperimentInfo.Task))
     | SPR SPR.Msg
-    | ToNextStep Acceptability.Step
-    | UserPressedKey (Maybe Bool)
     | VKS VKS.Msg
       --
       --                                                          ## ###  ##  ## ###  #  ###      #
@@ -582,15 +558,6 @@ update msg model =
                     ( model
                     , Nav.load url
                     )
-
-        ServerRespondedWithUserInfo (Result.Ok _) ->
-            ( model, Cmd.none )
-
-        ServerRespondedWithUserInfo (Result.Err _) ->
-            ( model, Cmd.none )
-
-        ToNextStep _ ->
-            ( { model | acceptabilityTask = model.acceptabilityTask }, Cmd.none )
 
         SPR submsg ->
             let
@@ -728,7 +695,7 @@ update msg model =
                         _ ->
                             ( model, Cmd.none )
 
-                ( _, _ ) ->
+                _ ->
                     case message of
                         Acceptability.StartMain _ _ ->
                             ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask Acceptability.initState, endAcceptabilityDuration = 500 }, toNextStep 0 Acceptability.Init )
@@ -742,7 +709,7 @@ update msg model =
                                     else
                                         ( model, Delay.after 0 (ServerRespondedWithAllPretestData (List.concat shuffledTrials) info) )
 
-                                Result.Err ( _, _ ) ->
+                                Result.Err _ ->
                                     ( { model | acceptabilityTask = Logic.Err "Error whhen I tried to shuffle trials" }, Cmd.none )
 
                         Acceptability.UserClickedSaveMsg ->
@@ -803,15 +770,6 @@ update msg model =
                                     (Acceptability.RuntimeShuffledTrials info st)
                             )
 
-                _ =
-                    List.Extra.gatherEqualsBy .sentenceType distractors_
-
-                _ =
-                    List.filter (\datum -> datum.trialType == Acceptability.Target) trials
-
-                distractors_ =
-                    List.filter (\datum -> datum.trialType == Acceptability.Distractor) trials
-
                 trainingTrials =
                     List.filter (\datum -> datum.trialType == Acceptability.Training) trials
 
@@ -822,10 +780,6 @@ update msg model =
                             Random.int 1 (List.length block - 1)
                                 |> Random.andThen
                                     (\position ->
-                                        let
-                                            _ =
-                                                List.Extra.swapAt 0 position block
-                                        in
                                         Random.constant (List.Extra.swapAt 0 position block)
                                     )
                         )
@@ -833,47 +787,8 @@ update msg model =
             in
             ( { model | infos = RemoteData.Success (ExperimentInfo.toDict info) }, generateOrganizedTrials )
 
-        ServerRespondedWithSomePretestData downloadMsg ->
-            let
-                ( updte, cmd ) =
-                    case model.pilote of
-                        Loading downloadState ->
-                            Para.update2 downloadState downloadMsg |> Tuple.mapFirst Loading
-
-                        _ ->
-                            ( model.pilote, Cmd.none )
-            in
-            ( { model | pilote = updte }, cmd )
-
-        UserPressedKey evaluation ->
-            ( model
-            , Task.perform (\time -> WithTime (UserPressedKey evaluation) time) Time.now
-            )
-
         UserToggledInCloudWords word ->
             ( { model | cloudWords = CloudWords.toggle word model.cloudWords }, Cmd.none )
-
-        WithTime message _ ->
-            case message of
-                UserPressedKey evaluation ->
-                    let
-                        prevState =
-                            Logic.getState model.acceptabilityTask
-                    in
-                    case prevState of
-                        Just pState ->
-                            ( { model | acceptabilityTask = Logic.update { pState | evaluation = Acceptability.maybeBoolToEvaluation evaluation } model.acceptabilityTask |> Logic.next Acceptability.initState }
-                            , Delay.after 500 playBeep
-                            )
-
-                        _ ->
-                            ( model, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        RuntimeShuffledOptionsOrder newOrder ->
-            ( { model | optionsOrder = newOrder }, Cmd.none )
 
         PlaysoundInJS url ->
             ( model, Ports.playAudio url )
@@ -921,10 +836,6 @@ update msg model =
             ( newModel, Cmd.map Spelling3 newCmd )
 
         YN message ->
-            let
-                _ =
-                    "rechYdq4MyLcb2nRG"
-            in
             case message of
                 YN.UserClickedNextTrial ->
                     ( { model | yn = Logic.next CU1.initState model.yn }, Cmd.none )
@@ -1016,23 +927,6 @@ toAcceptabilityMessage { eventType, name, timestamp } =
             NoOp
 
 
-type JsAudioEvent
-    = AudioStarted String Time.Posix
-    | AudioEnded String Time.Posix
-
-
-type alias InboundAudioInfos =
-    { eventType : String
-    , name : String
-    , timestamp : Time.Posix
-    }
-
-
-type EventType
-    = SoundStarted
-    | SoundEnded
-
-
 keyDecoder : Json.Decode.Decoder Msg
 keyDecoder =
     Json.Decode.map toEvaluation (Json.Decode.field "key" Json.Decode.string)
@@ -1094,10 +988,6 @@ viewCloud model =
     div [ class "grid grid-flow-col grid-rows-4 auto-cols-max gap-4 " ]
         (List.map
             (\word ->
-                let
-                    _ =
-                        Dict.get word model.cloudWords
-                in
                 label [ class "border-2 p-2 text-black align-baseline flex flex-row" ]
                     [ input
                         [ type_ "checkbox"
@@ -1110,10 +1000,6 @@ viewCloud model =
             )
             (Dict.keys model.cloudWords)
         )
-
-
-playBeep =
-    PlaysoundInJS beep
 
 
 beep =
@@ -1230,16 +1116,9 @@ organizeAcceptabilityTrialsHelper targets distractors output =
                                                 )
                                     )
                         )
-
-        _ =
-            List.Extra.gatherEqualsBy .sentenceType distractors
     in
     case targets of
         [] ->
-            let
-                _ =
-                    List.filter (\block -> List.length block < 4) (output ++ [ distractors ])
-            in
             Result.Ok (output ++ [ distractors ])
 
         x :: xs ->

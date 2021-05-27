@@ -2,11 +2,10 @@ module Postest.YN exposing (..)
 
 import Data
 import ExperimentInfo exposing (Task)
-import Html.Styled as Html exposing (Html, div, fromUnstyled, span, text)
+import Html.Styled as Html exposing (div, span, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
-import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
@@ -24,12 +23,12 @@ view exp { toggleFeedback, nextTrialMsg, startMainMsg, userChangedInput } =
         Logic.Err reason ->
             div [] [ text reason ]
 
-        Logic.Running Logic.Instructions data ->
+        Logic.Running Logic.Instructions _ ->
             div [] []
 
-        Logic.Running Logic.Training { trainingTrials, mainTrials, current, state, feedback, history, infos } ->
+        Logic.Running Logic.Training { mainTrials, current, feedback, infos } ->
             case current of
-                Just trial ->
+                Just _ ->
                     div []
                         [ View.viewTraining infos.instructions
                             [ div [] <|
@@ -62,7 +61,7 @@ view exp { toggleFeedback, nextTrialMsg, startMainMsg, userChangedInput } =
                             }
                         ]
 
-        Logic.Running Logic.Main { mainTrials, current, state, feedback, history, infos } ->
+        Logic.Running Logic.Main { current, state, infos } ->
             case current of
                 Just trial ->
                     div []

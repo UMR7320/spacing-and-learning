@@ -3,10 +3,8 @@ module Logic exposing (..)
 import Data
 import ExperimentInfo
 import Html.Styled as Html
-import Json.Decode as Decode
 import Json.Encode as Encode
 import Task
-import Time exposing (toMillis, utc)
 
 
 type Task trial state
@@ -313,7 +311,7 @@ toggle task =
 getState : Task t s -> Maybe s
 getState task =
     case task of
-        Running step { state } ->
+        Running _ { state } ->
             Just state
 
         _ ->
@@ -323,7 +321,7 @@ getState task =
 getTrial : Task t s -> Maybe t
 getTrial task =
     case task of
-        Running step { current } ->
+        Running _ { current } ->
             current
 
         _ ->
@@ -333,7 +331,7 @@ getTrial task =
 getHistory : Task t s -> List ( t, s )
 getHistory task =
     case task of
-        Running step { history } ->
+        Running _ { history } ->
             history
 
         _ ->

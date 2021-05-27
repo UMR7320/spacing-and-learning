@@ -1,7 +1,6 @@
 module Session1.Session exposing (..)
 
 import Data
-import Debug exposing (todo)
 import Dict
 import ExperimentInfo
 import Http

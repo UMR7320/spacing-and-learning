@@ -1,7 +1,6 @@
 module Session3.Session exposing (..)
 
 import Data
-import Debug exposing (todo)
 import ExperimentInfo
 import Http
 import Logic
@@ -85,4 +84,3 @@ update msg model =
               }
             , Cmd.none
             )
-

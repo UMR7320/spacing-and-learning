@@ -3,11 +3,9 @@ module Session3.CU3 exposing (..)
 import Data
 import Dict
 import ExperimentInfo
-import Html.Styled as Html exposing (Html, div, fromUnstyled, span, text)
+import Html.Styled as Html exposing (div, span, text)
 import Html.Styled.Attributes exposing (class)
-import Html.Styled.Events
 import Http exposing (Error)
-import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
@@ -32,7 +30,7 @@ view exp =
         Logic.Running Logic.Instructions data ->
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
-        Logic.Running Logic.Training ({ current, state, feedback } as data) ->
+        Logic.Running Logic.Training { current, state, feedback } ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
@@ -82,7 +80,6 @@ view exp =
 type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
-    | UserClickedRadioButton String
     | UserClickedStartMain
     | UserChangedInput String
     | UserClickedSaveData
@@ -98,9 +95,6 @@ update msg model =
 
         UserClickedToggleFeedback ->
             ( { model | cu3 = Logic.toggle model.cu3 }, Cmd.none )
-
-        UserClickedRadioButton newChoice ->
-            ( { model | cu3 = Logic.update { uid = "", userAnswer = newChoice } model.cu3 }, Cmd.none )
 
         UserClickedStartMain ->
             ( { model | cu3 = Logic.startMain model.cu3 initState }, Cmd.none )

@@ -2,8 +2,8 @@ module Session1.Presentation exposing (..)
 
 import Data
 import Dict exposing (Dict)
-import ExperimentInfo exposing (Task)
-import Html.Styled as Html exposing (Html, div, fromUnstyled, p, span, text)
+import ExperimentInfo
+import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
@@ -13,15 +13,12 @@ import Logic
 import Ports
 import Progressbar exposing (progressBar)
 import Session3.Synonym exposing (Msg(..))
-import String.Interpolate exposing (interpolate)
 import Task
 import View
 
 
 type Entry
-    = Definition
-    | Example
-    | Translation
+    = Translation
 
 
 type alias Presentation =
@@ -60,7 +57,7 @@ entries d e t msg toggledEntries =
     , ( "translation", { txt = "Translation: ", elements = List.filter ((/=) "missing") t } )
     ]
         |> List.map
-            (\( key, { txt, elements } as val ) ->
+            (\( key, { txt } as val ) ->
                 p [ class "flex flex-col", Html.Styled.Events.onClick (msg key) ]
                     [ div [ class "text-lg hover:underline cursor-pointer" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
                     , span [ class "p-2" ] [ viewEntry key val toggledEntries ]
@@ -133,7 +130,6 @@ view task =
 
 type Msg
     = UserClickedNextTrial
-    | UserClickedStartIntro (List Trial)
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserToggleElementOfEntry String
     | UserClickedStartAudio String
@@ -200,9 +196,6 @@ update msg model =
     case msg of
         UserClickedNextTrial ->
             ( { model | presentation = Logic.next initState model.presentation }, Cmd.none )
-
-        UserClickedStartIntro _ ->
-            ( model, Cmd.none )
 
         UserClickedStartMain _ _ ->
             ( { model | presentation = Logic.startMain model.presentation initState }, Cmd.none )

@@ -3,13 +3,12 @@ module Pretest.SentenceCompletion exposing (..)
 import Data
 import Dict
 import ExperimentInfo
-import Html exposing (textarea)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A
 import Html.Styled.Events as E
 import Http
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (custom, optional, required)
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
 import Pretest.Acceptability exposing (ErrorBlock(..))
@@ -195,9 +194,7 @@ type alias State =
 
 
 type Msg
-    = NoOp
-    | RuntimeShuffledTrials ( List Trial, List ExperimentInfo.Task )
-    | UserClickedToggleFeedback
+    = UserClickedToggleFeedback
     | UserClickedNextTrial
     | UserClickedStartMain ExperimentInfo.Task (List Trial)
     | UserClickedSaveData
@@ -223,9 +220,6 @@ update msg model =
             Logic.getState model.sentenceCompletion |> Maybe.withDefault initState
     in
     case msg of
-        RuntimeShuffledTrials ( trials, infos ) ->
-            ( { model | sentenceCompletion = init infos trials }, Cmd.none )
-
         RuntimeReordedAmorces field ->
             ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | order = field } }, Cmd.none )
 
@@ -235,7 +229,7 @@ update msg model =
         UserClickedToggleFeedback ->
             ( { model | sentenceCompletion = Logic.toggle model.sentenceCompletion }, Cmd.none )
 
-        UserClickedStartMain infos trials ->
+        UserClickedStartMain _ _ ->
             ( { model | sentenceCompletion = Logic.startMain model.sentenceCompletion initState }, Cmd.none )
 
         UserUpdatedField fieldId new ->
@@ -261,9 +255,6 @@ update msg model =
 
         UserClickedStartTraining ->
             ( { model | sentenceCompletion = Logic.startTraining model.sentenceCompletion }, Cmd.none )
-
-        NoOp ->
-            ( model, Cmd.none )
 
 
 init infos trials =

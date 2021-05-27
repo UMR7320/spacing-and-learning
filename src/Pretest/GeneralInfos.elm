@@ -1,17 +1,8 @@
 module Pretest.GeneralInfos exposing (..)
 
-import Data
-import Dict
-import ExperimentInfo exposing (Task)
-import Html.Styled as Html exposing (Html, div, fromUnstyled, h1, h2, input, label, p, span, text)
+import Html.Styled exposing (div, h1, input, label, text)
 import Html.Styled.Attributes exposing (class, for, id, type_, value)
 import Html.Styled.Events
-import Http exposing (Error)
-import Icons
-import Json.Decode as Decode exposing (Decoder, string)
-import Json.Decode.Pipeline exposing (..)
-import Logic
-import String.Interpolate exposing (interpolate)
 import View
 
 
@@ -29,9 +20,7 @@ type alias Model =
 
 
 type Msg
-    = UserClickedSendData String
-    | UserUpdatedEmailField String
-    | UserCreated (Result Http.Error ())
+    = UserUpdatedEmailField String
 
 
 type alias Volunteer =
