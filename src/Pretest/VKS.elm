@@ -5,13 +5,14 @@ import Dict
 import ExperimentInfo
 import Html exposing (textarea)
 import Html.Styled exposing (..)
-import Html.Styled.Attributes as A
+import Html.Styled.Attributes as A exposing (class, type_)
 import Html.Styled.Events as E
 import Http
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Logic
+import Postest.CloudWords exposing (WordKnowledge)
 import Pretest.Acceptability exposing (ErrorBlock(..))
 import Pretest.SPR exposing (Msg(..))
 import Random
@@ -20,7 +21,7 @@ import View
 
 
 taskId =
-    "reczQs5ZD6g1x5F29"
+    "recR6grI83e1so6Zl"
 
 
 type alias SC =
@@ -40,7 +41,7 @@ view task =
                     [ div [ A.class "flex flex-col items-center" ]
                         [ View.fromMarkdown data.infos.introToMain
                         , View.button
-                            { message = UserClickedStartMain data.infos data.mainTrials
+                            { message = UserClickedStartMain
                             , txt = "Start"
                             , isDisabled = False
                             }
@@ -50,59 +51,57 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ p [ A.class "text-center text-lg border-2 m-2 p-2" ] [ text trial.context ]
-                    , div [ A.class "flex flex-col items-center" ]
-                        [ div [ A.class "order-first" ]
-                            []
-                        , div
-                            [ A.class <|
-                                "flex flex-col "
-                                    ++ (if data.state.order == FirstProduction then
-                                            "order-2"
-
-                                        else
-                                            "order-3"
-                                       )
-                            ]
-                            [ h3 [] [ text "Complete this first text: " ]
-                            , label [ A.for "firstProd" ] [ text trial.firstAmorce ]
-                            , Html.Styled.textarea
-                                [ A.id "firstProd"
-                                , A.class "border-2"
-                                , A.value data.state.firstProduction
-                                , E.onInput (UserUpdatedField FirstProduction)
-                                , A.spellcheck False
+                    [ span [ class "text-lg font-bold" ] [ text trial.verb ]
+                    , Html.Styled.fieldset [ class "flex flex-col m-2" ]
+                        [ Html.Styled.label []
+                            [ Html.Styled.input
+                                [ type_ "radio"
+                                , A.id "ns"
+                                , A.value "NeverSeen"
+                                , A.checked (data.state.knowledge == NeverSeen)
+                                , E.onInput UserClickedNewKnowledge
                                 ]
                                 []
+                            , span [ class "p-2" ] [ text "I don’t remember having seen this verb before" ]
                             ]
-                        , div
-                            [ A.class <|
-                                "flex flex-col "
-                                    ++ (if data.state.order == SecondProduction then
-                                            "order-2"
-
-                                        else
-                                            "order-3"
-                                       )
-                            ]
-                            [ text trial.secondAmorce
-                            , Html.Styled.textarea
-                                [ A.id "secondProd"
-                                , A.class "border-2"
-                                , A.value data.state.secondProduction
-                                , E.onInput (UserUpdatedField SecondProduction)
-                                , A.spellcheck False
+                        , Html.Styled.label []
+                            [ Html.Styled.input
+                                [ type_ "radio"
+                                , A.value "PreviouslySeen"
+                                , A.checked (data.state.knowledge == PreviouslySeen)
+                                , E.onInput UserClickedNewKnowledge
                                 ]
                                 []
+                            , span [ class "p-2" ] [ text "I have seen this verb before, but I don’t know what it means" ]
                             ]
-                        , div [ A.class "order-last" ]
-                            [ View.button
-                                { message = UserClickedNextTrial
-                                , txt = "Next Item"
-                                , isDisabled = False
-                                }
+                        , Html.Styled.label []
+                            [ Html.Styled.input
+                                [ type_ "radio"
+                                , A.value "Known"
+                                , A.checked (data.state.knowledge == Known)
+                                , E.onInput UserClickedNewKnowledge
+                                ]
+                                []
+                            , span [ class "p-2" ] [ text "I have seen this verb before, and I think I know what it means" ]
                             ]
                         ]
+                    , if data.state.knowledge == Known then
+                        Html.Styled.fieldset [ class "flex flex-col p-2" ]
+                            [ label []
+                                [ text "What do you think this verb means? (please provide a translation, synonym or definition or all meanings of this verb that you know):"
+                                , input
+                                    [ type_ "text"
+                                    , class "border-2"
+                                    , E.onInput (UserUpdatedField FirstProduction)
+                                    ]
+                                    []
+                                ]
+                            , label [] [ text "Please use this verb in a sentence. The sentence should show that you know what the word means.", input [ type_ "text", class "border-2", E.onInput (UserUpdatedField SecondProduction) ] [] ]
+                            ]
+
+                      else
+                        text ""
+                    , View.button { txt = "Next Item", message = UserClickedNextTrial, isDisabled = False }
                     ]
 
                 Nothing ->
@@ -118,7 +117,7 @@ view task =
             [ text "C'est tout bon!" ]
 
         Logic.Running Logic.Instructions data ->
-            []
+            [ View.instructions data.infos.instructions UserClickedStartMain ]
 
 
 getRecords =
@@ -128,8 +127,8 @@ getRecords =
         , url =
             Data.buildQuery
                 { app = Data.apps.spacing
-                , base = "sentence_completion"
-                , view_ = "all"
+                , base = "input"
+                , view_ = "Meaning"
                 }
         , body = Http.emptyBody
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials
@@ -143,31 +142,28 @@ decodeAcceptabilityTrials =
         decoder =
             Decode.succeed Trial
                 |> required "id" Decode.string
-                |> required "context" Decode.string
-                |> required "amorce1" Decode.string
-                |> required "amorce2" Decode.string
-                |> optional "isTraining" Decode.bool False
-                |> optional "feedback1" Decode.string "Missing feedback"
-                |> optional "feedback2" Decode.string "Missing feedback 2"
+                |> required "Word_Text" Decode.string
     in
     Data.decodeRecords decoder
 
 
 type alias Trial =
     { id : String
-    , context : String
-    , firstAmorce : String
-    , secondAmorce : String
-    , isTraining : Bool
-    , firstFeedback : String
-    , secondFeedback : String
+    , verb : String
     }
 
 
+type Familiarity
+    = NeverSeen
+    | PreviouslySeen
+    | Known
+    | NoAnswer
+
+
 type alias State =
-    { firstProduction : String
-    , secondProduction : String
-    , order : Field
+    { knowledge : Familiarity
+    , definition : String
+    , usage : String
     }
 
 
@@ -176,11 +172,12 @@ type Msg
     | RuntimeShuffledTrials ( List Trial, List ExperimentInfo.Task )
     | UserClickedToggleFeedback
     | UserClickedNextTrial
-    | UserClickedStartMain ExperimentInfo.Task (List Trial)
+    | UserClickedStartMain
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | UserUpdatedField Field String
     | RuntimeReordedAmorces Field
+    | UserClickedNewKnowledge String
 
 
 type Field
@@ -203,7 +200,7 @@ update msg model =
             ( { model | vks = init infos trials }, Cmd.none )
 
         RuntimeReordedAmorces field ->
-            ( { model | vks = model.vks |> Logic.update { prevState | order = field } }, Cmd.none )
+            ( { model | vks = model.vks |> Logic.update prevState }, Cmd.none )
 
         UserClickedNextTrial ->
             ( { model | vks = model.vks |> Logic.toggle |> Logic.next initState }, Random.generate RuntimeReordedAmorces (Random.uniform FirstProduction [ SecondProduction ]) )
@@ -211,16 +208,16 @@ update msg model =
         UserClickedToggleFeedback ->
             ( { model | vks = Logic.toggle model.vks }, Cmd.none )
 
-        UserClickedStartMain infos trials ->
+        UserClickedStartMain ->
             ( { model | vks = Logic.startMain model.vks initState }, Cmd.none )
 
         UserUpdatedField fieldId new ->
             case fieldId of
                 FirstProduction ->
-                    ( { model | vks = model.vks |> Logic.update { prevState | firstProduction = new } }, Cmd.none )
+                    ( { model | vks = model.vks |> Logic.update { prevState | definition = new } }, Cmd.none )
 
                 SecondProduction ->
-                    ( { model | vks = model.vks |> Logic.update { prevState | secondProduction = new } }, Cmd.none )
+                    ( { model | vks = model.vks |> Logic.update { prevState | usage = new } }, Cmd.none )
 
         UserClickedSaveData ->
             let
@@ -235,20 +232,57 @@ update msg model =
         ServerRespondedWithLastRecords (Result.Err reason) ->
             ( { model | vks = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
+        UserClickedNewKnowledge str ->
+            ( { model | vks = model.vks |> Logic.update { prevState | knowledge = familiarityFromString str } }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
 
+init : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 init infos trials =
     let
         info =
             ExperimentInfo.toDict infos |> Dict.get taskId |> Result.fromMaybe "I couldn't find Task infos"
     in
-    Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
+    Logic.startIntro info [] trials initState
 
 
+initState : State
 initState =
-    { firstProduction = "", secondProduction = "", order = FirstProduction }
+    { knowledge = NoAnswer, definition = "", usage = "" }
+
+
+familiarityToString : Familiarity -> String
+familiarityToString fam =
+    case fam of
+        Known ->
+            "Known"
+
+        NeverSeen ->
+            "NeverSeen"
+
+        PreviouslySeen ->
+            "PreviouslySeen"
+
+        _ ->
+            ""
+
+
+familiarityFromString : String -> Familiarity
+familiarityFromString str =
+    case str of
+        "Known" ->
+            Known
+
+        "NeverSeen" ->
+            NeverSeen
+
+        "PreviouslySeen" ->
+            PreviouslySeen
+
+        _ ->
+            NoAnswer
 
 
 saveData responseHandler maybeUserId task =
@@ -261,13 +295,14 @@ saveData responseHandler maybeUserId task =
 
         summarizedTrialEncoder =
             Encode.list
-                (\( { id }, { firstProduction, secondProduction } ) ->
+                (\( { id }, { knowledge, definition, usage } ) ->
                     Encode.object
                         [ ( "fields"
                           , Encode.object
-                                [ ( "sentenceCompletionTrialId", Encode.list Encode.string [ id ] )
-                                , ( "firstProduction", Encode.string firstProduction )
-                                , ( "secondProduction", Encode.string secondProduction )
+                                [ ( "id", Encode.list Encode.string [ id ] )
+                                , ( "knowledge", Encode.string (familiarityToString knowledge) )
+                                , ( "definition", Encode.string definition )
+                                , ( "usage", Encode.string usage )
                                 ]
                           )
                         ]

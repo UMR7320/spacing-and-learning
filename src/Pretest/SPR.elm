@@ -12,8 +12,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Logic
-import Random
-import Random.List
 import String.Interpolate exposing (interpolate)
 import Task
 import Task.Parallel as Para
@@ -31,6 +29,10 @@ taskId =
 
 type alias Pretest =
     Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
+
+
+type alias SPR =
+    Logic.Task Trial State
 
 
 type alias Spr model =
@@ -63,15 +65,10 @@ type Msg
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | StartMain ExperimentInfo.Task (List Trial)
     | TimestampedMsg TimedMsg (Maybe Time.Posix)
-    | UserClickedNextTrial
+    | UserClickedNextTrial Answer
     | UserClickedSaveData
-    | UserConfirmedChoice
-
-
-
---| ServerRespondedWithSomePretestData (Para.Msg2 (List Trial) (List ExperimentInfo.Task))
---| ServerRespondedWithSomeError Http.Error
---| ServerRespondedWithAllPretestData (List Trial) (List ExperimentInfo.Task)
+    | UserConfirmedChoice Answer
+    | UserClickedStartTraining
 
 
 type TimedMsg
@@ -164,14 +161,51 @@ decodeSpace msg =
         (Decode.field "key" Decode.string)
 
 
-subscriptions : Maybe State -> Sub Msg
-subscriptions state =
-    case state of
-        Nothing ->
-            Sub.none
+decodeYesNoUnsure : Decode.Decoder Msg
+decodeYesNoUnsure =
+    Decode.map
+        (\k ->
+            case k of
+                "y" ->
+                    UserClickedNextTrial Yes
 
-        Just s ->
-            case s.step of
+                "n" ->
+                    UserClickedNextTrial No
+
+                "k" ->
+                    UserClickedNextTrial Unsure
+
+                _ ->
+                    NoOp
+        )
+        (Decode.field "key" Decode.string)
+
+
+decodeYesNoUnsureInTraining : Decode.Decoder Msg
+decodeYesNoUnsureInTraining =
+    Decode.map
+        (\k ->
+            case k of
+                "y" ->
+                    UserConfirmedChoice Yes
+
+                "n" ->
+                    UserConfirmedChoice No
+
+                "k" ->
+                    UserConfirmedChoice Unsure
+
+                _ ->
+                    NoOp
+        )
+        (Decode.field "key" Decode.string)
+
+
+subscriptions : Logic.Task Trial State -> Sub Msg
+subscriptions task =
+    case task of
+        Logic.Running Logic.Training data ->
+            case data.state.step of
                 SPR step ->
                     case step of
                         Start ->
@@ -181,10 +215,29 @@ subscriptions state =
                             onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToReadNextSegment Nothing))
 
                 Feedback ->
-                    onKeyDown (decodeSpace UserClickedNextTrial)
+                    onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToStartParagraph Nothing))
 
                 Question ->
+                    onKeyDown decodeYesNoUnsureInTraining
+
+        Logic.Running Logic.Main data ->
+            case data.state.step of
+                SPR step ->
+                    case step of
+                        Start ->
+                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToStartParagraph Nothing))
+
+                        Reading _ ->
+                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToReadNextSegment Nothing))
+
+                Question ->
+                    onKeyDown decodeYesNoUnsure
+
+                _ ->
                     Sub.none
+
+        _ ->
+            Sub.none
 
 
 saveSprData responseHandler maybeUserId task =
@@ -265,11 +318,11 @@ update msg model =
         UserChoseNewAnswer newAnswer ->
             ( { model | spr = Logic.update { prevState | answer = newAnswer } model.spr }, Cmd.none )
 
-        UserConfirmedChoice ->
-            ( { model | spr = Logic.update { prevState | step = Feedback } model.spr }, Cmd.none )
+        UserConfirmedChoice answer ->
+            ( { model | spr = model.spr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
 
-        UserClickedNextTrial ->
-            ( { model | spr = Logic.next initState model.spr }, Cmd.none )
+        UserClickedNextTrial newanswer ->
+            ( { model | spr = model.spr |> Logic.update { prevState | answer = newanswer } |> Logic.next initState }, Cmd.none )
 
         UserClickedSaveData ->
             let
@@ -362,6 +415,9 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
+        UserClickedStartTraining ->
+            ( { model | spr = Logic.startTraining model.spr }, Cmd.none )
+
 
 updateWithTime : TimedMsg -> Maybe Time.Posix -> model -> model -> ( model, Cmd Msg )
 updateWithTime msg timestamp prevModel newModel =
@@ -402,56 +458,14 @@ viewTask data trial endTrialMsg =
                     answerToString data.state.answer
             in
             div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
-                [ Html.Styled.fieldset [ Attr.class "flex flex-col" ]
-                    [ legend [] [ text trial.question ]
-                    , div [ Attr.class "flex flex-row" ]
-                        [ input
-                            [ Attr.type_ "radio"
-                            , Attr.id yes
-                            , Attr.value yes
-                            , Attr.checked (value == yes)
-                            , Ev.onClick (UserChoseNewAnswer (answerFromString yes))
-                            ]
-                            []
-                        , label [ Attr.for yes ] [ text yes ]
-                        ]
-                    , div []
-                        [ input
-                            [ Attr.type_ "radio"
-                            , Attr.id no
-                            , Attr.value no
-                            , Attr.checked (value == no)
-                            , Ev.onClick (UserChoseNewAnswer (answerFromString no))
-                            ]
-                            []
-                        , label [ Attr.for no ] [ text no ]
-                        ]
-                    , div []
-                        [ input
-                            [ Attr.type_ "radio"
-                            , Attr.id unsure
-                            , Attr.value unsure
-                            , Attr.checked (value == unsure)
-                            , Ev.onClick (UserChoseNewAnswer (answerFromString unsure))
-                            ]
-                            []
-                        , label [ Attr.for no, Attr.value value ] [ text unsure ]
-                        ]
-                    ]
-                , View.button
-                    { message = endTrialMsg
-                    , txt =
-                        if endTrialMsg == UserClickedNextTrial then
-                            "Next item"
-
-                        else
-                            "Click here to see the feedback"
-                    , isDisabled = String.isEmpty value
-                    }
+                [ span [ Attr.class "text-lg" ] [ text trial.question ]
+                , text "Press Y for Yes, N for No and K for I don't know"
                 ]
 
         ( Feedback, _ ) ->
-            div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ] [ View.fromMarkdown trial.feedback, View.button { message = UserClickedNextTrial, txt = "Next item", isDisabled = False } ]
+            div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
+                [ View.fromMarkdown trial.feedback
+                ]
 
 
 view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
@@ -463,8 +477,7 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    [ p [] [ View.fromMarkdown data.infos.instructions ]
-                    , viewTask data trial UserConfirmedChoice
+                    [ viewTask data trial UserConfirmedChoice
                     ]
 
                 Nothing ->
@@ -493,7 +506,7 @@ view task =
             [ p [] [ text "Thanks for your participation !" ] ]
 
         Logic.Running Logic.Instructions data ->
-            []
+            [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
 
 init infos trials =

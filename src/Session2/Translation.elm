@@ -22,6 +22,8 @@ import Json.Encode as Encode
 import Logic
 import Process
 import Progressbar
+import Random
+import Random.List
 import String.Interpolate exposing (interpolate)
 import Url exposing (Url)
 import View
@@ -45,10 +47,52 @@ type Msg
     | UserClickedToggleFeedback
     | UserClickedSaveData
     | UserClickedRadioButton String
-    | UserClickedStartIntro (List Trial)
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
+    | UserClickedStartTraining
+    | UserClickedStartMain
     | RuntimeSentData (List SummarizedTrial)
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | RuntimeShuffledOptionsOrder (List Int)
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | translationTask = Logic.next initState model.translationTask }
+            , Cmd.batch
+                [ Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                ]
+            )
+
+        ServerRespondedWithLastRecords (Ok _) ->
+            ( model, Cmd.none )
+
+        ServerRespondedWithLastRecords (Err _) ->
+            ( model, Cmd.none )
+
+        RuntimeSentData _ ->
+            ( model, Cmd.none )
+
+        UserClickedToggleFeedback ->
+            ( { model | translationTask = Logic.toggle model.translationTask }, Cmd.none )
+
+        UserClickedRadioButton newChoice ->
+            ( { model | translationTask = Logic.update { uid = "", userAnswer = newChoice } model.translationTask }, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | translationTask = Logic.startTraining model.translationTask }, Cmd.none )
+
+        UserClickedStartMain ->
+            ( { model | translationTask = Logic.startMain model.translationTask initState }, Cmd.none )
+
+        UserClickedSaveData ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.translationTask )
+
+        RuntimeShuffledOptionsOrder ls ->
+            ( { model | optionsOrder = ls }, Cmd.none )
 
 
 type alias Trial =
@@ -132,7 +176,7 @@ renderTask task trial data history allTrials =
             View.shuffledOptions
                 data.state
                 data.feedback
-                task.radioMsg
+                UserClickedRadioButton
                 trial
                 task.optionsOrder
         , View.genericSingleChoiceFeedback
@@ -141,34 +185,28 @@ renderTask task trial data history allTrials =
             , target = trial.target
             , feedback_Correct = ( data.infos.feedback_correct, [ trial.target ] )
             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.target ] )
-            , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
             }
         ]
 
 
 view :
     { task : Logic.Task Trial State
-    , infos : Maybe ExperimentInfo.Task
-    , radioMsg : String -> msg
-    , toggleFeedbackMsg : msg
-    , nextTrialMsg : msg
     , optionsOrder : List comparable
-    , startMainMsg : List Trial -> Task -> msg
-    , saveDataMsg : msg
     }
-    -> Html msg
+    -> Html Msg
 view task =
     case task.task of
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    View.viewTraining data.infos.instructions
+                    div [ class "flex flex-col items-center" ]
                         [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ trial.target ]
                         , renderTask task trial data data.history data.trainingTrials
                         ]
 
                 Nothing ->
-                    View.introToMain (task.startMainMsg data.mainTrials data.infos)
+                    View.introToMain UserClickedStartMain
 
         Logic.Running Logic.Main data ->
             case data.current of
@@ -178,7 +216,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end task.saveDataMsg "spelling"
+                    View.end data.infos.end UserClickedSaveData "spelling"
 
         Logic.Loading ->
             div [] [ text "Loading" ]
@@ -190,7 +228,7 @@ view task =
             div [] [ text reason ]
 
         Logic.Running Logic.Instructions data ->
-            div [] []
+            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
 
 taskId =

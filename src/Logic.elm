@@ -240,10 +240,20 @@ startIntro info trainingTrials mainTrials initStat =
             Err <| "I tried to start the intro of this task but I stumbled into an error : " ++ error
 
 
+newStep : Step -> Task t s -> Task t s
+newStep step task =
+    case task of
+        Running _ data ->
+            Running step data
+
+        _ ->
+            Err "I can't change Step here"
+
+
 startMain : Task t s -> s -> Task t s
 startMain task initState =
     case task of
-        Running Training data ->
+        Running _ data ->
             case data.mainTrials of
                 x :: y :: _ ->
                     Running Main
@@ -283,6 +293,11 @@ startMain task initState =
 
         _ ->
             Err "I can't go to Main from here"
+
+
+startTraining : Task t s -> Task t s
+startTraining task =
+    newStep Training task
 
 
 toggle : Task t s -> Task t s

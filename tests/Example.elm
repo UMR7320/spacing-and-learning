@@ -6,7 +6,7 @@ import Fuzz exposing (Fuzzer, int, list, string)
 import List.Extra
 import Main exposing (isNextSentence, nextNewSentenceType, organizeAcceptabilityTrials, removesItems)
 import Pretest.Acceptability as A exposing (..)
-import Session2.Scrabble exposing (dedupe)
+import Session2.Spelling exposing (dedupe)
 import Test exposing (..)
 
 

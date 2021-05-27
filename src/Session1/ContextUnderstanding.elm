@@ -1,4 +1,4 @@
-module Session1.CU1 exposing (..)
+module Session1.ContextUnderstanding exposing (..)
 
 import Data
 import Dict
@@ -12,12 +12,18 @@ import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Progressbar
+import Random
+import Random.List
 import String.Interpolate exposing (interpolate)
 import View
 
 
 
 --view : { a | task : Logic.Task t s, optionsOrder : Maybe (List comparable), nextTrialMsg : f, userClickedAudio : String -> f, radioMsg : String -> f, toggleFeedbackMsg : f, startMainMsg : List t -> f, inputChangedMsg : String -> f } -> Html msg
+
+
+type alias CU =
+    Logic.Task Trial State
 
 
 taskId =
@@ -34,15 +40,9 @@ paragraphWithInput pre userAnswer post =
 
 view :
     { task : Logic.Task Trial State
-    , infos : Maybe ExperimentInfo.Task
-    , radioMsg : String -> msg
-    , toggleFeedbackMsg : msg
-    , nextTrialMsg : msg
     , optionsOrder : List comparable
-    , startMainMsg : List Trial -> Task -> msg
-    , userClickedSaveData : msg
     }
-    -> Html msg
+    -> Html Msg
 view task =
     case task.task of
         Logic.NotStarted ->
@@ -70,7 +70,7 @@ view task =
                         [ View.viewTraining data.infos.instructions
                             [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.target ]
                             , paragraphWithInput pre data.state.userAnswer post
-                            , div [ class "w-full max-w-2xl" ] <| View.shuffledOptions data.state data.feedback task.radioMsg trial task.optionsOrder
+                            , div [ class "w-full max-w-2xl" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
                             , div [ class "col-start-2 col-span-4" ] <|
                                 [ View.genericSingleChoiceFeedback
                                     { isVisible = data.feedback
@@ -78,14 +78,14 @@ view task =
                                     , target = trial.target
                                     , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
                                     , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
-                                    , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                                    , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
                                     }
                                 ]
                             ]
                         ]
 
                 Nothing ->
-                    View.introToMain (task.startMainMsg data.mainTrials data.infos)
+                    View.introToMain (UserClickedStartMain data.mainTrials data.infos)
 
         Logic.Running Logic.Main data ->
             case data.current of
@@ -106,34 +106,36 @@ view task =
                         [ Progressbar.progressBar data.history data.mainTrials
                         , View.tooltip data.infos.instructions_short
                         , paragraphWithInput pre data.state.userAnswer post
-                        , div [ class "w-full max-w-xl" ] <| View.shuffledOptions data.state data.feedback task.radioMsg trial task.optionsOrder
+                        , div [ class "w-full max-w-xl" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
                             , target = trial.target
                             , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
-                            , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
                             }
                         ]
 
                 Nothing ->
-                    View.end data.infos.end task.userClickedSaveData "./"
+                    View.end data.infos.end UserClickedSaveData "./"
 
         Logic.Loading ->
             text "Loading..."
 
         Logic.Running Logic.Instructions data ->
-            text ""
+            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
 
-type CU1Msg
+type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedStartTraining
+    | RuntimeShuffledOptionsOrder (List Int)
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -151,6 +153,40 @@ start info trials =
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | cu1 = Logic.next initState model.cu1 }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
+
+        UserClickedToggleFeedback ->
+            ( { model | cu1 = Logic.toggle model.cu1 }, Cmd.none )
+
+        UserClickedRadioButton newChoice ->
+            ( { model | cu1 = Logic.update { uid = "", userAnswer = newChoice } model.cu1 }, Cmd.none )
+
+        UserClickedStartMain _ _ ->
+            ( { model | cu1 = Logic.startMain model.cu1 initState }, Cmd.none )
+
+        UserClickedSaveData ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.cu1 )
+
+        ServerRespondedWithLastRecords (Result.Ok _) ->
+            ( model, Cmd.none )
+
+        ServerRespondedWithLastRecords (Err _) ->
+            ( model, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | cu1 = Logic.startTraining model.cu1 }, Cmd.none )
+
+        RuntimeShuffledOptionsOrder newOrder ->
+            ( { model | optionsOrder = newOrder }, Cmd.none )
 
 
 decodeTranslationInput : Decoder (List Trial)

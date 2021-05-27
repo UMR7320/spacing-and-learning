@@ -9,6 +9,7 @@ module View exposing
     , genericNeutralFeedback
     , genericSingleChoiceFeedback
     , header
+    , instructions
     , introToMain
     , keyValue
     , navIn
@@ -97,6 +98,14 @@ shuffledOptions state fb radioMsg trial optionsOrder =
     ordoredOptions
 
 
+instructions content msgToTraining =
+    div [ class "flex flex-col items-center" ]
+        [ h1 [] [ text "Instructions" ]
+        , fromMarkdown content
+        , button { message = msgToTraining, txt = "Start Training", isDisabled = False }
+        ]
+
+
 end endInfo saveDataMsg linkToNextTask =
     div [ class "flex flex-col w-full items-center" ]
         [ fromMarkdown endInfo
@@ -130,10 +139,10 @@ navigationButton toggleFeedbackMsg nextTrialMsg feedback =
 
 
 viewQuestion : Int -> { a | target : String } -> String -> Html msg
-viewQuestion trialn trial instructions =
+viewQuestion trialn trial instructions_ =
     h3 []
         [ p []
-            [ text <| String.fromInt (trialn + 1) ++ ". " ++ instructions
+            [ text <| String.fromInt (trialn + 1) ++ ". " ++ instructions_
             , span [ class "italic" ] [ text <| trial.target ]
             ]
         ]
@@ -237,11 +246,11 @@ trainingBox =
 
 
 viewInstructions : String -> Html msg
-viewInstructions instructions =
+viewInstructions instructions_ =
     div [ class "flex flex-col" ]
         [ h2 [ class "font-bold" ] [ text "Instructions" ]
         , p [ class "pt-8 pb-8 font-medium" ]
-            [ pre [] [ fromMarkdown instructions ]
+            [ pre [] [ fromMarkdown instructions_ ]
             ]
         , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
         ]
@@ -284,9 +293,9 @@ trainingWheelsGeneric trialn pattern_ variables =
 
 
 viewTraining : String -> List (Html msg) -> Html msg
-viewTraining instructions content =
+viewTraining instructions_ content =
     div [ class "flex flex-col" ]
-        [ viewInstructions instructions, trainingBox content ]
+        [ viewInstructions instructions_, trainingBox content ]
 
 
 pct : Int -> List a -> Float

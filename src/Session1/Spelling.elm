@@ -1,4 +1,4 @@
-module Session1.SpellingLvl1 exposing (..)
+module Session1.Spelling exposing (..)
 
 import Array
 import Data exposing (decodeRecords)
@@ -10,12 +10,16 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Logic exposing (saveData)
+import Ports
 import Progressbar
 import Random
 import Random.List
-import Session1.CU1 exposing (CU1Msg(..))
 import Session3.Synonym exposing (Msg(..))
 import View
+
+
+type alias Spelling =
+    Logic.Task Trial State
 
 
 type alias Trial =
@@ -33,9 +37,11 @@ type Msg
     = UserClickedNextTrial
     | UserClickedFeedback
     | UserClickedRadioButton String
-    | UserClickedStartMainloop (List Trial) ExperimentInfo.Task
+    | UserClickedStartMainloop
     | UserClickedSavedData
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedPlayAudio String
+    | UserClickedStartTraining
 
 
 updateWhenNextTrial model shuffleOptionsMsg =
@@ -63,8 +69,8 @@ trainingBox =
     div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col" ]
 
 
-viewTask data currentTrial msgs ordoredOptions =
-    [ View.audioButton msgs.playAudio currentTrial.audio.url "word"
+viewTask data currentTrial ordoredOptions =
+    [ View.audioButton UserClickedPlayAudio currentTrial.audio.url "word"
     , div
         [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
         [ fieldset
@@ -76,25 +82,71 @@ viewTask data currentTrial msgs ordoredOptions =
             , target = currentTrial.target
             , feedback_Correct = ( data.infos.feedback_correct, [ View.bold currentTrial.target ] )
             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-            , button = View.navigationButton msgs.toggleFeedbackMsg msgs.nextTrialMsg data.feedback
+            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial data.feedback
             }
         ]
     ]
 
 
+update msg model =
+    let
+        taskId =
+            "recJOpE5pMTCHJOSV"
+
+        currentSpellingState =
+            Logic.getState model.spellingLvl1
+    in
+    case msg of
+        UserClickedFeedback ->
+            ( { model
+                | spellingLvl1 =
+                    model.spellingLvl1
+                        |> Logic.toggle
+              }
+            , Cmd.none
+            )
+
+        UserClickedRadioButton newChoice ->
+            case currentSpellingState of
+                Just prevState ->
+                    ( { model
+                        | spellingLvl1 =
+                            Logic.update { prevState | userAnswer = newChoice } model.spellingLvl1
+                      }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        UserClickedNextTrial ->
+            ( { model | spellingLvl1 = Logic.next initState model.spellingLvl1 }, Cmd.none )
+
+        UserClickedStartMainloop ->
+            ( { model | spellingLvl1 = Logic.startMain model.spellingLvl1 iniState }, Cmd.none )
+
+        UserClickedSavedData ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.spellingLvl1 )
+
+        ServerRespondedWithLastRecords _ ->
+            ( model, Cmd.none )
+
+        UserClickedPlayAudio url ->
+            ( model, Ports.playAudio url )
+
+        UserClickedStartTraining ->
+            ( { model | spellingLvl1 = Logic.startTraining model.spellingLvl1 }, Cmd.none )
+
+
 view :
     Logic.Task Trial State
     -> List Int
-    ->
-        { toggleFeedbackMsg : msg
-        , radioMsg : String -> msg
-        , nextTrialMsg : msg
-        , startMainloopMsg : List Trial -> ExperimentInfo.Task -> msg
-        , playAudio : String -> msg
-        , saveDataMsg : msg
-        }
-    -> Html msg
-view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloopMsg, playAudio, saveDataMsg } as msgs) =
+    -> Html Msg
+view exp optionsOrder =
     case exp of
         Logic.Loading ->
             text "Loading..."
@@ -103,7 +155,7 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
             text "I'm not started yet"
 
         Logic.Running Logic.Instructions data ->
-            text ""
+            div [ class "flex flex-col items-center" ] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
         Logic.Err reason ->
             text <| "Error: " ++ reason
@@ -118,7 +170,7 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
                                 (state.userAnswer == id)
                                 (isCorrect id)
                                 feedback
-                                (radioMsg id)
+                                (UserClickedRadioButton id)
 
                         isCorrect optionN =
                             optionN == x.target
@@ -132,15 +184,15 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
                                 |> List.sortBy Tuple.first
                                 |> List.map Tuple.second
                     in
-                    div []
-                        [ viewInstructions infos.instructions
-                        , trainingBox <|
-                            View.trainingWheelsGeneric (List.length history) data.infos.trainingWheel [ View.bold x.target ]
-                                :: viewTask data x msgs ordoredOptions
-                        ]
+                    div [] <|
+                        View.trainingWheelsGeneric
+                            (List.length history)
+                            data.infos.trainingWheel
+                            [ View.bold x.target ]
+                            :: viewTask data x ordoredOptions
 
                 Nothing ->
-                    View.introToMain (startMainloopMsg mainTrials infos)
+                    View.introToMain UserClickedStartMainloop
 
         Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
@@ -152,7 +204,7 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
                                 (state.userAnswer == id)
                                 (isCorrect id)
                                 feedback
-                                (radioMsg id)
+                                (UserClickedRadioButton id)
 
                         trialn =
                             List.length history + 1
@@ -175,12 +227,11 @@ view exp optionsOrder ({ radioMsg, nextTrialMsg, toggleFeedbackMsg, startMainloo
                                 :: viewTask
                                     data
                                     trial
-                                    msgs
                                     ordoredOptions
                         ]
 
                 Nothing ->
-                    View.end infos.end saveDataMsg "context-understanding"
+                    View.end infos.end UserClickedSavedData "context-understanding"
 
 
 type alias State =

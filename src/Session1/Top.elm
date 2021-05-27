@@ -13,7 +13,7 @@ import Logic exposing (saveData)
 import Progressbar
 import Random
 import Random.List
-import Session1.CU1 exposing (CU1Msg(..))
+import Session1.ContextUnderstanding exposing (Msg(..))
 import Session3.Synonym exposing (Msg(..))
 import View
 

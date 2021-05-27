@@ -12,12 +12,16 @@ import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Markdown
+import Ports
 import Progressbar exposing (progressBar)
-import Session1.CU1 exposing (CU1Msg(..))
+import Random
+import Random.List
+import Session1.Meaning exposing (Msg(..))
+import Session3.CU3 exposing (Msg(..))
 import View
 
 
-view exp optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg, startMainMsg, saveData } =
+view exp optionsOrder =
     case exp of
         Logic.NotStarted ->
             div [] [ text "experiment did not start yet" ]
@@ -29,29 +33,27 @@ view exp optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg
             div [] [ text reason ]
 
         Logic.Running Logic.Instructions data ->
-            div [] []
+            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
         Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
-                    div []
-                        [ View.viewTraining data.infos.instructions
-                            [ Html.p [ class "p-4" ] [ text trial.context ]
-                            , View.audioButton userClickedAudio trial.audioSentence.url "dialog"
-                            , div [] <| View.shuffledOptions state feedback radioMsg trial optionsOrder
-                            , View.genericSingleChoiceFeedback
-                                { isVisible = feedback
-                                , userAnswer = state.userAnswer
-                                , target = trial.target
-                                , feedback_Correct = ( trial.feedback, [] )
-                                , feedback_Incorrect = ( trial.feedback, [] )
-                                , button = View.navigationButton toggleFeedback nextTrialMsg feedback
-                                }
-                            ]
+                    div [ class "flex flex-col items-center" ]
+                        [ Html.p [ class "p-4" ] [ text trial.context ]
+                        , View.audioButton UserClickedAudio trial.audioSentence.url "dialog"
+                        , div [] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
+                        , View.genericSingleChoiceFeedback
+                            { isVisible = feedback
+                            , userAnswer = state.userAnswer
+                            , target = trial.target
+                            , feedback_Correct = ( trial.feedback, [] )
+                            , feedback_Incorrect = ( trial.feedback, [] )
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
+                            }
                         ]
 
                 Nothing ->
-                    View.introToMain (startMainMsg mainTrials data.infos)
+                    View.introToMain (UserClickedStartMain mainTrials data.infos)
 
         Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
             case current of
@@ -60,20 +62,54 @@ view exp optionsOrder { userClickedAudio, radioMsg, toggleFeedback, nextTrialMsg
                         [ View.tooltip data.infos.instructions_short
                         , progressBar history mainTrials
                         , Html.p [ class "p-8 text-lg" ] [ text trial.context ]
-                        , View.audioButton userClickedAudio trial.audioSentence.url "dialog"
-                        , div [ class "max-w-2xl pt-4" ] <| View.shuffledOptions state feedback radioMsg trial optionsOrder
+                        , View.audioButton UserClickedAudio trial.audioSentence.url "dialog"
+                        , div [ class "max-w-2xl pt-4" ] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , userAnswer = state.userAnswer
                             , target = trial.target
                             , feedback_Correct = ( trial.feedback, [] )
                             , feedback_Incorrect = ( trial.feedback, [] )
-                            , button = View.navigationButton toggleFeedback nextTrialMsg feedback
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
                             }
                         ]
 
                 Nothing ->
-                    View.end data.infos.end saveData "/"
+                    View.end data.infos.end UserClickedSaveData "/"
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | cuLvl2 = Logic.next initState model.cuLvl2 }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
+
+        UserClickedToggleFeedback ->
+            ( { model | cuLvl2 = Logic.toggle model.cuLvl2 }, Cmd.none )
+
+        UserClickedRadioButton newChoice ->
+            ( { model | cuLvl2 = Logic.update { uid = "", userAnswer = newChoice } model.cuLvl2 }, Cmd.none )
+
+        UserClickedStartMain _ _ ->
+            ( { model | cuLvl2 = Logic.startMain model.cuLvl2 initState }, Cmd.none )
+
+        ServerRespondedWithLastRecords _ ->
+            ( model, Cmd.none )
+
+        UserClickedSaveData ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.cuLvl2 )
+
+        UserClickedAudio url ->
+            ( model, Ports.playAudio url )
+
+        RuntimeShuffledOptionsOrder ls ->
+            ( { model | optionsOrder = ls }, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | cuLvl2 = Logic.startTraining model.cuLvl2 }, Cmd.none )
 
 
 type CU2Msg
@@ -83,6 +119,9 @@ type CU2Msg
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedAudio String
+    | RuntimeShuffledOptionsOrder (List Int)
+    | UserClickedStartTraining
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg

@@ -48,8 +48,8 @@ type Session1Task
 
 type Session2Task
     = Translation
-    | Scrabble
-    | CULevel2
+    | Spelling
+    | CU
 
 
 type PretestTask
@@ -129,9 +129,9 @@ parser =
                 </> string
                 </> s "session2"
                 </> oneOf
-                        [ map Scrabble (s "spelling")
+                        [ map Spelling (s "spelling")
                         , map Translation (s "translation")
-                        , map CULevel2 (s "context-understanding")
+                        , map CU (s "context-understanding")
                         ]
             )
         , map AuthenticatedSession3

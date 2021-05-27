@@ -1,6 +1,5 @@
 module Postest.CloudWords exposing (State, WordKnowledge, toggle, words)
 
-import Browser
 import Dict
 import Html exposing (Html)
 import Html.Styled as H exposing (toUnstyled)

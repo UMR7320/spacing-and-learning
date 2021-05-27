@@ -23,17 +23,17 @@ taskId =
     "reczQs5ZD6g1x5F29"
 
 
-type alias SC =
+type alias SentenceCompletion =
     Logic.Task Trial State
 
 
-view : SC -> List (Html Msg)
+view : SentenceCompletion -> List (Html Msg)
 view task =
     case task of
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    [ View.viewTraining data.infos.instructions
+                    [ div [ A.class "flex flex-col" ]
                         [ p [ A.class "text-lg  m-4 p-2" ] [ text trial.context ]
                         , Html.Styled.textarea
                             [ A.id "firstProd"
@@ -52,7 +52,7 @@ view task =
                             text ""
                         , Html.Styled.textarea
                             [ A.id "secondProd"
-                            , A.class "border-2 p-2 m-4"
+                            , A.class "border-2 p-2"
                             , E.onInput (UserUpdatedField SecondProduction)
                             , A.spellcheck False
                             ]
@@ -62,8 +62,8 @@ view task =
 
                           else
                             text ""
-                        , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
                         ]
+                    , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
                     ]
 
                 Nothing ->
@@ -80,10 +80,8 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ p [ A.class "text-center text-lg border-2 m-2 p-2" ] [ text trial.context ]
-                    , div [ A.class "flex flex-col items-center" ]
-                        [ div [ A.class "order-first" ]
-                            []
+                    [ div [ A.class "flex flex-col items-center" ]
+                        [ p [ A.class "text-center text-lg m-2 p-2" ] [ text trial.context ]
                         , div
                             [ A.class <|
                                 "flex flex-col "
@@ -94,16 +92,13 @@ view task =
                                             "order-3"
                                        )
                             ]
-                            [ h3 [] [ text "Complete this first text: " ]
-                            , label [ A.for "firstProd" ] [ text trial.firstAmorce ]
-                            , Html.Styled.textarea
+                            [ Html.Styled.textarea
                                 [ A.id "firstProd"
-                                , A.class "border-2"
-                                , A.value data.state.firstProduction
+                                , A.class "border-2 p-2"
                                 , E.onInput (UserUpdatedField FirstProduction)
                                 , A.spellcheck False
                                 ]
-                                []
+                                [ text trial.firstAmorce ]
                             ]
                         , div
                             [ A.class <|
@@ -115,15 +110,13 @@ view task =
                                             "order-3"
                                        )
                             ]
-                            [ text trial.secondAmorce
-                            , Html.Styled.textarea
+                            [ Html.Styled.textarea
                                 [ A.id "secondProd"
-                                , A.class "border-2"
-                                , A.value data.state.secondProduction
+                                , A.class "border-2 p-2"
                                 , E.onInput (UserUpdatedField SecondProduction)
                                 , A.spellcheck False
                                 ]
-                                []
+                                [ text trial.secondAmorce ]
                             ]
                         , div [ A.class "order-last" ]
                             [ View.button
@@ -148,7 +141,7 @@ view task =
             [ text "C'est tout bon!" ]
 
         Logic.Running Logic.Instructions data ->
-            []
+            [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
 
 getRecords =
@@ -211,6 +204,7 @@ type Msg
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | UserUpdatedField Field String
     | RuntimeReordedAmorces Field
+    | UserClickedStartTraining
 
 
 type Field
@@ -264,6 +258,9 @@ update msg model =
 
         ServerRespondedWithLastRecords (Result.Err reason) ->
             ( { model | sentenceCompletion = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | sentenceCompletion = Logic.startTraining model.sentenceCompletion }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
