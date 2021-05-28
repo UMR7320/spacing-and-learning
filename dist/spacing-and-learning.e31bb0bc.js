@@ -13865,7 +13865,7 @@ var $author$project$Main$init = F3(
 				return _Utils_Tuple2(
 					_Utils_update(
 						defaultInit,
-						{sentenceCompletion: $author$project$Logic$Loading, spr: $author$project$Logic$Loading}),
+						{sentenceCompletion: $author$project$Logic$Loading, spr: $author$project$Logic$Loading, vks: $author$project$Logic$Loading}),
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Pretest, $author$project$Pretest$Pretest$attempt.b));
 			case 'Pilote':
 				var userid = route.a;

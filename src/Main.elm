@@ -268,6 +268,7 @@ init _ url key =
             ( { defaultInit
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
+                , vks = Logic.Loading
               }
             , Cmd.map Pretest (Tuple.second Pretest.attempt)
             )
