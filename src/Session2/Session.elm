@@ -1,8 +1,10 @@
 module Session2.Session exposing (..)
 
+import Data
 import Debug exposing (todo)
 import ExperimentInfo
 import Http
+import Logic
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -87,8 +89,15 @@ update msg model =
             , Cmd.batch [ randomizeTrials ]
             )
 
-        ServerRespondedWithSomeError _ ->
-            todo ""
+        ServerRespondedWithSomeError reason ->
+            ( { model
+                | translationTask = Logic.Err (Data.buildErrorMessage reason)
+                , cuLvl2 = Logic.Err (Data.buildErrorMessage reason)
+                , scrabbleTask = Logic.Err (Data.buildErrorMessage reason)
+                , session2 = Session.Error (Data.buildErrorMessage reason)
+              }
+            , Cmd.none
+            )
 
         StartSession { cu, spelling, translation, infos } ->
             ( { model

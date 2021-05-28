@@ -5,3 +5,4 @@ type Session a
     = Loading a
     | Ready
     | NotAsked
+    | Error String

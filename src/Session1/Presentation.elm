@@ -219,7 +219,7 @@ update msg model =
             ( { model | presentation = Logic.startTraining model.presentation }, Cmd.none )
 
         NoOp ->
-            Debug.todo ""
+            ( model, Cmd.none )
 
 
 defaultTrial : Trial

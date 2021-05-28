@@ -16897,7 +16897,6 @@ var $author$project$Session1$Presentation$initState = A2(
 				_Utils_Tuple2('example', false),
 				_Utils_Tuple2('translation', false)
 			])));
-var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Session1$Presentation$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -16957,12 +16956,7 @@ var $author$project$Session1$Presentation$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
-				return _Debug_todo(
-					'Session1.Presentation',
-					{
-						start: {line: 222, column: 13},
-						end: {line: 222, column: 23}
-					})('');
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Session$Ready = {$: 'Ready'};
@@ -17443,6 +17437,9 @@ var $author$project$Session2$CU2$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Session$Error = function (a) {
+	return {$: 'Error', a: a};
+};
 var $author$project$Session2$Session$ShuffledSession2 = F4(
 	function (cu, spelling, translation, infos) {
 		return {cu: cu, infos: infos, spelling: spelling, translation: translation};
@@ -17693,12 +17690,21 @@ var $author$project$Session2$Session$update = F2(
 						_List_fromArray(
 							[randomizeTrials])));
 			case 'ServerRespondedWithSomeError':
-				return _Debug_todo(
-					'Session2.Session',
-					{
-						start: {line: 91, column: 13},
-						end: {line: 91, column: 17}
-					})('');
+				var reason = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(reason)),
+							scrabbleTask: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(reason)),
+							session2: $author$project$Session$Error(
+								$author$project$Data$buildErrorMessage(reason)),
+							translationTask: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(reason))
+						}),
+					$elm$core$Platform$Cmd$none);
 			default:
 				var cu = msg.a.cu;
 				var spelling = msg.a.spelling;
