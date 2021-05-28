@@ -26,6 +26,14 @@ type alias SentenceCompletion =
     Logic.Task Trial State
 
 
+readOnlyOnFeedback data =
+    if data.feedback then
+        A.readonly True
+
+    else
+        A.readonly False
+
+
 view : SentenceCompletion -> List (Html Msg)
 view task =
     case task of
@@ -42,6 +50,7 @@ view task =
                             , E.onInput (UserUpdatedField FirstProduction)
                             , A.spellcheck False
                             , A.placeholder trial.firstAmorce
+                            , readOnlyOnFeedback data
                             ]
                             [ text trial.firstAmorce ]
                         , if data.feedback then
@@ -54,6 +63,7 @@ view task =
                             , A.class "border-2 p-2"
                             , E.onInput (UserUpdatedField SecondProduction)
                             , A.spellcheck False
+                            , readOnlyOnFeedback data
                             ]
                             [ text trial.secondAmorce ]
                         , if data.feedback then

@@ -21582,6 +21582,10 @@ var $author$project$View$navigationButton = F3(
 			(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'} : {isDisabled: false, message: nextTrialMsg, txt: 'Next item '});
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
+var $rtfeldman$elm_css$Html$Styled$Attributes$readonly = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('readOnly');
+var $author$project$Pretest$SentenceCompletion$readOnlyOnFeedback = function (data) {
+	return data.feedback ? $rtfeldman$elm_css$Html$Styled$Attributes$readonly(true) : $rtfeldman$elm_css$Html$Styled$Attributes$readonly(false);
+};
 var $rtfeldman$elm_css$Html$Styled$Attributes$spellcheck = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('spellcheck');
 var $rtfeldman$elm_css$Html$Styled$textarea = $rtfeldman$elm_css$Html$Styled$node('textarea');
 var $author$project$Pretest$SentenceCompletion$view = function (task) {
@@ -21639,7 +21643,8 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 												$rtfeldman$elm_css$Html$Styled$Events$onInput(
 												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$FirstProduction)),
 												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
-												$rtfeldman$elm_css$Html$Styled$Attributes$placeholder(trial.firstAmorce)
+												$rtfeldman$elm_css$Html$Styled$Attributes$placeholder(trial.firstAmorce),
+												$author$project$Pretest$SentenceCompletion$readOnlyOnFeedback(data)
 											]),
 										_List_fromArray(
 											[
@@ -21654,7 +21659,8 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2'),
 												$rtfeldman$elm_css$Html$Styled$Events$onInput(
 												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$SecondProduction)),
-												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false)
+												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
+												$author$project$Pretest$SentenceCompletion$readOnlyOnFeedback(data)
 											]),
 										_List_fromArray(
 											[
@@ -24744,7 +24750,6 @@ var $rtfeldman$elm_css$Css$left = $rtfeldman$elm_css$Css$prop1('left');
 var $rtfeldman$elm_css$Css$none = {backgroundImage: $rtfeldman$elm_css$Css$Structure$Compatible, blockAxisOverflow: $rtfeldman$elm_css$Css$Structure$Compatible, borderStyle: $rtfeldman$elm_css$Css$Structure$Compatible, cursor: $rtfeldman$elm_css$Css$Structure$Compatible, display: $rtfeldman$elm_css$Css$Structure$Compatible, hoverCapability: $rtfeldman$elm_css$Css$Structure$Compatible, inlineAxisOverflow: $rtfeldman$elm_css$Css$Structure$Compatible, keyframes: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNone: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNoneOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNumberOrAutoOrNoneOrContent: $rtfeldman$elm_css$Css$Structure$Compatible, listStyleType: $rtfeldman$elm_css$Css$Structure$Compatible, listStyleTypeOrPositionOrImage: $rtfeldman$elm_css$Css$Structure$Compatible, none: $rtfeldman$elm_css$Css$Structure$Compatible, outline: $rtfeldman$elm_css$Css$Structure$Compatible, pointerDevice: $rtfeldman$elm_css$Css$Structure$Compatible, pointerEvents: $rtfeldman$elm_css$Css$Structure$Compatible, resize: $rtfeldman$elm_css$Css$Structure$Compatible, scriptingSupport: $rtfeldman$elm_css$Css$Structure$Compatible, textDecorationLine: $rtfeldman$elm_css$Css$Structure$Compatible, textTransform: $rtfeldman$elm_css$Css$Structure$Compatible, touchAction: $rtfeldman$elm_css$Css$Structure$Compatible, transform: $rtfeldman$elm_css$Css$Structure$Compatible, updateFrequency: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'none'};
 var $rtfeldman$elm_css$Css$padding = $rtfeldman$elm_css$Css$prop1('padding');
 var $rtfeldman$elm_css$Css$pointerEvents = $rtfeldman$elm_css$Css$prop1('pointer-events');
-var $rtfeldman$elm_css$Html$Styled$Attributes$readonly = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('readOnly');
 var $rtfeldman$elm_css$Css$top = $rtfeldman$elm_css$Css$prop1('top');
 var $rtfeldman$elm_css$Css$valuesOrNone = function (list) {
 	return $elm$core$List$isEmpty(list) ? {value: 'none'} : {
