@@ -13,6 +13,7 @@ import Json.Encode as Encode
 import Logic
 import Pretest.Acceptability exposing (ErrorBlock(..))
 import Pretest.SPR exposing (Msg(..))
+import Progressbar exposing (progressBar)
 import Random
 import Task
 import View
@@ -104,55 +105,46 @@ view task =
             case data.current of
                 Just trial ->
                     [ div [ A.class "flex flex-col w-full items-center" ]
-                        [ p [ A.class "text-center text-lg m-2 p-2" ] [ text trial.context ]
-                        , div
-                            [ A.class <|
-                                "flex flex-col "
-                                    ++ (if data.state.order == FirstProduction then
-                                            "order-2"
+                        [ progressBar data.history data.mainTrials
+                        , p [ A.class "text-lg  m-4 p-2" ] [ text trial.context ]
+                        , Html.Styled.textarea
+                            [ A.id "firstProd"
+                            , A.class "border-2 p-2 w-full"
+                            , A.class <|
+                                if data.state.order == FirstProduction then
+                                    "order-2"
 
-                                        else
-                                            "order-3"
-                                       )
+                                else
+                                    "order-3"
+                            , E.onInput (UserUpdatedField FirstProduction)
+                            , A.spellcheck False
+                            , A.value <|
+                                readOnlyAmorce
+                                    trial.firstAmorce
+                                    data.state.firstProduction
                             ]
-                            [ Html.Styled.textarea
-                                [ A.id "firstProd"
-                                , A.class "border-2 p-2 w-full"
-                                , E.onInput (UserUpdatedField FirstProduction)
-                                , A.spellcheck False
-                                , A.value <|
-                                    readOnlyAmorce
-                                        trial.firstAmorce
-                                        data.state.firstProduction
-                                ]
-                                [ text trial.firstAmorce ]
-                            ]
-                        , div
-                            [ A.class <|
-                                "flex flex-col "
-                                    ++ (if data.state.order == SecondProduction then
-                                            "order-2"
+                            [ text trial.firstAmorce ]
+                        , Html.Styled.textarea
+                            [ A.id "secondProd"
+                            , A.class "border-2 mt-4 p-2 w-full"
+                            , E.onInput (UserUpdatedField SecondProduction)
+                            , A.spellcheck False
+                            , A.class <|
+                                if data.state.order == SecondProduction then
+                                    " order-2"
 
-                                        else
-                                            "order-3"
-                                       )
+                                else
+                                    " order-3"
+                            , A.value <|
+                                readOnlyAmorce
+                                    trial.secondAmorce
+                                    data.state.secondProduction
                             ]
-                            [ Html.Styled.textarea
-                                [ A.id "secondProd"
-                                , A.class "border-2 p-2"
-                                , E.onInput (UserUpdatedField SecondProduction)
-                                , A.spellcheck False
-                                , A.value <|
-                                    readOnlyAmorce
-                                        trial.secondAmorce
-                                        data.state.secondProduction
-                                ]
-                                [ text trial.secondAmorce ]
-                            ]
+                            [ text trial.secondAmorce ]
                         , div [ A.class "order-last" ]
                             [ View.button
                                 { message = UserClickedNextTrial
-                                , txt = "Next Item"
+                                , txt = "Continue"
                                 , isDisabled = False
                                 }
                             ]

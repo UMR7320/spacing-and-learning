@@ -11,6 +11,7 @@ import Pretest.Acceptability as Acceptability exposing (ErrorBlock)
 import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
+import Pretest.YesNo as YesNo
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -18,21 +19,22 @@ import Task.Parallel as Para
 
 
 type alias Pretest =
-    Para.State5 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial)
+    Para.State6 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
 
 
 type alias ParaMsg =
-    Para.Msg5 (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial)
+    Para.Msg6 (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
 
 
 attempt : ( Pretest, Cmd Msg )
 attempt =
-    Para.attempt5
+    Para.attempt6
         { task1 = SPR.getRecords
         , task2 = SentenceCompletion.getRecords
         , task3 = ExperimentInfo.getRecords
         , task4 = VKS.getRecords
         , task5 = Acceptability.getRecords
+        , task6 = YesNo.getRecords
         , onUpdates = ServerRespondedWithSomePretestData
         , onFailure = ServerRespondedWithSomeError
         , onSuccess = ServerRespondedWithAllPretestData
@@ -42,7 +44,7 @@ attempt =
 type Msg
     = ServerRespondedWithSomePretestData ParaMsg
     | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial)
+    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
     | StartPretest ShuffledPretest
 
 
@@ -55,6 +57,7 @@ type alias ShuffledPretest =
         Result
             ( ErrorBlock, List Acceptability.Trial )
             (List (List Acceptability.Trial))
+    , yn : List YesNo.Trial
     }
 
 
@@ -68,7 +71,7 @@ update msg model =
         ServerRespondedWithSomePretestData downloaded ->
             let
                 ( nextState, nextCmd ) =
-                    Para.update5 model.pretest downloaded
+                    Para.update6 model.pretest downloaded
             in
             ( { model | pretest = nextState }, nextCmd )
 
@@ -82,10 +85,10 @@ update msg model =
             , Cmd.none
             )
 
-        ServerRespondedWithAllPretestData sprtrials sctrials infos vksTrials aTrials ->
+        ServerRespondedWithAllPretestData sprtrials sctrials infos vksTrials aTrials yn ->
             let
                 randomize =
-                    Random.generate StartPretest (Random.map5 ShuffledPretest (shuffle sprtrials) (shuffle sctrials) (Random.constant infos) (shuffle vksTrials) generateOrganizedTrials)
+                    Random.generate StartPretest (Random.Extra.map6 ShuffledPretest (shuffle sprtrials) (shuffle sctrials) (Random.constant infos) (shuffle vksTrials) generateOrganizedTrials (Random.constant yn))
 
                 generateOrganizedTrials =
                     Random.List.shuffle aTrials
@@ -134,7 +137,7 @@ update msg model =
             in
             ( model, randomize )
 
-        StartPretest { spr, sc, vks, infos, acceptability } ->
+        StartPretest { spr, sc, vks, infos, acceptability, yn } ->
             case acceptability of
                 Result.Ok shuffledTrials ->
                     if List.filter (\block -> List.length block < 4) shuffledTrials == [ [] ] then
@@ -148,7 +151,7 @@ update msg model =
                         )
 
                     else
-                        update (ServerRespondedWithAllPretestData spr sc infos vks (List.concat shuffledTrials)) model
+                        update (ServerRespondedWithAllPretestData spr sc infos vks (List.concat shuffledTrials) yn) model
 
                 Result.Err reason ->
                     ( { model | acceptabilityTask = Logic.Err "Error trying to build blocks" }, Cmd.none )

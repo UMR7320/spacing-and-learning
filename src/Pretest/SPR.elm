@@ -418,21 +418,29 @@ viewTask data trial endTrialMsg =
                     p [ Attr.class "text-bold" ] [ text "Press the space bar to start reading" ]
 
                 Reading _ ->
-                    div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2 text-bold text-lg" ] [ p [ Attr.class "text-lg items-center" ] [ text (Tuple.second taggedSegment) ] ]
+                    div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2 font-bold text-xl" ] [ p [ Attr.class "items-center" ] [ text (Tuple.second taggedSegment) ] ]
 
         ( SPR _, Nothing ) ->
             p [ Attr.class "text-lg" ] [ text "Press the space bar to start reading" ]
 
         ( Question, _ ) ->
             div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
-                [ span [ Attr.class "text-lg" ] [ text trial.question ]
-                , text "Press Y for Yes, N for No and K for I don't know"
+                [ span [ Attr.class "text-lg font-bold" ] [ text trial.question ]
+                , div [ Attr.class "flex flex-row m-2" ]
+                    [ unclickableButton "bg-green-500" "Y = Yes"
+                    , unclickableButton "bg-red-500" "N = No"
+                    , unclickableButton "bg-gray-400" "K = I don't know"
+                    ]
                 ]
 
         ( Feedback, _ ) ->
             div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
                 [ View.fromMarkdown trial.feedback
                 ]
+
+
+unclickableButton color txt =
+    div [ Attr.class <| "flex flex-col items-center m-2 p-4 rounded-lg " ++ color ++ " justify-center" ] [ text txt ]
 
 
 view : Logic.Task Trial State -> List (Html.Styled.Html Msg)

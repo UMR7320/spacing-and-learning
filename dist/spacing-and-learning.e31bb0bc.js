@@ -11121,9 +11121,9 @@ var $author$project$Main$Session2 = function (a) {
 var $author$project$Main$Session3 = function (a) {
 	return {$: 'Session3', a: a};
 };
-var $author$project$Pretest$Pretest$ServerRespondedWithAllPretestData = F5(
-	function (a, b, c, d, e) {
-		return {$: 'ServerRespondedWithAllPretestData', a: a, b: b, c: c, d: d, e: e};
+var $author$project$Pretest$Pretest$ServerRespondedWithAllPretestData = F6(
+	function (a, b, c, d, e, f) {
+		return {$: 'ServerRespondedWithAllPretestData', a: a, b: b, c: c, d: d, e: e, f: f};
 	});
 var $author$project$Pretest$Pretest$ServerRespondedWithSomeError = function (a) {
 	return {$: 'ServerRespondedWithSomeError', a: a};
@@ -11131,24 +11131,27 @@ var $author$project$Pretest$Pretest$ServerRespondedWithSomeError = function (a) 
 var $author$project$Pretest$Pretest$ServerRespondedWithSomePretestData = function (a) {
 	return {$: 'ServerRespondedWithSomePretestData', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedA5 = function (a) {
-	return {$: 'LoadedA5', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedA6 = function (a) {
+	return {$: 'LoadedA6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedB5 = function (a) {
-	return {$: 'LoadedB5', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedB6 = function (a) {
+	return {$: 'LoadedB6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedC5 = function (a) {
-	return {$: 'LoadedC5', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedC6 = function (a) {
+	return {$: 'LoadedC6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedD5 = function (a) {
-	return {$: 'LoadedD5', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedD6 = function (a) {
+	return {$: 'LoadedD6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedE5 = function (a) {
-	return {$: 'LoadedE5', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedE6 = function (a) {
+	return {$: 'LoadedE6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$State5 = F6(
-	function (a, b, c, d, e, f) {
-		return {$: 'State5', a: a, b: b, c: c, d: d, e: e, f: f};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedF6 = function (a) {
+	return {$: 'LoadedF6', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$State6 = F7(
+	function (a, b, c, d, e, f, g) {
+		return {$: 'State6', a: a, b: b, c: c, d: d, e: e, f: f, g: g};
 	});
 var $elm$core$Task$onError = _Scheduler_onError;
 var $0ui$elm_task_parallel$Task$Parallel$routeTo = F2(
@@ -11172,45 +11175,51 @@ var $0ui$elm_task_parallel$Task$Parallel$routeTo = F2(
 						}
 					})));
 	});
-var $0ui$elm_task_parallel$Task$Parallel$attempt5 = function (_v0) {
+var $0ui$elm_task_parallel$Task$Parallel$attempt6 = function (_v0) {
 	var task1 = _v0.task1;
 	var task2 = _v0.task2;
 	var task3 = _v0.task3;
 	var task4 = _v0.task4;
 	var task5 = _v0.task5;
+	var task6 = _v0.task6;
 	var onUpdates = _v0.onUpdates;
 	var onSuccess = _v0.onSuccess;
 	var onFailure = _v0.onFailure;
 	return _Utils_Tuple2(
-		A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		A7($0ui$elm_task_parallel$Task$Parallel$State6, onSuccess, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
 		$elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
 					A3(
 					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedA5),
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedA6),
 					onFailure,
 					task1),
 					A3(
 					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedB5),
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedB6),
 					onFailure,
 					task2),
 					A3(
 					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedC5),
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedC6),
 					onFailure,
 					task3),
 					A3(
 					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedD5),
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedD6),
 					onFailure,
 					task4),
 					A3(
 					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedE5),
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedE6),
 					onFailure,
-					task5)
+					task5),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedF6),
+					onFailure,
+					task6)
 				])));
 };
 var $author$project$Data$apps = {sleep: 'appTEVHZLw3jNa7fU', spacing: 'appvKOc8FH0j48Hw1'};
@@ -11827,8 +11836,40 @@ var $author$project$Pretest$VKS$getRecords = $elm$http$Http$task(
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Meaning'})
 	});
-var $author$project$Pretest$Pretest$attempt = $0ui$elm_task_parallel$Task$Parallel$attempt5(
-	{onFailure: $author$project$Pretest$Pretest$ServerRespondedWithSomeError, onSuccess: $author$project$Pretest$Pretest$ServerRespondedWithAllPretestData, onUpdates: $author$project$Pretest$Pretest$ServerRespondedWithSomePretestData, task1: $author$project$Pretest$SPR$getRecords, task2: $author$project$Pretest$SentenceCompletion$getRecords, task3: $author$project$ExperimentInfo$getRecords, task4: $author$project$Pretest$VKS$getRecords, task5: $author$project$Pretest$Acceptability$getRecords});
+var $author$project$Pretest$YesNo$Trial = F3(
+	function (id, word, exists) {
+		return {exists: exists, id: id, word: word};
+	});
+var $author$project$Pretest$YesNo$decodeAcceptabilityTrials = function () {
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'Exists',
+		$elm$json$Json$Decode$bool,
+		false,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'ItemName',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'id',
+				$elm$json$Json$Decode$string,
+				$elm$json$Json$Decode$succeed($author$project$Pretest$YesNo$Trial))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Pretest$YesNo$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Pretest$YesNo$decodeAcceptabilityTrials)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'yes_no', view_: 'all'})
+	});
+var $author$project$Pretest$Pretest$attempt = $0ui$elm_task_parallel$Task$Parallel$attempt6(
+	{onFailure: $author$project$Pretest$Pretest$ServerRespondedWithSomeError, onSuccess: $author$project$Pretest$Pretest$ServerRespondedWithAllPretestData, onUpdates: $author$project$Pretest$Pretest$ServerRespondedWithSomePretestData, task1: $author$project$Pretest$SPR$getRecords, task2: $author$project$Pretest$SentenceCompletion$getRecords, task3: $author$project$ExperimentInfo$getRecords, task4: $author$project$Pretest$VKS$getRecords, task5: $author$project$Pretest$Acceptability$getRecords, task6: $author$project$Pretest$YesNo$getRecords});
 var $author$project$Session3$Session$ServerRespondedWithAllSession3Data = F4(
 	function (a, b, c, d) {
 		return {$: 'ServerRespondedWithAllSession3Data', a: a, b: b, c: c, d: d};
@@ -12510,6 +12551,66 @@ var $author$project$Session1$Session$ServerRespondedWithSomeData = function (a) 
 };
 var $author$project$Session1$Session$ServerRespondedWithSomeError = function (a) {
 	return {$: 'ServerRespondedWithSomeError', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedA5 = function (a) {
+	return {$: 'LoadedA5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedB5 = function (a) {
+	return {$: 'LoadedB5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedC5 = function (a) {
+	return {$: 'LoadedC5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedD5 = function (a) {
+	return {$: 'LoadedD5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedE5 = function (a) {
+	return {$: 'LoadedE5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$State5 = F6(
+	function (a, b, c, d, e, f) {
+		return {$: 'State5', a: a, b: b, c: c, d: d, e: e, f: f};
+	});
+var $0ui$elm_task_parallel$Task$Parallel$attempt5 = function (_v0) {
+	var task1 = _v0.task1;
+	var task2 = _v0.task2;
+	var task3 = _v0.task3;
+	var task4 = _v0.task4;
+	var task5 = _v0.task5;
+	var onUpdates = _v0.onUpdates;
+	var onSuccess = _v0.onSuccess;
+	var onFailure = _v0.onFailure;
+	return _Utils_Tuple2(
+		A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		$elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedA5),
+					onFailure,
+					task1),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedB5),
+					onFailure,
+					task2),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedC5),
+					onFailure,
+					task3),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedD5),
+					onFailure,
+					task4),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedE5),
+					onFailure,
+					task5)
+				])));
 };
 var $author$project$Session1$ContextUnderstanding$Trial = F8(
 	function (uid, text, target, distractor1, distractor2, distractor3, definition, isTraining) {
@@ -15191,9 +15292,9 @@ var $author$project$Pretest$Acceptability$update = F2(
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Pretest$Pretest$ShuffledPretest = F5(
-	function (spr, sc, infos, vks, acceptability) {
-		return {acceptability: acceptability, infos: infos, sc: sc, spr: spr, vks: vks};
+var $author$project$Pretest$Pretest$ShuffledPretest = F6(
+	function (spr, sc, infos, vks, acceptability, yn) {
+		return {acceptability: acceptability, infos: infos, sc: sc, spr: spr, vks: vks, yn: yn};
 	});
 var $author$project$Pretest$Pretest$StartPretest = function (a) {
 	return {$: 'StartPretest', a: a};
@@ -15504,6 +15605,24 @@ var $elm$random$Random$int = F2(
 				}
 			});
 	});
+var $elm$random$Random$map2 = F3(
+	function (func, _v0, _v1) {
+		var genA = _v0.a;
+		var genB = _v1.a;
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v2 = genA(seed0);
+				var a = _v2.a;
+				var seed1 = _v2.b;
+				var _v3 = genB(seed1);
+				var b = _v3.a;
+				var seed2 = _v3.b;
+				return _Utils_Tuple2(
+					A2(func, a, b),
+					seed2);
+			});
+	});
+var $elm_community$random_extra$Random$Extra$andMap = $elm$random$Random$map2($elm$core$Basics$apR);
 var $elm$random$Random$map5 = F6(
 	function (func, _v0, _v1, _v2, _v3, _v4) {
 		var genA = _v0.a;
@@ -15532,6 +15651,13 @@ var $elm$random$Random$map5 = F6(
 					A5(func, a, b, c, d, e),
 					seed5);
 			});
+	});
+var $elm_community$random_extra$Random$Extra$map6 = F7(
+	function (f, generatorA, generatorB, generatorC, generatorD, generatorE, generatorF) {
+		return A2(
+			$elm_community$random_extra$Random$Extra$andMap,
+			generatorF,
+			A6($elm$random$Random$map5, f, generatorA, generatorB, generatorC, generatorD, generatorE));
 	});
 var $author$project$Pretest$Acceptability$FirstDistractorMissing = function (a) {
 	return {$: 'FirstDistractorMissing', a: a};
@@ -15850,23 +15976,6 @@ var $author$project$Pretest$Acceptability$organizeAcceptabilityTrials = F2(
 	function (targets, distractors) {
 		return A3($author$project$Pretest$Acceptability$organizeAcceptabilityTrialsHelper, targets, distractors, _List_Nil);
 	});
-var $elm$random$Random$map2 = F3(
-	function (func, _v0, _v1) {
-		var genA = _v0.a;
-		var genB = _v1.a;
-		return $elm$random$Random$Generator(
-			function (seed0) {
-				var _v2 = genA(seed0);
-				var a = _v2.a;
-				var seed1 = _v2.b;
-				var _v3 = genB(seed1);
-				var b = _v3.a;
-				var seed2 = _v3.b;
-				return _Utils_Tuple2(
-					A2(func, a, b),
-					seed2);
-			});
-	});
 var $elm_community$random_extra$Random$Extra$sequence = A2(
 	$elm$core$List$foldr,
 	$elm$random$Random$map2($elm$core$List$cons),
@@ -16139,7 +16248,7 @@ var $0ui$elm_task_parallel$Task$Parallel$toCmd = A2(
 			$elm$core$Task$succeed,
 			$elm$core$Task$perform($elm$core$Basics$identity))),
 	$elm$core$Maybe$withDefault($elm$core$Platform$Cmd$none));
-var $0ui$elm_task_parallel$Task$Parallel$update5 = F2(
+var $0ui$elm_task_parallel$Task$Parallel$update6 = F2(
 	function (_v0, msg) {
 		var onSuccess = _v0.a;
 		var a = _v0.b;
@@ -16147,58 +16256,92 @@ var $0ui$elm_task_parallel$Task$Parallel$update5 = F2(
 		var c = _v0.d;
 		var d = _v0.e;
 		var e = _v0.f;
-		var next = F5(
-			function (a_, b_, c_, d_, e_) {
+		var f = _v0.g;
+		var next = F6(
+			function (a_, b_, c_, d_, e_, f_) {
 				return _Utils_Tuple2(
-					A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, a_, b_, c_, d_, e_),
+					A7($0ui$elm_task_parallel$Task$Parallel$State6, onSuccess, a_, b_, c_, d_, e_, f_),
 					$0ui$elm_task_parallel$Task$Parallel$toCmd(
-						A6($elm$core$Maybe$map5, onSuccess, a_, b_, c_, d_, e_)));
+						A2(
+							$elm$core$Maybe$withDefault,
+							$elm$core$Maybe$Nothing,
+							A6(
+								$elm$core$Maybe$map5,
+								F5(
+									function (a6, b6, c6, d6, e6) {
+										return A2(
+											$elm$core$Maybe$map,
+											function (f6) {
+												return A6(onSuccess, a6, b6, c6, d6, e6, f6);
+											},
+											f_);
+									}),
+								a_,
+								b_,
+								c_,
+								d_,
+								e_))));
 			});
 		switch (msg.$) {
-			case 'LoadedA5':
+			case 'LoadedA6':
 				var data = msg.a;
-				return A5(
+				return A6(
 					next,
 					$elm$core$Maybe$Just(data),
 					b,
 					c,
 					d,
-					e);
-			case 'LoadedB5':
+					e,
+					f);
+			case 'LoadedB6':
 				var data = msg.a;
-				return A5(
+				return A6(
 					next,
 					a,
 					$elm$core$Maybe$Just(data),
 					c,
 					d,
-					e);
-			case 'LoadedC5':
+					e,
+					f);
+			case 'LoadedC6':
 				var data = msg.a;
-				return A5(
+				return A6(
 					next,
 					a,
 					b,
 					$elm$core$Maybe$Just(data),
 					d,
-					e);
-			case 'LoadedD5':
+					e,
+					f);
+			case 'LoadedD6':
 				var data = msg.a;
-				return A5(
+				return A6(
 					next,
 					a,
 					b,
 					c,
 					$elm$core$Maybe$Just(data),
-					e);
+					e,
+					f);
+			case 'LoadedE6':
+				var data = msg.a;
+				return A6(
+					next,
+					a,
+					b,
+					c,
+					d,
+					$elm$core$Maybe$Just(data),
+					f);
 			default:
 				var data = msg.a;
-				return A5(
+				return A6(
 					next,
 					a,
 					b,
 					c,
 					d,
+					e,
 					$elm$core$Maybe$Just(data));
 		}
 	});
@@ -16209,7 +16352,7 @@ var $author$project$Pretest$Pretest$update = F2(
 			switch (msg.$) {
 				case 'ServerRespondedWithSomePretestData':
 					var downloaded = msg.a;
-					var _v1 = A2($0ui$elm_task_parallel$Task$Parallel$update5, model.pretest, downloaded);
+					var _v1 = A2($0ui$elm_task_parallel$Task$Parallel$update6, model.pretest, downloaded);
 					var nextState = _v1.a;
 					var nextCmd = _v1.b;
 					return _Utils_Tuple2(
@@ -16239,6 +16382,7 @@ var $author$project$Pretest$Pretest$update = F2(
 					var infos = msg.c;
 					var vksTrials = msg.d;
 					var aTrials = msg.e;
+					var yn = msg.f;
 					var trainingTrials = A2(
 						$elm$core$List$filter,
 						function (datum) {
@@ -16304,14 +16448,15 @@ var $author$project$Pretest$Pretest$update = F2(
 					var randomize = A2(
 						$elm$random$Random$generate,
 						$author$project$Pretest$Pretest$StartPretest,
-						A6(
-							$elm$random$Random$map5,
+						A7(
+							$elm_community$random_extra$Random$Extra$map6,
 							$author$project$Pretest$Pretest$ShuffledPretest,
 							$elm_community$random_extra$Random$List$shuffle(sprtrials),
 							$elm_community$random_extra$Random$List$shuffle(sctrials),
 							$elm$random$Random$constant(infos),
 							$elm_community$random_extra$Random$List$shuffle(vksTrials),
-							generateOrganizedTrials));
+							generateOrganizedTrials,
+							$elm$random$Random$constant(yn)));
 					return _Utils_Tuple2(model, randomize);
 				default:
 					var spr = msg.a.spr;
@@ -16319,6 +16464,7 @@ var $author$project$Pretest$Pretest$update = F2(
 					var vks = msg.a.vks;
 					var infos = msg.a.infos;
 					var acceptability = msg.a.acceptability;
+					var yn = msg.a.yn;
 					if (acceptability.$ === 'Ok') {
 						var shuffledTrials = acceptability.a;
 						if (_Utils_eq(
@@ -16344,13 +16490,14 @@ var $author$project$Pretest$Pretest$update = F2(
 									}),
 								$elm$core$Platform$Cmd$none);
 						} else {
-							var $temp$msg = A5(
+							var $temp$msg = A6(
 								$author$project$Pretest$Pretest$ServerRespondedWithAllPretestData,
 								spr,
 								sc,
 								infos,
 								vks,
-								$elm$core$List$concat(shuffledTrials)),
+								$elm$core$List$concat(shuffledTrials),
+								yn),
 								$temp$model = model;
 							msg = $temp$msg;
 							model = $temp$model;
@@ -17562,6 +17709,69 @@ var $author$project$Session1$Spelling$start = F2(
 				},
 				trials),
 			$author$project$Session1$Spelling$initState);
+	});
+var $0ui$elm_task_parallel$Task$Parallel$update5 = F2(
+	function (_v0, msg) {
+		var onSuccess = _v0.a;
+		var a = _v0.b;
+		var b = _v0.c;
+		var c = _v0.d;
+		var d = _v0.e;
+		var e = _v0.f;
+		var next = F5(
+			function (a_, b_, c_, d_, e_) {
+				return _Utils_Tuple2(
+					A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, a_, b_, c_, d_, e_),
+					$0ui$elm_task_parallel$Task$Parallel$toCmd(
+						A6($elm$core$Maybe$map5, onSuccess, a_, b_, c_, d_, e_)));
+			});
+		switch (msg.$) {
+			case 'LoadedA5':
+				var data = msg.a;
+				return A5(
+					next,
+					$elm$core$Maybe$Just(data),
+					b,
+					c,
+					d,
+					e);
+			case 'LoadedB5':
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					$elm$core$Maybe$Just(data),
+					c,
+					d,
+					e);
+			case 'LoadedC5':
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					b,
+					$elm$core$Maybe$Just(data),
+					d,
+					e);
+			case 'LoadedD5':
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					b,
+					c,
+					$elm$core$Maybe$Just(data),
+					e);
+			default:
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					b,
+					c,
+					d,
+					$elm$core$Maybe$Just(data));
+		}
 	});
 var $author$project$Session1$Session$update = F2(
 	function (msg, model) {
@@ -21517,6 +21727,19 @@ var $author$project$Pretest$SPR$StartMain = F2(
 	});
 var $author$project$Pretest$SPR$UserClickedSaveData = {$: 'UserClickedSaveData'};
 var $author$project$Pretest$SPR$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Pretest$SPR$unclickableButton = F2(
+	function (color, txt) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center m-2 p-4 rounded-lg ' + (color + ' justify-center'))
+				]),
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(txt)
+				]));
+	});
 var $author$project$Pretest$SPR$viewTask = F3(
 	function (data, trial, endTrialMsg) {
 		var _v0 = _Utils_Tuple2(data.state.step, data.state.currentSegment);
@@ -21541,7 +21764,7 @@ var $author$project$Pretest$SPR$viewTask = F3(
 							$rtfeldman$elm_css$Html$Styled$div,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('w-max h-max flex flex-col items-center pt-16 pb-16 border-2 text-bold text-lg')
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('w-max h-max flex flex-col items-center pt-16 pb-16 border-2 font-bold text-xl')
 								]),
 							_List_fromArray(
 								[
@@ -21549,7 +21772,7 @@ var $author$project$Pretest$SPR$viewTask = F3(
 									$rtfeldman$elm_css$Html$Styled$p,
 									_List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg items-center')
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('items-center')
 										]),
 									_List_fromArray(
 										[
@@ -21584,13 +21807,24 @@ var $author$project$Pretest$SPR$viewTask = F3(
 							$rtfeldman$elm_css$Html$Styled$span,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg font-bold')
 								]),
 							_List_fromArray(
 								[
 									$rtfeldman$elm_css$Html$Styled$text(trial.question)
 								])),
-							$rtfeldman$elm_css$Html$Styled$text('Press Y for Yes, N for No and K for I don\'t know')
+							A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row m-2')
+								]),
+							_List_fromArray(
+								[
+									A2($author$project$Pretest$SPR$unclickableButton, 'bg-green-500', 'Y = Yes'),
+									A2($author$project$Pretest$SPR$unclickableButton, 'bg-red-500', 'N = No'),
+									A2($author$project$Pretest$SPR$unclickableButton, 'bg-gray-400', 'K = I don\'t know')
+								]))
 						]));
 			default:
 				var _v4 = _v0.a;
@@ -21742,6 +21976,50 @@ var $author$project$View$navigationButton = F3(
 			(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'} : {isDisabled: false, message: nextTrialMsg, txt: 'Next item '});
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
+var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
+var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
+var $author$project$View$pct = F2(
+	function (trialn, trials) {
+		return (trialn / $elm$core$List$length(trials)) * 100;
+	});
+var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
+var $author$project$Progressbar$progressBar = F2(
+	function (history, remainingTrials) {
+		var trialNumber = $elm$core$List$length(history) + 1;
+		var pct_ = A2(
+			$author$project$View$pct,
+			trialNumber,
+			_Utils_ap(
+				remainingTrials,
+				A2($elm$core$List$map, $elm$core$Tuple$first, history)));
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('shadow max-w-xl w-full bg-gray-300 mt-2 mb-12 transition duration-500')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-indigo-600 text-sm font-bold w-full leading-none py-1 text-center text-white '),
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Css$width(
+									$rtfeldman$elm_css$Css$pct(pct_))
+								]))
+						]),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$fromInt(
+								$elm$core$Basics$round(pct_)) + '%')
+						]))
+				]));
+	});
 var $author$project$Pretest$SentenceCompletion$readOnlyAmorce = F2(
 	function (firstAmorce, firstProduction) {
 		return (_Utils_cmp(
@@ -21877,67 +22155,52 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 									]),
 								_List_fromArray(
 									[
+										A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
 										A2(
 										$rtfeldman$elm_css$Html$Styled$p,
 										_List_fromArray(
 											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-center text-lg m-2 p-2')
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg  m-4 p-2')
 											]),
 										_List_fromArray(
 											[
 												$rtfeldman$elm_css$Html$Styled$text(trial.context)
 											])),
 										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
+										$rtfeldman$elm_css$Html$Styled$textarea,
 										_List_fromArray(
 											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$id('firstProd'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2 w-full'),
 												$rtfeldman$elm_css$Html$Styled$Attributes$class(
-												'flex flex-col ' + (_Utils_eq(data.state.order, $author$project$Pretest$SentenceCompletion$FirstProduction) ? 'order-2' : 'order-3'))
+												_Utils_eq(data.state.order, $author$project$Pretest$SentenceCompletion$FirstProduction) ? 'order-2' : 'order-3'),
+												$rtfeldman$elm_css$Html$Styled$Events$onInput(
+												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$FirstProduction)),
+												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
+												$rtfeldman$elm_css$Html$Styled$Attributes$value(
+												A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.firstAmorce, data.state.firstProduction))
 											]),
 										_List_fromArray(
 											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$textarea,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$id('firstProd'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2 w-full'),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput(
-														$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$FirstProduction)),
-														$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
-														$rtfeldman$elm_css$Html$Styled$Attributes$value(
-														A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.firstAmorce, data.state.firstProduction))
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text(trial.firstAmorce)
-													]))
+												$rtfeldman$elm_css$Html$Styled$text(trial.firstAmorce)
 											])),
 										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
+										$rtfeldman$elm_css$Html$Styled$textarea,
 										_List_fromArray(
 											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$id('secondProd'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 mt-4 p-2 w-full'),
+												$rtfeldman$elm_css$Html$Styled$Events$onInput(
+												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$SecondProduction)),
+												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
 												$rtfeldman$elm_css$Html$Styled$Attributes$class(
-												'flex flex-col ' + (_Utils_eq(data.state.order, $author$project$Pretest$SentenceCompletion$SecondProduction) ? 'order-2' : 'order-3'))
+												_Utils_eq(data.state.order, $author$project$Pretest$SentenceCompletion$SecondProduction) ? ' order-2' : ' order-3'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$value(
+												A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.secondAmorce, data.state.secondProduction))
 											]),
 										_List_fromArray(
 											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$textarea,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$id('secondProd'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2'),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput(
-														$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$SecondProduction)),
-														$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
-														$rtfeldman$elm_css$Html$Styled$Attributes$value(
-														A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.secondAmorce, data.state.secondProduction))
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text(trial.secondAmorce)
-													]))
+												$rtfeldman$elm_css$Html$Styled$text(trial.secondAmorce)
 											])),
 										A2(
 										$rtfeldman$elm_css$Html$Styled$div,
@@ -21948,7 +22211,7 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 										_List_fromArray(
 											[
 												$author$project$View$button(
-												{isDisabled: false, message: $author$project$Pretest$SentenceCompletion$UserClickedNextTrial, txt: 'Next Item'})
+												{isDisabled: false, message: $author$project$Pretest$SentenceCompletion$UserClickedNextTrial, txt: 'Continue'})
 											]))
 									]))
 							]);
@@ -22465,50 +22728,6 @@ var $author$project$Session1$ContextUnderstanding$paragraphWithInput = F3(
 							$rtfeldman$elm_css$Html$Styled$text(userAnswer)
 						])),
 					$rtfeldman$elm_css$Html$Styled$text(post)
-				]));
-	});
-var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
-var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
-var $author$project$View$pct = F2(
-	function (trialn, trials) {
-		return (trialn / $elm$core$List$length(trials)) * 100;
-	});
-var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
-var $author$project$Progressbar$progressBar = F2(
-	function (history, remainingTrials) {
-		var trialNumber = $elm$core$List$length(history) + 1;
-		var pct_ = A2(
-			$author$project$View$pct,
-			trialNumber,
-			_Utils_ap(
-				remainingTrials,
-				A2($elm$core$List$map, $elm$core$Tuple$first, history)));
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('shadow max-w-xl w-full bg-gray-300 mt-2 mb-12 transition duration-500')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-indigo-600 text-sm font-bold w-full leading-none py-1 text-center text-white '),
-							$rtfeldman$elm_css$Html$Styled$Attributes$css(
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Css$width(
-									$rtfeldman$elm_css$Css$pct(pct_))
-								]))
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(
-							$elm$core$String$fromInt(
-								$elm$core$Basics$round(pct_)) + '%')
-						]))
 				]));
 	});
 var $elm$core$Tuple$pair = F2(
@@ -26843,7 +27062,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Session1.Session.LoadingMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.Spelling.Trial) (List.List Session1.ContextUnderstanding.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"},"Pretest.Pretest.ParaMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Pretest.SPR.Trial) (List.List Pretest.SentenceCompletion.Trial) (List.List ExperimentInfo.Task) (List.List Pretest.VKS.Trial) (List.List Pretest.Acceptability.Trial)"},"Pretest.Pretest.ShuffledPretest":{"args":[],"type":"{ spr : List.List Pretest.SPR.Trial, sc : List.List Pretest.SentenceCompletion.Trial, infos : List.List ExperimentInfo.Task, vks : List.List Pretest.VKS.Trial, acceptability : Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial)) }"},"Session1.Session.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.Spelling.Trial, cu1 : List.List Session1.ContextUnderstanding.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Session2.Session.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Spelling.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Session3.Session.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String, introToMain : String.String }"},"Postest.YN.Trial":{"args":[],"type":"{ uid : String.String, word : String.String, exists : Basics.Bool }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String, timeout : Basics.Int }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"},"Pretest.SentenceCompletion.Trial":{"args":[],"type":"{ id : String.String, context : String.String, firstAmorce : String.String, secondAmorce : String.String, isTraining : Basics.Bool, firstFeedback : String.String, secondFeedback : String.String }"},"Pretest.VKS.Trial":{"args":[],"type":"{ id : String.String, verb : String.String }"},"Session1.ContextUnderstanding.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.Spelling.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session2.Spelling.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UserToggledInCloudWords":["String.String"],"PlaysoundInJS":["String.String"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"Pretest":["Pretest.Pretest.Msg"],"SentenceCompletion":["Pretest.SentenceCompletion.Msg"],"SPR":["Pretest.SPR.Msg"],"VKS":["Pretest.VKS.Msg"],"YesNo":["Pretest.YesNo.Msg"],"CU1":["Session1.ContextUnderstanding.Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.Spelling.Msg"],"Session1":["Session1.Session.Msg"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Session2.Spelling.Msg"],"Translation":["Session2.Translation.Msg"],"Session2":["Session2.Session.Msg"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"YN":["Postest.YN.Msg"],"Synonym":["Session3.Synonym.Msg"],"Session3":["Session3.Session.Msg"]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedAudio":["String.String"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedStartTraining":[],"UserClickedStartAnswering":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Postest.YN.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartIntro":["List.List Postest.YN.Trial"],"UserClickedStartMain":["List.List Postest.YN.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":[],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Pretest.Pretest.Msg":{"args":[],"tags":{"ServerRespondedWithSomePretestData":["Pretest.Pretest.ParaMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List Pretest.SentenceCompletion.Trial","List.List ExperimentInfo.Task","List.List Pretest.VKS.Trial","List.List Pretest.Acceptability.Trial"],"StartPretest":["Pretest.Pretest.ShuffledPretest"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"NoOp":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"UserClickedNextTrial":["Pretest.SPR.Answer"],"UserClickedSaveData":[],"UserConfirmedChoice":["Pretest.SPR.Answer"],"UserClickedStartTraining":[]}},"Pretest.SentenceCompletion.Msg":{"args":[],"tags":{"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":["ExperimentInfo.Task","List.List Pretest.SentenceCompletion.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.SentenceCompletion.Field","String.String"],"RuntimeReordedAmorces":["Pretest.SentenceCompletion.Field"],"UserClickedStartTraining":[]}},"Pretest.VKS.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.VKS.Field","String.String"],"RuntimeReordedAmorces":["Pretest.VKS.Field"],"UserClickedNewKnowledge":["String.String"]}},"Pretest.YesNo.Msg":{"args":[],"tags":{"NoOp":[]}},"Session1.ContextUnderstanding.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.ContextUnderstanding.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"],"UserClickedStartAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Session1.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Session1.Session.LoadingMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllData":["List.List Session1.Meaning.Trial","List.List Session1.Spelling.Trial","List.List Session1.ContextUnderstanding.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession":["Session1.Session.ShuffledSession1"]}},"Session1.Spelling.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":[],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[]}},"Session2.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Spelling.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllData":["List.List Session2.CU2.Trial","List.List Session2.Spelling.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session2.Session.ShuffledSession2"]}},"Session2.Spelling.Msg":{"args":[],"tags":{"UserDragsLetter":["DnDList.Msg"],"PlayAudio":["String.String"],"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Spelling.Trial"],"UserClickedStartMainloop":["List.List Session2.Spelling.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"UserClickedStartAudio":["String.String"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartTraining":[],"UserClickedStartMain":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session3.Session.ShuffledSession3"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartTraining":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserCLickedStartTraining":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Pretest.SentenceCompletion.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"Pretest.VKS.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"List.List":{"args":["a"],"tags":{}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Session1.Session.LoadingMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.Spelling.Trial) (List.List Session1.ContextUnderstanding.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"},"Pretest.Pretest.ParaMsg":{"args":[],"type":"Task.Parallel.Msg6 (List.List Pretest.SPR.Trial) (List.List Pretest.SentenceCompletion.Trial) (List.List ExperimentInfo.Task) (List.List Pretest.VKS.Trial) (List.List Pretest.Acceptability.Trial) (List.List Pretest.YesNo.Trial)"},"Pretest.Pretest.ShuffledPretest":{"args":[],"type":"{ spr : List.List Pretest.SPR.Trial, sc : List.List Pretest.SentenceCompletion.Trial, infos : List.List ExperimentInfo.Task, vks : List.List Pretest.VKS.Trial, acceptability : Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial)), yn : List.List Pretest.YesNo.Trial }"},"Session1.Session.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.Spelling.Trial, cu1 : List.List Session1.ContextUnderstanding.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Session2.Session.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Spelling.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Session3.Session.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String, introToMain : String.String }"},"Postest.YN.Trial":{"args":[],"type":"{ uid : String.String, word : String.String, exists : Basics.Bool }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String, timeout : Basics.Int }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"},"Pretest.SentenceCompletion.Trial":{"args":[],"type":"{ id : String.String, context : String.String, firstAmorce : String.String, secondAmorce : String.String, isTraining : Basics.Bool, firstFeedback : String.String, secondFeedback : String.String }"},"Pretest.VKS.Trial":{"args":[],"type":"{ id : String.String, verb : String.String }"},"Pretest.YesNo.Trial":{"args":[],"type":"{ id : String.String, word : String.String, exists : Basics.Bool }"},"Session1.ContextUnderstanding.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.Spelling.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session2.Spelling.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UserToggledInCloudWords":["String.String"],"PlaysoundInJS":["String.String"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"Pretest":["Pretest.Pretest.Msg"],"SentenceCompletion":["Pretest.SentenceCompletion.Msg"],"SPR":["Pretest.SPR.Msg"],"VKS":["Pretest.VKS.Msg"],"YesNo":["Pretest.YesNo.Msg"],"CU1":["Session1.ContextUnderstanding.Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.Spelling.Msg"],"Session1":["Session1.Session.Msg"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Session2.Spelling.Msg"],"Translation":["Session2.Translation.Msg"],"Session2":["Session2.Session.Msg"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"YN":["Postest.YN.Msg"],"Synonym":["Session3.Synonym.Msg"],"Session3":["Session3.Session.Msg"]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedAudio":["String.String"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedStartTraining":[],"UserClickedStartAnswering":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Postest.YN.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartIntro":["List.List Postest.YN.Trial"],"UserClickedStartMain":["List.List Postest.YN.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":[],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Pretest.Pretest.Msg":{"args":[],"tags":{"ServerRespondedWithSomePretestData":["Pretest.Pretest.ParaMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List Pretest.SentenceCompletion.Trial","List.List ExperimentInfo.Task","List.List Pretest.VKS.Trial","List.List Pretest.Acceptability.Trial","List.List Pretest.YesNo.Trial"],"StartPretest":["Pretest.Pretest.ShuffledPretest"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"NoOp":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"UserClickedNextTrial":["Pretest.SPR.Answer"],"UserClickedSaveData":[],"UserConfirmedChoice":["Pretest.SPR.Answer"],"UserClickedStartTraining":[]}},"Pretest.SentenceCompletion.Msg":{"args":[],"tags":{"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":["ExperimentInfo.Task","List.List Pretest.SentenceCompletion.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.SentenceCompletion.Field","String.String"],"RuntimeReordedAmorces":["Pretest.SentenceCompletion.Field"],"UserClickedStartTraining":[]}},"Pretest.VKS.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.VKS.Field","String.String"],"RuntimeReordedAmorces":["Pretest.VKS.Field"],"UserClickedNewKnowledge":["String.String"]}},"Pretest.YesNo.Msg":{"args":[],"tags":{"NoOp":[]}},"Session1.ContextUnderstanding.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.ContextUnderstanding.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"],"UserClickedStartAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Session1.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Session1.Session.LoadingMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllData":["List.List Session1.Meaning.Trial","List.List Session1.Spelling.Trial","List.List Session1.ContextUnderstanding.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession":["Session1.Session.ShuffledSession1"]}},"Session1.Spelling.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":[],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[]}},"Session2.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Spelling.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllData":["List.List Session2.CU2.Trial","List.List Session2.Spelling.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session2.Session.ShuffledSession2"]}},"Session2.Spelling.Msg":{"args":[],"tags":{"UserDragsLetter":["DnDList.Msg"],"PlayAudio":["String.String"],"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Spelling.Trial"],"UserClickedStartMainloop":["List.List Session2.Spelling.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"UserClickedStartAudio":["String.String"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartTraining":[],"UserClickedStartMain":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session3.Session.ShuffledSession3"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartTraining":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserCLickedStartTraining":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Pretest.SentenceCompletion.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"Pretest.VKS.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"List.List":{"args":["a"],"tags":{}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Task.Parallel.Msg6":{"args":["a","b","c","d","e","f"],"tags":{"LoadedA6":["a"],"LoadedB6":["b"],"LoadedC6":["c"],"LoadedD6":["d"],"LoadedE6":["e"],"LoadedF6":["f"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
