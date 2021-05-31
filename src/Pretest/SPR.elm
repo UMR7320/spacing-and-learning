@@ -17,10 +17,6 @@ import Time
 import View
 
 
-
---TODO: CHANGER INTERACTION Y N K à la place du click.
-
-
 taskId =
     "rec7oxQBDY7rBTRDn"
 

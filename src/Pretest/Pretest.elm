@@ -151,4 +151,4 @@ update msg model =
                         update (ServerRespondedWithAllPretestData spr sc infos vks (List.concat shuffledTrials)) model
 
                 Result.Err reason ->
-                    ( { model | acceptabilityTask = Logic.Err (Debug.toString reason) }, Cmd.none )
+                    ( { model | acceptabilityTask = Logic.Err "Error trying to build blocks" }, Cmd.none )

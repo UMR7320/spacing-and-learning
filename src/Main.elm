@@ -22,6 +22,7 @@ import Pretest.Pretest as Pretest
 import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
+import Pretest.YesNo as YesNo
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
 import Session exposing (Session(..))
@@ -83,6 +84,7 @@ type alias Model =
     , pretest : Pretest.Pretest
     , sentenceCompletion : SentenceCompletion.SentenceCompletion
     , vks : Logic.Task VKS.Trial VKS.State
+    , yesno : Logic.Task YesNo.Trial YesNo.State
 
     --
     --                                                                  ## ###  ##  ## ###  #  ###      #
@@ -185,6 +187,7 @@ init _ url key =
             , pretest = Tuple.first Pretest.attempt
             , sentenceCompletion = Logic.NotStarted
             , vks = Logic.NotStarted
+            , yesno = Logic.NotStarted
 
             -- POSTEST
             , cloudWords = Dict.fromList CloudWords.words
@@ -401,6 +404,9 @@ body model =
                     Route.Acceptability sub ->
                         List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
 
+                    Route.YesNo ->
+                        List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
+
             Home ->
                 [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
@@ -440,6 +446,7 @@ type Msg
     | SentenceCompletion SentenceCompletion.Msg
     | SPR SPR.Msg
     | VKS VKS.Msg
+    | YesNo YesNo.Msg
       --
       --                                                          ## ###  ##  ## ###  #  ###      #
       --                                                         #   #   #   #    #  # # # #     ##
@@ -649,6 +656,13 @@ update msg model =
                     Translation.update submsg model
             in
             ( subModel, Cmd.map Translation subCmd )
+
+        YesNo submsg ->
+            let
+                ( subModel, subCmd ) =
+                    YesNo.update submsg model
+            in
+            ( subModel, Cmd.map YesNo subCmd )
 
 
 subscriptions : Model -> Sub Msg

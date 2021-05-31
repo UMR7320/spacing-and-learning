@@ -58,6 +58,7 @@ type PretestTask
     | SentenceCompletion
     | VKS
     | Acceptability AcceptabilityRoute
+    | YesNo
 
 
 type AcceptabilityRoute
@@ -93,6 +94,7 @@ parser =
                         , map EmailSent (s "email-sent")
                         , map SentenceCompletion (s "sentence-completion")
                         , map VKS (s "vks")
+                        , map YesNo (s "yes-no")
                         , map Acceptability
                             (s "acceptability"
                                 </> oneOf
