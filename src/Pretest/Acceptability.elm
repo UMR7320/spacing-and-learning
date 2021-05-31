@@ -1,15 +1,19 @@
 module Pretest.Acceptability exposing (..)
 
+import Browser.Navigation exposing (pushUrl)
 import Data exposing (decodeRecords)
+import Delay
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, div, h1, p, span, text)
+import Html.Styled exposing (Html, div, h1, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, height, src, width)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
+import List.Extra
 import Logic exposing (Task)
+import Ports
 import Task
 import Time
 import View
@@ -77,8 +81,9 @@ type Msg
     | StartTraining
     | UserClickedSaveMsg
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
-    | StartMain (List Trial) ExperimentInfo.Task
-    | RuntimeShuffledTrials (List ExperimentInfo.Task) (Result.Result ( ErrorBlock, List Trial ) (List (List Trial)))
+    | StartMain
+    | UserClickedPlayAudio String
+    | UserClickedStartTraining
 
 
 type alias Trial =
@@ -90,6 +95,18 @@ type alias Trial =
     , audio : Data.AudioFile
     , feedback : String
     , timeout : Int
+    }
+
+
+dumbTrial =
+    { uid = "dumbId"
+    , sentence = "dumbSentence"
+    , sentenceType = EmbeddedQuestion
+    , trialType = Target
+    , isGrammatical = False
+    , audio = Data.AudioFile "" ""
+    , feedback = "String"
+    , timeout = 5000
     }
 
 
@@ -175,13 +192,8 @@ grammaticalityToKey isGrammatical =
 
 view :
     Logic.Task Trial State
-    ->
-        { saveDataMsg : msg
-        , startMainMsg : ExperimentInfo.Task -> List Trial -> msg
-        , startTraining : msg
-        }
-    -> List (Html msg)
-view task { startMainMsg, startTraining, saveDataMsg } =
+    -> List (Html Msg)
+view task =
     let
         prompt =
             div [ class "flex flex-col items-center justify-center" ]
@@ -201,7 +213,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
                     [ div [ class "flex flex-col items-center" ]
                         [ View.button
                             { isDisabled = False
-                            , message = startMainMsg data.infos data.mainTrials
+                            , message = StartMain
                             , txt = "That's it for the practice items"
                             }
                         ]
@@ -223,7 +235,7 @@ view task { startMainMsg, startTraining, saveDataMsg } =
         Logic.Running Logic.Main data ->
             case data.current of
                 Nothing ->
-                    [ viewTransition data.infos.end saveDataMsg "Click to save your answers"
+                    [ viewTransition data.infos.end UserClickedSaveMsg "Click to save your answers"
                     ]
 
                 Just _ ->
@@ -245,11 +257,11 @@ view task { startMainMsg, startTraining, saveDataMsg } =
             [ text "not started" ]
 
         Logic.Err reason ->
-            [ p [] [ text <| "Oups, I ran into the following error: " ++ reason ]
+            [ pre [] [ text reason ]
             ]
 
-        Logic.Running Logic.Instructions _ ->
-            []
+        Logic.Running Logic.Instructions data ->
+            [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
 
 decodeAcceptabilityTrials : Decode.Decoder (List Trial)
@@ -307,14 +319,6 @@ decodeAcceptabilityTrials =
                     Decode.fail ("I couldn't find the corresponding SentenceType for this string :" ++ str)
     in
     decodeRecords decoder
-
-
-type alias Block =
-    { targetPos : Int
-    , d1 : ( Int, Int )
-    , d2 : ( Int, Int )
-    , d3 : ( Int, Int )
-    }
 
 
 enumSentenceType : List SentenceType
@@ -490,3 +494,258 @@ evalToString eval =
 
         EvaluationTimeOut ->
             "Timeout"
+
+
+update msg model =
+    let
+        pState =
+            Logic.getState model.acceptabilityTask |> Maybe.withDefault initState
+
+        toNextStep int step =
+            Delay.after int (NextStepCinematic step)
+
+        trial =
+            Logic.getTrial model.acceptabilityTask |> Maybe.withDefault dumbTrial
+    in
+    case msg of
+        NextStepCinematic step ->
+            case step of
+                Listening ->
+                    ( { model | acceptabilityTask = Logic.update { pState | step = Listening } model.acceptabilityTask }
+                    , Delay.after 500 (UserClickedPlayAudio trial.audio.url)
+                    )
+
+                Answering ->
+                    ( { model | acceptabilityTask = Logic.update { pState | step = Answering } model.acceptabilityTask }, Delay.after trial.timeout (UserPressedButton Nothing) )
+
+                End ->
+                    ( { model | acceptabilityTask = Logic.update { pState | step = End } model.acceptabilityTask |> Logic.next pState }
+                    , toNextStep 0 Start
+                    )
+
+                Start ->
+                    ( { model | acceptabilityTask = Logic.update newLoop model.acceptabilityTask }, Delay.after 0 (UserClickedPlayAudio beep) )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        UserPressedButton maybeBool ->
+            let
+                forward =
+                    if pState.step == Answering then
+                        Task.perform (\timestamp -> UserPressedButtonWithTimestamp maybeBool timestamp) Time.now
+
+                    else
+                        Cmd.none
+            in
+            ( model, forward )
+
+        UserPressedButtonWithTimestamp maybeBool timestamp ->
+            ( { model
+                | acceptabilityTask =
+                    Logic.update
+                        { pState
+                            | step = End
+                            , evaluation = maybeBoolToEvaluation maybeBool
+                            , userAnsweredAt = Just timestamp
+                        }
+                        model.acceptabilityTask
+              }
+            , toNextStep model.endAcceptabilityDuration End
+            )
+
+        AudioEnded ( name, timestamp ) ->
+            if name == beep then
+                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask }, Cmd.none )
+
+            else
+                ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask }
+                , toNextStep 0 Answering
+                )
+
+        AudioStarted ( name, timestamp ) ->
+            if name == beep then
+                ( { model | acceptabilityTask = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptabilityTask }, toNextStep 0 Listening )
+
+            else
+                ( { model | acceptabilityTask = Logic.update { pState | audioStartedAt = Just timestamp } model.acceptabilityTask }
+                , Cmd.none
+                )
+
+        StartTraining ->
+            ( model, Cmd.batch [ pushUrl model.key "start" ] )
+
+        StartMain ->
+            ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask initState, endAcceptabilityDuration = 500 }, toNextStep 0 Init )
+
+        UserClickedSaveMsg ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( { model | acceptabilityTask = Logic.Loading }, saveAcceptabilityData responseHandler model.user model.acceptabilityTask )
+
+        ServerRespondedWithLastRecords (Result.Ok _) ->
+            ( { model | acceptabilityTask = Logic.Loading }
+            , pushUrl model.key "end"
+            )
+
+        UserClickedPlayAudio url ->
+            ( model, Ports.playAudio url )
+
+        ServerRespondedWithLastRecords (Result.Err reason) ->
+            ( { model | acceptabilityTask = Logic.Err <| Data.buildErrorMessage reason ++ "Please report this error message to yacourt@unice.fr with a nice screenshot!" }, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | acceptabilityTask = Logic.startTraining model.acceptabilityTask }, Cmd.none )
+
+
+organizeAcceptabilityTrials : List Trial -> List Trial -> Result.Result ( ErrorBlock, List Trial ) (List (List Trial))
+organizeAcceptabilityTrials targets distractors =
+    organizeAcceptabilityTrialsHelper targets distractors []
+
+
+organizeAcceptabilityTrialsHelper : List Trial -> List Trial -> List (List Trial) -> Result.Result ( ErrorBlock, List Trial ) (List (List Trial))
+organizeAcceptabilityTrialsHelper targets distractors output =
+    -- Acceptability trials must be organized in sequence of blocks containing exactly one target and 3 distractors belonging to 3 different sentence type.
+    -- After shuffling all the trials, this function is used create the proper sequence.
+    -- Because the target can't be at the first position of a sequence, we have to swap the position of the target with one of the following distractors. TODO
+    -- En gros, ça va marcher tant qu'il y a le bon nombre d'items mais s'il devait y avoir un déséquilibre, cela créera une recursion infinie.
+    -- C'est le pire code de l'enfer, désolé si quelqu'un d'autre que moi voit ce massacre.
+    let
+        nextGrammaticalSentence buff dis =
+            dis.isGrammatical && not (List.member dis.sentenceType (getSentenceTypes buff))
+
+        --not (List.member dis.sentenceType (getSentenceTypes buff))
+        --&& not (List.member dis.sentenceType (whichSentenceTypes buff))
+        nextUngrammaticalSentence buff dis =
+            not dis.isGrammatical && not (List.member dis.sentenceType (getSentenceTypes buff))
+
+        --List.member dis.sentenceType (getSentenceTypes buff) |> not
+        findFirstGrammaticalDistractor =
+            List.Extra.find (nextGrammaticalSentence []) distractors
+
+        findSecondGrammaticalDistractor firstDistractor =
+            List.Extra.find (nextGrammaticalSentence firstDistractor) (removesItems firstDistractor distractors)
+
+        findThirdGrammaticalDistractor firstDistractor secondDistractor =
+            List.Extra.find (nextGrammaticalSentence [ firstDistractor, secondDistractor ]) (removesItems [ firstDistractor, secondDistractor ] distractors)
+
+        firstUnGrammaticalDistractor =
+            List.Extra.find (nextUngrammaticalSentence []) distractors
+
+        findSecondUnGrammaticalDistractor firstDistractor =
+            removesItems [ firstDistractor ] distractors
+                |> List.Extra.find (nextUngrammaticalSentence [ firstDistractor ])
+
+        findThirdUnGrammaticalDistractor firstDistractor secondDistractor =
+            removesItems [ firstDistractor, secondDistractor ] distractors
+                |> List.Extra.find (nextUngrammaticalSentence [ firstDistractor, secondDistractor ])
+
+        buildBlock target =
+            if target.isGrammatical then
+                firstUnGrammaticalDistractor
+                    |> Result.fromMaybe ( FirstDistractorMissing False, [ target ] )
+                    |> Result.andThen
+                        (\distractorFound ->
+                            findSecondGrammaticalDistractor [ distractorFound ]
+                                |> Result.fromMaybe
+                                    ( SecondDistractorMissing True
+                                    , [ target, distractorFound ]
+                                    )
+                                |> Result.andThen
+                                    (\secondDistractorFound ->
+                                        findThirdUnGrammaticalDistractor distractorFound secondDistractorFound
+                                            |> Result.fromMaybe
+                                                ( ThirdDistractorMissing False
+                                                , [ target, distractorFound, secondDistractorFound ]
+                                                )
+                                            |> Result.andThen
+                                                (\thirdDistractorFound ->
+                                                    Result.Ok
+                                                        { target = target
+                                                        , firstDistractor = distractorFound
+                                                        , secondDistractor = secondDistractorFound
+                                                        , thirdDistractor = thirdDistractorFound
+                                                        , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
+                                                        }
+                                                )
+                                    )
+                        )
+
+            else
+                findFirstGrammaticalDistractor
+                    |> Result.fromMaybe ( FirstDistractorMissing True, [ target ] )
+                    |> Result.andThen
+                        (\distractorFound ->
+                            findSecondUnGrammaticalDistractor distractorFound
+                                |> Result.fromMaybe ( SecondDistractorMissing False, [ target, distractorFound ] )
+                                |> Result.andThen
+                                    (\secondDistractorFound ->
+                                        findThirdGrammaticalDistractor distractorFound secondDistractorFound
+                                            |> Result.fromMaybe ( ThirdDistractorMissing True, [ target, distractorFound, secondDistractorFound ] )
+                                            |> Result.andThen
+                                                (\thirdDistractorFound ->
+                                                    Result.Ok
+                                                        { target = target
+                                                        , firstDistractor = distractorFound
+                                                        , secondDistractor = secondDistractorFound
+                                                        , thirdDistractor = thirdDistractorFound
+                                                        , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
+                                                        }
+                                                )
+                                    )
+                        )
+    in
+    case targets of
+        [] ->
+            Result.Ok (output ++ [ distractors ])
+
+        x :: xs ->
+            case buildBlock x of
+                Result.Err (( _, blockSoFar ) as err) ->
+                    organizeAcceptabilityTrialsHelper xs (removesItems blockSoFar distractors) (blockSoFar :: output)
+
+                Result.Ok { target, firstDistractor, secondDistractor, thirdDistractor, remainingDistractors } ->
+                    let
+                        block =
+                            [ target, firstDistractor, secondDistractor, thirdDistractor ]
+                    in
+                    organizeAcceptabilityTrialsHelper xs remainingDistractors (block :: output)
+
+
+nextNewSentenceType buff dis =
+    List.member dis.sentenceType (getSentenceTypes buff) |> not
+
+
+beep =
+    "https://dl.airtable.com/.attachments/b000c72585c5f5145828b1cf3916c38d/88d9c821/beep.mp3"
+
+
+removesItemsHelp : List a -> List a -> List a -> List a
+removesItemsHelp items ls acc =
+    case ls of
+        [] ->
+            List.reverse acc
+
+        x :: xs ->
+            if List.member x items then
+                removesItemsHelp items xs acc
+
+            else
+                removesItemsHelp items xs (x :: acc)
+
+
+removesItems : List a -> List a -> List a
+removesItems items ls =
+    removesItemsHelp items ls []
+
+
+isNextSentence : { a | sentenceType : SentenceType } -> List { b | sentenceType : SentenceType } -> Bool
+isNextSentence dis blockBuffer =
+    List.member dis.sentenceType (getSentenceTypes blockBuffer) |> not
+
+
+getSentenceTypes : List { a | sentenceType : SentenceType } -> List SentenceType
+getSentenceTypes sentences =
+    List.map .sentenceType sentences
