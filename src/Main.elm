@@ -1,16 +1,8 @@
-port module Main exposing
-    ( isNextSentence
-    , main
-    , nextNewSentenceType
-    , organizeAcceptabilityTrials
-    , removesItems
-    )
+module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation as Nav exposing (pushUrl)
-import Data
-import Delay
 import Dict
 import DnDList
 import DnDList.Groups exposing (Model)
@@ -20,7 +12,6 @@ import Html.Styled.Attributes exposing (accept, class, href, type_)
 import Html.Styled.Events
 import Http
 import Json.Decode
-import List.Extra
 import Logic
 import Ports
 import Postest.CloudWords as CloudWords
@@ -31,11 +22,7 @@ import Pretest.Pretest as Pretest
 import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
-import Random
-import Random.Extra
-import Random.List
 import RemoteData exposing (RemoteData)
-import Result
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
 import Session exposing (Session(..))
 import Session1.ContextUnderstanding as CU1
@@ -52,7 +39,6 @@ import Session3.CU3 as CU3
 import Session3.Session as Session3
 import Session3.Spelling3 as Spelling3
 import Session3.Synonym as Synonym
-import Task
 import Task.Parallel as Para
 import Time
 import Url exposing (Url)
@@ -62,9 +48,6 @@ import View exposing (navOut)
 
 type alias Flags =
     {}
-
-
-port audioEnded : ({ eventType : String, name : String, timestamp : Int } -> msg) -> Sub msg
 
 
 
@@ -670,31 +653,10 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    let
-        acceptabilityState =
-            Logic.getState model.acceptabilityTask
-
-        listenToInput : Sub Msg
-        listenToInput =
-            case acceptabilityState of
-                Just state ->
-                    if state.step == Acceptability.Answering then
-                        onKeyDown keyDecoder
-
-                    else if state.step == Acceptability.Init then
-                        onKeyDown decodeSpace
-
-                    else
-                        Sub.none
-
-                Nothing ->
-                    Sub.none
-    in
     Sub.batch
         [ Sub.map Spelling2 (Scrabble.subscriptions model)
-        , listenToInput
-        , audioEnded toAcceptabilityMessage
         , Sub.map SPR (SPR.subscriptions model.spr)
+        , Sub.map Acceptability (Acceptability.subscriptions model)
         ]
 
 
@@ -791,150 +753,3 @@ viewCloud model =
 
 beep =
     "https://dl.airtable.com/.attachments/b000c72585c5f5145828b1cf3916c38d/88d9c821/beep.mp3"
-
-
-removesItemsHelp : List a -> List a -> List a -> List a
-removesItemsHelp items ls acc =
-    case ls of
-        [] ->
-            List.reverse acc
-
-        x :: xs ->
-            if List.member x items then
-                removesItemsHelp items xs acc
-
-            else
-                removesItemsHelp items xs (x :: acc)
-
-
-removesItems : List a -> List a -> List a
-removesItems items ls =
-    removesItemsHelp items ls []
-
-
-organizeAcceptabilityTrialsHelper : List Acceptability.Trial -> List Acceptability.Trial -> List (List Acceptability.Trial) -> Result.Result ( Acceptability.ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
-organizeAcceptabilityTrialsHelper targets distractors output =
-    -- Acceptability trials must be organized in sequence of blocks containing exactly one target and 3 distractors belonging to 3 different sentence type.
-    -- After shuffling all the trials, this function is used create the proper sequence.
-    -- Because the target can't be at the first position of a sequence, we have to swap the position of the target with one of the following distractors. TODO
-    -- En gros, ça va marcher tant qu'il y a le bon nombre d'items mais s'il devait y avoir un déséquilibre, cela créera une recursion infinie.
-    -- C'est le pire code de l'enfer, désolé si quelqu'un d'autre que moi voit ce massacre.
-    let
-        nextGrammaticalSentence buff dis =
-            dis.isGrammatical && not (List.member dis.sentenceType (getSentenceTypes buff))
-
-        --not (List.member dis.sentenceType (getSentenceTypes buff))
-        --&& not (List.member dis.sentenceType (whichSentenceTypes buff))
-        nextUngrammaticalSentence buff dis =
-            not dis.isGrammatical && not (List.member dis.sentenceType (getSentenceTypes buff))
-
-        --List.member dis.sentenceType (getSentenceTypes buff) |> not
-        findFirstGrammaticalDistractor =
-            List.Extra.find (nextGrammaticalSentence []) distractors
-
-        findSecondGrammaticalDistractor firstDistractor =
-            List.Extra.find (nextGrammaticalSentence firstDistractor) (removesItems firstDistractor distractors)
-
-        findThirdGrammaticalDistractor firstDistractor secondDistractor =
-            List.Extra.find (nextGrammaticalSentence [ firstDistractor, secondDistractor ]) (removesItems [ firstDistractor, secondDistractor ] distractors)
-
-        firstUnGrammaticalDistractor =
-            List.Extra.find (nextUngrammaticalSentence []) distractors
-
-        findSecondUnGrammaticalDistractor firstDistractor =
-            removesItems [ firstDistractor ] distractors
-                |> List.Extra.find (nextUngrammaticalSentence [ firstDistractor ])
-
-        findThirdUnGrammaticalDistractor firstDistractor secondDistractor =
-            removesItems [ firstDistractor, secondDistractor ] distractors
-                |> List.Extra.find (nextUngrammaticalSentence [ firstDistractor, secondDistractor ])
-
-        buildBlock target =
-            if target.isGrammatical then
-                firstUnGrammaticalDistractor
-                    |> Result.fromMaybe ( Acceptability.FirstDistractorMissing False, [ target ] )
-                    |> Result.andThen
-                        (\distractorFound ->
-                            findSecondGrammaticalDistractor [ distractorFound ]
-                                |> Result.fromMaybe
-                                    ( Acceptability.SecondDistractorMissing True
-                                    , [ target, distractorFound ]
-                                    )
-                                |> Result.andThen
-                                    (\secondDistractorFound ->
-                                        findThirdUnGrammaticalDistractor distractorFound secondDistractorFound
-                                            |> Result.fromMaybe
-                                                ( Acceptability.ThirdDistractorMissing False
-                                                , [ target, distractorFound, secondDistractorFound ]
-                                                )
-                                            |> Result.andThen
-                                                (\thirdDistractorFound ->
-                                                    Result.Ok
-                                                        { target = target
-                                                        , firstDistractor = distractorFound
-                                                        , secondDistractor = secondDistractorFound
-                                                        , thirdDistractor = thirdDistractorFound
-                                                        , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
-                                                        }
-                                                )
-                                    )
-                        )
-
-            else
-                findFirstGrammaticalDistractor
-                    |> Result.fromMaybe ( Acceptability.FirstDistractorMissing True, [ target ] )
-                    |> Result.andThen
-                        (\distractorFound ->
-                            findSecondUnGrammaticalDistractor distractorFound
-                                |> Result.fromMaybe ( Acceptability.SecondDistractorMissing False, [ target, distractorFound ] )
-                                |> Result.andThen
-                                    (\secondDistractorFound ->
-                                        findThirdGrammaticalDistractor distractorFound secondDistractorFound
-                                            |> Result.fromMaybe ( Acceptability.ThirdDistractorMissing True, [ target, distractorFound, secondDistractorFound ] )
-                                            |> Result.andThen
-                                                (\thirdDistractorFound ->
-                                                    Result.Ok
-                                                        { target = target
-                                                        , firstDistractor = distractorFound
-                                                        , secondDistractor = secondDistractorFound
-                                                        , thirdDistractor = thirdDistractorFound
-                                                        , remainingDistractors = removesItems [ distractorFound, secondDistractorFound, thirdDistractorFound ] distractors
-                                                        }
-                                                )
-                                    )
-                        )
-    in
-    case targets of
-        [] ->
-            Result.Ok (output ++ [ distractors ])
-
-        x :: xs ->
-            case buildBlock x of
-                Result.Err ( _, blockSoFar ) ->
-                    organizeAcceptabilityTrialsHelper xs (removesItems blockSoFar distractors) (blockSoFar :: output)
-
-                Result.Ok { target, firstDistractor, secondDistractor, thirdDistractor, remainingDistractors } ->
-                    let
-                        block =
-                            [ target, firstDistractor, secondDistractor, thirdDistractor ]
-                    in
-                    organizeAcceptabilityTrialsHelper xs remainingDistractors (block :: output)
-
-
-nextNewSentenceType buff dis =
-    List.member dis.sentenceType (getSentenceTypes buff) |> not
-
-
-isNextSentence : { a | sentenceType : Acceptability.SentenceType } -> List { b | sentenceType : Acceptability.SentenceType } -> Bool
-isNextSentence dis blockBuffer =
-    List.member dis.sentenceType (getSentenceTypes blockBuffer) |> not
-
-
-getSentenceTypes : List { a | sentenceType : Acceptability.SentenceType } -> List Acceptability.SentenceType
-getSentenceTypes sentences =
-    List.map .sentenceType sentences
-
-
-organizeAcceptabilityTrials : List Acceptability.Trial -> List Acceptability.Trial -> Result.Result ( Acceptability.ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
-organizeAcceptabilityTrials targets distractors =
-    organizeAcceptabilityTrialsHelper targets distractors []

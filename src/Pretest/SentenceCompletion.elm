@@ -34,6 +34,14 @@ readOnlyOnFeedback data =
         A.readonly False
 
 
+readOnlyAmorce firstAmorce firstProduction =
+    if String.length firstProduction < String.length firstAmorce then
+        firstAmorce
+
+    else
+        firstProduction
+
+
 view : SentenceCompletion -> List (Html Msg)
 view task =
     case task of
@@ -45,8 +53,10 @@ view task =
                         , Html.Styled.textarea
                             [ A.id "firstProd"
                             , A.class "border-2 p-2"
-
-                            --, A.value data.state.firstProduction
+                            , A.value <|
+                                readOnlyAmorce
+                                    trial.firstAmorce
+                                    data.state.firstProduction
                             , E.onInput (UserUpdatedField FirstProduction)
                             , A.spellcheck False
                             , A.placeholder trial.firstAmorce
@@ -64,6 +74,10 @@ view task =
                             , E.onInput (UserUpdatedField SecondProduction)
                             , A.spellcheck False
                             , readOnlyOnFeedback data
+                            , A.value <|
+                                readOnlyAmorce
+                                    trial.secondAmorce
+                                    data.state.secondProduction
                             ]
                             [ text trial.secondAmorce ]
                         , if data.feedback then
@@ -89,7 +103,7 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ div [ A.class "flex flex-col items-center" ]
+                    [ div [ A.class "flex flex-col w-full items-center" ]
                         [ p [ A.class "text-center text-lg m-2 p-2" ] [ text trial.context ]
                         , div
                             [ A.class <|
@@ -103,9 +117,13 @@ view task =
                             ]
                             [ Html.Styled.textarea
                                 [ A.id "firstProd"
-                                , A.class "border-2 p-2"
+                                , A.class "border-2 p-2 w-full"
                                 , E.onInput (UserUpdatedField FirstProduction)
                                 , A.spellcheck False
+                                , A.value <|
+                                    readOnlyAmorce
+                                        trial.firstAmorce
+                                        data.state.firstProduction
                                 ]
                                 [ text trial.firstAmorce ]
                             ]
@@ -124,6 +142,10 @@ view task =
                                 , A.class "border-2 p-2"
                                 , E.onInput (UserUpdatedField SecondProduction)
                                 , A.spellcheck False
+                                , A.value <|
+                                    readOnlyAmorce
+                                        trial.secondAmorce
+                                        data.state.secondProduction
                                 ]
                                 [ text trial.secondAmorce ]
                             ]

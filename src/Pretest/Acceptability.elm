@@ -1,5 +1,6 @@
 module Pretest.Acceptability exposing (..)
 
+import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (pushUrl)
 import Data exposing (decodeRecords)
 import Delay
@@ -17,6 +18,18 @@ import Ports
 import Task
 import Time
 import View
+
+
+type alias State =
+    { trialuid : String
+    , evaluation : Evaluation
+    , beepStartedAt : Maybe Time.Posix
+    , audioStartedAt : Maybe Time.Posix
+    , beepEndedAt : Maybe Time.Posix
+    , audioEndedAt : Maybe Time.Posix
+    , userAnsweredAt : Maybe Time.Posix
+    , step : Step
+    }
 
 
 saveAcceptabilityData : (Result.Result Http.Error (List ()) -> msg) -> Maybe String -> Task Trial State -> Cmd msg
@@ -84,6 +97,7 @@ type Msg
     | StartMain
     | UserClickedPlayAudio String
     | UserClickedStartTraining
+    | NoOp
 
 
 type alias Trial =
@@ -440,18 +454,6 @@ type alias CurrentTrialNumber =
     Int
 
 
-type alias State =
-    { trialuid : String
-    , evaluation : Evaluation
-    , beepStartedAt : Maybe Time.Posix
-    , audioStartedAt : Maybe Time.Posix
-    , beepEndedAt : Maybe Time.Posix
-    , audioEndedAt : Maybe Time.Posix
-    , userAnsweredAt : Maybe Time.Posix
-    , step : Step
-    }
-
-
 type Step
     = Start
     | Listening
@@ -599,6 +601,9 @@ update msg model =
         UserClickedStartTraining ->
             ( { model | acceptabilityTask = Logic.startTraining model.acceptabilityTask }, Cmd.none )
 
+        NoOp ->
+            ( model, Cmd.none )
+
 
 organizeAcceptabilityTrials : List Trial -> List Trial -> Result.Result ( ErrorBlock, List Trial ) (List (List Trial))
 organizeAcceptabilityTrials targets distractors =
@@ -712,6 +717,87 @@ organizeAcceptabilityTrialsHelper targets distractors output =
                             [ target, firstDistractor, secondDistractor, thirdDistractor ]
                     in
                     organizeAcceptabilityTrialsHelper xs remainingDistractors (block :: output)
+
+
+toAcceptabilityMessage { eventType, name, timestamp } =
+    case eventType of
+        "SoundStarted" ->
+            AudioStarted ( name, Time.millisToPosix timestamp )
+
+        "SoundEnded" ->
+            AudioEnded ( name, Time.millisToPosix timestamp )
+
+        _ ->
+            NoOp
+
+
+keyDecoder : Decode.Decoder Msg
+keyDecoder =
+    Decode.map toEvaluation (Decode.field "key" Decode.string)
+
+
+decodeSpace : Decode.Decoder Msg
+decodeSpace =
+    Decode.map
+        (\k ->
+            case k of
+                " " ->
+                    NextStepCinematic Start
+
+                _ ->
+                    NoOp
+        )
+        (Decode.field "key" Decode.string)
+
+
+
+--toEvaluation : String -> Msg
+--toEvaluation : String -> Msg
+
+
+toEvaluation : String -> Msg
+toEvaluation x =
+    case x of
+        "j" ->
+            UserPressedButton (Just True)
+
+        "f" ->
+            UserPressedButton (Just False)
+
+        _ ->
+            UserPressedButton Nothing
+
+
+subscriptions model =
+    let
+        acceptabilityState =
+            Logic.getState model.acceptabilityTask
+
+        listenToInput : Sub Msg
+        listenToInput =
+            case acceptabilityState of
+                Just state ->
+                    if state.step == Answering then
+                        onKeyDown keyDecoder
+
+                    else if state.step == Init then
+                        onKeyDown decodeSpace
+
+                    else
+                        Sub.none
+
+                Nothing ->
+                    Sub.none
+    in
+    case model.acceptabilityTask of
+        Logic.Running Logic.Training _ ->
+            Sub.batch [ listenToInput, Ports.audioEnded toAcceptabilityMessage ]
+
+        Logic.Running Logic.Main _ ->
+            Sub.batch [ listenToInput, Ports.audioEnded toAcceptabilityMessage ]
+
+        _ ->
+            Sub.none
 
 
 nextNewSentenceType buff dis =
