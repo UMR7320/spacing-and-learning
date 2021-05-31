@@ -1,6 +1,7 @@
 module Session2.CU2 exposing (..)
 
 import Data
+import Delay
 import Dict
 import ExperimentInfo
 import Html.Styled as Html exposing (div, text)
@@ -33,12 +34,26 @@ view exp optionsOrder =
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
         Logic.Running Logic.Training ({ mainTrials, current, state, feedback } as data) ->
-            case current of
-                Just trial ->
+            case ( current, data.state.step ) of
+                ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center" ]
                         [ Html.p [ class "p-4" ] [ text trial.context ]
-                        , View.audioButton UserClickedAudio trial.audioSentence.url "dialog"
-                        , div [] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
+                        , if nTimes > 0 then
+                            View.audioButton UserClickedAudio trial.audioSentence.url ("dialog " ++ String.fromInt nTimes)
+
+                          else
+                            View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
+                        , View.button
+                            { isDisabled =
+                                nTimes == 3
+                            , message = UserClickedStartAnswering
+                            , txt = "What happened?"
+                            }
+                        ]
+
+                ( Just trial, Answering ) ->
+                    div [ class "flex flex-col items-center" ]
+                        [ div [] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , userAnswer = state.userAnswer
@@ -49,17 +64,33 @@ view exp optionsOrder =
                             }
                         ]
 
-                Nothing ->
+                ( Nothing, _ ) ->
                     View.introToMain (UserClickedStartMain mainTrials data.infos)
 
         Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
-            case current of
-                Just trial ->
+            case ( current, data.state.step ) of
+                ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col w-full items-center" ]
                         [ View.tooltip data.infos.instructions_short
                         , progressBar history mainTrials
                         , Html.p [ class "p-8 text-lg" ] [ text trial.context ]
-                        , View.audioButton UserClickedAudio trial.audioSentence.url "dialog"
+                        , if nTimes > 0 then
+                            View.audioButton UserClickedAudio trial.audioSentence.url ("dialog " ++ String.fromInt nTimes)
+
+                          else
+                            View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
+                        , View.button
+                            { isDisabled =
+                                nTimes == 3
+                            , message = UserClickedStartAnswering
+                            , txt = "What happened?"
+                            }
+                        ]
+
+                ( Just trial, Answering ) ->
+                    div [ class "flex flex-col w-full items-center" ]
+                        [ View.tooltip data.infos.instructions_short
+                        , progressBar history mainTrials
                         , div [ class "max-w-2xl pt-4" ] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
@@ -71,11 +102,15 @@ view exp optionsOrder =
                             }
                         ]
 
-                Nothing ->
+                ( Nothing, _ ) ->
                     View.end data.infos.end UserClickedSaveData "/"
 
 
 update msg model =
+    let
+        prevState =
+            Logic.getState model.cuLvl2 |> Maybe.withDefault initState
+    in
     case msg of
         UserClickedNextTrial ->
             ( { model | cuLvl2 = Logic.next initState model.cuLvl2 }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
@@ -84,7 +119,7 @@ update msg model =
             ( { model | cuLvl2 = Logic.toggle model.cuLvl2 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | cuLvl2 = Logic.update { uid = "", userAnswer = newChoice } model.cuLvl2 }, Cmd.none )
+            ( { model | cuLvl2 = Logic.update { prevState | userAnswer = newChoice } model.cuLvl2 }, Cmd.none )
 
         UserClickedStartMain _ _ ->
             ( { model | cuLvl2 = Logic.startMain model.cuLvl2 initState }, Cmd.none )
@@ -100,13 +135,41 @@ update msg model =
             ( model, Logic.saveData responseHandler model.user taskId model.cuLvl2 )
 
         UserClickedAudio url ->
-            ( model, Ports.playAudio url )
+            ( { model | cuLvl2 = Logic.update { prevState | step = decrement prevState.step } model.cuLvl2 }
+            , if prevState.step /= Listening 0 then
+                Ports.playAudio url
+
+              else
+                Delay.after 0 UserClickedStartAnswering
+            )
 
         RuntimeShuffledOptionsOrder ls ->
             ( { model | optionsOrder = ls }, Cmd.none )
 
         UserClickedStartTraining ->
             ( { model | cuLvl2 = Logic.startTraining model.cuLvl2 }, Cmd.none )
+
+        UserClickedStartAnswering ->
+            ( { model | cuLvl2 = Logic.update { prevState | step = Answering } model.cuLvl2 }, Cmd.none )
+
+
+type Step
+    = Listening Ntimes
+    | Answering
+
+
+type alias Ntimes =
+    Int
+
+
+decrement : Step -> Step
+decrement step =
+    case step of
+        Listening nTimes ->
+            Listening (nTimes - 1)
+
+        _ ->
+            Answering
 
 
 type CU2Msg
@@ -119,6 +182,7 @@ type CU2Msg
     | UserClickedAudio String
     | RuntimeShuffledOptionsOrder (List Int)
     | UserClickedStartTraining
+    | UserClickedStartAnswering
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -147,7 +211,7 @@ decodeTranslationInput =
 
 initState : State
 initState =
-    State "DefaultUid" ""
+    State "" (Listening 3)
 
 
 defaultTrial : Trial
@@ -170,8 +234,8 @@ type alias Trial =
 
 
 type alias State =
-    { uid : String
-    , userAnswer : String
+    { userAnswer : String
+    , step : Step
     }
 
 
