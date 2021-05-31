@@ -29,7 +29,6 @@ type Route
     | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
-    | Pilote UserId AcceptabilityRoute
     | Posttest PosttestTask
 
 
@@ -58,6 +57,7 @@ type PretestTask
     | SPR
     | SentenceCompletion
     | VKS
+    | Acceptability AcceptabilityRoute
 
 
 type AcceptabilityRoute
@@ -93,17 +93,14 @@ parser =
                         , map EmailSent (s "email-sent")
                         , map SentenceCompletion (s "sentence-completion")
                         , map VKS (s "vks")
-                        ]
-            )
-        , map Pilote
-            (s "user"
-                </> string
-                </> s "pilote"
-                </> s "acceptability"
-                </> oneOf
-                        [ map AcceptabilityInstructions (s "instructions")
-                        , map AcceptabilityStart (s "start")
-                        , map AcceptabilityEnd (s "end")
+                        , map Acceptability
+                            (s "acceptability"
+                                </> oneOf
+                                        [ map AcceptabilityInstructions (s "instructions")
+                                        , map AcceptabilityStart (s "start")
+                                        , map AcceptabilityEnd (s "end")
+                                        ]
+                            )
                         ]
             )
         , map Pretest

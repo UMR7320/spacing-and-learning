@@ -211,7 +211,7 @@ subscriptions task =
                             onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToReadNextSegment Nothing))
 
                 Feedback ->
-                    onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToStartParagraph Nothing))
+                    onKeyDown (decodeSpace (UserClickedNextTrial data.state.answer))
 
                 Question ->
                     onKeyDown decodeYesNoUnsureInTraining
@@ -425,7 +425,7 @@ viewTask data trial endTrialMsg =
                     div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2 text-bold text-lg" ] [ p [ Attr.class "text-lg items-center" ] [ text (Tuple.second taggedSegment) ] ]
 
         ( SPR _, Nothing ) ->
-            p [ Attr.class "text-lg" ] [ text "Press the space to start" ]
+            p [ Attr.class "text-lg" ] [ text "Press the space bar to start reading" ]
 
         ( Question, _ ) ->
             div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]

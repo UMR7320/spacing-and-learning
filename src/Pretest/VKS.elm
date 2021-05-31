@@ -49,7 +49,7 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ span [ class "text-lg font-bold" ] [ text trial.verb ]
+                    [ span [ class "text-lg font-bold" ] [ text <| "to " ++ trial.verb ]
                     , Html.Styled.fieldset [ class "flex flex-col m-2" ]
                         [ Html.Styled.label []
                             [ Html.Styled.input
@@ -85,7 +85,7 @@ view task =
                         ]
                     , if data.state.knowledge == Known then
                         Html.Styled.fieldset [ class "flex flex-col p-2" ]
-                            [ label []
+                            [ label [ class "flex flex-col" ]
                                 [ text "What do you think this verb means? (please provide a translation, synonym or definition or all meanings of this verb that you know):"
                                 , input
                                     [ type_ "text"
@@ -94,7 +94,10 @@ view task =
                                     ]
                                     []
                                 ]
-                            , label [] [ text "Please use this verb in a sentence. The sentence should show that you know what the word means.", input [ type_ "text", class "border-2", E.onInput (UserUpdatedField SecondProduction) ] [] ]
+                            , label [ class "flex flex-col p-2" ]
+                                [ text "Please use this verb in a sentence. The sentence should show that you know what the word means."
+                                , textarea [ class "border-2", E.onInput (UserUpdatedField SecondProduction) ] []
+                                ]
                             ]
 
                       else

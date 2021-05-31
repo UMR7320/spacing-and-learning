@@ -16,7 +16,7 @@ import DnDList
 import DnDList.Groups exposing (Model)
 import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (class, href, type_)
+import Html.Styled.Attributes exposing (accept, class, href, type_)
 import Html.Styled.Events
 import Http
 import Json.Decode
@@ -269,18 +269,9 @@ init _ url key =
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
                 , vks = Logic.Loading
+                , acceptabilityTask = Logic.Loading
               }
             , Cmd.map Pretest (Tuple.second Pretest.attempt)
-            )
-
-        Route.Pilote userid _ ->
-            ( { defaultInit
-                | acceptabilityTask = Logic.Loading
-                , pilote = Session.NotAsked
-                , user = Just userid
-              }
-            , Cmd.none
-              --fetchPilote
             )
 
         Route.Posttest _ ->
@@ -398,41 +389,6 @@ body model =
                     Route.CloudWords ->
                         [ viewCloud model ]
 
-            Route.Pilote _ task ->
-                case task of
-                    Route.AcceptabilityEnd ->
-                        [ p [] [ text "Thanks again for your time and your help with this project. \nContact shona.whyte@univ-cotedazur.fr if you have any questions or comments." ] ]
-
-                    Route.AcceptabilityStart ->
-                        Acceptability.view model.acceptabilityTask
-                            { startTraining = Acceptability Acceptability.StartTraining
-                            , startMainMsg = \informations trials -> Acceptability (Acceptability.StartMain trials informations)
-                            , saveDataMsg = Acceptability Acceptability.UserClickedSaveMsg
-                            }
-
-                    Route.AcceptabilityInstructions ->
-                        case model.infos of
-                            RemoteData.Success informations ->
-                                let
-                                    taskInfo =
-                                        Dict.get "recR8areYkKRvQ6lU" informations |> Maybe.map .instructions |> Maybe.withDefault "I couldn't find the infos of the task : recR8areYkKRvQ6lU "
-                                in
-                                [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
-                                    [ h1 [ class "" ] [ text "Instructions" ]
-                                    , p [ class "max-w-2xl text-xl text-center mb-8" ] [ View.fromMarkdown taskInfo ]
-                                    , View.button { message = Acceptability Acceptability.StartTraining, txt = "start", isDisabled = False }
-                                    ]
-                                ]
-
-                            RemoteData.Failure _ ->
-                                [ p [] [ text "I couldn't find the tasks infos. Please report this error." ] ]
-
-                            RemoteData.Loading ->
-                                [ text "Loading..." ]
-
-                            RemoteData.NotAsked ->
-                                [ text "Info not asked" ]
-
             Route.Pretest task ->
                 case task of
                     Route.YN ->
@@ -458,6 +414,9 @@ body model =
 
                     Route.VKS ->
                         List.map (Html.Styled.map VKS) (VKS.view model.vks)
+
+                    Route.Acceptability sub ->
+                        List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
 
             Home ->
                 [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
@@ -496,7 +455,6 @@ type Msg
     | Acceptability Acceptability.Msg
     | Pretest Pretest.Msg
     | SentenceCompletion SentenceCompletion.Msg
-    | ServerRespondedWithAllPretestData (List Acceptability.Trial) (List ExperimentInfo.Task)
     | SPR SPR.Msg
     | VKS VKS.Msg
       --
@@ -609,184 +567,12 @@ update msg model =
             in
             ( newModel, Cmd.map VKS newCmd )
 
-        Acceptability message ->
+        Acceptability submsg ->
             let
-                prevState =
-                    Logic.getState model.acceptabilityTask
-
-                toNextStep int step =
-                    Delay.after int (Acceptability (Acceptability.NextStepCinematic step))
-
-                getTrial =
-                    Logic.getTrial model.acceptabilityTask
+                ( newModel, newCmd ) =
+                    Acceptability.update submsg model
             in
-            case ( prevState, getTrial ) of
-                ( Just pState, Just trial ) ->
-                    case message of
-                        Acceptability.NextStepCinematic step ->
-                            case step of
-                                Acceptability.Listening ->
-                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Listening } model.acceptabilityTask }
-                                    , Delay.after 500 (PlaysoundInJS trial.audio.url)
-                                    )
-
-                                Acceptability.Answering ->
-                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.Answering } model.acceptabilityTask }, Delay.after trial.timeout (Acceptability (Acceptability.UserPressedButton Nothing)) )
-
-                                Acceptability.End ->
-                                    ( { model | acceptabilityTask = Logic.update { pState | step = Acceptability.End } model.acceptabilityTask |> Logic.next pState }
-                                    , toNextStep 0 Acceptability.Start
-                                    )
-
-                                Acceptability.Start ->
-                                    ( { model | acceptabilityTask = Logic.update Acceptability.newLoop model.acceptabilityTask }, Delay.after 0 (PlaysoundInJS beep) )
-
-                                _ ->
-                                    ( model, Cmd.none )
-
-                        Acceptability.StartMain _ _ ->
-                            ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask Acceptability.initState }, Cmd.none )
-
-                        Acceptability.UserPressedButton maybeBool ->
-                            let
-                                forward =
-                                    if pState.step == Acceptability.Answering then
-                                        Task.perform (\timestamp -> Acceptability (Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp)) Time.now
-
-                                    else
-                                        Cmd.none
-                            in
-                            ( model, forward )
-
-                        Acceptability.UserPressedButtonWithTimestamp maybeBool timestamp ->
-                            ( { model
-                                | acceptabilityTask =
-                                    Logic.update
-                                        { pState
-                                            | step = Acceptability.End
-                                            , evaluation = Acceptability.maybeBoolToEvaluation maybeBool
-                                            , userAnsweredAt = Just timestamp
-                                        }
-                                        model.acceptabilityTask
-                              }
-                            , toNextStep model.endAcceptabilityDuration Acceptability.End
-                            )
-
-                        Acceptability.AudioEnded ( name, timestamp ) ->
-                            if name == beep then
-                                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask }, Cmd.none )
-
-                            else
-                                ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask }
-                                , toNextStep 0 Acceptability.Answering
-                                )
-
-                        Acceptability.AudioStarted ( name, timestamp ) ->
-                            if name == beep then
-                                ( { model | acceptabilityTask = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptabilityTask }, toNextStep 0 Acceptability.Listening )
-
-                            else
-                                ( { model | acceptabilityTask = Logic.update { pState | audioStartedAt = Just timestamp } model.acceptabilityTask }
-                                , Cmd.none
-                                )
-
-                        Acceptability.StartTraining ->
-                            ( model, Cmd.batch [ Nav.pushUrl model.key "start" ] )
-
-                        _ ->
-                            ( model, Cmd.none )
-
-                _ ->
-                    case message of
-                        Acceptability.StartMain _ _ ->
-                            ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask Acceptability.initState, endAcceptabilityDuration = 500 }, toNextStep 0 Acceptability.Init )
-
-                        Acceptability.RuntimeShuffledTrials info trials ->
-                            case trials of
-                                Result.Ok shuffledTrials ->
-                                    if List.filter (\block -> List.length block < 4) shuffledTrials == [ [] ] then
-                                        ( { model | acceptabilityTask = Acceptability.start info (List.concat shuffledTrials) }, Cmd.none )
-
-                                    else
-                                        ( model, Delay.after 0 (ServerRespondedWithAllPretestData (List.concat shuffledTrials) info) )
-
-                                Result.Err _ ->
-                                    ( { model | acceptabilityTask = Logic.Err "Error whhen I tried to shuffle trials" }, Cmd.none )
-
-                        Acceptability.UserClickedSaveMsg ->
-                            let
-                                responseHandler =
-                                    \records -> Acceptability (Acceptability.ServerRespondedWithLastRecords records)
-                            in
-                            ( { model | acceptabilityTask = Logic.Loading }, Acceptability.saveAcceptabilityData responseHandler model.user model.acceptabilityTask )
-
-                        Acceptability.ServerRespondedWithLastRecords (Result.Ok _) ->
-                            ( { model | acceptabilityTask = Logic.Loading }
-                            , pushUrl model.key "end"
-                            )
-
-                        Acceptability.ServerRespondedWithLastRecords (Result.Err reason) ->
-                            ( { model | acceptabilityTask = Logic.Err <| Data.buildErrorMessage reason ++ "Please report this error message to yacourt@unice.fr with a nice screenshot!" }, Cmd.none )
-
-                        _ ->
-                            ( model, Cmd.none )
-
-        ServerRespondedWithAllPretestData trials info ->
-            let
-                generateOrganizedTrials =
-                    Random.List.shuffle trials
-                        |> Random.andThen
-                            (\shuffledTrials ->
-                                let
-                                    targets =
-                                        List.filter (\datum -> datum.trialType == Acceptability.Target) shuffledTrials
-
-                                    distractors =
-                                        List.filter (\datum -> datum.trialType == Acceptability.Distractor) shuffledTrials
-                                in
-                                Random.constant (organizeAcceptabilityTrials targets distractors)
-                                    |> Random.andThen
-                                        (\organizedTrials_ ->
-                                            case organizedTrials_ of
-                                                Result.Err reason ->
-                                                    Random.constant (Result.Err reason)
-
-                                                Result.Ok tr ->
-                                                    Random.Extra.sequence (swapTargetWithOneDistractor tr)
-                                                        |> Random.andThen
-                                                            (\swapedTargets ->
-                                                                Random.constant
-                                                                    (--if notLeakingBlock then
-                                                                     Result.Ok
-                                                                        (trainingTrials :: swapedTargets)
-                                                                     --else
-                                                                     -- Result.Err Acceptability.FirstDistractorMissing
-                                                                    )
-                                                            )
-                                        )
-                            )
-                        |> Random.generate
-                            (\st ->
-                                Acceptability
-                                    (Acceptability.RuntimeShuffledTrials info st)
-                            )
-
-                trainingTrials =
-                    List.filter (\datum -> datum.trialType == Acceptability.Training) trials
-
-                swapTargetWithOneDistractor : List (List Acceptability.Trial) -> List (Random.Generator (List Acceptability.Trial))
-                swapTargetWithOneDistractor tr =
-                    List.map
-                        (\block ->
-                            Random.int 1 (List.length block - 1)
-                                |> Random.andThen
-                                    (\position ->
-                                        Random.constant (List.Extra.swapAt 0 position block)
-                                    )
-                        )
-                        tr
-            in
-            ( { model | infos = RemoteData.Success (ExperimentInfo.toDict info) }, generateOrganizedTrials )
+            ( newModel, Cmd.map Acceptability newCmd )
 
         UserToggledInCloudWords word ->
             ( { model | cloudWords = CloudWords.toggle word model.cloudWords }, Cmd.none )

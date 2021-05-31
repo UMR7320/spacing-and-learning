@@ -91,7 +91,7 @@ instructions content msgToTraining =
     div [ class "flex flex-col items-center" ]
         [ h1 [] [ text "Instructions" ]
         , fromMarkdown content
-        , button { message = msgToTraining, txt = "Start Training", isDisabled = False }
+        , button { message = msgToTraining, txt = "Continue", isDisabled = False }
         ]
 
 
