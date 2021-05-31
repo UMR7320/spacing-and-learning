@@ -102,7 +102,16 @@ view task =
 
                       else
                         text ""
-                    , View.button { txt = "Next Item", message = UserClickedNextTrial, isDisabled = False }
+                    , View.button
+                        { txt = "Next Item"
+                        , message = UserClickedNextTrial
+                        , isDisabled =
+                            if data.state.knowledge == Known && List.all String.isEmpty [ data.state.usage, data.state.definition ] then
+                                True
+
+                            else
+                                False
+                        }
                     ]
 
                 Nothing ->

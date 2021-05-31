@@ -22071,7 +22071,15 @@ var $author$project$Pretest$VKS$view = function (task) {
 											]))
 									])) : $rtfeldman$elm_css$Html$Styled$text(''),
 								$author$project$View$button(
-								{isDisabled: false, message: $author$project$Pretest$VKS$UserClickedNextTrial, txt: 'Next Item'})
+								{
+									isDisabled: (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) && A2(
+										$elm$core$List$all,
+										$elm$core$String$isEmpty,
+										_List_fromArray(
+											[data.state.usage, data.state.definition]))) ? true : false,
+									message: $author$project$Pretest$VKS$UserClickedNextTrial,
+									txt: 'Next Item'
+								})
 							]);
 					} else {
 						return _List_fromArray(
@@ -30584,7 +30592,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52139" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49826" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
