@@ -31,7 +31,7 @@ decodeTranslationInput =
                 |> required "UID" string
                 |> required "Word_Text" string
                 |> required "Word_Audio" Data.decodeAudioFiles
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" Decode.bool False
                 |> required "Word_Text" string
     in
     Data.decodeRecords decoder

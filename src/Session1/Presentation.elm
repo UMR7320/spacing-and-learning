@@ -15,6 +15,7 @@ import Progressbar exposing (progressBar)
 import Session3.Synonym exposing (Msg(..))
 import Task
 import View
+import Json.Decode exposing (bool)
 
 
 type Entry
@@ -159,7 +160,7 @@ decodeTranslationInput =
                 |> required "Translation_1" string
                 |> optional "Translation_2" string "missing"
                 |> required "Word_Audio" Data.decodeAudioFiles
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" bool False
     in
     Data.decodeRecords decoder
 

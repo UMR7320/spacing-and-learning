@@ -204,7 +204,7 @@ decodeTranslationInput =
                 |> required "CU_Lvl2_Distractor_2" string
                 |> required "CU_Lvl2_Distractor_3" string
                 |> required "Feedback_CU_Lvl2" string
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
 

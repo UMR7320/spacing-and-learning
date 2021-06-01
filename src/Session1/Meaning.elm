@@ -24,6 +24,7 @@ import Random.List
 import Session2.Translation exposing (Msg(..))
 import String.Interpolate exposing (interpolate)
 import View
+import Json.Decode exposing (bool)
 
 
 type alias Meaning =
@@ -58,7 +59,7 @@ decodeMeaningInput =
                 |> optional "Distractor_3_Meaning" string "MISSING"
                 |> required "Feedback_Incorrect_Meaning" string
                 |> required "Feedback_Correct_Meaning" string
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" bool False
     in
     decodeRecords decoder
 

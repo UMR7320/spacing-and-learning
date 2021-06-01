@@ -11940,24 +11940,12 @@ var $author$project$Session3$CU3$Trial = F7(
 	function (uid, writtenWord, audioSentence, context, amorce, feedback, isTraining) {
 		return {amorce: amorce, audioSentence: audioSentence, context: context, feedback: feedback, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
 	});
-var $author$project$Data$decodeBool = function (fieldname) {
-	var stringToBoolDecoder = function (str) {
-		if (str === 'true') {
-			return $elm$json$Json$Decode$succeed(true);
-		} else {
-			return $elm$json$Json$Decode$succeed(false);
-		}
-	};
-	return $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom(
-		A2(
-			$elm$json$Json$Decode$andThen,
-			stringToBoolDecoder,
-			A2($elm$json$Json$Decode$field, fieldname, $elm$json$Json$Decode$string)));
-};
 var $author$project$Session3$CU3$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'CU_Lvl3_Feedback',
@@ -12002,9 +11990,11 @@ var $author$project$Session3$Spelling3$Trial = F4(
 		return {audioSentence: audioSentence, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
 	});
 var $author$project$Session3$Spelling3$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A4(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 			'Word_Audio',
@@ -12048,12 +12038,11 @@ var $author$project$Session3$Synonym$decodeSynonymTrials = function () {
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'radical',
 		$elm$json$Json$Decode$string,
-		A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2(
-				$elm$json$Json$Decode$andThen,
-				stringToBoolDecoder,
-				A2($elm$json$Json$Decode$field, 'isTraining', $elm$json$Json$Decode$string)),
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'isTraining',
+			$elm$json$Json$Decode$bool,
+			false,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'post',
@@ -12621,6 +12610,20 @@ var $author$project$Session1$ContextUnderstanding$Trial = F8(
 	function (uid, text, target, distractor1, distractor2, distractor3, definition, isTraining) {
 		return {definition: definition, distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, target: target, text: text, uid: uid};
 	});
+var $author$project$Data$decodeBool = function (fieldname) {
+	var stringToBoolDecoder = function (str) {
+		if (str === 'true') {
+			return $elm$json$Json$Decode$succeed(true);
+		} else {
+			return $elm$json$Json$Decode$succeed(false);
+		}
+	};
+	return $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom(
+		A2(
+			$elm$json$Json$Decode$andThen,
+			stringToBoolDecoder,
+			A2($elm$json$Json$Decode$field, fieldname, $elm$json$Json$Decode$string)));
+};
 var $author$project$Session1$ContextUnderstanding$decodeTranslationInput = function () {
 	var decoder = A2(
 		$author$project$Data$decodeBool,
@@ -12672,9 +12675,11 @@ var $author$project$Session1$Meaning$Trial = F9(
 		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, feedbackCorrect: feedbackCorrect, feedbackIncorrect: feedbackIncorrect, isTraining: isTraining, target: target, uid: uid, writtenWord: writtenWord};
 	});
 var $author$project$Session1$Meaning$decodeMeaningInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Feedback_Correct_Meaning',
@@ -12729,9 +12734,11 @@ var $author$project$Session1$Presentation$Trial = F8(
 		return {audio: audio, definition: definition, example: example, isTraining: isTraining, text: text, translation1: translation1, translation2: translation2, uid: uid};
 	});
 var $author$project$Session1$Presentation$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Word_Audio',
@@ -12791,12 +12798,11 @@ var $author$project$Session1$Spelling$decodeTrials = function () {
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'Word_Audio',
 		$author$project$Data$decodeAudioFiles,
-		A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2(
-				$elm$json$Json$Decode$andThen,
-				stringToBoolDecoder,
-				A2($elm$json$Json$Decode$field, 'isTraining', $elm$json$Json$Decode$string)),
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'isTraining',
+			$elm$json$Json$Decode$bool,
+			false,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'Distractor_3_CCS',
@@ -12865,9 +12871,11 @@ var $author$project$Session2$CU2$Trial = function (uid) {
 	};
 };
 var $author$project$Session2$CU2$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Feedback_CU_Lvl2',
@@ -12928,9 +12936,11 @@ var $author$project$Session2$Spelling$decodeTranslationInput = function () {
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'Word_Text',
 		$elm$json$Json$Decode$string,
-		A2(
-			$author$project$Data$decodeBool,
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 			'isTraining',
+			$elm$json$Json$Decode$bool,
+			false,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'Word_Audio',
@@ -12962,9 +12972,11 @@ var $author$project$Session2$Translation$Trial = F9(
 		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, question: question, target: target, translation2: translation2, uid: uid, word: word};
 	});
 var $author$project$Session2$Translation$decodeTrials = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A4(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 			'Word_Text',
@@ -31464,7 +31476,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56021" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55911" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

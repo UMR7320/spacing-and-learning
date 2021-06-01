@@ -215,7 +215,7 @@ decodeSynonymTrials =
                 |> required "pre" Decode.string
                 |> required "stim" Decode.string
                 |> required "post" Decode.string
-                |> custom (Decode.field "isTraining" Decode.string |> Decode.andThen stringToBoolDecoder)
+                |> optional "isTraining" Decode.bool False
                 |> required "radical" Decode.string
     in
     decodeRecords decoder

@@ -136,7 +136,7 @@ decodeTrials =
                 |> optional "Distractor_2_Translation" string "Missing distractor"
                 |> optional "Distractor_3_Translation" string "missing distractor"
                 |> optional "Word_Text" string "MISSING"
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
 

@@ -263,7 +263,7 @@ decodeTrials =
                 |> required "Distractor_1_CCS" Decode.string
                 |> required "Distractor_2_CCS" Decode.string
                 |> required "Distractor_3_CCS" Decode.string
-                |> custom (Decode.field "isTraining" Decode.string |> Decode.andThen stringToBoolDecoder)
+                |> optional "isTraining" Decode.bool False
                 |> required "Word_Audio" Data.decodeAudioFiles
     in
     decodeRecords decoder

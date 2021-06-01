@@ -147,7 +147,7 @@ decodeTranslationInput =
                 |> required "CU_Lvl3_Presentation" string
                 |> required "CU_Lvl3_TextToComplete_amorce" string
                 |> required "CU_Lvl3_Feedback" string
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
 
