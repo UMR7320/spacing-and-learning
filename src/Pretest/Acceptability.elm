@@ -347,8 +347,8 @@ getRecords =
         , url =
             Data.buildQuery
                 { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Pilote Acceptability"
+                , base = "acceptability"
+                , view_ = "all"
                 }
         , body = Http.emptyBody
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials

@@ -88,7 +88,7 @@ shuffledOptions state fb radioMsg trial optionsOrder =
 
 
 instructions content msgToTraining =
-    div [ class "flex flex-col items-center" ]
+    div [ class "flex text-xl flex-col items-center" ]
         [ h1 [] [ text "Instructions" ]
         , fromMarkdown content
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }

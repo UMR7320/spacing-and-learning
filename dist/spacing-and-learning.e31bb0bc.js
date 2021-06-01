@@ -11685,7 +11685,7 @@ var $author$project$Pretest$Acceptability$getRecords = $elm$http$Http$task(
 			$author$project$Data$handleJsonResponse($author$project$Pretest$Acceptability$decodeAcceptabilityTrials)),
 		timeout: $elm$core$Maybe$Just(5000),
 		url: $author$project$Data$buildQuery(
-			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Pilote Acceptability'})
+			{app: $author$project$Data$apps.spacing, base: 'acceptability', view_: 'all'})
 	});
 var $author$project$Pretest$SPR$Trial = F6(
 	function (id, taggedSegments, question, isGrammatical, isTraining, feedback) {
@@ -21531,7 +21531,7 @@ var $author$project$View$instructions = F2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex text-xl flex-col items-center')
 				]),
 			_List_fromArray(
 				[
