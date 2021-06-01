@@ -62,7 +62,14 @@ type alias ShuffledPretest =
 
 
 type alias Model superModel =
-    { superModel | spr : SPR.SPR, sentenceCompletion : SentenceCompletion.SentenceCompletion, pretest : Pretest, vks : Logic.Task VKS.Trial VKS.State, acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State }
+    { superModel
+        | spr : SPR.SPR
+        , sentenceCompletion : SentenceCompletion.SentenceCompletion
+        , pretest : Pretest
+        , vks : Logic.Task VKS.Trial VKS.State
+        , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
+        , yesno : YesNo.YN
+    }
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -145,7 +152,8 @@ update msg model =
                             | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials)
                             , spr = SPR.init infos spr
                             , sentenceCompletion = SentenceCompletion.init infos sc
-                            , vks = VKS.init infos vks
+                            , vks = VKS.init infos (List.filter (not << .isTraining) vks)
+                            , yesno = YesNo.init infos yn
                           }
                         , Cmd.none
                         )

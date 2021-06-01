@@ -8,7 +8,7 @@ import Html.Styled.Attributes as A exposing (class, type_)
 import Html.Styled.Events as E
 import Http
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
 import Pretest.Acceptability exposing (ErrorBlock(..))
@@ -109,6 +109,9 @@ view task =
                             if data.state.knowledge == Known && List.all String.isEmpty [ data.state.usage, data.state.definition ] then
                                 True
 
+                            else if data.state.knowledge == NoAnswer then
+                                True
+
                             else
                                 False
                         }
@@ -153,6 +156,7 @@ decodeAcceptabilityTrials =
             Decode.succeed Trial
                 |> required "id" Decode.string
                 |> required "Word_Text" Decode.string
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
 
@@ -160,6 +164,7 @@ decodeAcceptabilityTrials =
 type alias Trial =
     { id : String
     , verb : String
+    , isTraining : Bool
     }
 
 

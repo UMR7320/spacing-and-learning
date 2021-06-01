@@ -36,7 +36,7 @@ view exp optionsOrder =
         Logic.Running Logic.Training ({ mainTrials, current, state, feedback } as data) ->
             case ( current, data.state.step ) of
                 ( Just trial, Listening nTimes ) ->
-                    div [ class "flex flex-col items-center" ]
+                    div [ class "flex flex-col text-lg items-center" ]
                         [ Html.p [ class "p-4" ] [ text trial.context ]
                         , if nTimes > 0 then
                             View.audioButton UserClickedAudio trial.audioSentence.url ("dialog " ++ String.fromInt nTimes)
@@ -47,7 +47,7 @@ view exp optionsOrder =
                             { isDisabled =
                                 nTimes == 3
                             , message = UserClickedStartAnswering
-                            , txt = "What happened?"
+                            , txt = "See descriptions and respond to question"
                             }
                         ]
 

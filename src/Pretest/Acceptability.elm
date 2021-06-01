@@ -765,7 +765,7 @@ toEvaluation x =
             UserPressedButton (Just False)
 
         _ ->
-            UserPressedButton Nothing
+            NoOp
 
 
 subscriptions model =

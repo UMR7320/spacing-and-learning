@@ -256,6 +256,7 @@ init _ url key =
                 , sentenceCompletion = Logic.Loading
                 , vks = Logic.Loading
                 , acceptabilityTask = Logic.Loading
+                , yesno = Logic.Loading
               }
             , Cmd.map Pretest (Tuple.second Pretest.attempt)
             )
@@ -671,6 +672,7 @@ subscriptions model =
         [ Sub.map Spelling2 (Scrabble.subscriptions model)
         , Sub.map SPR (SPR.subscriptions model.spr)
         , Sub.map Acceptability (Acceptability.subscriptions model)
+        , Sub.map YesNo (YesNo.subscriptions model)
         ]
 
 

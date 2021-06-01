@@ -11,6 +11,7 @@ module View exposing
     , header
     , instructions
     , introToMain
+    , loading
     , navOut
     , navigationButton
     , notFound
@@ -20,6 +21,7 @@ module View exposing
     , shuffledOptions
     , tooltip
     , trainingWheelsGeneric
+    , unclickableButton
     , viewTraining
     )
 
@@ -87,6 +89,14 @@ shuffledOptions state fb radioMsg trial optionsOrder =
     ordoredOptions
 
 
+unclickableButton color txt =
+    div [ class <| "flex flex-col items-center m-2 p-4 rounded-lg " ++ color ++ " justify-center" ] [ text txt ]
+
+
+loading =
+    div [] [ text "Loading... Please don't quit or data will be lost" ]
+
+
 instructions content msgToTraining =
     div [ class "flex text-xl flex-col items-center" ]
         [ h1 [] [ text "Instructions" ]
@@ -96,7 +106,7 @@ instructions content msgToTraining =
 
 
 end endInfo saveDataMsg linkToNextTask =
-    div [ class "flex flex-col w-full items-center" ]
+    div [ class "flex flex-col text-xl w-full items-center" ]
         [ fromMarkdown endInfo
         , a [ href linkToNextTask ]
             [ button
@@ -418,7 +428,7 @@ radio value isChecked isCorrect feedbackMode msg =
 
 introToMain : msg -> Html msg
 introToMain msg =
-    div [ class "container flex flex-col w-full items-center justify-center" ]
+    div [ class "container flex flex-col text-xl w-full items-center justify-center" ]
         [ h3 [] [ text "Now you understand the activity, let's try our target words." ]
         , button
             { message = msg

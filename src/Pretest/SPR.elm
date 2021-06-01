@@ -11,10 +11,11 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Logic
+import Progressbar exposing (progressBar)
 import Task
 import Task.Parallel as Para
 import Time
-import View
+import View exposing (unclickableButton)
 
 
 taskId =
@@ -439,10 +440,6 @@ viewTask data trial endTrialMsg =
                 ]
 
 
-unclickableButton color txt =
-    div [ Attr.class <| "flex flex-col items-center m-2 p-4 rounded-lg " ++ color ++ " justify-center" ] [ text txt ]
-
-
 view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
 view task =
     case task of
@@ -469,7 +466,9 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ viewTask data trial UserClickedNextTrial ]
+                    [ progressBar data.history data.mainTrials
+                    , viewTask data trial UserClickedNextTrial
+                    ]
 
                 Nothing ->
                     [ div [ Attr.class "flex flex-col items-center" ] [ View.fromMarkdown data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here to save your data", isDisabled = False } ] ]
