@@ -1,11 +1,10 @@
 module Progressbar exposing (..)
 
 import Css
-import Css.Transitions exposing (transition)
 import Html.Styled as Html exposing (Html)
-import Html.Styled.Attributes as Html exposing (class, style)
+import Html.Styled.Attributes as Html exposing (class)
 import Tuple
-import View exposing (pct)
+import View
 
 
 progressBar : List ( trial, state ) -> List trial -> Html msg

@@ -2,8 +2,8 @@ module Session3.Spelling3 exposing (..)
 
 import Data
 import Dict
-import ExperimentInfo exposing (Task)
-import Html.Styled as Html exposing (Html, div, fromUnstyled, h1, p, span, text)
+import ExperimentInfo
+import Html.Styled exposing (Html, div, fromUnstyled, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
@@ -11,66 +11,60 @@ import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
+import Ports
+import Session1.Presentation exposing (Msg(..))
 import View
 
 
 view :
     Logic.Task Trial State
-    ->
-        { e
-            | userClickedAudio : String -> msg
-            , toggleFeedback : msg
-            , nextTrialMsg : msg
-            , startMainMsg : List Trial -> ExperimentInfo.Task -> msg
-            , userChangedInput : String -> msg
-            , saveData : msg
-        }
-    -> Html msg
-view exp { userClickedAudio, toggleFeedback, nextTrialMsg, saveData, startMainMsg, userChangedInput } =
+    -> Html Msg
+view exp =
     case exp of
         Logic.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
-        Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Instructions data ->
+            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+
+        Logic.Running Logic.Training ({ current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
-                    div []
-                        [ View.viewTraining data.infos.instructions
-                            [ View.trainingWheelsGeneric (List.length history) data.infos.trainingWheel []
-                            , View.audioButton userClickedAudio trial.audioSentence.url "word"
-                            , div [ class "p-8" ] [ View.floatingLabel "" state.userAnswer userChangedInput feedback ]
-                            , View.genericSingleChoiceFeedback
-                                { isVisible = feedback
-                                , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
-                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.writtenWord ] )
-                                , userAnswer = state.userAnswer |> String.trim |> String.toLower
-                                , target = trial.writtenWord
-                                , button = View.navigationButton toggleFeedback nextTrialMsg feedback
-                                }
-                            ]
-                        ]
-
-                Nothing ->
-                    View.introToMain (startMainMsg mainTrials data.infos)
-
-        Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
-            case current of
-                Just trial ->
-                    div [ class "container flex flex-col justify-center items-center max-w-3xl m-4 p-4" ]
-                        [ div [ class "h-8 w-8 pb-16", Html.Styled.Events.onClick (userClickedAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
-                        , div [ class "pb-8" ] [ View.floatingLabel "Type here" state.userAnswer userChangedInput feedback ]
+                    div [ class "flex flex-col items-center" ]
+                        [ View.trainingWheelsGeneric (List.length history) data.infos.trainingWheel []
+                        , View.audioButton UserClickedPlayAudio trial.audioSentence.url "word"
+                        , div [ class "p-8" ] [ View.floatingLabel "" state.userAnswer UserChangedInput feedback ]
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.writtenWord ] )
                             , userAnswer = state.userAnswer |> String.trim |> String.toLower
                             , target = trial.writtenWord
-                            , button = View.navigationButton toggleFeedback nextTrialMsg feedback
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
                             }
                         ]
 
                 Nothing ->
-                    View.end data.infos.end saveData "context-understanding"
+                    View.introToMain UserClickedStartMain
+
+        Logic.Running Logic.Main ({ current, state, feedback } as data) ->
+            case current of
+                Just trial ->
+                    div [ class "container flex flex-col justify-center items-center max-w-3xl m-4 p-4" ]
+                        [ div [ class "h-8 w-8 pb-16", Html.Styled.Events.onClick (UserClickedPlayAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
+                        , div [ class "pb-8" ] [ View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback ]
+                        , View.genericSingleChoiceFeedback
+                            { isVisible = feedback
+                            , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
+                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.writtenWord ] )
+                            , userAnswer = state.userAnswer |> String.trim |> String.toLower
+                            , target = trial.writtenWord
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
+                            }
+                        ]
+
+                Nothing ->
+                    View.end data.infos.end UserClickedSaveData "context-understanding"
 
         Logic.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
@@ -82,16 +76,48 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, saveData, startMainMs
 type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
-    | UserClickedStartIntro (List Trial)
-    | UserClickedStartMain (List Trial) Task
+    | UserClickedStartTraining
+    | UserClickedStartMain
     | UserChangedInput String
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedPlayAudio String
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
 getTrialsFromServer msgHandler =
     Data.getTrialsFromServer_ "input" "ContextUnderstandingLvl3" msgHandler decodeTranslationInput
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | spelling3 = Logic.next initState model.spelling3 }, Cmd.none )
+
+        UserClickedToggleFeedback ->
+            ( { model | spelling3 = Logic.toggle model.spelling3 }, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | spelling3 = Logic.startTraining model.spelling3 }, Cmd.none )
+
+        UserClickedStartMain ->
+            ( { model | spelling3 = Logic.startMain model.spelling3 initState }, Cmd.none )
+
+        UserChangedInput new ->
+            ( { model | spelling3 = Logic.update { uid = "", userAnswer = new } model.spelling3 }, Cmd.none )
+
+        UserClickedSaveData ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.scrabbleTask )
+
+        ServerRespondedWithLastRecords _ ->
+            ( model, Cmd.none )
+
+        UserClickedPlayAudio url ->
+            ( model, Ports.playAudio url )
 
 
 decodeTranslationInput : Decoder (List Trial)
@@ -102,7 +128,7 @@ decodeTranslationInput =
                 |> required "UID" string
                 |> required "Word_Text" string
                 |> optional "Word_Audio" Data.decodeAudioFiles (Data.AudioFile "" "")
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
 

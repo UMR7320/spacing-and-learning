@@ -1,12 +1,11 @@
 module Example exposing (..)
 
 import Data
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Expect
 import List.Extra
 import Main exposing (isNextSentence, nextNewSentenceType, organizeAcceptabilityTrials, removesItems)
-import Pretest.Acceptability as A exposing (..)
-import Session2.Scrabble exposing (dedupe)
+import Pretest.Acceptability as A
+import Session2.Spelling exposing (dedupe)
 import Test exposing (..)
 
 
@@ -112,98 +111,6 @@ suite =
                             Nothing
                     in
                     Expect.equal expectedResult (List.Extra.find predicate searchedList)
-            , test "Returns the second element of the list when its category is not already in the buff" <|
-                \_ ->
-                    let
-                        searchedList =
-                            [ { sentenceType = A.RelativeClause } ]
-
-                        predicate =
-                            nextNewSentenceType [ { sentenceType = A.RelativeClause } ]
-
-                        expectedResult =
-                            Nothing
-                    in
-                    Expect.equal expectedResult (List.Extra.find predicate searchedList)
-            ]
-        , describe "Test suite for organizeAcceptabilityTrials"
-            [ test "Without targets or distractors we get an empty list" <|
-                \_ -> Expect.equal (Result.Ok []) (organizeAcceptabilityTrials [] [])
-            , skip <|
-                test "With one target and no distractors it returns an Error message" <|
-                    \_ ->
-                        Debug.todo ""
-
-            {--Expect.equal
-                            ( Result.Err "I couldn't find the first distractor", [] )
-                            (organizeAcceptabilityTrials
-                                [ testTarget
-                                ]
-                                []
-                            )--}
-            , test "Without targets, returns nothing" <|
-                \_ ->
-                    Expect.equal
-                        (Result.Ok [])
-                        (organizeAcceptabilityTrials
-                            []
-                            [ testDistractor ]
-                        )
-            , skip <|
-                test "With one target and three times the same distractor it returns an Error" <|
-                    \_ ->
-                        Debug.todo ""
-
-            {--Expect.equal
-                            (Result.Err "I couldn't find the second distractor")
-                            (organizeAcceptabilityTrials
-                                [ testTarget ]
-                                [ testDistractor, testDistractor, testDistractor ]
-                            )--}
-            , skip <|
-                test "With one target and three different distractors it returns a correctly built list" <|
-                    \_ ->
-                        let
-                            distractors =
-                                [ testDistractor
-                                , { testDistractor | sentenceType = A.EmbeddedQuestion, isGrammatical = False }
-                                , { testDistractor
-                                    | sentenceType = A.PresentPerfectOrSimplePast
-                                    , isGrammatical = False
-                                  }
-                                ]
-
-                            targets =
-                                [ testTarget ]
-                        in
-                        Expect.equal
-                            (Result.Ok [ testTarget :: distractors ])
-                            (organizeAcceptabilityTrials
-                                targets
-                                distractors
-                            )
-            , skip <|
-                test "With 2 targets and 6 different distractors it returns a correctly built list" <|
-                    \_ ->
-                        let
-                            distractors1 =
-                                [ { testDistractor | sentence = "kjzabekjza" }, { testDistractor | sentenceType = A.EmbeddedQuestion, sentence = "sentence1" }, { testDistractor | sentenceType = A.PresentPerfectOrSimplePast, sentence = "sentence2" } ]
-
-                            distractors2 =
-                                [ { testDistractor | sentence = "sentence blabla" }, { testDistractor | sentenceType = A.EmbeddedQuestion }, { testDistractor | sentenceType = A.PresentPerfectOrSimplePast } ]
-
-                            targets =
-                                List.concatMap (List.repeat 2) [ testTarget ]
-
-                            result =
-                                [ testTarget :: distractors2, testTarget :: distractors1 ]
-                        in
-                        Expect.equal
-                            (Result.Ok result)
-                            (organizeAcceptabilityTrials
-                                targets
-                                (distractors1 ++ distractors2)
-                            )
             ]
         ]
 

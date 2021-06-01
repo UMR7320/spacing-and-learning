@@ -3,20 +3,20 @@ module Session3.CU3 exposing (..)
 import Data
 import Dict
 import ExperimentInfo
-import Html.Styled as Html exposing (Html, div, fromUnstyled, span, text)
+import Html.Styled as Html exposing (div, span, text)
 import Html.Styled.Attributes exposing (class)
-import Html.Styled.Events
 import Http exposing (Error)
-import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Progressbar exposing (progressBar)
-import Session1.CU1 exposing (CU1Msg(..))
+import Random
+import Random.List
+import Session3.Spelling3 exposing (Msg(..))
 import View
 
 
-view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userChangedInput, saveDataMsg } =
+view exp =
     case exp of
         Logic.NotStarted ->
             div [] [ text "Task is not started yet." ]
@@ -27,31 +27,32 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userCha
         Logic.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
 
-        Logic.Intr ({ trainingTrials, mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Instructions data ->
+            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+
+        Logic.Running Logic.Training { current, state, feedback } ->
             case current of
                 Just trial ->
-                    div []
-                        [ View.viewTraining data.infos.instructions
-                            [ Html.p [ class "max-w-lg  text-lg m-4" ]
-                                [ View.fromMarkdown trial.context
-                                , Html.br [] []
-                                ]
-                            , div [ class "flex flex-row p-4 text-lg items-center" ]
-                                [ View.fromMarkdown trial.amorce
-                                , View.floatingLabel "" state.userAnswer userChangedInput feedback
-                                ]
-                            , View.genericNeutralFeedback
-                                { isVisible = feedback
-                                , feedback_Correct = ( trial.feedback, [] )
-                                , button = View.navigationButton toggleFeedback nextTrialMsg feedback
-                                }
+                    div [ class "flex flex-col items-center" ]
+                        [ Html.p [ class "max-w-lg  text-lg m-4" ]
+                            [ View.fromMarkdown trial.context
+                            , Html.br [] []
                             ]
+                        , div [ class "flex flex-row p-4 text-lg items-center" ]
+                            [ span [ class "pr-4" ] [ View.fromMarkdown trial.amorce ]
+                            , View.floatingLabel "" state.userAnswer UserChangedInput feedback
+                            ]
+                        , View.genericNeutralFeedback
+                            { isVisible = feedback
+                            , feedback_Correct = ( trial.feedback, [] )
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
+                            }
                         ]
 
                 Nothing ->
-                    View.introToMain (startMainMsg mainTrials data.infos)
+                    View.introToMain UserClickedStartMain
 
-        Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
+        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
@@ -62,28 +63,60 @@ view exp { userClickedAudio, toggleFeedback, nextTrialMsg, startMainMsg, userCha
                             , Html.br [] []
                             ]
                         , div [ class "flex flex-row p-4 text-lg items-center" ]
-                            [ View.fromMarkdown trial.amorce
-                            , View.floatingLabel "" state.userAnswer userChangedInput feedback
+                            [ span [ class "pr-4" ] [ View.fromMarkdown trial.amorce ]
+                            , View.floatingLabel "" state.userAnswer UserChangedInput feedback
                             ]
                         , View.genericNeutralFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( trial.feedback, [] )
-                            , button = View.navigationButton toggleFeedback nextTrialMsg feedback
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
                             }
                         ]
 
                 Nothing ->
-                    View.end data.infos.end saveDataMsg "/"
+                    View.end data.infos.end UserClickedSaveData "/"
 
 
 type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
-    | UserClickedRadioButton String
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
+    | UserClickedStartMain
     | UserChangedInput String
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedStartTraining
+    | RuntimeShuffledOptionsOrder (List Int)
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | cu3 = Logic.next initState model.cu3 }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
+
+        UserClickedToggleFeedback ->
+            ( { model | cu3 = Logic.toggle model.cu3 }, Cmd.none )
+
+        UserClickedStartMain ->
+            ( { model | cu3 = Logic.startMain model.cu3 initState }, Cmd.none )
+
+        UserChangedInput new ->
+            ( { model | cu3 = Logic.update { uid = "", userAnswer = new } model.cu3 }, Cmd.none )
+
+        UserClickedSaveData ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.scrabbleTask )
+
+        ServerRespondedWithLastRecords _ ->
+            ( model, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | cu3 = Logic.startTraining model.cu3 }, Cmd.none )
+
+        RuntimeShuffledOptionsOrder ls ->
+            ( { model | optionsOrder = ls }, Cmd.none )
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -114,7 +147,7 @@ decodeTranslationInput =
                 |> required "CU_Lvl3_Presentation" string
                 |> required "CU_Lvl3_TextToComplete_amorce" string
                 |> required "CU_Lvl3_Feedback" string
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
 

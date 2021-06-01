@@ -9,38 +9,31 @@ module View exposing
     , genericNeutralFeedback
     , genericSingleChoiceFeedback
     , header
+    , instructions
     , introToMain
-    , keyValue
-    , navIn
+    , loading
     , navOut
     , navigationButton
     , notFound
     , pct
-    , play
     , radio
     , sentenceInSynonym
     , shuffledOptions
-    , simpleAudioPlayer
     , tooltip
     , trainingWheelsGeneric
-    , viewInstructions
-    , viewQuestion
+    , unclickableButton
     , viewTraining
     )
 
-import Array
 import Css
 import Css.Global
 import Css.Transitions
-import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
     exposing
         ( attribute
-        , autofocus
         , checked
         , class
-        , classList
         , css
         , href
         , id
@@ -50,7 +43,6 @@ import Html.Styled.Attributes
         )
 import Html.Styled.Events exposing (onClick)
 import Icons
-import Logic
 import Markdown
 import String.Interpolate exposing (interpolate)
 
@@ -97,8 +89,24 @@ shuffledOptions state fb radioMsg trial optionsOrder =
     ordoredOptions
 
 
+unclickableButton color txt =
+    div [ class <| "flex flex-col items-center m-2 p-4 rounded-lg " ++ color ++ " justify-center" ] [ text txt ]
+
+
+loading =
+    div [] [ text "Loading... Please don't quit or data will be lost" ]
+
+
+instructions content msgToTraining =
+    div [ class "flex text-xl flex-col items-center" ]
+        [ h1 [] [ text "Instructions" ]
+        , fromMarkdown content
+        , button { message = msgToTraining, txt = "Continue", isDisabled = False }
+        ]
+
+
 end endInfo saveDataMsg linkToNextTask =
-    div [ class "flex flex-col w-full items-center" ]
+    div [ class "flex flex-col text-xl w-full items-center" ]
         [ fromMarkdown endInfo
         , a [ href linkToNextTask ]
             [ button
@@ -108,10 +116,6 @@ end endInfo saveDataMsg linkToNextTask =
                 }
             ]
         ]
-
-
-play msg url =
-    div [ class "h-8 w-8 pt-4", Html.Styled.Events.onClick (msg url) ] [ fromUnstyled <| Icons.music ]
 
 
 navigationButton toggleFeedbackMsg nextTrialMsg feedback =
@@ -127,16 +131,6 @@ navigationButton toggleFeedbackMsg nextTrialMsg feedback =
             , txt = "Next item "
             , isDisabled = False
             }
-
-
-viewQuestion : Int -> { a | target : String } -> String -> Html msg
-viewQuestion trialn trial instructions =
-    h3 []
-        [ p []
-            [ text <| String.fromInt (trialn + 1) ++ ". " ++ instructions
-            , span [ class "italic" ] [ text <| trial.target ]
-            ]
-        ]
 
 
 bold string =
@@ -237,36 +231,14 @@ trainingBox =
 
 
 viewInstructions : String -> Html msg
-viewInstructions instructions =
+viewInstructions instructions_ =
     div [ class "flex flex-col" ]
         [ h2 [ class "font-bold" ] [ text "Instructions" ]
         , p [ class "pt-8 pb-8 font-medium" ]
-            [ pre [] [ fromMarkdown instructions ]
+            [ pre [] [ fromMarkdown instructions_ ]
             ]
         , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
         ]
-
-
-trainingWheels : Int -> String -> String -> Html msg
-trainingWheels trialn radical target =
-    let
-        helpSentence =
-            div [ class "flex flex-col pt-4 italic text-xl " ]
-                [ p []
-                    [ text "The synonym of "
-                    , span [ class "font-bold" ] [ text radical ]
-                    , text " is "
-                    , span [ class "font-bold" ] [ text target ]
-                    ]
-                , span [] [ text "Type it here and you're good to go!" ]
-                ]
-    in
-    case trialn of
-        0 ->
-            helpSentence
-
-        _ ->
-            div [] []
 
 
 trainingWheelsGeneric : Int -> String -> List String -> Html msg
@@ -284,9 +256,9 @@ trainingWheelsGeneric trialn pattern_ variables =
 
 
 viewTraining : String -> List (Html msg) -> Html msg
-viewTraining instructions content =
+viewTraining instructions_ content =
     div [ class "flex flex-col" ]
-        [ viewInstructions instructions, trainingBox content ]
+        [ viewInstructions instructions_, trainingBox content ]
 
 
 pct : Int -> List a -> Float
@@ -366,11 +338,6 @@ item name attributes =
     li [ class "mr-6" ] [ a attributes [ text name ] ]
 
 
-navIn : String -> String -> Html msg
-navIn name url =
-    item name [ href url ]
-
-
 navOut : String -> String -> Html msg
 navOut name url =
     item name [ href url, target "_blank", class "external" ]
@@ -412,19 +379,6 @@ notFound =
 
 
 -- MISC
-
-
-keyValue : String -> String -> List (Html msg)
-keyValue key value =
-    [ span
-        [ class "inline-block mr-6 w-12"
-        , class "text-gray-600 text-right text-xs uppercase"
-        ]
-        [ text key ]
-    , span
-        [ attribute "data-value" key ]
-        [ text value ]
-    ]
 
 
 radio : String -> Bool -> Bool -> Bool -> msg -> Html msg
@@ -474,7 +428,7 @@ radio value isChecked isCorrect feedbackMode msg =
 
 introToMain : msg -> Html msg
 introToMain msg =
-    div [ class "container flex flex-col w-full items-center justify-center" ]
+    div [ class "container flex flex-col text-xl w-full items-center justify-center" ]
         [ h3 [] [ text "Now you understand the activity, let's try our target words." ]
         , button
             { message = msg
@@ -614,17 +568,6 @@ button { message, txt, isDisabled } =
                 "visible"
         ]
         [ text txt ]
-
-
-simpleAudioPlayer : String -> Html msg
-simpleAudioPlayer src =
-    Html.Styled.audio
-        [ Html.Styled.Attributes.controls True
-        , Html.Styled.Attributes.src src
-        , Html.Styled.Attributes.autoplay True
-        , Html.Styled.Attributes.width 300
-        ]
-        []
 
 
 audioButton msg url audioName =

@@ -1,17 +1,15 @@
 module Session3.Synonym exposing (..)
 
-import Array
-import Data exposing (buildErrorMessage, decodeRecords)
+import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, div, fieldset, h1, h2, h3, h4, p, pre, span, text)
-import Html.Styled.Attributes exposing (class, disabled)
+import Html.Styled exposing (Html, div, h4, p, span, text)
+import Html.Styled.Attributes exposing (class)
 import Http
-import Icons
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Logic
-import Progressbar
+import Session1.ContextUnderstanding exposing (Msg(..))
 import View
 
 
@@ -19,9 +17,55 @@ type Msg
     = UserClickedFeedback
     | UserChangedInput String
     | UserClickedNextTrial
-    | UserClickedStartMainloop (List Trial) ExperimentInfo.Task
+    | UserClickedStartMainloop
     | SaveDataMsg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserCLickedStartTraining
+
+
+update msg model =
+    case msg of
+        UserClickedFeedback ->
+            ( { model
+                | synonymTask =
+                    model.synonymTask
+                        |> Logic.toggle
+              }
+            , Cmd.none
+            )
+
+        UserChangedInput newChoice ->
+            ( { model
+                | synonymTask =
+                    model.synonymTask
+                        |> Logic.update { uid = "", userAnswer = newChoice }
+              }
+            , Cmd.none
+            )
+
+        UserClickedNextTrial ->
+            ( { model
+                | synonymTask =
+                    model.synonymTask |> Logic.next initState
+              }
+            , Cmd.none
+            )
+
+        SaveDataMsg ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.translationTask )
+
+        UserClickedStartMainloop ->
+            ( { model | synonymTask = Logic.startMain model.synonymTask initState }, Cmd.none )
+
+        ServerRespondedWithLastRecords _ ->
+            ( model, Cmd.none )
+
+        UserCLickedStartTraining ->
+            ( { model | synonymTask = Logic.startTraining model.synonymTask }, Cmd.none )
 
 
 trainingWheels : Int -> String -> String -> Html msg
@@ -48,62 +92,47 @@ trainingWheels trialn radical target =
 
 viewTask :
     Logic.Task Trial State
-    ->
-        { toggleFeedbackMsg : msg
-        , updateInputMsg : String -> msg
-        , nextTrialMsg : msg
-        , toMainloopMsg : List Trial -> ExperimentInfo.Task -> msg
-        , saveDataMsg : msg
-        }
-    -> List (Html msg)
-viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloopMsg, saveDataMsg } =
+    -> List (Html Msg)
+viewTask experiment =
     case experiment of
         Logic.Err reason ->
             [ h4 [] [ p [] [ text ("Failure" ++ reason) ] ]
             ]
 
         Logic.NotStarted ->
-            [ text "I'm not started yet. Obviously." ]
+            [ text "I'm not started yet." ]
 
         Logic.Loading ->
             [ text "Loading..." ]
 
-        Logic.Intr task ->
+        Logic.Running Logic.Instructions data ->
+            [ View.instructions data.infos.instructions UserCLickedStartTraining ]
+
+        Logic.Running Logic.Training task ->
             let
                 toggleFeedback =
                     View.button
-                        { message = toggleFeedbackMsg
+                        { message = UserClickedFeedback
                         , txt = "Check my answer"
                         , isDisabled = False
                         }
-
-                viewInstructions x =
-                    div [ class "flex flex-col" ]
-                        [ h2 [ class "font-bold" ] [ text "Instructions" ]
-                        , p [ class "pt-8 pb-8 font-medium" ]
-                            [ pre [] [ View.fromMarkdown task.infos.instructions ]
-                            ]
-                        , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
-                        ]
 
                 trainingBox =
                     div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center " ]
             in
             case ( task.current, task.feedback ) of
                 ( Just x, False ) ->
-                    [ viewInstructions x
-                    , trainingBox
+                    [ trainingBox
                         [ trainingWheels (List.length task.history) x.radical x.target
-                        , div [ class "p-8" ] [ View.sentenceInSynonym x task.state updateInputMsg task.feedback ]
+                        , div [ class "p-8" ] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
                         , div [ class "m-8" ] [ toggleFeedback ]
                         ]
                     ]
 
                 ( Just x, True ) ->
-                    [ viewInstructions x
-                    , trainingBox
+                    [ trainingBox
                         [ trainingWheels (List.length task.history) x.stimulus x.target
-                        , div [ class "m-8" ] [ View.sentenceInSynonym x task.state updateInputMsg task.feedback ]
+                        , div [ class "m-8" ] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
                         , div [ class " rounded-md text-center object-center bg-green-300 m-8" ]
                             [ p [ class "p-6 text-xl text-white" ]
                                 [ text "The correct synonym for "
@@ -113,7 +142,7 @@ viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloo
                                 ]
                             , div [ class "pb-4" ]
                                 [ View.button
-                                    { message = nextTrialMsg
+                                    { message = UserClickedNextTrial
                                     , txt = "Next"
                                     , isDisabled = False
                                     }
@@ -123,15 +152,15 @@ viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloo
                     ]
 
                 ( Nothing, _ ) ->
-                    [ View.introToMain <| toMainloopMsg task.mainTrials task.infos ]
+                    [ View.introToMain <| UserClickedStartMainloop ]
 
-        Logic.Main task ->
+        Logic.Running Logic.Main task ->
             case ( task.current, task.feedback ) of
                 ( Just t, False ) ->
                     [ View.tooltip "Type the synonym of the word in the box"
-                    , View.sentenceInSynonym t task.state updateInputMsg task.feedback
+                    , View.sentenceInSynonym t task.state UserChangedInput task.feedback
                     , View.button
-                        { message = toggleFeedbackMsg
+                        { message = UserClickedFeedback
                         , txt = "Check my answer"
                         , isDisabled = False
                         }
@@ -139,12 +168,12 @@ viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloo
 
                 -- TODO: Abstraire le feedback pour le partager entre la phase d'entrainement et la phase principale
                 ( Just t, True ) ->
-                    [ View.sentenceInSynonym t task.state updateInputMsg task.feedback
+                    [ View.sentenceInSynonym t task.state UserChangedInput task.feedback
                     , div [ class "p-4" ] []
                     , div [ class "flex flex-col w-full rounded-lg h-48 bg-green-300 items-center text-center" ]
                         [ p [ class "pt-8 text-lg text-white" ] [ text <| "The best synonym for " ++ t.radical ++ " is ", span [ class "font-bold" ] [ text t.target ] ]
                         , View.button
-                            { message = nextTrialMsg
+                            { message = UserClickedNextTrial
                             , txt = "Next"
                             , isDisabled = False
                             }
@@ -152,7 +181,7 @@ viewTask experiment { toggleFeedbackMsg, updateInputMsg, nextTrialMsg, toMainloo
                     ]
 
                 ( Nothing, _ ) ->
-                    [ View.end task.infos.end saveDataMsg "spelling" ]
+                    [ View.end task.infos.end SaveDataMsg "spelling" ]
 
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
@@ -186,7 +215,7 @@ decodeSynonymTrials =
                 |> required "pre" Decode.string
                 |> required "stim" Decode.string
                 |> required "post" Decode.string
-                |> custom (Decode.field "isTraining" Decode.string |> Decode.andThen stringToBoolDecoder)
+                |> optional "isTraining" Decode.bool False
                 |> required "radical" Decode.string
     in
     decodeRecords decoder

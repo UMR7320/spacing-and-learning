@@ -1,21 +1,10 @@
 module Session1.Top exposing (..)
 
-import Array
-import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, a, div, fieldset, h1, h2, h3, p, pre, span, text)
-import Html.Styled.Attributes exposing (class, disabled, href)
-import Http
-import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (..)
-import Logic exposing (saveData)
-import Progressbar
-import Random
-import Random.List
-import Session1.CU1 exposing (CU1Msg(..))
+import Html.Styled exposing (a, div, h1, h2, p, text)
+import Html.Styled.Attributes exposing (class, href)
 import Session3.Synonym exposing (Msg(..))
-import View
 
 
 view infos =

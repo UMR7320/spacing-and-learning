@@ -14,7 +14,6 @@ import Url.Parser as Parser
     exposing
         ( (</>)
         , Parser
-        , int
         , map
         , oneOf
         , s
@@ -30,7 +29,6 @@ type Route
     | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
-    | Pilote UserId AcceptabilityRoute
     | Posttest PosttestTask
 
 
@@ -48,8 +46,8 @@ type Session1Task
 
 type Session2Task
     = Translation
-    | Scrabble
-    | CULevel2
+    | Spelling
+    | CU
 
 
 type PretestTask
@@ -57,6 +55,10 @@ type PretestTask
     | GeneralInfos
     | EmailSent
     | SPR
+    | SentenceCompletion
+    | VKS
+    | Acceptability AcceptabilityRoute
+    | YesNo
 
 
 type AcceptabilityRoute
@@ -90,17 +92,17 @@ parser =
                         , map YN (s "yesno-task")
                         , map GeneralInfos (s "informations")
                         , map EmailSent (s "email-sent")
-                        ]
-            )
-        , map Pilote
-            (s "user"
-                </> string
-                </> s "pilote"
-                </> s "acceptability"
-                </> oneOf
-                        [ map AcceptabilityInstructions (s "instructions")
-                        , map AcceptabilityStart (s "start")
-                        , map AcceptabilityEnd (s "end")
+                        , map SentenceCompletion (s "sentence-completion")
+                        , map VKS (s "vks")
+                        , map YesNo (s "yes-no")
+                        , map Acceptability
+                            (s "acceptability"
+                                </> oneOf
+                                        [ map AcceptabilityInstructions (s "instructions")
+                                        , map AcceptabilityStart (s "start")
+                                        , map AcceptabilityEnd (s "end")
+                                        ]
+                            )
                         ]
             )
         , map Pretest
@@ -125,9 +127,9 @@ parser =
                 </> string
                 </> s "session2"
                 </> oneOf
-                        [ map Scrabble (s "spelling")
+                        [ map Spelling (s "spelling")
                         , map Translation (s "translation")
-                        , map CULevel2 (s "context-understanding")
+                        , map CU (s "context-understanding")
                         ]
             )
         , map AuthenticatedSession3
@@ -150,17 +152,6 @@ parser =
 
 
 --translationPath : Parser (String -> a) a
-
-
-translationPath =
-    s "user" </> string |> map User
-
-
-type alias User =
-    { userId : String }
-
-
-
 --userAndTask : a -> b -> c -> d -> e -> f -> g -> h -> i -> Url.Url -> Route
 --spacing-and-learning.netlify.app/user/userId/task/scrabble
 

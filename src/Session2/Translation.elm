@@ -1,29 +1,23 @@
 module Session2.Translation exposing (..)
 
-import Browser
-import Css exposing (visibility)
-import Data exposing (decodeRecords)
+import Data
 import Dict
-import ExperimentInfo exposing (Task)
+import ExperimentInfo
 import Html.Styled
     exposing
         ( Html
         , div
-        , h3
-        , p
-        , span
         , text
         )
-import Html.Styled.Attributes exposing (checked, class, disabled, for, id, type_)
+import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
-import Process
 import Progressbar
-import String.Interpolate exposing (interpolate)
-import Url exposing (Url)
+import Random
+import Random.List
 import View
 
 
@@ -45,10 +39,48 @@ type Msg
     | UserClickedToggleFeedback
     | UserClickedSaveData
     | UserClickedRadioButton String
-    | UserClickedStartIntro (List Trial)
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
-    | RuntimeSentData (List SummarizedTrial)
+    | UserClickedStartTraining
+    | UserClickedStartMain
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | RuntimeShuffledOptionsOrder (List Int)
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | translationTask = Logic.next initState model.translationTask }
+            , Cmd.batch
+                [ Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                ]
+            )
+
+        ServerRespondedWithLastRecords (Ok _) ->
+            ( model, Cmd.none )
+
+        ServerRespondedWithLastRecords (Err _) ->
+            ( model, Cmd.none )
+
+        UserClickedToggleFeedback ->
+            ( { model | translationTask = Logic.toggle model.translationTask }, Cmd.none )
+
+        UserClickedRadioButton newChoice ->
+            ( { model | translationTask = Logic.update { uid = "", userAnswer = newChoice } model.translationTask }, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | translationTask = Logic.startTraining model.translationTask }, Cmd.none )
+
+        UserClickedStartMain ->
+            ( { model | translationTask = Logic.startMain model.translationTask initState }, Cmd.none )
+
+        UserClickedSaveData ->
+            let
+                responseHandler =
+                    ServerRespondedWithLastRecords
+            in
+            ( model, Logic.saveData responseHandler model.user taskId model.translationTask )
+
+        RuntimeShuffledOptionsOrder ls ->
+            ( { model | optionsOrder = ls }, Cmd.none )
 
 
 type alias Trial =
@@ -104,7 +136,7 @@ decodeTrials =
                 |> optional "Distractor_2_Translation" string "Missing distractor"
                 |> optional "Distractor_3_Translation" string "missing distractor"
                 |> optional "Word_Text" string "MISSING"
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
 
@@ -132,7 +164,7 @@ renderTask task trial data history allTrials =
             View.shuffledOptions
                 data.state
                 data.feedback
-                task.radioMsg
+                UserClickedRadioButton
                 trial
                 task.optionsOrder
         , View.genericSingleChoiceFeedback
@@ -141,36 +173,30 @@ renderTask task trial data history allTrials =
             , target = trial.target
             , feedback_Correct = ( data.infos.feedback_correct, [ trial.target ] )
             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.target ] )
-            , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
             }
         ]
 
 
 view :
     { task : Logic.Task Trial State
-    , infos : Maybe ExperimentInfo.Task
-    , radioMsg : String -> msg
-    , toggleFeedbackMsg : msg
-    , nextTrialMsg : msg
     , optionsOrder : List comparable
-    , startMainMsg : List Trial -> Task -> msg
-    , saveDataMsg : msg
     }
-    -> Html msg
+    -> Html Msg
 view task =
     case task.task of
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    View.viewTraining data.infos.instructions
+                    div [ class "flex flex-col items-center" ]
                         [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ trial.target ]
                         , renderTask task trial data data.history data.trainingTrials
                         ]
 
                 Nothing ->
-                    View.introToMain (task.startMainMsg data.mainTrials data.infos)
+                    View.introToMain UserClickedStartMain
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
@@ -178,7 +204,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end task.saveDataMsg "spelling"
+                    View.end data.infos.end UserClickedSaveData "spelling"
 
         Logic.Loading ->
             div [] [ text "Loading" ]
@@ -188,6 +214,9 @@ view task =
 
         Logic.Err reason ->
             div [] [ text reason ]
+
+        Logic.Running Logic.Instructions data ->
+            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
 
 taskId =

@@ -11109,59 +11109,49 @@ var $author$project$Session$Loading = function (a) {
 var $author$project$Session$NotAsked = {$: 'NotAsked'};
 var $author$project$Route$NotFound = {$: 'NotFound'};
 var $author$project$Logic$NotStarted = {$: 'NotStarted'};
-var $author$project$Main$SPR = function (a) {
-	return {$: 'SPR', a: a};
+var $author$project$Main$Pretest = function (a) {
+	return {$: 'Pretest', a: a};
 };
-var $author$project$Main$ServerRespondedWithAllPretestData = F2(
-	function (a, b) {
-		return {$: 'ServerRespondedWithAllPretestData', a: a, b: b};
+var $author$project$Main$Session1 = function (a) {
+	return {$: 'Session1', a: a};
+};
+var $author$project$Main$Session2 = function (a) {
+	return {$: 'Session2', a: a};
+};
+var $author$project$Main$Session3 = function (a) {
+	return {$: 'Session3', a: a};
+};
+var $author$project$Pretest$Pretest$ServerRespondedWithAllPretestData = F6(
+	function (a, b, c, d, e, f) {
+		return {$: 'ServerRespondedWithAllPretestData', a: a, b: b, c: c, d: d, e: e, f: f};
 	});
-var $author$project$Pretest$SPR$ServerRespondedWithAllPretestData = F2(
-	function (a, b) {
-		return {$: 'ServerRespondedWithAllPretestData', a: a, b: b};
-	});
-var $author$project$Main$ServerRespondedWithAllSession1Data = F5(
-	function (a, b, c, d, e) {
-		return {$: 'ServerRespondedWithAllSession1Data', a: a, b: b, c: c, d: d, e: e};
-	});
-var $author$project$Main$ServerRespondedWithAllSession2Data = F4(
-	function (a, b, c, d) {
-		return {$: 'ServerRespondedWithAllSession2Data', a: a, b: b, c: c, d: d};
-	});
-var $author$project$Main$ServerRespondedWithAllSession3Data = F4(
-	function (a, b, c, d) {
-		return {$: 'ServerRespondedWithAllSession3Data', a: a, b: b, c: c, d: d};
-	});
-var $author$project$Main$ServerRespondedWithSomeError = function (a) {
+var $author$project$Pretest$Pretest$ServerRespondedWithSomeError = function (a) {
 	return {$: 'ServerRespondedWithSomeError', a: a};
 };
-var $author$project$Pretest$SPR$ServerRespondedWithSomeError = function (a) {
-	return {$: 'ServerRespondedWithSomeError', a: a};
-};
-var $author$project$Main$ServerRespondedWithSomePretestData = function (a) {
+var $author$project$Pretest$Pretest$ServerRespondedWithSomePretestData = function (a) {
 	return {$: 'ServerRespondedWithSomePretestData', a: a};
 };
-var $author$project$Pretest$SPR$ServerRespondedWithSomePretestData = function (a) {
-	return {$: 'ServerRespondedWithSomePretestData', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedA6 = function (a) {
+	return {$: 'LoadedA6', a: a};
 };
-var $author$project$Main$ServerRespondedWithSomeSession1Data = function (a) {
-	return {$: 'ServerRespondedWithSomeSession1Data', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedB6 = function (a) {
+	return {$: 'LoadedB6', a: a};
 };
-var $author$project$Main$ServerRespondedWithSomeSession2Data = function (a) {
-	return {$: 'ServerRespondedWithSomeSession2Data', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedC6 = function (a) {
+	return {$: 'LoadedC6', a: a};
 };
-var $author$project$Main$ServerRespondedWithSomeSession3Data = function (a) {
-	return {$: 'ServerRespondedWithSomeSession3Data', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedD6 = function (a) {
+	return {$: 'LoadedD6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedA2 = function (a) {
-	return {$: 'LoadedA2', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedE6 = function (a) {
+	return {$: 'LoadedE6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedB2 = function (a) {
-	return {$: 'LoadedB2', a: a};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedF6 = function (a) {
+	return {$: 'LoadedF6', a: a};
 };
-var $0ui$elm_task_parallel$Task$Parallel$State2 = F3(
-	function (a, b, c) {
-		return {$: 'State2', a: a, b: b, c: c};
+var $0ui$elm_task_parallel$Task$Parallel$State6 = F7(
+	function (a, b, c, d, e, f, g) {
+		return {$: 'State6', a: a, b: b, c: c, d: d, e: e, f: f, g: g};
 	});
 var $elm$core$Task$onError = _Scheduler_onError;
 var $0ui$elm_task_parallel$Task$Parallel$routeTo = F2(
@@ -11185,27 +11175,51 @@ var $0ui$elm_task_parallel$Task$Parallel$routeTo = F2(
 						}
 					})));
 	});
-var $0ui$elm_task_parallel$Task$Parallel$attempt2 = function (_v0) {
+var $0ui$elm_task_parallel$Task$Parallel$attempt6 = function (_v0) {
 	var task1 = _v0.task1;
 	var task2 = _v0.task2;
+	var task3 = _v0.task3;
+	var task4 = _v0.task4;
+	var task5 = _v0.task5;
+	var task6 = _v0.task6;
 	var onUpdates = _v0.onUpdates;
 	var onSuccess = _v0.onSuccess;
 	var onFailure = _v0.onFailure;
 	return _Utils_Tuple2(
-		A3($0ui$elm_task_parallel$Task$Parallel$State2, onSuccess, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		A7($0ui$elm_task_parallel$Task$Parallel$State6, onSuccess, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
 		$elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
 					A3(
 					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedA2),
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedA6),
 					onFailure,
 					task1),
 					A3(
 					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedB2),
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedB6),
 					onFailure,
-					task2)
+					task2),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedC6),
+					onFailure,
+					task3),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedD6),
+					onFailure,
+					task4),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedE6),
+					onFailure,
+					task5),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedF6),
+					onFailure,
+					task6)
 				])));
 };
 var $author$project$Data$apps = {sleep: 'appTEVHZLw3jNa7fU', spacing: 'appvKOc8FH0j48Hw1'};
@@ -11277,7 +11291,9 @@ var $author$project$ExperimentInfo$Task = function (uid) {
 									return function (feedback_incorrect) {
 										return function (end) {
 											return function (trainingWheel) {
-												return {description: description, end: end, feedback_correct: feedback_correct, feedback_incorrect: feedback_incorrect, instructions: instructions, instructions_short: instructions_short, name: name, session: session, trainingWheel: trainingWheel, type_: type_, uid: uid, url: url};
+												return function (introToMain) {
+													return {description: description, end: end, feedback_correct: feedback_correct, feedback_incorrect: feedback_incorrect, instructions: instructions, instructions_short: instructions_short, introToMain: introToMain, name: name, session: session, trainingWheel: trainingWheel, type_: type_, uid: uid, url: url};
+												};
 											};
 										};
 									};
@@ -11383,66 +11399,71 @@ var $author$project$ExperimentInfo$decode = function () {
 	};
 	var decoder = A4(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-		'trainingWheels',
+		'IntroToMain',
 		$elm$json$Json$Decode$string,
-		'Missing training wheel',
+		'Missing IntroToMain text',
 		A4(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-			'End',
+			'trainingWheels',
 			$elm$json$Json$Decode$string,
-			'Missing End',
+			'Missing training wheel',
 			A4(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-				'feedback_incorrect',
+				'End',
 				$elm$json$Json$Decode$string,
-				'Missing feedback incorrect',
+				'Missing End',
 				A4(
 					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-					'feedback_correct',
+					'feedback_incorrect',
 					$elm$json$Json$Decode$string,
-					'Missing feedback correct',
+					'Missing feedback incorrect',
 					A4(
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-						'Instructions_short',
+						'feedback_correct',
 						$elm$json$Json$Decode$string,
-						'Missing instructions short',
+						'Missing feedback correct',
 						A4(
 							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-							'Instructions',
+							'Instructions_short',
 							$elm$json$Json$Decode$string,
-							'Missing instructions',
+							'Missing instructions short',
 							A4(
 								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-								'Description',
+								'Instructions',
 								$elm$json$Json$Decode$string,
-								'Missing Description',
+								'Missing instructions',
 								A4(
 									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-									'Demo_Link',
+									'Description',
 									$elm$json$Json$Decode$string,
-									'Missing link',
+									'Missing Description',
 									A4(
 										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-										'Name',
+										'Demo_Link',
 										$elm$json$Json$Decode$string,
-										'Missing Name',
-										A2(
-											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-											A2(
-												$elm$json$Json$Decode$andThen,
-												mapToType_,
-												A2($elm$json$Json$Decode$field, 'Type', $elm$json$Json$Decode$string)),
+										'Missing link',
+										A4(
+											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+											'Name',
+											$elm$json$Json$Decode$string,
+											'Missing Name',
 											A2(
 												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
 												A2(
 													$elm$json$Json$Decode$andThen,
-													mapToSession,
-													A2($elm$json$Json$Decode$field, 'Session', $elm$json$Json$Decode$string)),
-												A3(
-													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-													'UID',
-													$elm$json$Json$Decode$string,
-													$elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Task)))))))))))));
+													mapToType_,
+													A2($elm$json$Json$Decode$field, 'Type', $elm$json$Json$Decode$string)),
+												A2(
+													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+													A2(
+														$elm$json$Json$Decode$andThen,
+														mapToSession,
+														A2($elm$json$Json$Decode$field, 'Session', $elm$json$Json$Decode$string)),
+													A3(
+														$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+														'UID',
+														$elm$json$Json$Decode$string,
+														$elm$json$Json$Decode$succeed($author$project$ExperimentInfo$Task))))))))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
 var $elm$http$Http$BadStatus_ = F2(
@@ -11540,11 +11561,136 @@ var $author$project$ExperimentInfo$getRecords = $elm$http$Http$task(
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'tasks', view_: 'allTasksGrid'})
 	});
+var $author$project$Pretest$Acceptability$AdjectiveAgreement = {$: 'AdjectiveAgreement'};
+var $author$project$Pretest$Acceptability$Conditional = {$: 'Conditional'};
+var $author$project$Pretest$Acceptability$Distractor = {$: 'Distractor'};
+var $author$project$Pretest$Acceptability$EmbeddedQuestion = {$: 'EmbeddedQuestion'};
+var $author$project$Pretest$Acceptability$PresentPerfectOrSimplePast = {$: 'PresentPerfectOrSimplePast'};
+var $author$project$Pretest$Acceptability$Question = {$: 'Question'};
+var $author$project$Pretest$Acceptability$RelativeClause = {$: 'RelativeClause'};
+var $author$project$Pretest$Acceptability$Target = {$: 'Target'};
+var $author$project$Pretest$Acceptability$Training = {$: 'Training'};
+var $author$project$Pretest$Acceptability$Trial = F8(
+	function (uid, sentence, sentenceType, trialType, isGrammatical, audio, feedback, timeout) {
+		return {audio: audio, feedback: feedback, isGrammatical: isGrammatical, sentence: sentence, sentenceType: sentenceType, timeout: timeout, trialType: trialType, uid: uid};
+	});
+var $author$project$Pretest$Acceptability$ZeroArticle = {$: 'ZeroArticle'};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$Data$AudioFile = F2(
+	function (url, type_) {
+		return {type_: type_, url: url};
+	});
+var $author$project$Data$audioDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Data$AudioFile,
+	A2($elm$json$Json$Decode$field, 'url', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string));
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Data$decodeAudioFiles = A2(
+	$elm$json$Json$Decode$map,
+	A2(
+		$elm$core$Basics$composeL,
+		$elm$core$Maybe$withDefault(
+			A2($author$project$Data$AudioFile, '', '')),
+		$elm$core$List$head),
+	$elm$json$Json$Decode$list($author$project$Data$audioDecoder));
+var $author$project$Pretest$Acceptability$decodeAcceptabilityTrials = function () {
+	var toTrialTypeDecoder = function (str) {
+		switch (str) {
+			case 'Target':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Target);
+			case 'Training':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Training);
+			case 'Distractor':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Distractor);
+			default:
+				return $elm$json$Json$Decode$fail('I couldn\'t map ' + (str + ' to TrialType'));
+		}
+	};
+	var toSentenceType = function (str) {
+		switch (str) {
+			case 'Embedded Question':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$EmbeddedQuestion);
+			case 'Zero article':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$ZeroArticle);
+			case 'Adjective agreement':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$AdjectiveAgreement);
+			case 'Present perfect/simple past':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$PresentPerfectOrSimplePast);
+			case 'Conditional':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Conditional);
+			case 'Question':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Question);
+			case 'Relative clause':
+				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$RelativeClause);
+			default:
+				return $elm$json$Json$Decode$fail('I couldn\'t find the corresponding SentenceType for this string :' + str);
+		}
+	};
+	var decoder = A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'Timeout',
+		$elm$json$Json$Decode$int,
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'Acceptability Feedback',
+			$elm$json$Json$Decode$string,
+			'no feedback',
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'Acceptability Audio',
+				$author$project$Data$decodeAudioFiles,
+				A4(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+					'IsGrammatical',
+					$elm$json$Json$Decode$bool,
+					false,
+					A2(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+						A2(
+							$elm$json$Json$Decode$andThen,
+							toTrialTypeDecoder,
+							A2($elm$json$Json$Decode$field, 'Trial type', $elm$json$Json$Decode$string)),
+						A2(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+							A2(
+								$elm$json$Json$Decode$andThen,
+								toSentenceType,
+								A2($elm$json$Json$Decode$field, 'Sentence type', $elm$json$Json$Decode$string)),
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'Acceptability Sentence',
+								$elm$json$Json$Decode$string,
+								A3(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+									'id',
+									$elm$json$Json$Decode$string,
+									$elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Trial)))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Pretest$Acceptability$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Pretest$Acceptability$decodeAcceptabilityTrials)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'acceptability', view_: 'all'})
+	});
 var $author$project$Pretest$SPR$Trial = F6(
 	function (id, taggedSegments, question, isGrammatical, isTraining, feedback) {
 		return {feedback: feedback, id: id, isGrammatical: isGrammatical, isTraining: isTraining, question: question, taggedSegments: taggedSegments};
 	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$Pretest$SPR$Critic = {$: 'Critic'};
 var $author$project$Pretest$SPR$NoUnit = {$: 'NoUnit'};
 var $author$project$Pretest$SPR$SpillOver = {$: 'SpillOver'};
@@ -11613,8 +11759,132 @@ var $author$project$Pretest$SPR$getRecords = $elm$http$Http$task(
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'SPR', view_: 'Pretest'})
 	});
-var $author$project$Pretest$SPR$attempt = $0ui$elm_task_parallel$Task$Parallel$attempt2(
-	{onFailure: $author$project$Pretest$SPR$ServerRespondedWithSomeError, onSuccess: $author$project$Pretest$SPR$ServerRespondedWithAllPretestData, onUpdates: $author$project$Pretest$SPR$ServerRespondedWithSomePretestData, task1: $author$project$Pretest$SPR$getRecords, task2: $author$project$ExperimentInfo$getRecords});
+var $author$project$Pretest$SentenceCompletion$Trial = F7(
+	function (id, context, firstAmorce, secondAmorce, isTraining, firstFeedback, secondFeedback) {
+		return {context: context, firstAmorce: firstAmorce, firstFeedback: firstFeedback, id: id, isTraining: isTraining, secondAmorce: secondAmorce, secondFeedback: secondFeedback};
+	});
+var $author$project$Pretest$SentenceCompletion$decodeAcceptabilityTrials = function () {
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'feedback2',
+		$elm$json$Json$Decode$string,
+		'Missing feedback 2',
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'feedback1',
+			$elm$json$Json$Decode$string,
+			'Missing feedback',
+			A4(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+				'isTraining',
+				$elm$json$Json$Decode$bool,
+				false,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'amorce2',
+					$elm$json$Json$Decode$string,
+					A3(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'amorce1',
+						$elm$json$Json$Decode$string,
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'context',
+							$elm$json$Json$Decode$string,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'id',
+								$elm$json$Json$Decode$string,
+								$elm$json$Json$Decode$succeed($author$project$Pretest$SentenceCompletion$Trial))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Pretest$SentenceCompletion$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Pretest$SentenceCompletion$decodeAcceptabilityTrials)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'sentence_completion', view_: 'all'})
+	});
+var $author$project$Pretest$VKS$Trial = F3(
+	function (id, verb, isTraining) {
+		return {id: id, isTraining: isTraining, verb: verb};
+	});
+var $author$project$Pretest$VKS$decodeAcceptabilityTrials = function () {
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'Word_Text',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'id',
+				$elm$json$Json$Decode$string,
+				$elm$json$Json$Decode$succeed($author$project$Pretest$VKS$Trial))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Pretest$VKS$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Pretest$VKS$decodeAcceptabilityTrials)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Meaning'})
+	});
+var $author$project$Pretest$YesNo$Trial = F3(
+	function (id, word, exists) {
+		return {exists: exists, id: id, word: word};
+	});
+var $author$project$Pretest$YesNo$decodeAcceptabilityTrials = function () {
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'Exists',
+		$elm$json$Json$Decode$bool,
+		false,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'ItemName',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'id',
+				$elm$json$Json$Decode$string,
+				$elm$json$Json$Decode$succeed($author$project$Pretest$YesNo$Trial))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Pretest$YesNo$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Pretest$YesNo$decodeAcceptabilityTrials)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'yes_no', view_: 'all'})
+	});
+var $author$project$Pretest$Pretest$attempt = $0ui$elm_task_parallel$Task$Parallel$attempt6(
+	{onFailure: $author$project$Pretest$Pretest$ServerRespondedWithSomeError, onSuccess: $author$project$Pretest$Pretest$ServerRespondedWithAllPretestData, onUpdates: $author$project$Pretest$Pretest$ServerRespondedWithSomePretestData, task1: $author$project$Pretest$SPR$getRecords, task2: $author$project$Pretest$SentenceCompletion$getRecords, task3: $author$project$ExperimentInfo$getRecords, task4: $author$project$Pretest$VKS$getRecords, task5: $author$project$Pretest$Acceptability$getRecords, task6: $author$project$Pretest$YesNo$getRecords});
+var $author$project$Session3$Session$ServerRespondedWithAllSession3Data = F4(
+	function (a, b, c, d) {
+		return {$: 'ServerRespondedWithAllSession3Data', a: a, b: b, c: c, d: d};
+	});
+var $author$project$Session3$Session$ServerRespondedWithSomeError = function (a) {
+	return {$: 'ServerRespondedWithSomeError', a: a};
+};
+var $author$project$Session3$Session$ServerRespondedWithSomeSession3Data = function (a) {
+	return {$: 'ServerRespondedWithSomeSession3Data', a: a};
+};
 var $0ui$elm_task_parallel$Task$Parallel$LoadedA4 = function (a) {
 	return {$: 'LoadedA4', a: a};
 };
@@ -11666,66 +11936,149 @@ var $0ui$elm_task_parallel$Task$Parallel$attempt4 = function (_v0) {
 					task4)
 				])));
 };
-var $0ui$elm_task_parallel$Task$Parallel$LoadedA5 = function (a) {
-	return {$: 'LoadedA5', a: a};
-};
-var $0ui$elm_task_parallel$Task$Parallel$LoadedB5 = function (a) {
-	return {$: 'LoadedB5', a: a};
-};
-var $0ui$elm_task_parallel$Task$Parallel$LoadedC5 = function (a) {
-	return {$: 'LoadedC5', a: a};
-};
-var $0ui$elm_task_parallel$Task$Parallel$LoadedD5 = function (a) {
-	return {$: 'LoadedD5', a: a};
-};
-var $0ui$elm_task_parallel$Task$Parallel$LoadedE5 = function (a) {
-	return {$: 'LoadedE5', a: a};
-};
-var $0ui$elm_task_parallel$Task$Parallel$State5 = F6(
-	function (a, b, c, d, e, f) {
-		return {$: 'State5', a: a, b: b, c: c, d: d, e: e, f: f};
+var $author$project$Session3$CU3$Trial = F7(
+	function (uid, writtenWord, audioSentence, context, amorce, feedback, isTraining) {
+		return {amorce: amorce, audioSentence: audioSentence, context: context, feedback: feedback, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
 	});
-var $0ui$elm_task_parallel$Task$Parallel$attempt5 = function (_v0) {
-	var task1 = _v0.task1;
-	var task2 = _v0.task2;
-	var task3 = _v0.task3;
-	var task4 = _v0.task4;
-	var task5 = _v0.task5;
-	var onUpdates = _v0.onUpdates;
-	var onSuccess = _v0.onSuccess;
-	var onFailure = _v0.onFailure;
-	return _Utils_Tuple2(
-		A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
-		$elm$core$Platform$Cmd$batch(
-			_List_fromArray(
-				[
+var $author$project$Session3$CU3$decodeTranslationInput = function () {
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'CU_Lvl3_Feedback',
+			$elm$json$Json$Decode$string,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'CU_Lvl3_TextToComplete_amorce',
+				$elm$json$Json$Decode$string,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'CU_Lvl3_Presentation',
+					$elm$json$Json$Decode$string,
+					A4(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+						'CU_Lv3_Audio',
+						$author$project$Data$decodeAudioFiles,
+						A2($author$project$Data$AudioFile, '', ''),
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'Word_Text',
+							$elm$json$Json$Decode$string,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'UID',
+								$elm$json$Json$Decode$string,
+								$elm$json$Json$Decode$succeed($author$project$Session3$CU3$Trial))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Session3$CU3$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Session3$CU3$decodeTranslationInput)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
+	});
+var $author$project$Session3$Spelling3$Trial = F4(
+	function (uid, writtenWord, audioSentence, isTraining) {
+		return {audioSentence: audioSentence, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
+	});
+var $author$project$Session3$Spelling3$decodeTranslationInput = function () {
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'Word_Audio',
+			$author$project$Data$decodeAudioFiles,
+			A2($author$project$Data$AudioFile, '', ''),
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'Word_Text',
+				$elm$json$Json$Decode$string,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'UID',
+					$elm$json$Json$Decode$string,
+					$elm$json$Json$Decode$succeed($author$project$Session3$Spelling3$Trial)))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Session3$Spelling3$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Session3$Spelling3$decodeTranslationInput)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
+	});
+var $author$project$Session3$Synonym$Trial = F7(
+	function (uid, target, pre, stimulus, post, isTraining, radical) {
+		return {isTraining: isTraining, post: post, pre: pre, radical: radical, stimulus: stimulus, target: target, uid: uid};
+	});
+var $author$project$Session3$Synonym$decodeSynonymTrials = function () {
+	var stringToBoolDecoder = function (str) {
+		if (str === 'true') {
+			return $elm$json$Json$Decode$succeed(true);
+		} else {
+			return $elm$json$Json$Decode$succeed(false);
+		}
+	};
+	var decoder = A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'radical',
+		$elm$json$Json$Decode$string,
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'isTraining',
+			$elm$json$Json$Decode$bool,
+			false,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'post',
+				$elm$json$Json$Decode$string,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'stim',
+					$elm$json$Json$Decode$string,
 					A3(
-					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedA5),
-					onFailure,
-					task1),
-					A3(
-					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedB5),
-					onFailure,
-					task2),
-					A3(
-					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedC5),
-					onFailure,
-					task3),
-					A3(
-					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedD5),
-					onFailure,
-					task4),
-					A3(
-					$0ui$elm_task_parallel$Task$Parallel$routeTo,
-					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedE5),
-					onFailure,
-					task5)
-				])));
-};
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'pre',
+						$elm$json$Json$Decode$string,
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'Word_Text',
+							$elm$json$Json$Decode$string,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'UID',
+								$elm$json$Json$Decode$string,
+								$elm$json$Json$Decode$succeed($author$project$Session3$Synonym$Trial))))))));
+	return $author$project$Data$decodeRecords(decoder);
+}();
+var $author$project$Session3$Synonym$getRecords = $elm$http$Http$task(
+	{
+		body: $elm$http$Http$emptyBody,
+		headers: _List_Nil,
+		method: 'GET',
+		resolver: $elm$http$Http$stringResolver(
+			$author$project$Data$handleJsonResponse($author$project$Session3$Synonym$decodeSynonymTrials)),
+		timeout: $elm$core$Maybe$Just(5000),
+		url: $author$project$Data$buildQuery(
+			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
+	});
+var $author$project$Session3$Session$attempt = $0ui$elm_task_parallel$Task$Parallel$attempt4(
+	{onFailure: $author$project$Session3$Session$ServerRespondedWithSomeError, onSuccess: $author$project$Session3$Session$ServerRespondedWithAllSession3Data, onUpdates: $author$project$Session3$Session$ServerRespondedWithSomeSession3Data, task1: $author$project$Session3$CU3$getRecords, task2: $author$project$Session3$Spelling3$getRecords, task3: $author$project$Session3$Synonym$getRecords, task4: $author$project$ExperimentInfo$getRecords});
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
 		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
@@ -11845,6 +12198,9 @@ var $elm$url$Url$Parser$parse = F2(
 					url.fragment,
 					$elm$core$Basics$identity)));
 	});
+var $author$project$Route$Acceptability = function (a) {
+	return {$: 'Acceptability', a: a};
+};
 var $author$project$Route$AcceptabilityEnd = {$: 'AcceptabilityEnd'};
 var $author$project$Route$AcceptabilityInstructions = {$: 'AcceptabilityInstructions'};
 var $author$project$Route$AcceptabilityStart = {$: 'AcceptabilityStart'};
@@ -11856,33 +12212,32 @@ var $author$project$Route$AuthenticatedSession3 = F2(
 	function (a, b) {
 		return {$: 'AuthenticatedSession3', a: a, b: b};
 	});
+var $author$project$Route$CU = {$: 'CU'};
 var $author$project$Route$CU1 = {$: 'CU1'};
 var $author$project$Route$CU3 = {$: 'CU3'};
-var $author$project$Route$CULevel2 = {$: 'CULevel2'};
 var $author$project$Route$EmailSent = {$: 'EmailSent'};
 var $author$project$Route$GeneralInfos = {$: 'GeneralInfos'};
 var $author$project$Route$Home = {$: 'Home'};
 var $author$project$Route$Meaning = {$: 'Meaning'};
-var $author$project$Route$Pilote = F2(
-	function (a, b) {
-		return {$: 'Pilote', a: a, b: b};
-	});
 var $author$project$Route$Presentation = {$: 'Presentation'};
 var $author$project$Route$Pretest = function (a) {
 	return {$: 'Pretest', a: a};
 };
 var $author$project$Route$SPR = {$: 'SPR'};
-var $author$project$Route$Scrabble = {$: 'Scrabble'};
+var $author$project$Route$SentenceCompletion = {$: 'SentenceCompletion'};
 var $author$project$Route$Session1 = F2(
 	function (a, b) {
 		return {$: 'Session1', a: a, b: b};
 	});
+var $author$project$Route$Spelling = {$: 'Spelling'};
 var $author$project$Route$Spelling3 = {$: 'Spelling3'};
 var $author$project$Route$SpellingLevel1 = {$: 'SpellingLevel1'};
 var $author$project$Route$Synonym = {$: 'Synonym'};
 var $author$project$Route$TopSession1 = {$: 'TopSession1'};
 var $author$project$Route$Translation = {$: 'Translation'};
+var $author$project$Route$VKS = {$: 'VKS'};
 var $author$project$Route$YN = {$: 'YN'};
+var $author$project$Route$YesNo = {$: 'YesNo'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
@@ -12035,39 +12390,42 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 							A2(
 							$elm$url$Url$Parser$map,
 							$author$project$Route$EmailSent,
-							$elm$url$Url$Parser$s('email-sent'))
+							$elm$url$Url$Parser$s('email-sent')),
+							A2(
+							$elm$url$Url$Parser$map,
+							$author$project$Route$SentenceCompletion,
+							$elm$url$Url$Parser$s('sentence-completion')),
+							A2(
+							$elm$url$Url$Parser$map,
+							$author$project$Route$VKS,
+							$elm$url$Url$Parser$s('vks')),
+							A2(
+							$elm$url$Url$Parser$map,
+							$author$project$Route$YesNo,
+							$elm$url$Url$Parser$s('yes-no')),
+							A2(
+							$elm$url$Url$Parser$map,
+							$author$project$Route$Acceptability,
+							A2(
+								$elm$url$Url$Parser$slash,
+								$elm$url$Url$Parser$s('acceptability'),
+								$elm$url$Url$Parser$oneOf(
+									_List_fromArray(
+										[
+											A2(
+											$elm$url$Url$Parser$map,
+											$author$project$Route$AcceptabilityInstructions,
+											$elm$url$Url$Parser$s('instructions')),
+											A2(
+											$elm$url$Url$Parser$map,
+											$author$project$Route$AcceptabilityStart,
+											$elm$url$Url$Parser$s('start')),
+											A2(
+											$elm$url$Url$Parser$map,
+											$author$project$Route$AcceptabilityEnd,
+											$elm$url$Url$Parser$s('end'))
+										]))))
 						])))),
-			A2(
-			$elm$url$Url$Parser$map,
-			$author$project$Route$Pilote,
-			A2(
-				$elm$url$Url$Parser$slash,
-				$elm$url$Url$Parser$s('user'),
-				A2(
-					$elm$url$Url$Parser$slash,
-					$elm$url$Url$Parser$string,
-					A2(
-						$elm$url$Url$Parser$slash,
-						$elm$url$Url$Parser$s('pilote'),
-						A2(
-							$elm$url$Url$Parser$slash,
-							$elm$url$Url$Parser$s('acceptability'),
-							$elm$url$Url$Parser$oneOf(
-								_List_fromArray(
-									[
-										A2(
-										$elm$url$Url$Parser$map,
-										$author$project$Route$AcceptabilityInstructions,
-										$elm$url$Url$Parser$s('instructions')),
-										A2(
-										$elm$url$Url$Parser$map,
-										$author$project$Route$AcceptabilityStart,
-										$elm$url$Url$Parser$s('start')),
-										A2(
-										$elm$url$Url$Parser$map,
-										$author$project$Route$AcceptabilityEnd,
-										$elm$url$Url$Parser$s('end'))
-									]))))))),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Pretest,
@@ -12132,7 +12490,7 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 								[
 									A2(
 									$elm$url$Url$Parser$map,
-									$author$project$Route$Scrabble,
+									$author$project$Route$Spelling,
 									$elm$url$Url$Parser$s('spelling')),
 									A2(
 									$elm$url$Url$Parser$map,
@@ -12140,7 +12498,7 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 									$elm$url$Url$Parser$s('translation')),
 									A2(
 									$elm$url$Url$Parser$map,
-									$author$project$Route$CULevel2,
+									$author$project$Route$CU,
 									$elm$url$Url$Parser$s('context-understanding'))
 								])))))),
 			A2(
@@ -12178,128 +12536,77 @@ var $author$project$Route$fromUrl = function (url) {
 		$author$project$Route$NotFound,
 		A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url));
 };
-var $author$project$Pretest$Acceptability$AdjectiveAgreement = {$: 'AdjectiveAgreement'};
-var $author$project$Pretest$Acceptability$Conditional = {$: 'Conditional'};
-var $author$project$Pretest$Acceptability$Distractor = {$: 'Distractor'};
-var $author$project$Pretest$Acceptability$EmbeddedQuestion = {$: 'EmbeddedQuestion'};
-var $author$project$Pretest$Acceptability$PresentPerfectOrSimplePast = {$: 'PresentPerfectOrSimplePast'};
-var $author$project$Pretest$Acceptability$Question = {$: 'Question'};
-var $author$project$Pretest$Acceptability$RelativeClause = {$: 'RelativeClause'};
-var $author$project$Pretest$Acceptability$Target = {$: 'Target'};
-var $author$project$Pretest$Acceptability$Training = {$: 'Training'};
-var $author$project$Pretest$Acceptability$Trial = F7(
-	function (uid, sentence, sentenceType, trialType, isGrammatical, audio, feedback) {
-		return {audio: audio, feedback: feedback, isGrammatical: isGrammatical, sentence: sentence, sentenceType: sentenceType, trialType: trialType, uid: uid};
+var $author$project$Session1$Session$ServerRespondedWithAllData = F5(
+	function (a, b, c, d, e) {
+		return {$: 'ServerRespondedWithAllData', a: a, b: b, c: c, d: d, e: e};
 	});
-var $author$project$Pretest$Acceptability$ZeroArticle = {$: 'ZeroArticle'};
-var $author$project$Data$AudioFile = F2(
-	function (url, type_) {
-		return {type_: type_, url: url};
-	});
-var $author$project$Data$audioDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Data$AudioFile,
-	A2($elm$json$Json$Decode$field, 'url', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string));
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
+var $author$project$Session1$Session$ServerRespondedWithSomeData = function (a) {
+	return {$: 'ServerRespondedWithSomeData', a: a};
 };
-var $author$project$Data$decodeAudioFiles = A2(
-	$elm$json$Json$Decode$map,
-	A2(
-		$elm$core$Basics$composeL,
-		$elm$core$Maybe$withDefault(
-			A2($author$project$Data$AudioFile, '', '')),
-		$elm$core$List$head),
-	$elm$json$Json$Decode$list($author$project$Data$audioDecoder));
-var $author$project$Pretest$Acceptability$decodeAcceptabilityTrials = function () {
-	var toTrialTypeDecoder = function (str) {
-		switch (str) {
-			case 'Target':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Target);
-			case 'Training':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Training);
-			case 'Distractor':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Distractor);
-			default:
-				return $elm$json$Json$Decode$fail('I couldn\'t map ' + (str + ' to TrialType'));
-		}
-	};
-	var toSentenceType = function (str) {
-		switch (str) {
-			case 'Embedded Question':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$EmbeddedQuestion);
-			case 'Zero article':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$ZeroArticle);
-			case 'Adjective agreement':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$AdjectiveAgreement);
-			case 'Present perfect/simple past':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$PresentPerfectOrSimplePast);
-			case 'Conditional':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Conditional);
-			case 'Question':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Question);
-			case 'Relative clause':
-				return $elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$RelativeClause);
-			default:
-				return $elm$json$Json$Decode$fail('I couldn\'t find the corresponding SentenceType for this string :' + str);
-		}
-	};
-	var decoder = A4(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-		'Acceptability Feedback',
-		$elm$json$Json$Decode$string,
-		'no feedback',
-		A3(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'Acceptability Audio',
-			$author$project$Data$decodeAudioFiles,
-			A4(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-				'IsGrammatical',
-				$elm$json$Json$Decode$bool,
-				false,
-				A2(
-					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-					A2(
-						$elm$json$Json$Decode$andThen,
-						toTrialTypeDecoder,
-						A2($elm$json$Json$Decode$field, 'Trial type', $elm$json$Json$Decode$string)),
-					A2(
-						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-						A2(
-							$elm$json$Json$Decode$andThen,
-							toSentenceType,
-							A2($elm$json$Json$Decode$field, 'Sentence type', $elm$json$Json$Decode$string)),
-						A3(
-							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'Acceptability Sentence',
-							$elm$json$Json$Decode$string,
-							A3(
-								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'id',
-								$elm$json$Json$Decode$string,
-								$elm$json$Json$Decode$succeed($author$project$Pretest$Acceptability$Trial))))))));
-	return $author$project$Data$decodeRecords(decoder);
-}();
-var $author$project$Pretest$Acceptability$getRecords = $elm$http$Http$task(
-	{
-		body: $elm$http$Http$emptyBody,
-		headers: _List_Nil,
-		method: 'GET',
-		resolver: $elm$http$Http$stringResolver(
-			$author$project$Data$handleJsonResponse($author$project$Pretest$Acceptability$decodeAcceptabilityTrials)),
-		timeout: $elm$core$Maybe$Just(5000),
-		url: $author$project$Data$buildQuery(
-			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Pilote Acceptability'})
+var $author$project$Session1$Session$ServerRespondedWithSomeError = function (a) {
+	return {$: 'ServerRespondedWithSomeError', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedA5 = function (a) {
+	return {$: 'LoadedA5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedB5 = function (a) {
+	return {$: 'LoadedB5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedC5 = function (a) {
+	return {$: 'LoadedC5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedD5 = function (a) {
+	return {$: 'LoadedD5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$LoadedE5 = function (a) {
+	return {$: 'LoadedE5', a: a};
+};
+var $0ui$elm_task_parallel$Task$Parallel$State5 = F6(
+	function (a, b, c, d, e, f) {
+		return {$: 'State5', a: a, b: b, c: c, d: d, e: e, f: f};
 	});
-var $author$project$Session1$CU1$Trial = F8(
+var $0ui$elm_task_parallel$Task$Parallel$attempt5 = function (_v0) {
+	var task1 = _v0.task1;
+	var task2 = _v0.task2;
+	var task3 = _v0.task3;
+	var task4 = _v0.task4;
+	var task5 = _v0.task5;
+	var onUpdates = _v0.onUpdates;
+	var onSuccess = _v0.onSuccess;
+	var onFailure = _v0.onFailure;
+	return _Utils_Tuple2(
+		A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		$elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedA5),
+					onFailure,
+					task1),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedB5),
+					onFailure,
+					task2),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedC5),
+					onFailure,
+					task3),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedD5),
+					onFailure,
+					task4),
+					A3(
+					$0ui$elm_task_parallel$Task$Parallel$routeTo,
+					A2($elm$core$Basics$composeL, onUpdates, $0ui$elm_task_parallel$Task$Parallel$LoadedE5),
+					onFailure,
+					task5)
+				])));
+};
+var $author$project$Session1$ContextUnderstanding$Trial = F8(
 	function (uid, text, target, distractor1, distractor2, distractor3, definition, isTraining) {
 		return {definition: definition, distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, target: target, text: text, uid: uid};
 	});
@@ -12317,7 +12624,7 @@ var $author$project$Data$decodeBool = function (fieldname) {
 			stringToBoolDecoder,
 			A2($elm$json$Json$Decode$field, fieldname, $elm$json$Json$Decode$string)));
 };
-var $author$project$Session1$CU1$decodeTranslationInput = function () {
+var $author$project$Session1$ContextUnderstanding$decodeTranslationInput = function () {
 	var decoder = A2(
 		$author$project$Data$decodeBool,
 		'isTraining',
@@ -12349,16 +12656,16 @@ var $author$project$Session1$CU1$decodeTranslationInput = function () {
 									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 									'UID',
 									$elm$json$Json$Decode$string,
-									$elm$json$Json$Decode$succeed($author$project$Session1$CU1$Trial)))))))));
+									$elm$json$Json$Decode$succeed($author$project$Session1$ContextUnderstanding$Trial)))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
-var $author$project$Session1$CU1$getRecords = $elm$http$Http$task(
+var $author$project$Session1$ContextUnderstanding$getRecords = $elm$http$Http$task(
 	{
 		body: $elm$http$Http$emptyBody,
 		headers: _List_Nil,
 		method: 'GET',
 		resolver: $elm$http$Http$stringResolver(
-			$author$project$Data$handleJsonResponse($author$project$Session1$CU1$decodeTranslationInput)),
+			$author$project$Data$handleJsonResponse($author$project$Session1$ContextUnderstanding$decodeTranslationInput)),
 		timeout: $elm$core$Maybe$Just(5000),
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
@@ -12368,9 +12675,11 @@ var $author$project$Session1$Meaning$Trial = F9(
 		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, feedbackCorrect: feedbackCorrect, feedbackIncorrect: feedbackIncorrect, isTraining: isTraining, target: target, uid: uid, writtenWord: writtenWord};
 	});
 var $author$project$Session1$Meaning$decodeMeaningInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Feedback_Correct_Meaning',
@@ -12425,9 +12734,11 @@ var $author$project$Session1$Presentation$Trial = F8(
 		return {audio: audio, definition: definition, example: example, isTraining: isTraining, text: text, translation1: translation1, translation2: translation2, uid: uid};
 	});
 var $author$project$Session1$Presentation$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Word_Audio',
@@ -12471,11 +12782,11 @@ var $author$project$Session1$Presentation$getRecords = $elm$http$Http$task(
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
 	});
-var $author$project$Session1$SpellingLvl1$Trial = F7(
+var $author$project$Session1$Spelling$Trial = F7(
 	function (uid, target, distractor1, distractor2, distractor3, isTraining, audio) {
 		return {audio: audio, distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, target: target, uid: uid};
 	});
-var $author$project$Session1$SpellingLvl1$decodeTrials = function () {
+var $author$project$Session1$Spelling$decodeTrials = function () {
 	var stringToBoolDecoder = function (str) {
 		if (str === 'true') {
 			return $elm$json$Json$Decode$succeed(true);
@@ -12487,12 +12798,11 @@ var $author$project$Session1$SpellingLvl1$decodeTrials = function () {
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'Word_Audio',
 		$author$project$Data$decodeAudioFiles,
-		A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2(
-				$elm$json$Json$Decode$andThen,
-				stringToBoolDecoder,
-				A2($elm$json$Json$Decode$field, 'isTraining', $elm$json$Json$Decode$string)),
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'isTraining',
+			$elm$json$Json$Decode$bool,
+			false,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'Distractor_3_CCS',
@@ -12513,20 +12823,32 @@ var $author$project$Session1$SpellingLvl1$decodeTrials = function () {
 								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 								'UID',
 								$elm$json$Json$Decode$string,
-								$elm$json$Json$Decode$succeed($author$project$Session1$SpellingLvl1$Trial))))))));
+								$elm$json$Json$Decode$succeed($author$project$Session1$Spelling$Trial))))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
-var $author$project$Session1$SpellingLvl1$getRecords = $elm$http$Http$task(
+var $author$project$Session1$Spelling$getRecords = $elm$http$Http$task(
 	{
 		body: $elm$http$Http$emptyBody,
 		headers: _List_Nil,
 		method: 'GET',
 		resolver: $elm$http$Http$stringResolver(
-			$author$project$Data$handleJsonResponse($author$project$Session1$SpellingLvl1$decodeTrials)),
+			$author$project$Data$handleJsonResponse($author$project$Session1$Spelling$decodeTrials)),
 		timeout: $elm$core$Maybe$Just(5000),
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
 	});
+var $author$project$Session1$Session$getAll = $0ui$elm_task_parallel$Task$Parallel$attempt5(
+	{onFailure: $author$project$Session1$Session$ServerRespondedWithSomeError, onSuccess: $author$project$Session1$Session$ServerRespondedWithAllData, onUpdates: $author$project$Session1$Session$ServerRespondedWithSomeData, task1: $author$project$Session1$Meaning$getRecords, task2: $author$project$Session1$Spelling$getRecords, task3: $author$project$Session1$ContextUnderstanding$getRecords, task4: $author$project$Session1$Presentation$getRecords, task5: $author$project$ExperimentInfo$getRecords});
+var $author$project$Session2$Session$ServerRespondedWithAllData = F4(
+	function (a, b, c, d) {
+		return {$: 'ServerRespondedWithAllData', a: a, b: b, c: c, d: d};
+	});
+var $author$project$Session2$Session$ServerRespondedWithSomeData = function (a) {
+	return {$: 'ServerRespondedWithSomeData', a: a};
+};
+var $author$project$Session2$Session$ServerRespondedWithSomeError = function (a) {
+	return {$: 'ServerRespondedWithSomeError', a: a};
+};
 var $author$project$Session2$CU2$Trial = function (uid) {
 	return function (writtenWord) {
 		return function (audioSentence) {
@@ -12549,9 +12871,11 @@ var $author$project$Session2$CU2$Trial = function (uid) {
 	};
 };
 var $author$project$Session2$CU2$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Feedback_CU_Lvl2',
@@ -12603,18 +12927,20 @@ var $author$project$Session2$CU2$getRecords = $elm$http$Http$task(
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
 	});
-var $author$project$Session2$Scrabble$Trial = F5(
+var $author$project$Session2$Spelling$Trial = F5(
 	function (uid, writtenWord, audioWord, isTraining, target) {
 		return {audioWord: audioWord, isTraining: isTraining, target: target, uid: uid, writtenWord: writtenWord};
 	});
-var $author$project$Session2$Scrabble$decodeTranslationInput = function () {
+var $author$project$Session2$Spelling$decodeTranslationInput = function () {
 	var decoder = A3(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'Word_Text',
 		$elm$json$Json$Decode$string,
-		A2(
-			$author$project$Data$decodeBool,
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 			'isTraining',
+			$elm$json$Json$Decode$bool,
+			false,
 			A3(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 				'Word_Audio',
@@ -12627,16 +12953,16 @@ var $author$project$Session2$Scrabble$decodeTranslationInput = function () {
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 						'UID',
 						$elm$json$Json$Decode$string,
-						$elm$json$Json$Decode$succeed($author$project$Session2$Scrabble$Trial))))));
+						$elm$json$Json$Decode$succeed($author$project$Session2$Spelling$Trial))))));
 	return $author$project$Data$decodeRecords(decoder);
 }();
-var $author$project$Session2$Scrabble$getRecords = $elm$http$Http$task(
+var $author$project$Session2$Spelling$getRecords = $elm$http$Http$task(
 	{
 		body: $elm$http$Http$emptyBody,
 		headers: _List_Nil,
 		method: 'GET',
 		resolver: $elm$http$Http$stringResolver(
-			$author$project$Data$handleJsonResponse($author$project$Session2$Scrabble$decodeTranslationInput)),
+			$author$project$Data$handleJsonResponse($author$project$Session2$Spelling$decodeTranslationInput)),
 		timeout: $elm$core$Maybe$Just(5000),
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
@@ -12646,9 +12972,11 @@ var $author$project$Session2$Translation$Trial = F9(
 		return {distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, question: question, target: target, translation2: translation2, uid: uid, word: word};
 	});
 var $author$project$Session2$Translation$decodeTrials = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A4(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 			'Word_Text',
@@ -12700,154 +13028,18 @@ var $author$project$Session2$Translation$getRecords = $elm$http$Http$task(
 		url: $author$project$Data$buildQuery(
 			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
 	});
-var $author$project$Session3$CU3$Trial = F7(
-	function (uid, writtenWord, audioSentence, context, amorce, feedback, isTraining) {
-		return {amorce: amorce, audioSentence: audioSentence, context: context, feedback: feedback, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
-	});
-var $author$project$Session3$CU3$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
-		'isTraining',
-		A3(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'CU_Lvl3_Feedback',
-			$elm$json$Json$Decode$string,
-			A3(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'CU_Lvl3_TextToComplete_amorce',
-				$elm$json$Json$Decode$string,
-				A3(
-					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'CU_Lvl3_Presentation',
-					$elm$json$Json$Decode$string,
-					A4(
-						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-						'CU_Lv3_Audio',
-						$author$project$Data$decodeAudioFiles,
-						A2($author$project$Data$AudioFile, '', ''),
-						A3(
-							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'Word_Text',
-							$elm$json$Json$Decode$string,
-							A3(
-								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'UID',
-								$elm$json$Json$Decode$string,
-								$elm$json$Json$Decode$succeed($author$project$Session3$CU3$Trial))))))));
-	return $author$project$Data$decodeRecords(decoder);
-}();
-var $author$project$Session3$CU3$getRecords = $elm$http$Http$task(
-	{
-		body: $elm$http$Http$emptyBody,
-		headers: _List_Nil,
-		method: 'GET',
-		resolver: $elm$http$Http$stringResolver(
-			$author$project$Data$handleJsonResponse($author$project$Session3$CU3$decodeTranslationInput)),
-		timeout: $elm$core$Maybe$Just(5000),
-		url: $author$project$Data$buildQuery(
-			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
-	});
-var $author$project$Session3$Spelling3$Trial = F4(
-	function (uid, writtenWord, audioSentence, isTraining) {
-		return {audioSentence: audioSentence, isTraining: isTraining, uid: uid, writtenWord: writtenWord};
-	});
-var $author$project$Session3$Spelling3$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
-		'isTraining',
-		A4(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-			'Word_Audio',
-			$author$project$Data$decodeAudioFiles,
-			A2($author$project$Data$AudioFile, '', ''),
-			A3(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'Word_Text',
-				$elm$json$Json$Decode$string,
-				A3(
-					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'UID',
-					$elm$json$Json$Decode$string,
-					$elm$json$Json$Decode$succeed($author$project$Session3$Spelling3$Trial)))));
-	return $author$project$Data$decodeRecords(decoder);
-}();
-var $author$project$Session3$Spelling3$getRecords = $elm$http$Http$task(
-	{
-		body: $elm$http$Http$emptyBody,
-		headers: _List_Nil,
-		method: 'GET',
-		resolver: $elm$http$Http$stringResolver(
-			$author$project$Data$handleJsonResponse($author$project$Session3$Spelling3$decodeTranslationInput)),
-		timeout: $elm$core$Maybe$Just(5000),
-		url: $author$project$Data$buildQuery(
-			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
-	});
-var $author$project$Session3$Synonym$Trial = F7(
-	function (uid, target, pre, stimulus, post, isTraining, radical) {
-		return {isTraining: isTraining, post: post, pre: pre, radical: radical, stimulus: stimulus, target: target, uid: uid};
-	});
-var $author$project$Session3$Synonym$decodeSynonymTrials = function () {
-	var stringToBoolDecoder = function (str) {
-		if (str === 'true') {
-			return $elm$json$Json$Decode$succeed(true);
-		} else {
-			return $elm$json$Json$Decode$succeed(false);
-		}
-	};
-	var decoder = A3(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'radical',
-		$elm$json$Json$Decode$string,
-		A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2(
-				$elm$json$Json$Decode$andThen,
-				stringToBoolDecoder,
-				A2($elm$json$Json$Decode$field, 'isTraining', $elm$json$Json$Decode$string)),
-			A3(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-				'post',
-				$elm$json$Json$Decode$string,
-				A3(
-					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'stim',
-					$elm$json$Json$Decode$string,
-					A3(
-						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'pre',
-						$elm$json$Json$Decode$string,
-						A3(
-							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'Word_Text',
-							$elm$json$Json$Decode$string,
-							A3(
-								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'UID',
-								$elm$json$Json$Decode$string,
-								$elm$json$Json$Decode$succeed($author$project$Session3$Synonym$Trial))))))));
-	return $author$project$Data$decodeRecords(decoder);
-}();
-var $author$project$Session3$Synonym$getRecords = $elm$http$Http$task(
-	{
-		body: $elm$http$Http$emptyBody,
-		headers: _List_Nil,
-		method: 'GET',
-		resolver: $elm$http$Http$stringResolver(
-			$author$project$Data$handleJsonResponse($author$project$Session3$Synonym$decodeSynonymTrials)),
-		timeout: $elm$core$Maybe$Just(5000),
-		url: $author$project$Data$buildQuery(
-			{app: $author$project$Data$apps.spacing, base: 'input', view_: 'Presentation'})
-	});
+var $author$project$Session2$Session$getAll = $0ui$elm_task_parallel$Task$Parallel$attempt4(
+	{onFailure: $author$project$Session2$Session$ServerRespondedWithSomeError, onSuccess: $author$project$Session2$Session$ServerRespondedWithAllData, onUpdates: $author$project$Session2$Session$ServerRespondedWithSomeData, task1: $author$project$Session2$CU2$getRecords, task2: $author$project$Session2$Spelling$getRecords, task3: $author$project$Session2$Translation$getRecords, task4: $author$project$ExperimentInfo$getRecords});
 var $author$project$Main$pure = function (model) {
 	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 };
-var $author$project$Main$UserDragsLetter = function (a) {
+var $author$project$Session2$Spelling$UserDragsLetter = function (a) {
 	return {$: 'UserDragsLetter', a: a};
 };
 var $annaghi$dnd_list$DnDList$Free = {$: 'Free'};
 var $annaghi$dnd_list$DnDList$OnDrag = {$: 'OnDrag'};
 var $annaghi$dnd_list$DnDList$Swap = {$: 'Swap'};
-var $author$project$Main$config = {
+var $author$project$Session2$Spelling$config = {
 	beforeUpdate: F3(
 		function (_v0, _v1, list) {
 			return list;
@@ -13775,7 +13967,7 @@ var $annaghi$dnd_list$DnDList$create = F2(
 			update: $annaghi$dnd_list$DnDList$update(config)
 		};
 	});
-var $author$project$Main$system = A2($annaghi$dnd_list$DnDList$create, $author$project$Main$config, $author$project$Main$UserDragsLetter);
+var $author$project$Session2$Spelling$system = A2($annaghi$dnd_list$DnDList$create, $author$project$Session2$Spelling$config, $author$project$Session2$Spelling$UserDragsLetter);
 var $author$project$Postest$CloudWords$NotKnown = {$: 'NotKnown'};
 var $author$project$Postest$CloudWords$words = _List_fromArray(
 	[
@@ -13790,7 +13982,7 @@ var $author$project$Main$init = F3(
 			cu1: $author$project$Logic$Loading,
 			cu3: $author$project$Logic$NotStarted,
 			cuLvl2: $author$project$Logic$NotStarted,
-			dnd: $author$project$Main$system.model,
+			dnd: $author$project$Session2$Spelling$system.model,
 			endAcceptabilityDuration: 6000,
 			errorTracking: _List_Nil,
 			informations: '',
@@ -13802,9 +13994,10 @@ var $author$project$Main$init = F3(
 			packetsSended: 0,
 			pilote: $author$project$Session$NotAsked,
 			presentation: $author$project$Logic$NotStarted,
-			pretest: $author$project$Pretest$SPR$attempt.a,
+			pretest: $author$project$Pretest$Pretest$attempt.a,
 			route: route,
 			scrabbleTask: $author$project$Logic$NotStarted,
+			sentenceCompletion: $author$project$Logic$NotStarted,
 			session1: $author$project$Session$NotAsked,
 			session2: $author$project$Session$NotAsked,
 			session3: $author$project$Session$NotAsked,
@@ -13814,44 +14007,19 @@ var $author$project$Main$init = F3(
 			synonymTask: $author$project$Logic$NotStarted,
 			translationTask: $author$project$Logic$NotStarted,
 			user: url.query,
+			vks: $author$project$Logic$NotStarted,
+			yesno: $author$project$Logic$NotStarted,
 			yn: $author$project$Logic$Loading
 		};
-		var _v1 = $0ui$elm_task_parallel$Task$Parallel$attempt4(
-			{onFailure: $author$project$Main$ServerRespondedWithSomeError, onSuccess: $author$project$Main$ServerRespondedWithAllSession3Data, onUpdates: $author$project$Main$ServerRespondedWithSomeSession3Data, task1: $author$project$Session3$CU3$getRecords, task2: $author$project$Session3$Spelling3$getRecords, task3: $author$project$Session3$Synonym$getRecords, task4: $author$project$ExperimentInfo$getRecords});
+		var _v1 = $author$project$Session3$Session$attempt;
 		var loadingStateSession3 = _v1.a;
 		var fetchSession3 = _v1.b;
-		var _v2 = $0ui$elm_task_parallel$Task$Parallel$attempt4(
-			{onFailure: $author$project$Main$ServerRespondedWithSomeError, onSuccess: $author$project$Main$ServerRespondedWithAllSession2Data, onUpdates: $author$project$Main$ServerRespondedWithSomeSession2Data, task1: $author$project$Session2$CU2$getRecords, task2: $author$project$Session2$Scrabble$getRecords, task3: $author$project$Session2$Translation$getRecords, task4: $author$project$ExperimentInfo$getRecords});
+		var _v2 = $author$project$Session2$Session$getAll;
 		var loadingStateSession2 = _v2.a;
 		var fetchSession2 = _v2.b;
-		var _v3 = $0ui$elm_task_parallel$Task$Parallel$attempt2(
-			{
-				onFailure: function (err) {
-					return $author$project$Main$SPR(
-						$author$project$Pretest$SPR$ServerRespondedWithSomeError(err));
-				},
-				onSuccess: F2(
-					function (trials, info) {
-						return $author$project$Main$SPR(
-							A2($author$project$Pretest$SPR$ServerRespondedWithAllPretestData, trials, info));
-					}),
-				onUpdates: function (someData) {
-					return $author$project$Main$SPR(
-						$author$project$Pretest$SPR$ServerRespondedWithSomePretestData(someData));
-				},
-				task1: $author$project$Pretest$SPR$getRecords,
-				task2: $author$project$ExperimentInfo$getRecords
-			});
-		var loadingStatePretest = _v3.a;
-		var fetchPretest = _v3.b;
-		var _v4 = $0ui$elm_task_parallel$Task$Parallel$attempt2(
-			{onFailure: $author$project$Main$ServerRespondedWithSomeError, onSuccess: $author$project$Main$ServerRespondedWithAllPretestData, onUpdates: $author$project$Main$ServerRespondedWithSomePretestData, task1: $author$project$Pretest$Acceptability$getRecords, task2: $author$project$ExperimentInfo$getRecords});
-		var loadingStatePilote = _v4.a;
-		var fetchPilote = _v4.b;
-		var _v5 = $0ui$elm_task_parallel$Task$Parallel$attempt5(
-			{onFailure: $author$project$Main$ServerRespondedWithSomeError, onSuccess: $author$project$Main$ServerRespondedWithAllSession1Data, onUpdates: $author$project$Main$ServerRespondedWithSomeSession1Data, task1: $author$project$Session1$Meaning$getRecords, task2: $author$project$Session1$SpellingLvl1$getRecords, task3: $author$project$Session1$CU1$getRecords, task4: $author$project$Session1$Presentation$getRecords, task5: $author$project$ExperimentInfo$getRecords});
-		var loadingState = _v5.a;
-		var fetchCmd = _v5.b;
+		var _v3 = $author$project$Session1$Session$getAll;
+		var loadingStateSession1 = _v3.a;
+		var fetchSession1 = _v3.b;
 		switch (route.$) {
 			case 'Session1':
 				var userId = route.a;
@@ -13862,11 +14030,11 @@ var $author$project$Main$init = F3(
 							cu1: $author$project$Logic$Loading,
 							meaning: $author$project$Logic$Loading,
 							presentation: $author$project$Logic$Loading,
-							session1: $author$project$Session$Loading(loadingState),
+							session1: $author$project$Session$Loading(loadingStateSession1),
 							spellingLvl1: $author$project$Logic$Loading,
 							user: $elm$core$Maybe$Just(userId)
 						}),
-					fetchCmd);
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Session1, fetchSession1));
 			case 'Home':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -13875,11 +14043,11 @@ var $author$project$Main$init = F3(
 							cu1: $author$project$Logic$Loading,
 							meaning: $author$project$Logic$Loading,
 							presentation: $author$project$Logic$Loading,
-							session1: $author$project$Session$Loading(loadingState),
+							session1: $author$project$Session$Loading(loadingStateSession1),
 							spellingLvl1: $author$project$Logic$Loading,
 							user: $elm$core$Maybe$Nothing
 						}),
-					fetchCmd);
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Session1, fetchSession1));
 			case 'AuthenticatedSession2':
 				var userid = route.a;
 				return _Utils_Tuple2(
@@ -13892,7 +14060,7 @@ var $author$project$Main$init = F3(
 							translationTask: $author$project$Logic$Loading,
 							user: $elm$core$Maybe$Just(userid)
 						}),
-					fetchSession2);
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Session2, fetchSession2));
 			case 'AuthenticatedSession3':
 				var userid = route.a;
 				return _Utils_Tuple2(
@@ -13905,24 +14073,13 @@ var $author$project$Main$init = F3(
 							synonymTask: $author$project$Logic$Loading,
 							user: $elm$core$Maybe$Just(userid)
 						}),
-					fetchSession3);
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Session3, fetchSession3));
 			case 'Pretest':
 				return _Utils_Tuple2(
 					_Utils_update(
 						defaultInit,
-						{spr: $author$project$Logic$Loading}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$SPR, $author$project$Pretest$SPR$attempt.b));
-			case 'Pilote':
-				var userid = route.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						defaultInit,
-						{
-							acceptabilityTask: $author$project$Logic$Loading,
-							pilote: $author$project$Session$Loading(loadingStatePilote),
-							user: $elm$core$Maybe$Just(userid)
-						}),
-					fetchPilote);
+						{acceptabilityTask: $author$project$Logic$Loading, sentenceCompletion: $author$project$Logic$Loading, spr: $author$project$Logic$Loading, vks: $author$project$Logic$Loading, yesno: $author$project$Logic$Loading}),
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Pretest, $author$project$Pretest$Pretest$attempt.b));
 			case 'Posttest':
 				return $author$project$Main$pure(defaultInit);
 			default:
@@ -13932,9 +14089,21 @@ var $author$project$Main$init = F3(
 						{route: $author$project$Route$NotFound}));
 		}
 	});
+var $author$project$Main$Acceptability = function (a) {
+	return {$: 'Acceptability', a: a};
+};
+var $author$project$Main$SPR = function (a) {
+	return {$: 'SPR', a: a};
+};
+var $author$project$Main$Spelling2 = function (a) {
+	return {$: 'Spelling2', a: a};
+};
+var $author$project$Main$YesNo = function (a) {
+	return {$: 'YesNo', a: a};
+};
 var $author$project$Pretest$Acceptability$Answering = {$: 'Answering'};
 var $author$project$Pretest$Acceptability$Init = {$: 'Init'};
-var $author$project$Main$audioEnded = _Platform_incomingPort(
+var $author$project$Ports$audioEnded = _Platform_incomingPort(
 	'audioEnded',
 	A2(
 		$elm$json$Json$Decode$andThen,
@@ -13953,65 +14122,125 @@ var $author$project$Main$audioEnded = _Platform_incomingPort(
 				A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string));
 		},
 		A2($elm$json$Json$Decode$field, 'timestamp', $elm$json$Json$Decode$int)));
-var $author$project$Main$Acceptability = function (a) {
-	return {$: 'Acceptability', a: a};
-};
 var $author$project$Pretest$Acceptability$NextStepCinematic = function (a) {
 	return {$: 'NextStepCinematic', a: a};
 };
-var $author$project$Main$NoOp = {$: 'NoOp'};
+var $author$project$Pretest$Acceptability$NoOp = {$: 'NoOp'};
 var $author$project$Pretest$Acceptability$Start = {$: 'Start'};
-var $author$project$Main$decodeSpace = A2(
+var $author$project$Pretest$Acceptability$decodeSpace = A2(
 	$elm$json$Json$Decode$map,
 	function (k) {
 		if (k === ' ') {
-			return $author$project$Main$Acceptability(
-				$author$project$Pretest$Acceptability$NextStepCinematic($author$project$Pretest$Acceptability$Start));
+			return $author$project$Pretest$Acceptability$NextStepCinematic($author$project$Pretest$Acceptability$Start);
 		} else {
-			return $author$project$Main$NoOp;
+			return $author$project$Pretest$Acceptability$NoOp;
 		}
 	},
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
 var $author$project$Logic$getState = function (task) {
-	switch (task.$) {
-		case 'Main':
-			var state = task.a.state;
-			return $elm$core$Maybe$Just(state);
-		case 'Intr':
-			var state = task.a.state;
-			return $elm$core$Maybe$Just(state);
-		default:
-			return $elm$core$Maybe$Nothing;
+	if (task.$ === 'Running') {
+		var state = task.b.state;
+		return $elm$core$Maybe$Just(state);
+	} else {
+		return $elm$core$Maybe$Nothing;
 	}
 };
 var $author$project$Pretest$Acceptability$UserPressedButton = function (a) {
 	return {$: 'UserPressedButton', a: a};
 };
-var $author$project$Main$toEvaluation = function (x) {
+var $author$project$Pretest$Acceptability$toEvaluation = function (x) {
 	switch (x) {
 		case 'j':
-			return $author$project$Main$Acceptability(
-				$author$project$Pretest$Acceptability$UserPressedButton(
-					$elm$core$Maybe$Just(true)));
+			return $author$project$Pretest$Acceptability$UserPressedButton(
+				$elm$core$Maybe$Just(true));
 		case 'f':
-			return $author$project$Main$Acceptability(
-				$author$project$Pretest$Acceptability$UserPressedButton(
-					$elm$core$Maybe$Just(false)));
+			return $author$project$Pretest$Acceptability$UserPressedButton(
+				$elm$core$Maybe$Just(false));
 		default:
-			return $author$project$Main$Acceptability(
-				$author$project$Pretest$Acceptability$UserPressedButton($elm$core$Maybe$Nothing));
+			return $author$project$Pretest$Acceptability$NoOp;
 	}
 };
-var $author$project$Main$keyDecoder = A2(
+var $author$project$Pretest$Acceptability$keyDecoder = A2(
 	$elm$json$Json$Decode$map,
-	$author$project$Main$toEvaluation,
+	$author$project$Pretest$Acceptability$toEvaluation,
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
 var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keydown');
+var $author$project$Pretest$Acceptability$AudioEnded = function (a) {
+	return {$: 'AudioEnded', a: a};
+};
+var $author$project$Pretest$Acceptability$AudioStarted = function (a) {
+	return {$: 'AudioStarted', a: a};
+};
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $author$project$Pretest$Acceptability$toAcceptabilityMessage = function (_v0) {
+	var eventType = _v0.eventType;
+	var name = _v0.name;
+	var timestamp = _v0.timestamp;
+	switch (eventType) {
+		case 'SoundStarted':
+			return $author$project$Pretest$Acceptability$AudioStarted(
+				_Utils_Tuple2(
+					name,
+					$elm$time$Time$millisToPosix(timestamp)));
+		case 'SoundEnded':
+			return $author$project$Pretest$Acceptability$AudioEnded(
+				_Utils_Tuple2(
+					name,
+					$elm$time$Time$millisToPosix(timestamp)));
+		default:
+			return $author$project$Pretest$Acceptability$NoOp;
+	}
+};
+var $author$project$Pretest$Acceptability$subscriptions = function (model) {
+	var acceptabilityState = $author$project$Logic$getState(model.acceptabilityTask);
+	var listenToInput = function () {
+		if (acceptabilityState.$ === 'Just') {
+			var state = acceptabilityState.a;
+			return _Utils_eq(state.step, $author$project$Pretest$Acceptability$Answering) ? $elm$browser$Browser$Events$onKeyDown($author$project$Pretest$Acceptability$keyDecoder) : (_Utils_eq(state.step, $author$project$Pretest$Acceptability$Init) ? $elm$browser$Browser$Events$onKeyDown($author$project$Pretest$Acceptability$decodeSpace) : $elm$core$Platform$Sub$none);
+		} else {
+			return $elm$core$Platform$Sub$none;
+		}
+	}();
+	var _v0 = model.acceptabilityTask;
+	_v0$2:
+	while (true) {
+		if (_v0.$ === 'Running') {
+			switch (_v0.a.$) {
+				case 'Training':
+					var _v1 = _v0.a;
+					return $elm$core$Platform$Sub$batch(
+						_List_fromArray(
+							[
+								listenToInput,
+								$author$project$Ports$audioEnded($author$project$Pretest$Acceptability$toAcceptabilityMessage)
+							]));
+				case 'Main':
+					var _v2 = _v0.a;
+					return $elm$core$Platform$Sub$batch(
+						_List_fromArray(
+							[
+								listenToInput,
+								$author$project$Ports$audioEnded($author$project$Pretest$Acceptability$toAcceptabilityMessage)
+							]));
+				default:
+					break _v0$2;
+			}
+		} else {
+			break _v0$2;
+		}
+	}
+	return $elm$core$Platform$Sub$none;
+};
 var $author$project$Pretest$SPR$TimestampedMsg = F2(
 	function (a, b) {
 		return {$: 'TimestampedMsg', a: a, b: b};
 	});
-var $author$project$Pretest$SPR$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Pretest$SPR$UserClickedNextTrial = function (a) {
+	return {$: 'UserClickedNextTrial', a: a};
+};
 var $author$project$Pretest$SPR$UserPressedSpaceToReadNextSegment = {$: 'UserPressedSpaceToReadNextSegment'};
 var $author$project$Pretest$SPR$UserPressedSpaceToStartParagraph = {$: 'UserPressedSpaceToStartParagraph'};
 var $author$project$Pretest$SPR$NoOp = {$: 'NoOp'};
@@ -14027,84 +14256,156 @@ var $author$project$Pretest$SPR$decodeSpace = function (msg) {
 		},
 		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
 };
-var $author$project$Pretest$SPR$subscriptions = function (state) {
-	if (state.$ === 'Nothing') {
-		return $elm$core$Platform$Sub$none;
-	} else {
-		var s = state.a;
-		var _v1 = s.step;
-		switch (_v1.$) {
-			case 'SPR':
-				var step = _v1.a;
-				if (step.$ === 'Start') {
-					return $elm$browser$Browser$Events$onKeyDown(
-						$author$project$Pretest$SPR$decodeSpace(
-							A2($author$project$Pretest$SPR$TimestampedMsg, $author$project$Pretest$SPR$UserPressedSpaceToStartParagraph, $elm$core$Maybe$Nothing)));
-				} else {
-					return $elm$browser$Browser$Events$onKeyDown(
-						$author$project$Pretest$SPR$decodeSpace(
-							A2($author$project$Pretest$SPR$TimestampedMsg, $author$project$Pretest$SPR$UserPressedSpaceToReadNextSegment, $elm$core$Maybe$Nothing)));
-				}
-			case 'Feedback':
-				return $elm$browser$Browser$Events$onKeyDown(
-					$author$project$Pretest$SPR$decodeSpace($author$project$Pretest$SPR$UserClickedNextTrial));
+var $author$project$Pretest$SPR$No = {$: 'No'};
+var $author$project$Pretest$SPR$Unsure = {$: 'Unsure'};
+var $author$project$Pretest$SPR$Yes = {$: 'Yes'};
+var $author$project$Pretest$SPR$decodeYesNoUnsure = A2(
+	$elm$json$Json$Decode$map,
+	function (k) {
+		switch (k) {
+			case 'y':
+				return $author$project$Pretest$SPR$UserClickedNextTrial($author$project$Pretest$SPR$Yes);
+			case 'n':
+				return $author$project$Pretest$SPR$UserClickedNextTrial($author$project$Pretest$SPR$No);
+			case 'k':
+				return $author$project$Pretest$SPR$UserClickedNextTrial($author$project$Pretest$SPR$Unsure);
 			default:
-				return $elm$core$Platform$Sub$none;
+				return $author$project$Pretest$SPR$NoOp;
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+var $author$project$Pretest$SPR$UserConfirmedChoice = function (a) {
+	return {$: 'UserConfirmedChoice', a: a};
+};
+var $author$project$Pretest$SPR$decodeYesNoUnsureInTraining = A2(
+	$elm$json$Json$Decode$map,
+	function (k) {
+		switch (k) {
+			case 'y':
+				return $author$project$Pretest$SPR$UserConfirmedChoice($author$project$Pretest$SPR$Yes);
+			case 'n':
+				return $author$project$Pretest$SPR$UserConfirmedChoice($author$project$Pretest$SPR$No);
+			case 'k':
+				return $author$project$Pretest$SPR$UserConfirmedChoice($author$project$Pretest$SPR$Unsure);
+			default:
+				return $author$project$Pretest$SPR$NoOp;
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+var $author$project$Pretest$SPR$subscriptions = function (task) {
+	_v0$2:
+	while (true) {
+		if (task.$ === 'Running') {
+			switch (task.a.$) {
+				case 'Training':
+					var _v1 = task.a;
+					var data = task.b;
+					var _v2 = data.state.step;
+					switch (_v2.$) {
+						case 'SPR':
+							var step = _v2.a;
+							if (step.$ === 'Start') {
+								return $elm$browser$Browser$Events$onKeyDown(
+									$author$project$Pretest$SPR$decodeSpace(
+										A2($author$project$Pretest$SPR$TimestampedMsg, $author$project$Pretest$SPR$UserPressedSpaceToStartParagraph, $elm$core$Maybe$Nothing)));
+							} else {
+								return $elm$browser$Browser$Events$onKeyDown(
+									$author$project$Pretest$SPR$decodeSpace(
+										A2($author$project$Pretest$SPR$TimestampedMsg, $author$project$Pretest$SPR$UserPressedSpaceToReadNextSegment, $elm$core$Maybe$Nothing)));
+							}
+						case 'Feedback':
+							return $elm$browser$Browser$Events$onKeyDown(
+								$author$project$Pretest$SPR$decodeSpace(
+									$author$project$Pretest$SPR$UserClickedNextTrial(data.state.answer)));
+						default:
+							return $elm$browser$Browser$Events$onKeyDown($author$project$Pretest$SPR$decodeYesNoUnsureInTraining);
+					}
+				case 'Main':
+					var _v4 = task.a;
+					var data = task.b;
+					var _v5 = data.state.step;
+					switch (_v5.$) {
+						case 'SPR':
+							var step = _v5.a;
+							if (step.$ === 'Start') {
+								return $elm$browser$Browser$Events$onKeyDown(
+									$author$project$Pretest$SPR$decodeSpace(
+										A2($author$project$Pretest$SPR$TimestampedMsg, $author$project$Pretest$SPR$UserPressedSpaceToStartParagraph, $elm$core$Maybe$Nothing)));
+							} else {
+								return $elm$browser$Browser$Events$onKeyDown(
+									$author$project$Pretest$SPR$decodeSpace(
+										A2($author$project$Pretest$SPR$TimestampedMsg, $author$project$Pretest$SPR$UserPressedSpaceToReadNextSegment, $elm$core$Maybe$Nothing)));
+							}
+						case 'Question':
+							return $elm$browser$Browser$Events$onKeyDown($author$project$Pretest$SPR$decodeYesNoUnsure);
+						default:
+							return $elm$core$Platform$Sub$none;
+					}
+				default:
+					break _v0$2;
+			}
+		} else {
+			break _v0$2;
 		}
 	}
+	return $elm$core$Platform$Sub$none;
 };
-var $author$project$Pretest$Acceptability$AudioEnded = function (a) {
-	return {$: 'AudioEnded', a: a};
+var $author$project$Pretest$YesNo$NoOp = {$: 'NoOp'};
+var $author$project$Pretest$YesNo$UserPressedButton = function (a) {
+	return {$: 'UserPressedButton', a: a};
 };
-var $author$project$Pretest$Acceptability$AudioStarted = function (a) {
-	return {$: 'AudioStarted', a: a};
-};
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $author$project$Main$toAcceptabilityMessage = function (_v0) {
-	var eventType = _v0.eventType;
-	var name = _v0.name;
-	var timestamp = _v0.timestamp;
-	switch (eventType) {
-		case 'SoundStarted':
-			return $author$project$Main$Acceptability(
-				$author$project$Pretest$Acceptability$AudioStarted(
-					_Utils_Tuple2(
-						name,
-						$elm$time$Time$millisToPosix(timestamp))));
-		case 'SoundEnded':
-			return $author$project$Main$Acceptability(
-				$author$project$Pretest$Acceptability$AudioEnded(
-					_Utils_Tuple2(
-						name,
-						$elm$time$Time$millisToPosix(timestamp))));
+var $author$project$Pretest$YesNo$toEvaluation = function (x) {
+	switch (x) {
+		case 'j':
+			return $author$project$Pretest$YesNo$UserPressedButton(
+				$elm$core$Maybe$Just(true));
+		case 'f':
+			return $author$project$Pretest$YesNo$UserPressedButton(
+				$elm$core$Maybe$Just(false));
 		default:
-			return $author$project$Main$NoOp;
+			return $author$project$Pretest$YesNo$NoOp;
 	}
+};
+var $author$project$Pretest$YesNo$keyDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Pretest$YesNo$toEvaluation,
+	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+var $author$project$Pretest$YesNo$subscriptions = function (model) {
+	var _v0 = model.yesno;
+	if ((_v0.$ === 'Running') && (_v0.a.$ === 'Main')) {
+		var _v1 = _v0.a;
+		return $elm$core$Platform$Sub$batch(
+			_List_fromArray(
+				[
+					$elm$browser$Browser$Events$onKeyDown($author$project$Pretest$YesNo$keyDecoder)
+				]));
+	} else {
+		return $elm$core$Platform$Sub$none;
+	}
+};
+var $author$project$Session2$Spelling$subscriptions = function (model) {
+	return $author$project$Session2$Spelling$system.subscriptions(model.dnd);
 };
 var $author$project$Main$subscriptions = function (model) {
-	var sprState = $author$project$Logic$getState(model.spr);
-	var acceptabilityState = $author$project$Logic$getState(model.acceptabilityTask);
-	var listenToInput = function () {
-		if (acceptabilityState.$ === 'Just') {
-			var state = acceptabilityState.a;
-			return _Utils_eq(state.step, $author$project$Pretest$Acceptability$Answering) ? $elm$browser$Browser$Events$onKeyDown($author$project$Main$keyDecoder) : (_Utils_eq(state.step, $author$project$Pretest$Acceptability$Init) ? $elm$browser$Browser$Events$onKeyDown($author$project$Main$decodeSpace) : $elm$core$Platform$Sub$none);
-		} else {
-			return $elm$core$Platform$Sub$none;
-		}
-	}();
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
-				$author$project$Main$system.subscriptions(model.dnd),
-				listenToInput,
-				$author$project$Main$audioEnded($author$project$Main$toAcceptabilityMessage),
+				A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$Spelling2,
+				$author$project$Session2$Spelling$subscriptions(model)),
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$SPR,
-				$author$project$Pretest$SPR$subscriptions(sprState))
+				$author$project$Pretest$SPR$subscriptions(model.spr)),
+				A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$Acceptability,
+				$author$project$Pretest$Acceptability$subscriptions(model)),
+				A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$YesNo,
+				$author$project$Pretest$YesNo$subscriptions(model))
 			]));
 };
 var $author$project$Main$CU1 = function (a) {
@@ -14116,104 +14417,388 @@ var $author$project$Main$CU2 = function (a) {
 var $author$project$Main$CU3 = function (a) {
 	return {$: 'CU3', a: a};
 };
-var $author$project$Pretest$Acceptability$End = {$: 'End'};
-var $author$project$Logic$Err = function (a) {
-	return {$: 'Err', a: a};
-};
-var $author$project$Main$Informations = function (a) {
-	return {$: 'Informations', a: a};
-};
-var $author$project$Pretest$Acceptability$Listening = {$: 'Listening'};
 var $author$project$Main$Meaning = function (a) {
 	return {$: 'Meaning', a: a};
 };
-var $author$project$Main$PlaysoundInJS = function (a) {
-	return {$: 'PlaysoundInJS', a: a};
+var $author$project$Main$Presentation = function (a) {
+	return {$: 'Presentation', a: a};
 };
-var $author$project$Session$Ready = {$: 'Ready'};
-var $author$project$Main$RuntimeShuffledOptionsOrder = function (a) {
-	return {$: 'RuntimeShuffledOptionsOrder', a: a};
+var $author$project$Main$SentenceCompletion = function (a) {
+	return {$: 'SentenceCompletion', a: a};
 };
-var $author$project$Pretest$Acceptability$RuntimeShuffledTrials = F2(
-	function (a, b) {
-		return {$: 'RuntimeShuffledTrials', a: a, b: b};
-	});
-var $author$project$Main$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Pretest$Acceptability$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Session1$CU1$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Session1$Meaning$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Session1$SpellingLvl1$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Session2$CU2$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Session3$CU3$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Session3$Spelling3$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Session3$Synonym$ServerRespondedWithLastRecords = function (a) {
-	return {$: 'ServerRespondedWithLastRecords', a: a};
-};
-var $author$project$Main$ShuffledSession1 = F5(
-	function (meaning, spelling, cu1, presentation, infos_) {
-		return {cu1: cu1, infos_: infos_, meaning: meaning, presentation: presentation, spelling: spelling};
-	});
-var $author$project$Main$ShuffledSession2 = F4(
-	function (cu, spelling, translation, infos) {
-		return {cu: cu, infos: infos, spelling: spelling, translation: translation};
-	});
-var $author$project$Main$ShuffledSession3 = F4(
-	function (cu, spelling, synonym, infos) {
-		return {cu: cu, infos: infos, spelling: spelling, synonym: synonym};
-	});
 var $author$project$Main$Spelling1 = function (a) {
 	return {$: 'Spelling1', a: a};
-};
-var $author$project$Main$Spelling2 = function (a) {
-	return {$: 'Spelling2', a: a};
 };
 var $author$project$Main$Spelling3 = function (a) {
 	return {$: 'Spelling3', a: a};
 };
-var $author$project$Main$StartSession1 = function (a) {
-	return {$: 'StartSession1', a: a};
-};
-var $author$project$Main$StartSession2 = function (a) {
-	return {$: 'StartSession2', a: a};
-};
-var $author$project$Main$StartSession3 = function (a) {
-	return {$: 'StartSession3', a: a};
-};
-var $krisajenkins$remotedata$RemoteData$Success = function (a) {
-	return {$: 'Success', a: a};
-};
 var $author$project$Main$Synonym = function (a) {
 	return {$: 'Synonym', a: a};
 };
-var $author$project$Pretest$GeneralInfos$UserCreated = function (a) {
-	return {$: 'UserCreated', a: a};
+var $author$project$Main$Translation = function (a) {
+	return {$: 'Translation', a: a};
+};
+var $author$project$Main$VKS = function (a) {
+	return {$: 'VKS', a: a};
+};
+var $author$project$Postest$YN$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Postest$YN$initState = A2($author$project$Postest$YN$State, 'DefaultUid', '');
+var $author$project$Session1$ContextUnderstanding$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Session1$ContextUnderstanding$initState = A2($author$project$Session1$ContextUnderstanding$State, 'DefaultUid', '');
+var $elm$browser$Browser$Navigation$load = _Browser_load;
+var $author$project$Logic$Err = function (a) {
+	return {$: 'Err', a: a};
+};
+var $author$project$Logic$Main = {$: 'Main'};
+var $author$project$Logic$Running = F2(
+	function (a, b) {
+		return {$: 'Running', a: a, b: b};
+	});
+var $author$project$Logic$Training = {$: 'Training'};
+var $author$project$Logic$next = F2(
+	function (resetedState, task) {
+		_v0$3:
+		while (true) {
+			switch (task.$) {
+				case 'Running':
+					switch (task.a.$) {
+						case 'Training':
+							var _v1 = task.a;
+							var data = task.b;
+							var _v2 = data.trainingTrials;
+							if (_v2.b) {
+								if (!_v2.b.b) {
+									var last = _v2.a;
+									return A2(
+										$author$project$Logic$Running,
+										$author$project$Logic$Training,
+										_Utils_update(
+											data,
+											{
+												current: $elm$core$Maybe$Nothing,
+												feedback: !data.feedback,
+												history: A2(
+													$elm$core$List$cons,
+													_Utils_Tuple2(last, data.state),
+													data.history),
+												next: $elm$core$Maybe$Nothing,
+												state: resetedState,
+												trainingTrials: _List_Nil
+											}));
+								} else {
+									if (_v2.b.b.b) {
+										var x = _v2.a;
+										var _v3 = _v2.b;
+										var y = _v3.a;
+										var _v4 = _v3.b;
+										var z = _v4.a;
+										var zs = _v4.b;
+										return A2(
+											$author$project$Logic$Running,
+											$author$project$Logic$Training,
+											_Utils_update(
+												data,
+												{
+													current: $elm$core$Maybe$Just(y),
+													feedback: !data.feedback,
+													history: A2(
+														$elm$core$List$cons,
+														_Utils_Tuple2(x, data.state),
+														data.history),
+													next: $elm$core$Maybe$Just(z),
+													state: resetedState,
+													trainingTrials: A2(
+														$elm$core$List$cons,
+														y,
+														A2($elm$core$List$cons, z, zs))
+												}));
+									} else {
+										var x = _v2.a;
+										var _v5 = _v2.b;
+										var y = _v5.a;
+										return A2(
+											$author$project$Logic$Running,
+											$author$project$Logic$Training,
+											_Utils_update(
+												data,
+												{
+													current: $elm$core$Maybe$Just(y),
+													feedback: !data.feedback,
+													history: A2(
+														$elm$core$List$cons,
+														_Utils_Tuple2(x, data.state),
+														data.history),
+													next: $elm$core$Maybe$Nothing,
+													state: resetedState,
+													trainingTrials: _List_fromArray(
+														[y])
+												}));
+									}
+								}
+							} else {
+								return A2(
+									$author$project$Logic$Running,
+									$author$project$Logic$Training,
+									_Utils_update(
+										data,
+										{current: $elm$core$Maybe$Nothing, feedback: data.feedback, history: data.history, next: $elm$core$Maybe$Nothing, state: resetedState, trainingTrials: _List_Nil}));
+							}
+						case 'Main':
+							var _v6 = task.a;
+							var data = task.b;
+							var _v7 = data.mainTrials;
+							if (_v7.b) {
+								if (!_v7.b.b) {
+									var last = _v7.a;
+									return A2(
+										$author$project$Logic$Running,
+										$author$project$Logic$Main,
+										_Utils_update(
+											data,
+											{
+												current: $elm$core$Maybe$Nothing,
+												feedback: !data.feedback,
+												history: A2(
+													$elm$core$List$cons,
+													_Utils_Tuple2(last, data.state),
+													data.history),
+												mainTrials: _List_Nil,
+												next: $elm$core$Maybe$Nothing,
+												state: resetedState
+											}));
+								} else {
+									if (_v7.b.b.b) {
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var zs = _v9.b;
+										return A2(
+											$author$project$Logic$Running,
+											$author$project$Logic$Main,
+											_Utils_update(
+												data,
+												{
+													current: $elm$core$Maybe$Just(y),
+													feedback: !data.feedback,
+													history: A2(
+														$elm$core$List$cons,
+														_Utils_Tuple2(x, data.state),
+														data.history),
+													mainTrials: A2(
+														$elm$core$List$cons,
+														y,
+														A2($elm$core$List$cons, z, zs)),
+													next: $elm$core$Maybe$Just(z),
+													state: resetedState
+												}));
+									} else {
+										var x = _v7.a;
+										var _v10 = _v7.b;
+										var y = _v10.a;
+										return A2(
+											$author$project$Logic$Running,
+											$author$project$Logic$Main,
+											_Utils_update(
+												data,
+												{
+													current: $elm$core$Maybe$Just(y),
+													feedback: !data.feedback,
+													history: A2(
+														$elm$core$List$cons,
+														_Utils_Tuple2(x, data.state),
+														data.history),
+													mainTrials: _List_fromArray(
+														[y]),
+													next: $elm$core$Maybe$Nothing,
+													state: resetedState
+												}));
+									}
+								}
+							} else {
+								return A2(
+									$author$project$Logic$Running,
+									$author$project$Logic$Main,
+									_Utils_update(
+										data,
+										{current: $elm$core$Maybe$Nothing, feedback: data.feedback, history: data.history, mainTrials: _List_Nil, next: $elm$core$Maybe$Nothing, state: resetedState}));
+							}
+						default:
+							break _v0$3;
+					}
+				case 'Err':
+					var reason = task.a;
+					return $author$project$Logic$Err(reason);
+				default:
+					break _v0$3;
+			}
+		}
+		return $author$project$Logic$Err('There is no next trial to access');
+	});
+var $author$project$Ports$playAudio = _Platform_outgoingPort('playAudio', $elm$json$Json$Encode$string);
+var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $author$project$Logic$startMain = F2(
+	function (task, initState) {
+		if (task.$ === 'Running') {
+			var data = task.b;
+			var _v1 = data.mainTrials;
+			if (_v1.b) {
+				if (_v1.b.b) {
+					var x = _v1.a;
+					var _v2 = _v1.b;
+					var y = _v2.a;
+					return A2(
+						$author$project$Logic$Running,
+						$author$project$Logic$Main,
+						{
+							current: $elm$core$Maybe$Just(x),
+							feedback: false,
+							history: data.history,
+							infos: data.infos,
+							mainTrials: data.mainTrials,
+							next: $elm$core$Maybe$Just(y),
+							state: initState,
+							trainingTrials: _List_Nil
+						});
+				} else {
+					var x = _v1.a;
+					return A2(
+						$author$project$Logic$Running,
+						$author$project$Logic$Main,
+						{
+							current: $elm$core$Maybe$Just(x),
+							feedback: false,
+							history: data.history,
+							infos: data.infos,
+							mainTrials: data.mainTrials,
+							next: $elm$core$Maybe$Nothing,
+							state: initState,
+							trainingTrials: _List_Nil
+						});
+				}
+			} else {
+				return A2(
+					$author$project$Logic$Running,
+					$author$project$Logic$Main,
+					{current: $elm$core$Maybe$Nothing, feedback: false, history: data.history, infos: data.infos, mainTrials: data.mainTrials, next: $elm$core$Maybe$Nothing, state: initState, trainingTrials: _List_Nil});
+			}
+		} else {
+			return $author$project$Logic$Err('I can\'t go to Main from here');
+		}
+	});
+var $elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + $elm$core$String$fromInt(port_));
+		}
+	});
+var $elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var $elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _v0 = url.protocol;
+		if (_v0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		$elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			$elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					$elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
+var $author$project$Logic$toggle = function (task) {
+	if (task.$ === 'Running') {
+		var step = task.a;
+		var data = task.b;
+		return A2(
+			$author$project$Logic$Running,
+			step,
+			_Utils_update(
+				data,
+				{feedback: !data.feedback}));
+	} else {
+		return $author$project$Logic$Err('I tried to toggle the feedback but the task is still loading. Please report this error.');
+	}
+};
+var $author$project$Postest$CloudWords$Known = {$: 'Known'};
+var $author$project$Postest$CloudWords$MaybeKnown = {$: 'MaybeKnown'};
+var $author$project$Postest$CloudWords$toggle = function (key) {
+	return A2(
+		$elm$core$Dict$update,
+		key,
+		function (old) {
+			if (old.$ === 'Just') {
+				var value = old.a;
+				switch (value.$) {
+					case 'NotKnown':
+						return $elm$core$Maybe$Just($author$project$Postest$CloudWords$MaybeKnown);
+					case 'MaybeKnown':
+						return $elm$core$Maybe$Just($author$project$Postest$CloudWords$Known);
+					default:
+						return $elm$core$Maybe$Just($author$project$Postest$CloudWords$NotKnown);
+				}
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		});
+};
+var $author$project$Logic$update = F2(
+	function (newState, task) {
+		if (task.$ === 'Running') {
+			var step = task.a;
+			var data = task.b;
+			return A2(
+				$author$project$Logic$Running,
+				step,
+				_Utils_update(
+					data,
+					{state: newState}));
+		} else {
+			return $author$project$Logic$Err('You can\'t update anything here');
+		}
+	});
+var $author$project$Pretest$Acceptability$End = {$: 'End'};
+var $author$project$Pretest$Acceptability$Listening = {$: 'Listening'};
+var $author$project$Pretest$Acceptability$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Pretest$Acceptability$UserClickedPlayAudio = function (a) {
+	return {$: 'UserClickedPlayAudio', a: a};
 };
 var $author$project$Pretest$Acceptability$UserPressedButtonWithTimestamp = F2(
 	function (a, b) {
 		return {$: 'UserPressedButtonWithTimestamp', a: a, b: b};
-	});
-var $author$project$Main$UserPressedKey = function (a) {
-	return {$: 'UserPressedKey', a: a};
-};
-var $author$project$Main$WithTime = F2(
-	function (a, b) {
-		return {$: 'WithTime', a: a, b: b};
 	});
 var $elm$core$Process$sleep = _Process_sleep;
 var $andrewMacmurray$elm_delay$Delay$after = F2(
@@ -14223,23 +14808,7 @@ var $andrewMacmurray$elm_delay$Delay$after = F2(
 			$elm$core$Basics$always(msg),
 			$elm$core$Process$sleep(time));
 	});
-var $elm$random$Random$Generator = function (a) {
-	return {$: 'Generator', a: a};
-};
-var $elm$random$Random$andThen = F2(
-	function (callback, _v0) {
-		var genA = _v0.a;
-		return $elm$random$Random$Generator(
-			function (seed) {
-				var _v1 = genA(seed);
-				var result = _v1.a;
-				var newSeed = _v1.b;
-				var _v2 = callback(result);
-				var genB = _v2.a;
-				return genB(newSeed);
-			});
-	});
-var $author$project$Main$beep = 'https://dl.airtable.com/.attachments/b000c72585c5f5145828b1cf3916c38d/88d9c821/beep.mp3';
+var $author$project$Pretest$Acceptability$beep = 'https://dl.airtable.com/.attachments/b000c72585c5f5145828b1cf3916c38d/88d9c821/beep.mp3';
 var $author$project$Data$buildErrorMessage = function (httpError) {
 	switch (httpError.$) {
 		case 'BadUrl':
@@ -14257,23 +14826,86 @@ var $author$project$Data$buildErrorMessage = function (httpError) {
 			return message;
 	}
 };
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
+var $author$project$Pretest$Acceptability$dumbTrial = {
+	audio: A2($author$project$Data$AudioFile, '', ''),
+	feedback: 'String',
+	isGrammatical: false,
+	sentence: 'dumbSentence',
+	sentenceType: $author$project$Pretest$Acceptability$EmbeddedQuestion,
+	timeout: 5000,
+	trialType: $author$project$Pretest$Acceptability$Target,
+	uid: 'dumbId'
 };
-var $elm$random$Random$constant = function (value) {
-	return $elm$random$Random$Generator(
-		function (seed) {
-			return _Utils_Tuple2(value, seed);
-		});
+var $author$project$Logic$getTrial = function (task) {
+	if (task.$ === 'Running') {
+		var current = task.b.current;
+		return current;
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
 };
-var $elm$http$Http$expectBytesResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'arraybuffer',
-			_Http_toDataView,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
+var $author$project$Pretest$Acceptability$NoEvaluation = {$: 'NoEvaluation'};
+var $author$project$Pretest$Acceptability$initState = {audioEndedAt: $elm$core$Maybe$Nothing, audioStartedAt: $elm$core$Maybe$Nothing, beepEndedAt: $elm$core$Maybe$Nothing, beepStartedAt: $elm$core$Maybe$Nothing, evaluation: $author$project$Pretest$Acceptability$NoEvaluation, step: $author$project$Pretest$Acceptability$Init, trialuid: 'defaulttrialuid', userAnsweredAt: $elm$core$Maybe$Nothing};
+var $author$project$Pretest$Acceptability$EvaluationTimeOut = {$: 'EvaluationTimeOut'};
+var $author$project$Pretest$Acceptability$SentenceCorrect = {$: 'SentenceCorrect'};
+var $author$project$Pretest$Acceptability$SentenceIncorrect = {$: 'SentenceIncorrect'};
+var $author$project$Pretest$Acceptability$maybeBoolToEvaluation = function (maybeBool) {
+	if (maybeBool.$ === 'Nothing') {
+		return $author$project$Pretest$Acceptability$EvaluationTimeOut;
+	} else {
+		if (maybeBool.a) {
+			return $author$project$Pretest$Acceptability$SentenceCorrect;
+		} else {
+			return $author$project$Pretest$Acceptability$SentenceIncorrect;
+		}
+	}
+};
+var $author$project$Pretest$Acceptability$newLoop = _Utils_update(
+	$author$project$Pretest$Acceptability$initState,
+	{step: $author$project$Pretest$Acceptability$Start});
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
 	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $author$project$Pretest$Acceptability$evalToString = function (_eval) {
+	switch (_eval.$) {
+		case 'NoEvaluation':
+			return 'No Eval';
+		case 'SentenceCorrect':
+			return 'Correct';
+		case 'SentenceIncorrect':
+			return 'Incorrect';
+		default:
+			return 'Timeout';
+	}
+};
+var $author$project$Logic$getHistory = function (task) {
+	if (task.$ === 'Running') {
+		var history = task.b.history;
+		return history;
+	} else {
+		return _List_Nil;
+	}
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
 var $elm$core$Result$mapError = F2(
 	function (f, result) {
 		if (result.$ === 'Ok') {
@@ -14285,8 +14917,8 @@ var $elm$core$Result$mapError = F2(
 				f(e));
 		}
 	});
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
+var $author$project$Data$resolve = F2(
+	function (bodyParser, response) {
 		switch (response.$) {
 			case 'BadUrl_':
 				var url = response.a;
@@ -14305,17 +14937,443 @@ var $elm$http$Http$resolve = F2(
 				return A2(
 					$elm$core$Result$mapError,
 					$elm$http$Http$BadBody,
-					toResult(body));
+					bodyParser(body));
 		}
 	});
-var $elm$http$Http$expectWhatever = function (toMsg) {
-	return A2(
-		$elm$http$Http$expectBytesResponse,
-		toMsg,
-		$elm$http$Http$resolve(
+var $author$project$Data$postRecordsBatch = function (payload) {
+	return $elm$http$Http$task(
+		{
+			body: payload,
+			headers: _List_Nil,
+			method: 'POST',
+			resolver: $elm$http$Http$stringResolver(
+				$author$project$Data$resolve(
+					$elm$core$Basics$always(
+						$elm$core$Result$Ok(_Utils_Tuple0)))),
+			timeout: $elm$core$Maybe$Just(5000),
+			url: $author$project$Data$buildQuery(
+				{app: $author$project$Data$apps.spacing, base: 'output', view_: 'all'})
+		});
+};
+var $author$project$Data$splitIn = F2(
+	function (k, xs) {
+		return (!k) ? _List_fromArray(
+			[_List_Nil]) : ((k < 0) ? _List_Nil : ((_Utils_cmp(
+			$elm$core$List$length(xs),
+			k) > 0) ? A2(
+			$elm$core$List$cons,
+			A2($elm$core$List$take, k, xs),
+			A2(
+				$author$project$Data$splitIn,
+				k,
+				A2($elm$core$List$drop, k, xs))) : _List_fromArray(
+			[xs])));
+	});
+var $author$project$Data$updateUserCompletedTasks = function (payload) {
+	return $elm$http$Http$task(
+		{
+			body: payload,
+			headers: _List_Nil,
+			method: 'PATCH',
+			resolver: $elm$http$Http$stringResolver(
+				$author$project$Data$resolve(
+					$elm$core$Basics$always(
+						$elm$core$Result$Ok(_Utils_Tuple0)))),
+			timeout: $elm$core$Maybe$Just(5000),
+			url: $author$project$Data$buildQuery(
+				{app: $author$project$Data$apps.spacing, base: 'users', view_: 'all'})
+		});
+};
+var $author$project$Data$sendInBatch = F4(
+	function (historyEncoder, taskId, userId, history) {
+		var fieldsToUpdate = $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'tasks',
+					A2(
+						$elm$json$Json$Encode$list,
+						$elm$json$Json$Encode$string,
+						_List_fromArray(
+							[taskId])))
+				]));
+		var chuncks = A2($author$project$Data$splitIn, 10, history);
+		return $elm$core$Task$sequence(
+			A2(
+				$elm$core$List$cons,
+				$author$project$Data$updateUserCompletedTasks(
+					$elm$http$Http$jsonBody(
+						$elm$json$Json$Encode$object(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'id',
+									$elm$json$Json$Encode$string(userId)),
+									_Utils_Tuple2('fields', fieldsToUpdate)
+								])))),
+				A2(
+					$elm$core$List$map,
+					function (sublist) {
+						return A2(
+							$elm$core$Task$andThen,
+							function (_v0) {
+								return $author$project$Data$postRecordsBatch(
+									$elm$http$Http$jsonBody(
+										historyEncoder(sublist)));
+							},
+							$elm$core$Process$sleep(0));
+					},
+					chuncks)));
+	});
+var $author$project$Pretest$Acceptability$taskId = 'recR8areYkKRvQ6lU';
+var $author$project$Pretest$Acceptability$saveAcceptabilityData = F3(
+	function (responseHandler, maybeUserId, task) {
+		var whenNothing = $elm$time$Time$millisToPosix(1000000000);
+		var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', maybeUserId);
+		var taskId_ = $author$project$Pretest$Acceptability$taskId;
+		var intFromMillis = function (posix) {
+			return $elm$json$Json$Encode$int(
+				$elm$time$Time$posixToMillis(
+					A2($elm$core$Maybe$withDefault, whenNothing, posix)));
+		};
+		var summarizedTrialEncoder = $elm$json$Json$Encode$list(
 			function (_v0) {
-				return $elm$core$Result$Ok(_Utils_Tuple0);
-			}));
+				var t = _v0.a;
+				var s = _v0.b;
+				return $elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'fields',
+							$elm$json$Json$Encode$object(
+								_List_fromArray(
+									[
+										_Utils_Tuple2(
+										'trialUid',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[t.uid]))),
+										_Utils_Tuple2(
+										'userUid',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[userId]))),
+										_Utils_Tuple2(
+										'Task_UID',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[$author$project$Pretest$Acceptability$taskId]))),
+										_Utils_Tuple2(
+										'audioStartedAt',
+										intFromMillis(s.audioStartedAt)),
+										_Utils_Tuple2(
+										'beepStartedAt',
+										intFromMillis(s.beepStartedAt)),
+										_Utils_Tuple2(
+										'audioEndedAt',
+										$elm$json$Json$Encode$int(
+											$elm$time$Time$posixToMillis(
+												A2($elm$core$Maybe$withDefault, whenNothing, s.audioEndedAt)))),
+										_Utils_Tuple2(
+										'beepEndedAt',
+										$elm$json$Json$Encode$int(
+											$elm$time$Time$posixToMillis(
+												A2($elm$core$Maybe$withDefault, whenNothing, s.beepEndedAt)))),
+										_Utils_Tuple2(
+										'userAnsweredAt',
+										$elm$json$Json$Encode$int(
+											$elm$time$Time$posixToMillis(
+												A2($elm$core$Maybe$withDefault, whenNothing, s.userAnsweredAt)))),
+										_Utils_Tuple2(
+										'evaluation',
+										$elm$json$Json$Encode$string(
+											$author$project$Pretest$Acceptability$evalToString(s.evaluation)))
+									])))
+						]));
+			});
+		var history = $author$project$Logic$getHistory(task);
+		var sendInBatch_ = A4($author$project$Data$sendInBatch, summarizedTrialEncoder, taskId_, userId, history);
+		var callbackHandler = responseHandler;
+		return A2($elm$core$Task$attempt, callbackHandler, sendInBatch_);
+	});
+var $author$project$Logic$newStep = F2(
+	function (step, task) {
+		if (task.$ === 'Running') {
+			var data = task.b;
+			return A2($author$project$Logic$Running, step, data);
+		} else {
+			return $author$project$Logic$Err('I can\'t change Step here');
+		}
+	});
+var $author$project$Logic$startTraining = function (task) {
+	return A2($author$project$Logic$newStep, $author$project$Logic$Training, task);
+};
+var $author$project$Pretest$Acceptability$update = F2(
+	function (msg, model) {
+		var trial = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$Pretest$Acceptability$dumbTrial,
+			$author$project$Logic$getTrial(model.acceptabilityTask));
+		var toNextStep = F2(
+			function (_int, step) {
+				return A2(
+					$andrewMacmurray$elm_delay$Delay$after,
+					_int,
+					$author$project$Pretest$Acceptability$NextStepCinematic(step));
+			});
+		var pState = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$Pretest$Acceptability$initState,
+			$author$project$Logic$getState(model.acceptabilityTask));
+		switch (msg.$) {
+			case 'NextStepCinematic':
+				var step = msg.a;
+				switch (step.$) {
+					case 'Listening':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									acceptabilityTask: A2(
+										$author$project$Logic$update,
+										_Utils_update(
+											pState,
+											{step: $author$project$Pretest$Acceptability$Listening}),
+										model.acceptabilityTask)
+								}),
+							A2(
+								$andrewMacmurray$elm_delay$Delay$after,
+								500,
+								$author$project$Pretest$Acceptability$UserClickedPlayAudio(trial.audio.url)));
+					case 'Answering':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									acceptabilityTask: A2(
+										$author$project$Logic$update,
+										_Utils_update(
+											pState,
+											{step: $author$project$Pretest$Acceptability$Answering}),
+										model.acceptabilityTask)
+								}),
+							A2(
+								$andrewMacmurray$elm_delay$Delay$after,
+								trial.timeout,
+								$author$project$Pretest$Acceptability$UserPressedButton($elm$core$Maybe$Nothing)));
+					case 'End':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									acceptabilityTask: A2(
+										$author$project$Logic$next,
+										pState,
+										A2(
+											$author$project$Logic$update,
+											_Utils_update(
+												pState,
+												{step: $author$project$Pretest$Acceptability$End}),
+											model.acceptabilityTask))
+								}),
+							A2(toNextStep, 0, $author$project$Pretest$Acceptability$Start));
+					case 'Start':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									acceptabilityTask: A2($author$project$Logic$update, $author$project$Pretest$Acceptability$newLoop, model.acceptabilityTask)
+								}),
+							A2(
+								$andrewMacmurray$elm_delay$Delay$after,
+								0,
+								$author$project$Pretest$Acceptability$UserClickedPlayAudio($author$project$Pretest$Acceptability$beep)));
+					default:
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'UserPressedButton':
+				var maybeBool = msg.a;
+				var forward = _Utils_eq(pState.step, $author$project$Pretest$Acceptability$Answering) ? A2(
+					$elm$core$Task$perform,
+					function (timestamp) {
+						return A2($author$project$Pretest$Acceptability$UserPressedButtonWithTimestamp, maybeBool, timestamp);
+					},
+					$elm$time$Time$now) : $elm$core$Platform$Cmd$none;
+				return _Utils_Tuple2(model, forward);
+			case 'UserPressedButtonWithTimestamp':
+				var maybeBool = msg.a;
+				var timestamp = msg.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							acceptabilityTask: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									pState,
+									{
+										evaluation: $author$project$Pretest$Acceptability$maybeBoolToEvaluation(maybeBool),
+										step: $author$project$Pretest$Acceptability$End,
+										userAnsweredAt: $elm$core$Maybe$Just(timestamp)
+									}),
+								model.acceptabilityTask)
+						}),
+					A2(toNextStep, model.endAcceptabilityDuration, $author$project$Pretest$Acceptability$End));
+			case 'AudioEnded':
+				var _v2 = msg.a;
+				var name = _v2.a;
+				var timestamp = _v2.b;
+				return _Utils_eq(name, $author$project$Pretest$Acceptability$beep) ? _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							acceptabilityTask: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									pState,
+									{
+										beepEndedAt: $elm$core$Maybe$Just(timestamp)
+									}),
+								model.acceptabilityTask)
+						}),
+					$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							acceptabilityTask: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									pState,
+									{
+										audioEndedAt: $elm$core$Maybe$Just(timestamp)
+									}),
+								model.acceptabilityTask)
+						}),
+					A2(toNextStep, 0, $author$project$Pretest$Acceptability$Answering));
+			case 'AudioStarted':
+				var _v3 = msg.a;
+				var name = _v3.a;
+				var timestamp = _v3.b;
+				return _Utils_eq(name, $author$project$Pretest$Acceptability$beep) ? _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							acceptabilityTask: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									pState,
+									{
+										beepStartedAt: $elm$core$Maybe$Just(timestamp)
+									}),
+								model.acceptabilityTask)
+						}),
+					A2(toNextStep, 0, $author$project$Pretest$Acceptability$Listening)) : _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							acceptabilityTask: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									pState,
+									{
+										audioStartedAt: $elm$core$Maybe$Just(timestamp)
+									}),
+								model.acceptabilityTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'StartTraining':
+				return _Utils_Tuple2(
+					model,
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'start')
+							])));
+			case 'StartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							acceptabilityTask: A2($author$project$Logic$startMain, model.acceptabilityTask, $author$project$Pretest$Acceptability$initState),
+							endAcceptabilityDuration: 500
+						}),
+					A2(toNextStep, 0, $author$project$Pretest$Acceptability$Init));
+			case 'UserClickedSaveMsg':
+				var responseHandler = $author$project$Pretest$Acceptability$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{acceptabilityTask: $author$project$Logic$Loading}),
+					A3($author$project$Pretest$Acceptability$saveAcceptabilityData, responseHandler, model.user, model.acceptabilityTask));
+			case 'UserClickedPlayAudio':
+				var url = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Ports$playAudio(url));
+			case 'ServerRespondedWithLastRecords':
+				if (msg.a.$ === 'Ok') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{acceptabilityTask: $author$project$Logic$Loading}),
+						A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'end'));
+				} else {
+					var reason = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								acceptabilityTask: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(reason) + 'Please report this error message to yacourt@unice.fr with a nice screenshot!')
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							acceptabilityTask: $author$project$Logic$startTraining(model.acceptabilityTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Pretest$Pretest$ShuffledPretest = F6(
+	function (spr, sc, infos, vks, acceptability, yn) {
+		return {acceptability: acceptability, infos: infos, sc: sc, spr: spr, vks: vks, yn: yn};
+	});
+var $author$project$Pretest$Pretest$StartPretest = function (a) {
+	return {$: 'StartPretest', a: a};
+};
+var $elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var $elm$random$Random$andThen = F2(
+	function (callback, _v0) {
+		var genA = _v0.a;
+		return $elm$random$Random$Generator(
+			function (seed) {
+				var _v1 = genA(seed);
+				var result = _v1.a;
+				var newSeed = _v1.b;
+				var _v2 = callback(result);
+				var genB = _v2.a;
+				return genB(newSeed);
+			});
+	});
+var $elm$random$Random$constant = function (value) {
+	return $elm$random$Random$Generator(
+		function (seed) {
+			return _Utils_Tuple2(value, seed);
+		});
 };
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -14326,66 +15384,6 @@ var $elm$core$List$filter = F2(
 					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
 				}),
 			_List_Nil,
-			list);
-	});
-var $elm$core$String$cons = _String_cons;
-var $elm$core$String$fromChar = function (_char) {
-	return A2($elm$core$String$cons, _char, '');
-};
-var $elm$core$List$partition = F2(
-	function (pred, list) {
-		var step = F2(
-			function (x, _v0) {
-				var trues = _v0.a;
-				var falses = _v0.b;
-				return pred(x) ? _Utils_Tuple2(
-					A2($elm$core$List$cons, x, trues),
-					falses) : _Utils_Tuple2(
-					trues,
-					A2($elm$core$List$cons, x, falses));
-			});
-		return A3(
-			$elm$core$List$foldr,
-			step,
-			_Utils_Tuple2(_List_Nil, _List_Nil),
-			list);
-	});
-var $elm_community$list_extra$List$Extra$gatherWith = F2(
-	function (testFn, list) {
-		var helper = F2(
-			function (scattered, gathered) {
-				if (!scattered.b) {
-					return $elm$core$List$reverse(gathered);
-				} else {
-					var toGather = scattered.a;
-					var population = scattered.b;
-					var _v1 = A2(
-						$elm$core$List$partition,
-						testFn(toGather),
-						population);
-					var gathering = _v1.a;
-					var remaining = _v1.b;
-					return A2(
-						helper,
-						remaining,
-						A2(
-							$elm$core$List$cons,
-							_Utils_Tuple2(toGather, gathering),
-							gathered));
-				}
-			});
-		return A2(helper, list, _List_Nil);
-	});
-var $elm_community$list_extra$List$Extra$gatherEqualsBy = F2(
-	function (extract, list) {
-		return A2(
-			$elm_community$list_extra$List$Extra$gatherWith,
-			F2(
-				function (a, b) {
-					return _Utils_eq(
-						extract(a),
-						extract(b));
-				}),
 			list);
 	});
 var $elm$random$Random$Generate = function (a) {
@@ -14408,22 +15406,6 @@ var $elm$random$Random$initialSeed = function (x) {
 	var state2 = (state1 + x) >>> 0;
 	return $elm$random$Random$next(
 		A2($elm$random$Random$Seed, state2, incr));
-};
-var $elm$time$Time$Name = function (a) {
-	return {$: 'Name', a: a};
-};
-var $elm$time$Time$Offset = function (a) {
-	return {$: 'Offset', a: a};
-};
-var $elm$time$Time$Zone = F2(
-	function (a, b) {
-		return {$: 'Zone', a: a, b: b};
-	});
-var $elm$time$Time$customZone = $elm$time$Time$Zone;
-var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0.a;
-	return millis;
 };
 var $elm$random$Random$init = A2(
 	$elm$core$Task$andThen,
@@ -14487,80 +15469,171 @@ var $elm$random$Random$generate = F2(
 			$elm$random$Random$Generate(
 				A2($elm$random$Random$map, tagger, generator)));
 	});
-var $author$project$Logic$getTrial = function (task) {
-	switch (task.$) {
-		case 'Main':
-			var current = task.a.current;
-			return current;
-		case 'Intr':
-			var current = task.a.current;
-			return current;
-		default:
-			return $elm$core$Maybe$Nothing;
-	}
+var $elm$core$Result$fromMaybe = F2(
+	function (err, maybe) {
+		if (maybe.$ === 'Just') {
+			var v = maybe.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			return $elm$core$Result$Err(err);
+		}
+	});
+var $author$project$Pretest$SPR$NoAnswerYet = {$: 'NoAnswerYet'};
+var $author$project$Pretest$SPR$SPR = function (a) {
+	return {$: 'SPR', a: a};
 };
-var $author$project$Session1$SpellingLvl1$iniState = {inputUid: '', userAnswer: '', userUID: ''};
-var $author$project$Postest$YN$State = F2(
-	function (uid, userAnswer) {
-		return {uid: uid, userAnswer: userAnswer};
+var $author$project$Pretest$SPR$Start = {$: 'Start'};
+var $author$project$Pretest$SPR$initState = {
+	answer: $author$project$Pretest$SPR$NoAnswerYet,
+	currentSegment: $elm$core$Maybe$Nothing,
+	remainingSegments: _List_Nil,
+	seenSegments: _List_Nil,
+	step: $author$project$Pretest$SPR$SPR($author$project$Pretest$SPR$Start)
+};
+var $author$project$Logic$Instructions = {$: 'Instructions'};
+var $author$project$Logic$startIntro = F4(
+	function (info, trainingTrials, mainTrials, initStat) {
+		if (info.$ === 'Ok') {
+			var info_ = info.a;
+			if (!trainingTrials.b) {
+				return A2(
+					$author$project$Logic$Running,
+					$author$project$Logic$Instructions,
+					{current: $elm$core$Maybe$Nothing, feedback: false, history: _List_Nil, infos: info_, mainTrials: mainTrials, next: $elm$core$Maybe$Nothing, state: initStat, trainingTrials: trainingTrials});
+			} else {
+				if (trainingTrials.b.b) {
+					var x = trainingTrials.a;
+					var _v2 = trainingTrials.b;
+					var y = _v2.a;
+					return A2(
+						$author$project$Logic$Running,
+						$author$project$Logic$Instructions,
+						{
+							current: $elm$core$Maybe$Just(x),
+							feedback: false,
+							history: _List_Nil,
+							infos: info_,
+							mainTrials: mainTrials,
+							next: $elm$core$Maybe$Just(y),
+							state: initStat,
+							trainingTrials: trainingTrials
+						});
+				} else {
+					var x = trainingTrials.a;
+					return A2(
+						$author$project$Logic$Running,
+						$author$project$Logic$Instructions,
+						{
+							current: $elm$core$Maybe$Just(x),
+							feedback: false,
+							history: _List_Nil,
+							infos: info_,
+							mainTrials: mainTrials,
+							next: $elm$core$Maybe$Nothing,
+							state: initStat,
+							trainingTrials: trainingTrials
+						});
+				}
+			}
+		} else {
+			var error = info.a;
+			return $author$project$Logic$Err('I tried to start the intro of this task but I stumbled into an error : ' + error);
+		}
 	});
-var $author$project$Postest$YN$initState = A2($author$project$Postest$YN$State, 'DefaultUid', '');
-var $author$project$Pretest$Acceptability$initState = {audioEndedAt: $elm$core$Maybe$Nothing, audioStartedAt: $elm$core$Maybe$Nothing, beepEndedAt: $elm$core$Maybe$Nothing, beepStartedAt: $elm$core$Maybe$Nothing, evaluation: false, step: $author$project$Pretest$Acceptability$Init, trialuid: 'defaulttrialuid', userAnsweredAt: $elm$core$Maybe$Nothing};
-var $author$project$Session1$CU1$State = F2(
-	function (uid, userAnswer) {
-		return {uid: uid, userAnswer: userAnswer};
+var $author$project$Pretest$SPR$taskId = 'rec7oxQBDY7rBTRDn';
+var $author$project$ExperimentInfo$toDict = function (newInfos) {
+	return $elm$core$Dict$fromList(
+		A2(
+			$elm$core$List$map,
+			function (info) {
+				return _Utils_Tuple2(
+					info.uid,
+					$elm$core$Basics$identity(info));
+			},
+			newInfos));
+};
+var $author$project$Pretest$SPR$init = F2(
+	function (infos, trials) {
+		var info = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t find SPR infos',
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Pretest$SPR$taskId,
+				$author$project$ExperimentInfo$toDict(infos)));
+		return A4(
+			$author$project$Logic$startIntro,
+			info,
+			A2(
+				$elm$core$List$filter,
+				function (trial) {
+					return trial.isTraining;
+				},
+				trials),
+			A2(
+				$elm$core$List$filter,
+				function (trial) {
+					return !trial.isTraining;
+				},
+				trials),
+			$author$project$Pretest$SPR$initState);
 	});
-var $author$project$Session1$CU1$initState = A2($author$project$Session1$CU1$State, 'DefaultUid', '');
-var $author$project$Session1$Meaning$State = F2(
-	function (uid, userAnswer) {
-		return {uid: uid, userAnswer: userAnswer};
+var $author$project$Pretest$SentenceCompletion$FirstProduction = {$: 'FirstProduction'};
+var $author$project$Pretest$SentenceCompletion$initState = {firstProduction: '', order: $author$project$Pretest$SentenceCompletion$FirstProduction, secondProduction: ''};
+var $author$project$Pretest$SentenceCompletion$taskId = 'reczQs5ZD6g1x5F29';
+var $author$project$Pretest$SentenceCompletion$init = F2(
+	function (infos, trials) {
+		var info = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t find Task infos',
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Pretest$SentenceCompletion$taskId,
+				$author$project$ExperimentInfo$toDict(infos)));
+		return A4(
+			$author$project$Logic$startIntro,
+			info,
+			A2(
+				$elm$core$List$filter,
+				function (trial) {
+					return trial.isTraining;
+				},
+				trials),
+			A2(
+				$elm$core$List$filter,
+				function (trial) {
+					return !trial.isTraining;
+				},
+				trials),
+			$author$project$Pretest$SentenceCompletion$initState);
 	});
-var $author$project$Session1$Meaning$initState = A2($author$project$Session1$Meaning$State, 'DefaultTrialUID', '');
-var $author$project$Session1$Presentation$State = F2(
-	function (uid, toggledEntries) {
-		return {toggledEntries: toggledEntries, uid: uid};
+var $author$project$Pretest$VKS$NoAnswer = {$: 'NoAnswer'};
+var $author$project$Pretest$VKS$initState = {definition: '', knowledge: $author$project$Pretest$VKS$NoAnswer, usage: ''};
+var $author$project$Pretest$VKS$taskId = 'recR6grI83e1so6Zl';
+var $author$project$Pretest$VKS$init = F2(
+	function (infos, trials) {
+		var info = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t find Task infos',
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Pretest$VKS$taskId,
+				$author$project$ExperimentInfo$toDict(infos)));
+		return A4($author$project$Logic$startIntro, info, _List_Nil, trials, $author$project$Pretest$VKS$initState);
 	});
-var $author$project$Session1$Presentation$initState = A2(
-	$author$project$Session1$Presentation$State,
-	'DefaultUid',
-	$elm$core$Dict$fromList(
-		_List_fromArray(
-			[
-				_Utils_Tuple2('definition', false),
-				_Utils_Tuple2('example', false),
-				_Utils_Tuple2('translation', false)
-			])));
-var $author$project$Session1$SpellingLvl1$State = F3(
-	function (inputUid, userUID, userAnswer) {
-		return {inputUid: inputUid, userAnswer: userAnswer, userUID: userUID};
+var $author$project$Pretest$YesNo$initState = {evaluation: $elm$core$Maybe$Nothing};
+var $author$project$Pretest$YesNo$taskId = 'rechYdq4MyLcb2nRG';
+var $author$project$Pretest$YesNo$init = F2(
+	function (infos, trials) {
+		var info = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t find Task infos',
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Pretest$YesNo$taskId,
+				$author$project$ExperimentInfo$toDict(infos)));
+		return A4($author$project$Logic$startIntro, info, _List_Nil, trials, $author$project$Pretest$YesNo$initState);
 	});
-var $author$project$Session1$SpellingLvl1$initState = A3($author$project$Session1$SpellingLvl1$State, 'DefaultTrialUID', 'DefaultUserUID', '');
-var $author$project$Session2$CU2$State = F2(
-	function (uid, userAnswer) {
-		return {uid: uid, userAnswer: userAnswer};
-	});
-var $author$project$Session2$CU2$initState = A2($author$project$Session2$CU2$State, 'DefaultUid', '');
-var $author$project$Session2$Scrabble$State = F3(
-	function (uid, userAnswer, scrambledLetter) {
-		return {scrambledLetter: scrambledLetter, uid: uid, userAnswer: userAnswer};
-	});
-var $author$project$Session2$Scrabble$initState = A3($author$project$Session2$Scrabble$State, 'DefaultUid', '', _List_Nil);
-var $author$project$Session2$Translation$initState = {uid: '', userAnswer: ''};
-var $author$project$Session3$CU3$State = F2(
-	function (uid, userAnswer) {
-		return {uid: uid, userAnswer: userAnswer};
-	});
-var $author$project$Session3$CU3$initState = A2($author$project$Session3$CU3$State, 'DefaultUid', '');
-var $author$project$Session3$Spelling3$State = F2(
-	function (uid, userAnswer) {
-		return {uid: uid, userAnswer: userAnswer};
-	});
-var $author$project$Session3$Spelling3$initState = A2($author$project$Session3$Spelling3$State, 'DefaultUid', '');
-var $author$project$Session3$Synonym$State = F2(
-	function (uid, userAnswer) {
-		return {uid: uid, userAnswer: userAnswer};
-	});
-var $author$project$Session3$Synonym$initState = A2($author$project$Session3$Synonym$State, 'DefaultUserUID', '');
 var $elm$core$Bitwise$xor = _Bitwise_xor;
 var $elm$random$Random$peel = function (_v0) {
 	var state = _v0.a;
@@ -14599,38 +15672,24 @@ var $elm$random$Random$int = F2(
 				}
 			});
 	});
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
-var $elm$browser$Browser$Navigation$load = _Browser_load;
-var $elm$random$Random$map4 = F5(
-	function (func, _v0, _v1, _v2, _v3) {
+var $elm$random$Random$map2 = F3(
+	function (func, _v0, _v1) {
 		var genA = _v0.a;
 		var genB = _v1.a;
-		var genC = _v2.a;
-		var genD = _v3.a;
 		return $elm$random$Random$Generator(
 			function (seed0) {
-				var _v4 = genA(seed0);
-				var a = _v4.a;
-				var seed1 = _v4.b;
-				var _v5 = genB(seed1);
-				var b = _v5.a;
-				var seed2 = _v5.b;
-				var _v6 = genC(seed2);
-				var c = _v6.a;
-				var seed3 = _v6.b;
-				var _v7 = genD(seed3);
-				var d = _v7.a;
-				var seed4 = _v7.b;
+				var _v2 = genA(seed0);
+				var a = _v2.a;
+				var seed1 = _v2.b;
+				var _v3 = genB(seed1);
+				var b = _v3.a;
+				var seed2 = _v3.b;
 				return _Utils_Tuple2(
-					A4(func, a, b, c, d),
-					seed4);
+					A2(func, a, b),
+					seed2);
 			});
 	});
+var $elm_community$random_extra$Random$Extra$andMap = $elm$random$Random$map2($elm$core$Basics$apR);
 var $elm$random$Random$map5 = F6(
 	function (func, _v0, _v1, _v2, _v3, _v4) {
 		var genA = _v0.a;
@@ -14660,176 +15719,12 @@ var $elm$random$Random$map5 = F6(
 					seed5);
 			});
 	});
-var $elm$core$Tuple$mapFirst = F2(
-	function (func, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		return _Utils_Tuple2(
-			func(x),
-			y);
-	});
-var $author$project$Pretest$Acceptability$newLoop = {audioEndedAt: $elm$core$Maybe$Nothing, audioStartedAt: $elm$core$Maybe$Nothing, beepEndedAt: $elm$core$Maybe$Nothing, beepStartedAt: $elm$core$Maybe$Nothing, evaluation: false, step: $author$project$Pretest$Acceptability$Start, trialuid: 'defaulttrialuid', userAnsweredAt: $elm$core$Maybe$Nothing};
-var $author$project$Logic$Intr = function (a) {
-	return {$: 'Intr', a: a};
-};
-var $author$project$Logic$Main = function (a) {
-	return {$: 'Main', a: a};
-};
-var $author$project$Logic$next = F2(
-	function (resetedState, task) {
-		switch (task.$) {
-			case 'Main':
-				var data = task.a;
-				var _v1 = data.mainTrials;
-				if (_v1.b) {
-					if (!_v1.b.b) {
-						var last = _v1.a;
-						return $author$project$Logic$Main(
-							_Utils_update(
-								data,
-								{
-									current: $elm$core$Maybe$Nothing,
-									feedback: !data.feedback,
-									history: A2(
-										$elm$core$List$cons,
-										_Utils_Tuple2(last, data.state),
-										data.history),
-									mainTrials: _List_Nil,
-									next: $elm$core$Maybe$Nothing,
-									state: resetedState
-								}));
-					} else {
-						if (_v1.b.b.b) {
-							var x = _v1.a;
-							var _v2 = _v1.b;
-							var y = _v2.a;
-							var _v3 = _v2.b;
-							var z = _v3.a;
-							var zs = _v3.b;
-							return $author$project$Logic$Main(
-								_Utils_update(
-									data,
-									{
-										current: $elm$core$Maybe$Just(y),
-										feedback: !data.feedback,
-										history: A2(
-											$elm$core$List$cons,
-											_Utils_Tuple2(x, data.state),
-											data.history),
-										mainTrials: A2(
-											$elm$core$List$cons,
-											y,
-											A2($elm$core$List$cons, z, zs)),
-										next: $elm$core$Maybe$Just(z),
-										state: resetedState
-									}));
-						} else {
-							var x = _v1.a;
-							var _v4 = _v1.b;
-							var y = _v4.a;
-							return $author$project$Logic$Main(
-								_Utils_update(
-									data,
-									{
-										current: $elm$core$Maybe$Just(y),
-										feedback: !data.feedback,
-										history: A2(
-											$elm$core$List$cons,
-											_Utils_Tuple2(x, data.state),
-											data.history),
-										mainTrials: _List_fromArray(
-											[y]),
-										next: $elm$core$Maybe$Nothing,
-										state: resetedState
-									}));
-						}
-					}
-				} else {
-					return $author$project$Logic$Main(
-						_Utils_update(
-							data,
-							{current: $elm$core$Maybe$Nothing, feedback: data.feedback, history: data.history, mainTrials: _List_Nil, next: $elm$core$Maybe$Nothing, state: resetedState}));
-				}
-			case 'Loading':
-				return $author$project$Logic$Err('You can\'t go to the next trial before the experiment is started. Please report this error message.');
-			case 'NotStarted':
-				return $author$project$Logic$Err('You can\'t go to the next trial before the experiment is started. Please report this error message.');
-			case 'Err':
-				var reason = task.a;
-				return $author$project$Logic$Err(reason);
-			default:
-				var data = task.a;
-				var _v5 = data.trainingTrials;
-				if (_v5.b) {
-					if (!_v5.b.b) {
-						var last = _v5.a;
-						return $author$project$Logic$Intr(
-							_Utils_update(
-								data,
-								{
-									current: $elm$core$Maybe$Nothing,
-									feedback: !data.feedback,
-									history: A2(
-										$elm$core$List$cons,
-										_Utils_Tuple2(last, data.state),
-										data.history),
-									next: $elm$core$Maybe$Nothing,
-									state: resetedState,
-									trainingTrials: _List_Nil
-								}));
-					} else {
-						if (_v5.b.b.b) {
-							var x = _v5.a;
-							var _v6 = _v5.b;
-							var y = _v6.a;
-							var _v7 = _v6.b;
-							var z = _v7.a;
-							var zs = _v7.b;
-							return $author$project$Logic$Intr(
-								_Utils_update(
-									data,
-									{
-										current: $elm$core$Maybe$Just(y),
-										feedback: !data.feedback,
-										history: A2(
-											$elm$core$List$cons,
-											_Utils_Tuple2(x, data.state),
-											data.history),
-										next: $elm$core$Maybe$Just(z),
-										state: resetedState,
-										trainingTrials: A2(
-											$elm$core$List$cons,
-											y,
-											A2($elm$core$List$cons, z, zs))
-									}));
-						} else {
-							var x = _v5.a;
-							var _v8 = _v5.b;
-							var y = _v8.a;
-							return $author$project$Logic$Intr(
-								_Utils_update(
-									data,
-									{
-										current: $elm$core$Maybe$Just(y),
-										feedback: !data.feedback,
-										history: A2(
-											$elm$core$List$cons,
-											_Utils_Tuple2(x, data.state),
-											data.history),
-										next: $elm$core$Maybe$Nothing,
-										state: resetedState,
-										trainingTrials: _List_fromArray(
-											[y])
-									}));
-						}
-					}
-				} else {
-					return $author$project$Logic$Intr(
-						_Utils_update(
-							data,
-							{current: $elm$core$Maybe$Nothing, feedback: data.feedback, history: data.history, next: $elm$core$Maybe$Nothing, state: resetedState, trainingTrials: _List_Nil}));
-				}
-		}
+var $elm_community$random_extra$Random$Extra$map6 = F7(
+	function (f, generatorA, generatorB, generatorC, generatorD, generatorE, generatorF) {
+		return A2(
+			$elm_community$random_extra$Random$Extra$andMap,
+			generatorF,
+			A6($elm$random$Random$map5, f, generatorA, generatorB, generatorC, generatorD, generatorE));
 	});
 var $author$project$Pretest$Acceptability$FirstDistractorMissing = function (a) {
 	return {$: 'FirstDistractorMissing', a: a};
@@ -14871,16 +15766,7 @@ var $elm_community$list_extra$List$Extra$find = F2(
 			}
 		}
 	});
-var $elm$core$Result$fromMaybe = F2(
-	function (err, maybe) {
-		if (maybe.$ === 'Just') {
-			var v = maybe.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			return $elm$core$Result$Err(err);
-		}
-	});
-var $author$project$Main$getSentenceTypes = function (sentences) {
+var $author$project$Pretest$Acceptability$getSentenceTypes = function (sentences) {
 	return A2(
 		$elm$core$List$map,
 		function ($) {
@@ -14918,7 +15804,7 @@ var $elm$core$List$member = F2(
 			},
 			xs);
 	});
-var $author$project$Main$removesItemsHelp = F3(
+var $author$project$Pretest$Acceptability$removesItemsHelp = F3(
 	function (items, ls, acc) {
 		removesItemsHelp:
 		while (true) {
@@ -14947,11 +15833,11 @@ var $author$project$Main$removesItemsHelp = F3(
 			}
 		}
 	});
-var $author$project$Main$removesItems = F2(
+var $author$project$Pretest$Acceptability$removesItems = F2(
 	function (items, ls) {
-		return A3($author$project$Main$removesItemsHelp, items, ls, _List_Nil);
+		return A3($author$project$Pretest$Acceptability$removesItemsHelp, items, ls, _List_Nil);
 	});
-var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
+var $author$project$Pretest$Acceptability$organizeAcceptabilityTrialsHelper = F3(
 	function (targets, distractors, output) {
 		organizeAcceptabilityTrialsHelper:
 		while (true) {
@@ -14960,21 +15846,15 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 					return (!dis.isGrammatical) && (!A2(
 						$elm$core$List$member,
 						dis.sentenceType,
-						$author$project$Main$getSentenceTypes(buff)));
+						$author$project$Pretest$Acceptability$getSentenceTypes(buff)));
 				});
 			var nextGrammaticalSentence = F2(
 				function (buff, dis) {
 					return dis.isGrammatical && (!A2(
 						$elm$core$List$member,
 						dis.sentenceType,
-						$author$project$Main$getSentenceTypes(buff)));
+						$author$project$Pretest$Acceptability$getSentenceTypes(buff)));
 				});
-			var gatherBySentenceType = A2(
-				$elm_community$list_extra$List$Extra$gatherEqualsBy,
-				function ($) {
-					return $.sentenceType;
-				},
-				distractors);
 			var firstUnGrammaticalDistractor = A2(
 				$elm_community$list_extra$List$Extra$find,
 				nextUngrammaticalSentence(_List_Nil),
@@ -14987,7 +15867,7 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 							_List_fromArray(
 								[firstDistractor, secondDistractor])),
 						A2(
-							$author$project$Main$removesItems,
+							$author$project$Pretest$Acceptability$removesItems,
 							_List_fromArray(
 								[firstDistractor, secondDistractor]),
 							distractors));
@@ -15000,7 +15880,7 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 							_List_fromArray(
 								[firstDistractor, secondDistractor])),
 						A2(
-							$author$project$Main$removesItems,
+							$author$project$Pretest$Acceptability$removesItems,
 							_List_fromArray(
 								[firstDistractor, secondDistractor]),
 							distractors));
@@ -15012,7 +15892,7 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 						_List_fromArray(
 							[firstDistractor])),
 					A2(
-						$author$project$Main$removesItems,
+						$author$project$Pretest$Acceptability$removesItems,
 						_List_fromArray(
 							[firstDistractor]),
 						distractors));
@@ -15021,7 +15901,7 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 				return A2(
 					$elm_community$list_extra$List$Extra$find,
 					nextGrammaticalSentence(firstDistractor),
-					A2($author$project$Main$removesItems, firstDistractor, distractors));
+					A2($author$project$Pretest$Acceptability$removesItems, firstDistractor, distractors));
 			};
 			var findFirstGrammaticalDistractor = A2(
 				$elm_community$list_extra$List$Extra$find,
@@ -15041,7 +15921,7 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 											{
 												firstDistractor: distractorFound,
 												remainingDistractors: A2(
-													$author$project$Main$removesItems,
+													$author$project$Pretest$Acceptability$removesItems,
 													_List_fromArray(
 														[distractorFound, secondDistractorFound, thirdDistractorFound]),
 													distractors),
@@ -15087,7 +15967,7 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 											{
 												firstDistractor: distractorFound,
 												remainingDistractors: A2(
-													$author$project$Main$removesItems,
+													$author$project$Pretest$Acceptability$removesItems,
 													_List_fromArray(
 														[distractorFound, secondDistractorFound, thirdDistractorFound]),
 													distractors),
@@ -15121,15 +16001,6 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 						findFirstGrammaticalDistractor));
 			};
 			if (!targets.b) {
-				var notCompletBlocks = A2(
-					$elm$core$List$filter,
-					function (block) {
-						return $elm$core$List$length(block) < 4;
-					},
-					_Utils_ap(
-						output,
-						_List_fromArray(
-							[distractors])));
 				return $elm$core$Result$Ok(
 					_Utils_ap(
 						output,
@@ -15140,11 +16011,10 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 				var xs = targets.b;
 				var _v1 = buildBlock(x);
 				if (_v1.$ === 'Err') {
-					var _v2 = _v1.a;
-					var reason = _v2.a;
-					var blockSoFar = _v2.b;
+					var err = _v1.a;
+					var blockSoFar = err.b;
 					var $temp$targets = xs,
-						$temp$distractors = A2($author$project$Main$removesItems, blockSoFar, distractors),
+						$temp$distractors = A2($author$project$Pretest$Acceptability$removesItems, blockSoFar, distractors),
 						$temp$output = A2($elm$core$List$cons, blockSoFar, output);
 					targets = $temp$targets;
 					distractors = $temp$distractors;
@@ -15169,12 +16039,1394 @@ var $author$project$Main$organizeAcceptabilityTrialsHelper = F3(
 			}
 		}
 	});
-var $author$project$Main$organizeAcceptabilityTrials = F2(
+var $author$project$Pretest$Acceptability$organizeAcceptabilityTrials = F2(
 	function (targets, distractors) {
-		return A3($author$project$Main$organizeAcceptabilityTrialsHelper, targets, distractors, _List_Nil);
+		return A3($author$project$Pretest$Acceptability$organizeAcceptabilityTrialsHelper, targets, distractors, _List_Nil);
 	});
-var $author$project$Main$playAudio = _Platform_outgoingPort('playAudio', $elm$json$Json$Encode$string);
-var $author$project$Main$playBeep = $author$project$Main$PlaysoundInJS($author$project$Main$beep);
+var $elm_community$random_extra$Random$Extra$sequence = A2(
+	$elm$core$List$foldr,
+	$elm$random$Random$map2($elm$core$List$cons),
+	$elm$random$Random$constant(_List_Nil));
+var $elm$random$Random$listHelp = F4(
+	function (revList, n, gen, seed) {
+		listHelp:
+		while (true) {
+			if (n < 1) {
+				return _Utils_Tuple2(revList, seed);
+			} else {
+				var _v0 = gen(seed);
+				var value = _v0.a;
+				var newSeed = _v0.b;
+				var $temp$revList = A2($elm$core$List$cons, value, revList),
+					$temp$n = n - 1,
+					$temp$gen = gen,
+					$temp$seed = newSeed;
+				revList = $temp$revList;
+				n = $temp$n;
+				gen = $temp$gen;
+				seed = $temp$seed;
+				continue listHelp;
+			}
+		}
+	});
+var $elm$random$Random$list = F2(
+	function (n, _v0) {
+		var gen = _v0.a;
+		return $elm$random$Random$Generator(
+			function (seed) {
+				return A4($elm$random$Random$listHelp, _List_Nil, n, gen, seed);
+			});
+	});
+var $owanturist$elm_union_find$UnionFind$findFast = F2(
+	function (id, dict) {
+		findFast:
+		while (true) {
+			var _v0 = A2($elm$core$Dict$get, id, dict);
+			if (_v0.$ === 'Nothing') {
+				return id;
+			} else {
+				var cursor = _v0.a;
+				if (_Utils_eq(id, cursor)) {
+					return id;
+				} else {
+					var $temp$id = cursor,
+						$temp$dict = dict;
+					id = $temp$id;
+					dict = $temp$dict;
+					continue findFast;
+				}
+			}
+		}
+	});
+var $owanturist$elm_union_find$UnionFind$find = F2(
+	function (id, _v0) {
+		var dict = _v0.b;
+		return A2($owanturist$elm_union_find$UnionFind$findFast, id, dict);
+	});
+var $elm$core$Array$isEmpty = function (_v0) {
+	var len = _v0.a;
+	return !len;
+};
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $owanturist$elm_union_find$UnionFind$QuickUnionPathCompression = F2(
+	function (a, b) {
+		return {$: 'QuickUnionPathCompression', a: a, b: b};
+	});
+var $owanturist$elm_union_find$UnionFind$quickUnionPathCompression = A2($owanturist$elm_union_find$UnionFind$QuickUnionPathCompression, 0, $elm$core$Dict$empty);
+var $owanturist$elm_union_find$UnionFind$findCompressed = F2(
+	function (id, dict) {
+		var _v0 = A2($elm$core$Dict$get, id, dict);
+		if (_v0.$ === 'Nothing') {
+			return _Utils_Tuple2(
+				id,
+				A3($elm$core$Dict$insert, id, id, dict));
+		} else {
+			var cursor = _v0.a;
+			if (_Utils_eq(id, cursor)) {
+				return _Utils_Tuple2(id, dict);
+			} else {
+				var _v1 = A2($owanturist$elm_union_find$UnionFind$findCompressed, cursor, dict);
+				var parent = _v1.a;
+				var nextDict = _v1.b;
+				return _Utils_Tuple2(
+					parent,
+					A3($elm$core$Dict$insert, id, parent, nextDict));
+			}
+		}
+	});
+var $owanturist$elm_union_find$UnionFind$union = F3(
+	function (left, right, _v0) {
+		var count_ = _v0.a;
+		var dict = _v0.b;
+		var _v1 = A2($owanturist$elm_union_find$UnionFind$findCompressed, left, dict);
+		var leftRoot = _v1.a;
+		var leftDict = _v1.b;
+		var _v2 = A2($owanturist$elm_union_find$UnionFind$findCompressed, right, leftDict);
+		var rightRoot = _v2.a;
+		var rightDict = _v2.b;
+		return _Utils_eq(leftRoot, rightRoot) ? A2($owanturist$elm_union_find$UnionFind$QuickUnionPathCompression, count_, rightDict) : A2(
+			$owanturist$elm_union_find$UnionFind$QuickUnionPathCompression,
+			count_ + 1,
+			A3($elm$core$Dict$insert, leftRoot, rightRoot, rightDict));
+	});
+var $elm_community$random_extra$Utils$selectUniqByIndexes = F2(
+	function (values, randomIndexes) {
+		var modByLength = $elm$core$Basics$modBy(
+			$elm$core$Array$length(values));
+		var step = F2(
+			function (randomIndex, _v1) {
+				var uf = _v1.a;
+				var acc = _v1.b;
+				var leaderOfElement = A2($owanturist$elm_union_find$UnionFind$find, randomIndex, uf);
+				var leaderOfNextElement = A2(
+					$owanturist$elm_union_find$UnionFind$find,
+					modByLength(leaderOfElement + 1),
+					uf);
+				var _v0 = A2($elm$core$Array$get, leaderOfElement, values);
+				if (_v0.$ === 'Nothing') {
+					return _Utils_Tuple2(uf, acc);
+				} else {
+					var value = _v0.a;
+					return _Utils_Tuple2(
+						A3($owanturist$elm_union_find$UnionFind$union, leaderOfElement, leaderOfNextElement, uf),
+						A2($elm$core$List$cons, value, acc));
+				}
+			});
+		return $elm$core$Array$isEmpty(values) ? _List_Nil : A3(
+			$elm$core$List$foldr,
+			step,
+			_Utils_Tuple2($owanturist$elm_union_find$UnionFind$quickUnionPathCompression, _List_Nil),
+			randomIndexes).b;
+	});
+var $elm_community$random_extra$Random$List$shuffle = function (list) {
+	var values = $elm$core$Array$fromList(list);
+	var length = $elm$core$Array$length(values);
+	return A2(
+		$elm$random$Random$map,
+		$elm_community$random_extra$Utils$selectUniqByIndexes(values),
+		A2(
+			$elm$random$Random$list,
+			length,
+			A2($elm$random$Random$int, 0, length - 1)));
+};
+var $author$project$Pretest$Acceptability$start = F2(
+	function (info, trials) {
+		var relatedInfos = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t fetch the value associated with: ' + $author$project$Pretest$Acceptability$taskId,
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Pretest$Acceptability$taskId,
+				$author$project$ExperimentInfo$toDict(info)));
+		return A4(
+			$author$project$Logic$startIntro,
+			relatedInfos,
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Training);
+				},
+				trials),
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return !_Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Training);
+				},
+				trials),
+			$author$project$Pretest$Acceptability$initState);
+	});
+var $elm_community$list_extra$List$Extra$splitAt = F2(
+	function (n, xs) {
+		return _Utils_Tuple2(
+			A2($elm$core$List$take, n, xs),
+			A2($elm$core$List$drop, n, xs));
+	});
+var $elm_community$list_extra$List$Extra$uncons = function (list) {
+	if (!list.b) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var first = list.a;
+		var rest = list.b;
+		return $elm$core$Maybe$Just(
+			_Utils_Tuple2(first, rest));
+	}
+};
+var $elm_community$list_extra$List$Extra$swapAt = F3(
+	function (index1, index2, l) {
+		swapAt:
+		while (true) {
+			if (_Utils_eq(index1, index2) || (index1 < 0)) {
+				return l;
+			} else {
+				if (_Utils_cmp(index1, index2) > 0) {
+					var $temp$index1 = index2,
+						$temp$index2 = index1,
+						$temp$l = l;
+					index1 = $temp$index1;
+					index2 = $temp$index2;
+					l = $temp$l;
+					continue swapAt;
+				} else {
+					var _v0 = A2($elm_community$list_extra$List$Extra$splitAt, index1, l);
+					var part1 = _v0.a;
+					var tail1 = _v0.b;
+					var _v1 = A2($elm_community$list_extra$List$Extra$splitAt, index2 - index1, tail1);
+					var head2 = _v1.a;
+					var tail2 = _v1.b;
+					var _v2 = _Utils_Tuple2(
+						$elm_community$list_extra$List$Extra$uncons(head2),
+						$elm_community$list_extra$List$Extra$uncons(tail2));
+					if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
+						var _v3 = _v2.a.a;
+						var value1 = _v3.a;
+						var part2 = _v3.b;
+						var _v4 = _v2.b.a;
+						var value2 = _v4.a;
+						var part3 = _v4.b;
+						return $elm$core$List$concat(
+							_List_fromArray(
+								[
+									part1,
+									A2($elm$core$List$cons, value2, part2),
+									A2($elm$core$List$cons, value1, part3)
+								]));
+					} else {
+						return l;
+					}
+				}
+			}
+		}
+	});
+var $elm$core$Maybe$map5 = F6(
+	function (func, ma, mb, mc, md, me) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				if (mc.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var c = mc.a;
+					if (md.$ === 'Nothing') {
+						return $elm$core$Maybe$Nothing;
+					} else {
+						var d = md.a;
+						if (me.$ === 'Nothing') {
+							return $elm$core$Maybe$Nothing;
+						} else {
+							var e = me.a;
+							return $elm$core$Maybe$Just(
+								A5(func, a, b, c, d, e));
+						}
+					}
+				}
+			}
+		}
+	});
+var $0ui$elm_task_parallel$Task$Parallel$toCmd = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$Maybe$map(
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Task$succeed,
+			$elm$core$Task$perform($elm$core$Basics$identity))),
+	$elm$core$Maybe$withDefault($elm$core$Platform$Cmd$none));
+var $0ui$elm_task_parallel$Task$Parallel$update6 = F2(
+	function (_v0, msg) {
+		var onSuccess = _v0.a;
+		var a = _v0.b;
+		var b = _v0.c;
+		var c = _v0.d;
+		var d = _v0.e;
+		var e = _v0.f;
+		var f = _v0.g;
+		var next = F6(
+			function (a_, b_, c_, d_, e_, f_) {
+				return _Utils_Tuple2(
+					A7($0ui$elm_task_parallel$Task$Parallel$State6, onSuccess, a_, b_, c_, d_, e_, f_),
+					$0ui$elm_task_parallel$Task$Parallel$toCmd(
+						A2(
+							$elm$core$Maybe$withDefault,
+							$elm$core$Maybe$Nothing,
+							A6(
+								$elm$core$Maybe$map5,
+								F5(
+									function (a6, b6, c6, d6, e6) {
+										return A2(
+											$elm$core$Maybe$map,
+											function (f6) {
+												return A6(onSuccess, a6, b6, c6, d6, e6, f6);
+											},
+											f_);
+									}),
+								a_,
+								b_,
+								c_,
+								d_,
+								e_))));
+			});
+		switch (msg.$) {
+			case 'LoadedA6':
+				var data = msg.a;
+				return A6(
+					next,
+					$elm$core$Maybe$Just(data),
+					b,
+					c,
+					d,
+					e,
+					f);
+			case 'LoadedB6':
+				var data = msg.a;
+				return A6(
+					next,
+					a,
+					$elm$core$Maybe$Just(data),
+					c,
+					d,
+					e,
+					f);
+			case 'LoadedC6':
+				var data = msg.a;
+				return A6(
+					next,
+					a,
+					b,
+					$elm$core$Maybe$Just(data),
+					d,
+					e,
+					f);
+			case 'LoadedD6':
+				var data = msg.a;
+				return A6(
+					next,
+					a,
+					b,
+					c,
+					$elm$core$Maybe$Just(data),
+					e,
+					f);
+			case 'LoadedE6':
+				var data = msg.a;
+				return A6(
+					next,
+					a,
+					b,
+					c,
+					d,
+					$elm$core$Maybe$Just(data),
+					f);
+			default:
+				var data = msg.a;
+				return A6(
+					next,
+					a,
+					b,
+					c,
+					d,
+					e,
+					$elm$core$Maybe$Just(data));
+		}
+	});
+var $author$project$Pretest$Pretest$update = F2(
+	function (msg, model) {
+		update:
+		while (true) {
+			switch (msg.$) {
+				case 'ServerRespondedWithSomePretestData':
+					var downloaded = msg.a;
+					var _v1 = A2($0ui$elm_task_parallel$Task$Parallel$update6, model.pretest, downloaded);
+					var nextState = _v1.a;
+					var nextCmd = _v1.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{pretest: nextState}),
+						nextCmd);
+				case 'ServerRespondedWithSomeError':
+					var err = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								acceptabilityTask: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(err)),
+								sentenceCompletion: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(err)),
+								spr: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(err)),
+								vks: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(err))
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ServerRespondedWithAllPretestData':
+					var sprtrials = msg.a;
+					var sctrials = msg.b;
+					var infos = msg.c;
+					var vksTrials = msg.d;
+					var aTrials = msg.e;
+					var yn = msg.f;
+					var trainingTrials = A2(
+						$elm$core$List$filter,
+						function (datum) {
+							return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Training);
+						},
+						aTrials);
+					var swapTargetWithOneDistractor = function (tr) {
+						return A2(
+							$elm$core$List$map,
+							function (block) {
+								return A2(
+									$elm$random$Random$andThen,
+									function (position) {
+										return $elm$random$Random$constant(
+											A3($elm_community$list_extra$List$Extra$swapAt, 0, position, block));
+									},
+									A2(
+										$elm$random$Random$int,
+										1,
+										$elm$core$List$length(block) - 1));
+							},
+							tr);
+					};
+					var generateOrganizedTrials = A2(
+						$elm$random$Random$andThen,
+						function (shuffledTrials) {
+							var targets = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Target);
+								},
+								shuffledTrials);
+							var distractors = A2(
+								$elm$core$List$filter,
+								function (datum) {
+									return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Distractor);
+								},
+								shuffledTrials);
+							return A2(
+								$elm$random$Random$andThen,
+								function (organizedTrials_) {
+									if (organizedTrials_.$ === 'Err') {
+										var reason = organizedTrials_.a;
+										return $elm$random$Random$constant(
+											$elm$core$Result$Err(reason));
+									} else {
+										var tr = organizedTrials_.a;
+										return A2(
+											$elm$random$Random$andThen,
+											function (swapedTargets) {
+												return $elm$random$Random$constant(
+													$elm$core$Result$Ok(
+														A2($elm$core$List$cons, trainingTrials, swapedTargets)));
+											},
+											$elm_community$random_extra$Random$Extra$sequence(
+												swapTargetWithOneDistractor(tr)));
+									}
+								},
+								$elm$random$Random$constant(
+									A2($author$project$Pretest$Acceptability$organizeAcceptabilityTrials, targets, distractors)));
+						},
+						$elm_community$random_extra$Random$List$shuffle(aTrials));
+					var randomize = A2(
+						$elm$random$Random$generate,
+						$author$project$Pretest$Pretest$StartPretest,
+						A7(
+							$elm_community$random_extra$Random$Extra$map6,
+							$author$project$Pretest$Pretest$ShuffledPretest,
+							$elm_community$random_extra$Random$List$shuffle(sprtrials),
+							$elm_community$random_extra$Random$List$shuffle(sctrials),
+							$elm$random$Random$constant(infos),
+							$elm_community$random_extra$Random$List$shuffle(vksTrials),
+							generateOrganizedTrials,
+							$elm$random$Random$constant(yn)));
+					return _Utils_Tuple2(model, randomize);
+				default:
+					var spr = msg.a.spr;
+					var sc = msg.a.sc;
+					var vks = msg.a.vks;
+					var infos = msg.a.infos;
+					var acceptability = msg.a.acceptability;
+					var yn = msg.a.yn;
+					if (acceptability.$ === 'Ok') {
+						var shuffledTrials = acceptability.a;
+						if (_Utils_eq(
+							A2(
+								$elm$core$List$filter,
+								function (block) {
+									return $elm$core$List$length(block) < 4;
+								},
+								shuffledTrials),
+							_List_fromArray(
+								[_List_Nil]))) {
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										acceptabilityTask: A2(
+											$author$project$Pretest$Acceptability$start,
+											infos,
+											$elm$core$List$concat(shuffledTrials)),
+										sentenceCompletion: A2($author$project$Pretest$SentenceCompletion$init, infos, sc),
+										spr: A2($author$project$Pretest$SPR$init, infos, spr),
+										vks: A2(
+											$author$project$Pretest$VKS$init,
+											infos,
+											A2(
+												$elm$core$List$filter,
+												A2(
+													$elm$core$Basics$composeL,
+													$elm$core$Basics$not,
+													function ($) {
+														return $.isTraining;
+													}),
+												vks)),
+										yesno: A2($author$project$Pretest$YesNo$init, infos, yn)
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							var $temp$msg = A6(
+								$author$project$Pretest$Pretest$ServerRespondedWithAllPretestData,
+								spr,
+								sc,
+								infos,
+								vks,
+								$elm$core$List$concat(shuffledTrials),
+								yn),
+								$temp$model = model;
+							msg = $temp$msg;
+							model = $temp$model;
+							continue update;
+						}
+					} else {
+						var reason = acceptability.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									acceptabilityTask: $author$project$Logic$Err('Error trying to build blocks')
+								}),
+							$elm$core$Platform$Cmd$none);
+					}
+			}
+		}
+	});
+var $author$project$Pretest$SPR$Feedback = {$: 'Feedback'};
+var $author$project$Pretest$SPR$Question = {$: 'Question'};
+var $author$project$Pretest$SPR$Reading = function (a) {
+	return {$: 'Reading', a: a};
+};
+var $author$project$Pretest$SPR$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Pretest$SPR$TaggedSegmentStarted = F2(
+	function (taggedSegment, startedAt) {
+		return {startedAt: startedAt, taggedSegment: taggedSegment};
+	});
+var $author$project$Pretest$SPR$answerToString = function (answer) {
+	switch (answer.$) {
+		case 'Yes':
+			return 'Yes';
+		case 'No':
+			return 'No';
+		case 'Unsure':
+			return 'I don\'t know';
+		default:
+			return '';
+	}
+};
+var $author$project$Pretest$SPR$tagToString = function (tag) {
+	switch (tag.$) {
+		case 'NoUnit':
+			return 'No unit';
+		case 'Critic':
+			return 'Critic';
+		default:
+			return 'SpillOver';
+	}
+};
+var $author$project$Pretest$SPR$saveSprData = F3(
+	function (responseHandler, maybeUserId, task) {
+		var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', maybeUserId);
+		var taskId_ = $author$project$Pretest$SPR$taskId;
+		var summarizedTrialEncoder = $elm$json$Json$Encode$list(
+			function (_v2) {
+				var tag = _v2.tag;
+				var segment = _v2.segment;
+				var startedAt = _v2.startedAt;
+				var endedAt = _v2.endedAt;
+				var id = _v2.id;
+				var answer = _v2.answer;
+				return $elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'fields',
+							$elm$json$Json$Encode$object(
+								_List_fromArray(
+									[
+										_Utils_Tuple2(
+										'sprTrialId',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[id]))),
+										_Utils_Tuple2(
+										'answer',
+										$elm$json$Json$Encode$string(answer)),
+										_Utils_Tuple2(
+										'sprStartedAt',
+										$elm$json$Json$Encode$int(startedAt)),
+										_Utils_Tuple2(
+										'sprEndedAt',
+										$elm$json$Json$Encode$int(endedAt)),
+										_Utils_Tuple2(
+										'tag',
+										$elm$json$Json$Encode$string(tag)),
+										_Utils_Tuple2(
+										'segment',
+										$elm$json$Json$Encode$string(segment)),
+										_Utils_Tuple2(
+										'Task_UID',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[$author$project$Pretest$SPR$taskId]))),
+										_Utils_Tuple2(
+										'userUid',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[userId])))
+									])))
+						]));
+			});
+		var history = $author$project$Logic$getHistory(task);
+		var formattedData = A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, acc) {
+					var id = _v0.a.id;
+					var answer = _v0.b.answer;
+					var seenSegments = _v0.b.seenSegments;
+					return A2(
+						$elm$core$List$append,
+						acc,
+						A2(
+							$elm$core$List$map,
+							function (_v1) {
+								var taggedSegment = _v1.taggedSegment;
+								var startedAt = _v1.startedAt;
+								var endedAt = _v1.endedAt;
+								return {
+									answer: $author$project$Pretest$SPR$answerToString(answer),
+									endedAt: $elm$time$Time$posixToMillis(endedAt),
+									id: id,
+									segment: taggedSegment.b,
+									startedAt: $elm$time$Time$posixToMillis(startedAt),
+									tag: $author$project$Pretest$SPR$tagToString(taggedSegment.a)
+								};
+							},
+							seenSegments));
+				}),
+			_List_Nil,
+			history);
+		var sendInBatch_ = A4($author$project$Data$sendInBatch, summarizedTrialEncoder, taskId_, userId, formattedData);
+		var callbackHandler = responseHandler;
+		return A2($elm$core$Task$attempt, callbackHandler, sendInBatch_);
+	});
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Pretest$SPR$updateWithTime = F4(
+	function (msg, timestamp, prevModel, newModel) {
+		return _Utils_eq(timestamp, $elm$core$Maybe$Nothing) ? _Utils_Tuple2(
+			prevModel,
+			A2(
+				$elm$core$Task$perform,
+				$author$project$Pretest$SPR$TimestampedMsg(msg),
+				A2($elm$core$Task$map, $elm$core$Maybe$Just, $elm$time$Time$now))) : _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
+	});
+var $author$project$Pretest$SPR$update = F2(
+	function (msg, model) {
+		var prevState = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$Pretest$SPR$initState,
+			$author$project$Logic$getState(model.spr));
+		var currentTrial = $author$project$Logic$getTrial(model.spr);
+		switch (msg.$) {
+			case 'UserConfirmedChoice':
+				var answer = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spr: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									prevState,
+									{answer: answer, step: $author$project$Pretest$SPR$Feedback}),
+								model.spr)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedNextTrial':
+				var newanswer = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spr: A2(
+								$author$project$Logic$next,
+								$author$project$Pretest$SPR$initState,
+								A2(
+									$author$project$Logic$update,
+									_Utils_update(
+										prevState,
+										{answer: newanswer}),
+									model.spr))
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Pretest$SPR$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{spr: $author$project$Logic$Loading}),
+					A3($author$project$Pretest$SPR$saveSprData, responseHandler, model.user, model.spr));
+			case 'ServerRespondedWithLastRecords':
+				if (msg.a.$ === 'Ok') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{spr: $author$project$Logic$NotStarted}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'StartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spr: A2($author$project$Logic$startMain, model.spr, $author$project$Pretest$SPR$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'TimestampedMsg':
+				var subMsg = msg.a;
+				var timestamp = msg.b;
+				if (subMsg.$ === 'UserPressedSpaceToStartParagraph') {
+					return A4(
+						$author$project$Pretest$SPR$updateWithTime,
+						subMsg,
+						timestamp,
+						model,
+						_Utils_update(
+							model,
+							{
+								spr: function () {
+									if (currentTrial.$ === 'Nothing') {
+										return model.spr;
+									} else {
+										var tr = currentTrial.a;
+										var _v3 = tr.taggedSegments;
+										if (!_v3.b) {
+											return model.spr;
+										} else {
+											var x = _v3.a;
+											var xs = _v3.b;
+											return A2(
+												$author$project$Logic$update,
+												_Utils_update(
+													prevState,
+													{
+														currentSegment: $elm$core$Maybe$Just(
+															A2(
+																$author$project$Pretest$SPR$TaggedSegmentStarted,
+																x,
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	$elm$time$Time$millisToPosix(0),
+																	timestamp))),
+														remainingSegments: xs,
+														step: $author$project$Pretest$SPR$SPR(
+															$author$project$Pretest$SPR$Reading('bla)'))
+													}),
+												model.spr);
+										}
+									}
+								}()
+							}));
+				} else {
+					return A4(
+						$author$project$Pretest$SPR$updateWithTime,
+						subMsg,
+						timestamp,
+						model,
+						_Utils_update(
+							model,
+							{
+								spr: function () {
+									var _v4 = prevState.remainingSegments;
+									if (!_v4.b) {
+										return A2(
+											$author$project$Logic$update,
+											_Utils_update(
+												prevState,
+												{
+													seenSegments: function () {
+														var _v5 = prevState.currentSegment;
+														if (_v5.$ === 'Just') {
+															var seg = _v5.a;
+															return A2(
+																$elm$core$List$cons,
+																function (_v6) {
+																	var taggedSegment = _v6.taggedSegment;
+																	var startedAt = _v6.startedAt;
+																	return {
+																		endedAt: A2(
+																			$elm$core$Maybe$withDefault,
+																			$elm$time$Time$millisToPosix(0),
+																			timestamp),
+																		startedAt: startedAt,
+																		taggedSegment: taggedSegment
+																	};
+																}(seg),
+																prevState.seenSegments);
+														} else {
+															return prevState.seenSegments;
+														}
+													}(),
+													step: $author$project$Pretest$SPR$Question
+												}),
+											model.spr);
+									} else {
+										var x = _v4.a;
+										return A2(
+											$author$project$Logic$update,
+											_Utils_update(
+												prevState,
+												{
+													currentSegment: $elm$core$Maybe$Just(
+														A2(
+															$author$project$Pretest$SPR$TaggedSegmentStarted,
+															x,
+															A2(
+																$elm$core$Maybe$withDefault,
+																$elm$time$Time$millisToPosix(0),
+																timestamp))),
+													remainingSegments: A2(
+														$elm$core$Maybe$withDefault,
+														_List_Nil,
+														$elm$core$List$tail(prevState.remainingSegments)),
+													seenSegments: function () {
+														var _v7 = prevState.currentSegment;
+														if (_v7.$ === 'Just') {
+															var seg = _v7.a;
+															return A2(
+																$elm$core$List$cons,
+																function (_v8) {
+																	var taggedSegment = _v8.taggedSegment;
+																	var startedAt = _v8.startedAt;
+																	return {
+																		endedAt: A2(
+																			$elm$core$Maybe$withDefault,
+																			$elm$time$Time$millisToPosix(0),
+																			timestamp),
+																		startedAt: startedAt,
+																		taggedSegment: taggedSegment
+																	};
+																}(seg),
+																prevState.seenSegments);
+														} else {
+															return prevState.seenSegments;
+														}
+													}(),
+													step: $author$project$Pretest$SPR$SPR(
+														$author$project$Pretest$SPR$Reading('blo'))
+												}),
+											model.spr);
+									}
+								}()
+							}));
+				}
+			case 'NoOp':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spr: $author$project$Logic$startTraining(model.spr)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Pretest$SentenceCompletion$RuntimeReordedAmorces = function (a) {
+	return {$: 'RuntimeReordedAmorces', a: a};
+};
+var $author$project$Pretest$SentenceCompletion$SecondProduction = {$: 'SecondProduction'};
+var $author$project$Pretest$SentenceCompletion$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Pretest$SentenceCompletion$saveData = F3(
+	function (responseHandler, maybeUserId, task) {
+		var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', maybeUserId);
+		var summarizedTrialEncoder = $elm$json$Json$Encode$list(
+			function (_v0) {
+				var id = _v0.a.id;
+				var firstProduction = _v0.b.firstProduction;
+				var secondProduction = _v0.b.secondProduction;
+				return $elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'fields',
+							$elm$json$Json$Encode$object(
+								_List_fromArray(
+									[
+										_Utils_Tuple2(
+										'sentenceCompletionTrialId',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[id]))),
+										_Utils_Tuple2(
+										'firstProduction',
+										$elm$json$Json$Encode$string(firstProduction)),
+										_Utils_Tuple2(
+										'secondProduction',
+										$elm$json$Json$Encode$string(secondProduction))
+									])))
+						]));
+			});
+		var history = $author$project$Logic$getHistory(task);
+		var sendInBatch_ = A4($author$project$Data$sendInBatch, summarizedTrialEncoder, $author$project$Pretest$SentenceCompletion$taskId, userId, history);
+		return A2($elm$core$Task$attempt, responseHandler, sendInBatch_);
+	});
+var $elm$random$Random$addOne = function (value) {
+	return _Utils_Tuple2(1, value);
+};
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $elm$random$Random$float = F2(
+	function (a, b) {
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var seed1 = $elm$random$Random$next(seed0);
+				var range = $elm$core$Basics$abs(b - a);
+				var n1 = $elm$random$Random$peel(seed1);
+				var n0 = $elm$random$Random$peel(seed0);
+				var lo = (134217727 & n1) * 1.0;
+				var hi = (67108863 & n0) * 1.0;
+				var val = ((hi * 134217728.0) + lo) / 9007199254740992.0;
+				var scaled = (val * range) + a;
+				return _Utils_Tuple2(
+					scaled,
+					$elm$random$Random$next(seed1));
+			});
+	});
+var $elm$random$Random$getByWeight = F3(
+	function (_v0, others, countdown) {
+		getByWeight:
+		while (true) {
+			var weight = _v0.a;
+			var value = _v0.b;
+			if (!others.b) {
+				return value;
+			} else {
+				var second = others.a;
+				var otherOthers = others.b;
+				if (_Utils_cmp(
+					countdown,
+					$elm$core$Basics$abs(weight)) < 1) {
+					return value;
+				} else {
+					var $temp$_v0 = second,
+						$temp$others = otherOthers,
+						$temp$countdown = countdown - $elm$core$Basics$abs(weight);
+					_v0 = $temp$_v0;
+					others = $temp$others;
+					countdown = $temp$countdown;
+					continue getByWeight;
+				}
+			}
+		}
+	});
+var $elm$core$List$sum = function (numbers) {
+	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
+};
+var $elm$random$Random$weighted = F2(
+	function (first, others) {
+		var normalize = function (_v0) {
+			var weight = _v0.a;
+			return $elm$core$Basics$abs(weight);
+		};
+		var total = normalize(first) + $elm$core$List$sum(
+			A2($elm$core$List$map, normalize, others));
+		return A2(
+			$elm$random$Random$map,
+			A2($elm$random$Random$getByWeight, first, others),
+			A2($elm$random$Random$float, 0, total));
+	});
+var $elm$random$Random$uniform = F2(
+	function (value, valueList) {
+		return A2(
+			$elm$random$Random$weighted,
+			$elm$random$Random$addOne(value),
+			A2($elm$core$List$map, $elm$random$Random$addOne, valueList));
+	});
+var $author$project$Pretest$SentenceCompletion$update = F2(
+	function (msg, model) {
+		var prevState = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$Pretest$SentenceCompletion$initState,
+			$author$project$Logic$getState(model.sentenceCompletion));
+		switch (msg.$) {
+			case 'RuntimeReordedAmorces':
+				var field = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							sentenceCompletion: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									prevState,
+									{order: field}),
+								model.sentenceCompletion)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							sentenceCompletion: A2(
+								$author$project$Logic$next,
+								$author$project$Pretest$SentenceCompletion$initState,
+								$author$project$Logic$toggle(model.sentenceCompletion))
+						}),
+					A2(
+						$elm$random$Random$generate,
+						$author$project$Pretest$SentenceCompletion$RuntimeReordedAmorces,
+						A2(
+							$elm$random$Random$uniform,
+							$author$project$Pretest$SentenceCompletion$FirstProduction,
+							_List_fromArray(
+								[$author$project$Pretest$SentenceCompletion$SecondProduction]))));
+			case 'UserClickedToggleFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							sentenceCompletion: $author$project$Logic$toggle(model.sentenceCompletion)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							sentenceCompletion: A2($author$project$Logic$startMain, model.sentenceCompletion, $author$project$Pretest$SentenceCompletion$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserUpdatedField':
+				var fieldId = msg.a;
+				var _new = msg.b;
+				if (fieldId.$ === 'FirstProduction') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								sentenceCompletion: A2(
+									$author$project$Logic$update,
+									_Utils_update(
+										prevState,
+										{firstProduction: _new}),
+									model.sentenceCompletion)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								sentenceCompletion: A2(
+									$author$project$Logic$update,
+									_Utils_update(
+										prevState,
+										{secondProduction: _new}),
+									model.sentenceCompletion)
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Pretest$SentenceCompletion$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{sentenceCompletion: $author$project$Logic$Loading}),
+					A3($author$project$Pretest$SentenceCompletion$saveData, responseHandler, model.user, model.sentenceCompletion));
+			case 'ServerRespondedWithLastRecords':
+				if (msg.a.$ === 'Ok') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{sentenceCompletion: $author$project$Logic$NotStarted}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var reason = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								sentenceCompletion: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(reason))
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							sentenceCompletion: $author$project$Logic$startTraining(model.sentenceCompletion)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Pretest$VKS$FirstProduction = {$: 'FirstProduction'};
+var $author$project$Pretest$VKS$RuntimeReordedAmorces = function (a) {
+	return {$: 'RuntimeReordedAmorces', a: a};
+};
+var $author$project$Pretest$VKS$SecondProduction = {$: 'SecondProduction'};
+var $author$project$Pretest$VKS$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Pretest$VKS$Known = {$: 'Known'};
+var $author$project$Pretest$VKS$NeverSeen = {$: 'NeverSeen'};
+var $author$project$Pretest$VKS$PreviouslySeen = {$: 'PreviouslySeen'};
+var $author$project$Pretest$VKS$familiarityFromString = function (str) {
+	switch (str) {
+		case 'Known':
+			return $author$project$Pretest$VKS$Known;
+		case 'NeverSeen':
+			return $author$project$Pretest$VKS$NeverSeen;
+		case 'PreviouslySeen':
+			return $author$project$Pretest$VKS$PreviouslySeen;
+		default:
+			return $author$project$Pretest$VKS$NoAnswer;
+	}
+};
+var $author$project$Pretest$VKS$familiarityToString = function (fam) {
+	switch (fam.$) {
+		case 'Known':
+			return 'Known';
+		case 'NeverSeen':
+			return 'NeverSeen';
+		case 'PreviouslySeen':
+			return 'PreviouslySeen';
+		default:
+			return '';
+	}
+};
+var $author$project$Pretest$VKS$saveData = F3(
+	function (responseHandler, maybeUserId, task) {
+		var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', maybeUserId);
+		var summarizedTrialEncoder = $elm$json$Json$Encode$list(
+			function (_v0) {
+				var id = _v0.a.id;
+				var knowledge = _v0.b.knowledge;
+				var definition = _v0.b.definition;
+				var usage = _v0.b.usage;
+				return $elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'fields',
+							$elm$json$Json$Encode$object(
+								_List_fromArray(
+									[
+										_Utils_Tuple2(
+										'id',
+										A2(
+											$elm$json$Json$Encode$list,
+											$elm$json$Json$Encode$string,
+											_List_fromArray(
+												[id]))),
+										_Utils_Tuple2(
+										'knowledge',
+										$elm$json$Json$Encode$string(
+											$author$project$Pretest$VKS$familiarityToString(knowledge))),
+										_Utils_Tuple2(
+										'definition',
+										$elm$json$Json$Encode$string(definition)),
+										_Utils_Tuple2(
+										'usage',
+										$elm$json$Json$Encode$string(usage))
+									])))
+						]));
+			});
+		var history = $author$project$Logic$getHistory(task);
+		var sendInBatch_ = A4($author$project$Data$sendInBatch, summarizedTrialEncoder, $author$project$Pretest$VKS$taskId, userId, history);
+		return A2($elm$core$Task$attempt, responseHandler, sendInBatch_);
+	});
+var $author$project$Pretest$VKS$update = F2(
+	function (msg, model) {
+		var prevState = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$Pretest$VKS$initState,
+			$author$project$Logic$getState(model.vks));
+		switch (msg.$) {
+			case 'RuntimeReordedAmorces':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							vks: A2($author$project$Logic$update, prevState, model.vks)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							vks: A2(
+								$author$project$Logic$next,
+								$author$project$Pretest$VKS$initState,
+								$author$project$Logic$toggle(model.vks))
+						}),
+					A2(
+						$elm$random$Random$generate,
+						$author$project$Pretest$VKS$RuntimeReordedAmorces,
+						A2(
+							$elm$random$Random$uniform,
+							$author$project$Pretest$VKS$FirstProduction,
+							_List_fromArray(
+								[$author$project$Pretest$VKS$SecondProduction]))));
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							vks: A2($author$project$Logic$startMain, model.vks, $author$project$Pretest$VKS$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserUpdatedField':
+				var fieldId = msg.a;
+				var _new = msg.b;
+				if (fieldId.$ === 'FirstProduction') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								vks: A2(
+									$author$project$Logic$update,
+									_Utils_update(
+										prevState,
+										{definition: _new}),
+									model.vks)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								vks: A2(
+									$author$project$Logic$update,
+									_Utils_update(
+										prevState,
+										{usage: _new}),
+									model.vks)
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Pretest$VKS$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{vks: $author$project$Logic$Loading}),
+					A3($author$project$Pretest$VKS$saveData, responseHandler, model.user, model.vks));
+			case 'ServerRespondedWithLastRecords':
+				if (msg.a.$ === 'Ok') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{vks: $author$project$Logic$NotStarted}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var reason = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								vks: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(reason))
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			default:
+				var str = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							vks: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									prevState,
+									{
+										knowledge: $author$project$Pretest$VKS$familiarityFromString(str)
+									}),
+								model.vks)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Pretest$YesNo$ServerRespondedWithUpdatedUser = function (a) {
+	return {$: 'ServerRespondedWithUpdatedUser', a: a};
+};
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$http$Http$resolve = F2(
+	function (toResult, response) {
+		switch (response.$) {
+			case 'BadUrl_':
+				var url = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadUrl(url));
+			case 'Timeout_':
+				return $elm$core$Result$Err($elm$http$Http$Timeout);
+			case 'NetworkError_':
+				return $elm$core$Result$Err($elm$http$Http$NetworkError);
+			case 'BadStatus_':
+				var metadata = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadStatus(metadata.statusCode));
+			default:
+				var body = response.b;
+				return A2(
+					$elm$core$Result$mapError,
+					$elm$http$Http$BadBody,
+					toResult(body));
+		}
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -15324,207 +17576,159 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
-var $elm$http$Http$post = function (r) {
-	return $elm$http$Http$request(
-		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
-};
-var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $author$project$Logic$getHistory = function (task) {
-	if (task.$ === 'Main') {
-		var history = task.a.history;
-		return history;
-	} else {
-		return _List_Nil;
-	}
-};
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$Data$resolve = F2(
-	function (bodyParser, response) {
-		switch (response.$) {
-			case 'BadUrl_':
-				var url = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
-			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
-			default:
-				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					bodyParser(body));
-		}
+var $author$project$Pretest$YesNo$updateVocabularyScore = F3(
+	function (payload, callbackMsg, decoder) {
+		return $elm$http$Http$request(
+			{
+				body: payload,
+				expect: A2($elm$http$Http$expectJson, callbackMsg, decoder),
+				headers: _List_Nil,
+				method: 'PATCH',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: $author$project$Data$buildQuery(
+					{app: $author$project$Data$apps.spacing, base: 'users', view_: 'allUsers'})
+			});
 	});
-var $author$project$Data$postRecordsBatch = function (payload) {
-	return $elm$http$Http$task(
-		{
-			body: payload,
-			headers: _List_Nil,
-			method: 'POST',
-			resolver: $elm$http$Http$stringResolver(
-				$author$project$Data$resolve(
-					$elm$core$Basics$always(
-						$elm$core$Result$Ok(_Utils_Tuple0)))),
-			timeout: $elm$core$Maybe$Just(5000),
-			url: $author$project$Data$buildQuery(
-				{app: $author$project$Data$apps.spacing, base: 'output', view_: 'all'})
-		});
-};
-var $author$project$Data$splitIn = F2(
-	function (k, xs) {
-		return (!k) ? _List_fromArray(
-			[_List_Nil]) : ((k < 0) ? _List_Nil : ((_Utils_cmp(
-			$elm$core$List$length(xs),
-			k) > 0) ? A2(
-			$elm$core$List$cons,
-			A2($elm$core$List$take, k, xs),
-			A2(
-				$author$project$Data$splitIn,
-				k,
-				A2($elm$core$List$drop, k, xs))) : _List_fromArray(
-			[xs])));
-	});
-var $author$project$Data$updateUserCompletedTasks = function (payload) {
-	return $elm$http$Http$task(
-		{
-			body: payload,
-			headers: _List_Nil,
-			method: 'PATCH',
-			resolver: $elm$http$Http$stringResolver(
-				$author$project$Data$resolve(
-					$elm$core$Basics$always(
-						$elm$core$Result$Ok(_Utils_Tuple0)))),
-			timeout: $elm$core$Maybe$Just(5000),
-			url: $author$project$Data$buildQuery(
-				{app: $author$project$Data$apps.spacing, base: 'users', view_: 'all'})
-		});
-};
-var $author$project$Data$sendInBatch = F4(
-	function (historyEncoder, taskId, userId, history) {
-		var fieldsToUpdate = $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'tasks',
-					A2(
-						$elm$json$Json$Encode$list,
-						$elm$json$Json$Encode$string,
-						_List_fromArray(
-							[taskId])))
-				]));
-		var chuncks = A2($author$project$Data$splitIn, 10, history);
-		return $elm$core$Task$sequence(
-			A2(
-				$elm$core$List$cons,
-				$author$project$Data$updateUserCompletedTasks(
-					$elm$http$Http$jsonBody(
-						$elm$json$Json$Encode$object(
+var $author$project$Pretest$YesNo$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedStartTask':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							yesno: A2($author$project$Logic$startMain, model.yesno, $author$project$Pretest$YesNo$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserPressedButton':
+				var maybeBool = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							yesno: A2(
+								$author$project$Logic$next,
+								$author$project$Pretest$YesNo$initState,
+								A2(
+									$author$project$Logic$update,
+									{evaluation: maybeBool},
+									model.yesno))
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedSaveData':
+				var weighted = $elm$core$Basics$mul(0.2);
+				var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', model.user);
+				var responseDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
+				var history = $author$project$Logic$getHistory(model.yesno);
+				var encodeUpdatedUser = $elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'records',
+							A2(
+								$elm$json$Json$Encode$list,
+								function (score) {
+									return $elm$json$Json$Encode$object(
+										_List_fromArray(
+											[
+												_Utils_Tuple2(
+												'id',
+												$elm$json$Json$Encode$string(userId)),
+												_Utils_Tuple2(
+												'fields',
+												$elm$json$Json$Encode$object(
+													_List_fromArray(
+														[
+															_Utils_Tuple2(
+															'VocabLevel',
+															$elm$json$Json$Encode$int(score))
+														])))
+											]));
+								},
+								_List_fromArray(
+									[1000])))
+						]));
+				var _v1 = A3(
+					$elm$core$List$foldl,
+					F2(
+						function (_v2, _v3) {
+							var t = _v2.a;
+							var s = _v2.b;
+							var h = _v3.a;
+							var f = _v3.b;
+							return _Utils_eq(
+								t.exists,
+								A2($elm$core$Maybe$withDefault, false, s.evaluation)) ? _Utils_Tuple2(h + 1, f) : _Utils_Tuple2(h, f + 1);
+						}),
+					_Utils_Tuple2(0, 0),
+					history);
+				var hits = _v1.a;
+				var falseAlarms = _v1.b;
+				var correctionFactor = 1 - (weighted(falseAlarms) / weighted(hits));
+				var scoreVoc = (hits * 100) * correctionFactor;
+				var encode = A2(
+					$elm$json$Json$Encode$list,
+					function (score) {
+						return $elm$json$Json$Encode$object(
 							_List_fromArray(
 								[
 									_Utils_Tuple2(
 									'id',
 									$elm$json$Json$Encode$string(userId)),
-									_Utils_Tuple2('fields', fieldsToUpdate)
-								])))),
-				A2(
-					$elm$core$List$map,
-					function (sublist) {
-						return A2(
-							$elm$core$Task$andThen,
-							function (_v0) {
-								return $author$project$Data$postRecordsBatch(
-									$elm$http$Http$jsonBody(
-										historyEncoder(sublist)));
-							},
-							$elm$core$Process$sleep(210));
+									_Utils_Tuple2(
+									'fields',
+									$elm$json$Json$Encode$object(
+										_List_fromArray(
+											[
+												_Utils_Tuple2(
+												'VocabLevel',
+												$elm$json$Json$Encode$int(score))
+											])))
+								]));
 					},
-					chuncks)));
-	});
-var $author$project$Logic$saveAcceptabilityData = F4(
-	function (responseHandler, maybeUserId, taskId, task) {
-		var whenNothing = $elm$time$Time$millisToPosix(1000000000);
-		var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', maybeUserId);
-		var taskId_ = taskId;
-		var intFromMillis = function (posix) {
-			return $elm$json$Json$Encode$int(
-				$elm$time$Time$posixToMillis(
-					A2($elm$core$Maybe$withDefault, whenNothing, posix)));
-		};
-		var summarizedTrialEncoder = $elm$json$Json$Encode$list(
-			function (_v0) {
-				var t = _v0.a;
-				var s = _v0.b;
-				return $elm$json$Json$Encode$object(
 					_List_fromArray(
 						[
-							_Utils_Tuple2(
-							'fields',
-							$elm$json$Json$Encode$object(
-								_List_fromArray(
-									[
-										_Utils_Tuple2(
-										'trialUid',
-										A2(
-											$elm$json$Json$Encode$list,
-											$elm$json$Json$Encode$string,
-											_List_fromArray(
-												[t.uid]))),
-										_Utils_Tuple2(
-										'userUid',
-										A2(
-											$elm$json$Json$Encode$list,
-											$elm$json$Json$Encode$string,
-											_List_fromArray(
-												[userId]))),
-										_Utils_Tuple2(
-										'Task_UID',
-										A2(
-											$elm$json$Json$Encode$list,
-											$elm$json$Json$Encode$string,
-											_List_fromArray(
-												[taskId]))),
-										_Utils_Tuple2(
-										'evaluation',
-										$elm$json$Json$Encode$bool(s.evaluation)),
-										_Utils_Tuple2(
-										'audioStartedAt',
-										intFromMillis(s.audioStartedAt)),
-										_Utils_Tuple2(
-										'beepStartedAt',
-										intFromMillis(s.beepStartedAt)),
-										_Utils_Tuple2(
-										'audioEndedAt',
-										$elm$json$Json$Encode$int(
-											$elm$time$Time$posixToMillis(
-												A2($elm$core$Maybe$withDefault, whenNothing, s.audioEndedAt)))),
-										_Utils_Tuple2(
-										'beepEndedAt',
-										$elm$json$Json$Encode$int(
-											$elm$time$Time$posixToMillis(
-												A2($elm$core$Maybe$withDefault, whenNothing, s.beepEndedAt)))),
-										_Utils_Tuple2(
-										'userAnsweredAt',
-										$elm$json$Json$Encode$int(
-											$elm$time$Time$posixToMillis(
-												A2($elm$core$Maybe$withDefault, whenNothing, s.userAnsweredAt)))),
-										_Utils_Tuple2(
-										'evaluation',
-										$elm$json$Json$Encode$bool(s.evaluation))
-									])))
+							$elm$core$Basics$round(scoreVoc)
 						]));
-			});
-		var history = $author$project$Logic$getHistory(task);
-		var sendInBatch_ = A4($author$project$Data$sendInBatch, summarizedTrialEncoder, taskId_, userId, history);
-		var callbackHandler = responseHandler;
-		return A2($elm$core$Task$attempt, callbackHandler, sendInBatch_);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{yesno: $author$project$Logic$Loading}),
+					A3(
+						$author$project$Pretest$YesNo$updateVocabularyScore,
+						$elm$http$Http$jsonBody(encode),
+						$author$project$Pretest$YesNo$ServerRespondedWithUpdatedUser,
+						responseDecoder));
+			case 'ServerRespondedWithUpdatedUser':
+				if (msg.a.$ === 'Err') {
+					var reason = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								yesno: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(reason))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var id = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{yesno: $author$project$Logic$NotStarted}),
+						$elm$core$Platform$Cmd$none);
+				}
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
 	});
+var $author$project$Session1$ContextUnderstanding$RuntimeShuffledOptionsOrder = function (a) {
+	return {$: 'RuntimeShuffledOptionsOrder', a: a};
+};
+var $author$project$Session1$ContextUnderstanding$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
 var $author$project$Logic$saveData = F4(
 	function (responseHandler, maybeUserId, taskId, task) {
 		var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', maybeUserId);
@@ -15573,259 +17777,254 @@ var $author$project$Logic$saveData = F4(
 		var callbackHandler = responseHandler;
 		return A2($elm$core$Task$attempt, callbackHandler, sendInBatch_);
 	});
-var $elm$random$Random$map2 = F3(
-	function (func, _v0, _v1) {
-		var genA = _v0.a;
-		var genB = _v1.a;
-		return $elm$random$Random$Generator(
-			function (seed0) {
-				var _v2 = genA(seed0);
-				var a = _v2.a;
-				var seed1 = _v2.b;
-				var _v3 = genB(seed1);
-				var b = _v3.a;
-				var seed2 = _v3.b;
+var $author$project$Session1$ContextUnderstanding$taskId = 'recsN8oyy3LIC8URx';
+var $author$project$Session1$ContextUnderstanding$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedNextTrial':
 				return _Utils_Tuple2(
-					A2(func, a, b),
-					seed2);
-			});
-	});
-var $elm_community$random_extra$Random$Extra$sequence = A2(
-	$elm$core$List$foldr,
-	$elm$random$Random$map2($elm$core$List$cons),
-	$elm$random$Random$constant(_List_Nil));
-var $elm$random$Random$listHelp = F4(
-	function (revList, n, gen, seed) {
-		listHelp:
-		while (true) {
-			if (n < 1) {
-				return _Utils_Tuple2(revList, seed);
-			} else {
-				var _v0 = gen(seed);
-				var value = _v0.a;
-				var newSeed = _v0.b;
-				var $temp$revList = A2($elm$core$List$cons, value, revList),
-					$temp$n = n - 1,
-					$temp$gen = gen,
-					$temp$seed = newSeed;
-				revList = $temp$revList;
-				n = $temp$n;
-				gen = $temp$gen;
-				seed = $temp$seed;
-				continue listHelp;
-			}
-		}
-	});
-var $elm$random$Random$list = F2(
-	function (n, _v0) {
-		var gen = _v0.a;
-		return $elm$random$Random$Generator(
-			function (seed) {
-				return A4($elm$random$Random$listHelp, _List_Nil, n, gen, seed);
-			});
-	});
-var $owanturist$elm_union_find$UnionFind$findFast = F2(
-	function (id, dict) {
-		findFast:
-		while (true) {
-			var _v0 = A2($elm$core$Dict$get, id, dict);
-			if (_v0.$ === 'Nothing') {
-				return id;
-			} else {
-				var cursor = _v0.a;
-				if (_Utils_eq(id, cursor)) {
-					return id;
+					_Utils_update(
+						model,
+						{
+							cu1: A2($author$project$Logic$next, $author$project$Session1$ContextUnderstanding$initState, model.cu1)
+						}),
+					A2(
+						$elm$random$Random$generate,
+						$author$project$Session1$ContextUnderstanding$RuntimeShuffledOptionsOrder,
+						$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
+			case 'UserClickedToggleFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu1: $author$project$Logic$toggle(model.cu1)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedRadioButton':
+				var newChoice = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu1: A2(
+								$author$project$Logic$update,
+								{uid: '', userAnswer: newChoice},
+								model.cu1)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu1: A2($author$project$Logic$startMain, model.cu1, $author$project$Session1$ContextUnderstanding$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Session1$ContextUnderstanding$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session1$ContextUnderstanding$taskId, model.cu1));
+			case 'ServerRespondedWithLastRecords':
+				if (msg.a.$ === 'Ok') {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var $temp$id = cursor,
-						$temp$dict = dict;
-					id = $temp$id;
-					dict = $temp$dict;
-					continue findFast;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			}
-		}
-	});
-var $owanturist$elm_union_find$UnionFind$find = F2(
-	function (id, _v0) {
-		var dict = _v0.b;
-		return A2($owanturist$elm_union_find$UnionFind$findFast, id, dict);
-	});
-var $elm$core$Array$isEmpty = function (_v0) {
-	var len = _v0.a;
-	return !len;
-};
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $owanturist$elm_union_find$UnionFind$QuickUnionPathCompression = F2(
-	function (a, b) {
-		return {$: 'QuickUnionPathCompression', a: a, b: b};
-	});
-var $owanturist$elm_union_find$UnionFind$quickUnionPathCompression = A2($owanturist$elm_union_find$UnionFind$QuickUnionPathCompression, 0, $elm$core$Dict$empty);
-var $owanturist$elm_union_find$UnionFind$findCompressed = F2(
-	function (id, dict) {
-		var _v0 = A2($elm$core$Dict$get, id, dict);
-		if (_v0.$ === 'Nothing') {
-			return _Utils_Tuple2(
-				id,
-				A3($elm$core$Dict$insert, id, id, dict));
-		} else {
-			var cursor = _v0.a;
-			if (_Utils_eq(id, cursor)) {
-				return _Utils_Tuple2(id, dict);
-			} else {
-				var _v1 = A2($owanturist$elm_union_find$UnionFind$findCompressed, cursor, dict);
-				var parent = _v1.a;
-				var nextDict = _v1.b;
+			case 'UserClickedStartTraining':
 				return _Utils_Tuple2(
-					parent,
-					A3($elm$core$Dict$insert, id, parent, nextDict));
-			}
+					_Utils_update(
+						model,
+						{
+							cu1: $author$project$Logic$startTraining(model.cu1)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var newOrder = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{optionsOrder: newOrder}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $owanturist$elm_union_find$UnionFind$union = F3(
-	function (left, right, _v0) {
-		var count_ = _v0.a;
-		var dict = _v0.b;
-		var _v1 = A2($owanturist$elm_union_find$UnionFind$findCompressed, left, dict);
-		var leftRoot = _v1.a;
-		var leftDict = _v1.b;
-		var _v2 = A2($owanturist$elm_union_find$UnionFind$findCompressed, right, leftDict);
-		var rightRoot = _v2.a;
-		var rightDict = _v2.b;
-		return _Utils_eq(leftRoot, rightRoot) ? A2($owanturist$elm_union_find$UnionFind$QuickUnionPathCompression, count_, rightDict) : A2(
-			$owanturist$elm_union_find$UnionFind$QuickUnionPathCompression,
-			count_ + 1,
-			A3($elm$core$Dict$insert, leftRoot, rightRoot, rightDict));
+var $author$project$Session1$Meaning$RuntimeShuffledOptionsOrder = function (a) {
+	return {$: 'RuntimeShuffledOptionsOrder', a: a};
+};
+var $author$project$Session1$Meaning$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session1$Meaning$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
 	});
-var $elm_community$random_extra$Utils$selectUniqByIndexes = F2(
-	function (values, randomIndexes) {
-		var modByLength = $elm$core$Basics$modBy(
-			$elm$core$Array$length(values));
-		var step = F2(
-			function (randomIndex, _v1) {
-				var uf = _v1.a;
-				var acc = _v1.b;
-				var leaderOfElement = A2($owanturist$elm_union_find$UnionFind$find, randomIndex, uf);
-				var leaderOfNextElement = A2(
-					$owanturist$elm_union_find$UnionFind$find,
-					modByLength(leaderOfElement + 1),
-					uf);
-				var _v0 = A2($elm$core$Array$get, leaderOfElement, values);
-				if (_v0.$ === 'Nothing') {
-					return _Utils_Tuple2(uf, acc);
-				} else {
-					var value = _v0.a;
+var $author$project$Session1$Meaning$initState = A2($author$project$Session1$Meaning$State, 'DefaultTrialUID', '');
+var $author$project$Session1$Meaning$taskId = 'rec9fDmVOpqDJktmQ';
+var $author$project$Session1$Meaning$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							meaning: A2($author$project$Logic$next, $author$project$Session1$Meaning$initState, model.meaning)
+						}),
+					A2(
+						$elm$random$Random$generate,
+						$author$project$Session1$Meaning$RuntimeShuffledOptionsOrder,
+						$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
+			case 'UserClickedToggleFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							meaning: $author$project$Logic$toggle(model.meaning)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedRadioButton':
+				var newChoice = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							meaning: A2(
+								$author$project$Logic$update,
+								{uid: '', userAnswer: newChoice},
+								model.meaning)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							meaning: A2($author$project$Logic$startMain, model.meaning, $author$project$Session1$Meaning$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'SaveDataMsg':
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, $author$project$Session1$Meaning$ServerRespondedWithLastRecords, model.user, $author$project$Session1$Meaning$taskId, model.meaning));
+			case 'ServerRespondedWithLastRecords':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							meaning: $author$project$Logic$startTraining(model.meaning)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var newOrder = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{optionsOrder: newOrder}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session1$Presentation$State = F2(
+	function (uid, toggledEntries) {
+		return {toggledEntries: toggledEntries, uid: uid};
+	});
+var $author$project$Session1$Presentation$initState = A2(
+	$author$project$Session1$Presentation$State,
+	'DefaultUid',
+	$elm$core$Dict$fromList(
+		_List_fromArray(
+			[
+				_Utils_Tuple2('definition', false),
+				_Utils_Tuple2('example', false),
+				_Utils_Tuple2('translation', false)
+			])));
+var $author$project$Session1$Presentation$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							presentation: A2($author$project$Logic$next, $author$project$Session1$Presentation$initState, model.presentation)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							presentation: A2($author$project$Logic$startMain, model.presentation, $author$project$Session1$Presentation$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserToggleElementOfEntry':
+				var id = msg.a;
+				var prevState = $author$project$Logic$getState(model.presentation);
+				if (prevState.$ === 'Just') {
+					var state = prevState.a;
 					return _Utils_Tuple2(
-						A3($owanturist$elm_union_find$UnionFind$union, leaderOfElement, leaderOfNextElement, uf),
-						A2($elm$core$List$cons, value, acc));
-				}
-			});
-		return $elm$core$Array$isEmpty(values) ? _List_Nil : A3(
-			$elm$core$List$foldr,
-			step,
-			_Utils_Tuple2($owanturist$elm_union_find$UnionFind$quickUnionPathCompression, _List_Nil),
-			randomIndexes).b;
-	});
-var $elm_community$random_extra$Random$List$shuffle = function (list) {
-	var values = $elm$core$Array$fromList(list);
-	var length = $elm$core$Array$length(values);
-	return A2(
-		$elm$random$Random$map,
-		$elm_community$random_extra$Utils$selectUniqByIndexes(values),
-		A2(
-			$elm$random$Random$list,
-			length,
-			A2($elm$random$Random$int, 0, length - 1)));
-};
-var $author$project$Logic$startIntro = F4(
-	function (info, trainingTrials, mainTrials, initStat) {
-		if (info.$ === 'Ok') {
-			var info_ = info.a;
-			if (!trainingTrials.b) {
-				return $author$project$Logic$Intr(
-					{current: $elm$core$Maybe$Nothing, feedback: false, history: _List_Nil, infos: info_, mainTrials: mainTrials, next: $elm$core$Maybe$Nothing, state: initStat, trainingTrials: trainingTrials});
-			} else {
-				if (trainingTrials.b.b) {
-					var x = trainingTrials.a;
-					var _v2 = trainingTrials.b;
-					var y = _v2.a;
-					return $author$project$Logic$Intr(
-						{
-							current: $elm$core$Maybe$Just(x),
-							feedback: false,
-							history: _List_Nil,
-							infos: info_,
-							mainTrials: mainTrials,
-							next: $elm$core$Maybe$Just(y),
-							state: initStat,
-							trainingTrials: trainingTrials
-						});
+						_Utils_update(
+							model,
+							{
+								presentation: A2(
+									$author$project$Logic$update,
+									_Utils_update(
+										state,
+										{
+											toggledEntries: A3(
+												$elm$core$Dict$update,
+												id,
+												$elm$core$Maybe$map($elm$core$Basics$not),
+												state.toggledEntries)
+										}),
+									model.presentation)
+							}),
+						$elm$core$Platform$Cmd$none);
 				} else {
-					var x = trainingTrials.a;
-					return $author$project$Logic$Intr(
-						{
-							current: $elm$core$Maybe$Just(x),
-							feedback: false,
-							history: _List_Nil,
-							infos: info_,
-							mainTrials: mainTrials,
-							next: $elm$core$Maybe$Nothing,
-							state: initStat,
-							trainingTrials: trainingTrials
-						});
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			}
-		} else {
-			var error = info.a;
-			return $author$project$Logic$Err('I tried to start the intro of this task but I stumbled into an error : ' + error);
+			case 'UserClickedStartAudio':
+				var url = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Ports$playAudio(url));
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							presentation: $author$project$Logic$startTraining(model.presentation)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Pretest$Acceptability$taskId = 'recR8areYkKRvQ6lU';
-var $author$project$ExperimentInfo$toDict = function (newInfos) {
-	return $elm$core$Dict$fromList(
-		A2(
-			$elm$core$List$map,
-			function (info) {
-				return _Utils_Tuple2(
-					info.uid,
-					$elm$core$Basics$identity(info));
-			},
-			newInfos));
-};
-var $author$project$Pretest$Acceptability$start = F2(
-	function (info, trials) {
-		var relatedInfos = A2(
-			$elm$core$Result$fromMaybe,
-			'I couldn\'t fetch the value associated with: ' + $author$project$Pretest$Acceptability$taskId,
-			A2(
-				$elm$core$Dict$get,
-				$author$project$Pretest$Acceptability$taskId,
-				$author$project$ExperimentInfo$toDict(info)));
-		return A4(
-			$author$project$Logic$startIntro,
-			relatedInfos,
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Training);
-				},
-				trials),
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return !_Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Training);
-				},
-				trials),
-			$author$project$Pretest$Acceptability$initState);
+var $author$project$Session$Ready = {$: 'Ready'};
+var $author$project$Session1$Session$ShuffledSession1 = F5(
+	function (meaning, spelling, cu1, presentation, infos_) {
+		return {cu1: cu1, infos_: infos_, meaning: meaning, presentation: presentation, spelling: spelling};
 	});
-var $author$project$Session1$CU1$taskId = 'recsN8oyy3LIC8URx';
-var $author$project$Session1$CU1$start = F2(
+var $author$project$Session1$Session$StartSession = function (a) {
+	return {$: 'StartSession', a: a};
+};
+var $elm$core$Tuple$mapFirst = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
+	});
+var $author$project$Session1$ContextUnderstanding$start = F2(
 	function (info, trials) {
 		var relatedInfos = A2(
 			$elm$core$Result$fromMaybe,
-			'I couldn\'t fetch the value associated with: ' + $author$project$Session1$CU1$taskId,
+			'I couldn\'t fetch the value associated with: ' + $author$project$Session1$ContextUnderstanding$taskId,
 			A2(
 				$elm$core$Dict$get,
-				$author$project$Session1$CU1$taskId,
+				$author$project$Session1$ContextUnderstanding$taskId,
 				$author$project$ExperimentInfo$toDict(info)));
 		return A4(
 			$author$project$Logic$startIntro,
@@ -15842,9 +18041,8 @@ var $author$project$Session1$CU1$start = F2(
 					return !datum.isTraining;
 				},
 				trials),
-			$author$project$Session1$CU1$initState);
+			$author$project$Session1$ContextUnderstanding$initState);
 	});
-var $author$project$Session1$Meaning$taskId = 'rec9fDmVOpqDJktmQ';
 var $author$project$Session1$Meaning$start = F2(
 	function (info, trials) {
 		var relatedInfos = A2(
@@ -15898,7 +18096,12 @@ var $author$project$Session1$Presentation$start = F2(
 				trials),
 			$author$project$Session1$Presentation$initState);
 	});
-var $author$project$Session1$SpellingLvl1$start = F2(
+var $author$project$Session1$Spelling$State = F3(
+	function (inputUid, userUID, userAnswer) {
+		return {inputUid: inputUid, userAnswer: userAnswer, userUID: userUID};
+	});
+var $author$project$Session1$Spelling$initState = A3($author$project$Session1$Spelling$State, 'DefaultTrialUID', 'DefaultUserUID', '');
+var $author$project$Session1$Spelling$start = F2(
 	function (info, trials) {
 		var id = 'recJOpE5pMTCHJOSV';
 		var relatedInfos = A2(
@@ -15923,9 +18126,390 @@ var $author$project$Session1$SpellingLvl1$start = F2(
 					return !datum.isTraining;
 				},
 				trials),
-			$author$project$Session1$SpellingLvl1$initState);
+			$author$project$Session1$Spelling$initState);
 	});
+var $0ui$elm_task_parallel$Task$Parallel$update5 = F2(
+	function (_v0, msg) {
+		var onSuccess = _v0.a;
+		var a = _v0.b;
+		var b = _v0.c;
+		var c = _v0.d;
+		var d = _v0.e;
+		var e = _v0.f;
+		var next = F5(
+			function (a_, b_, c_, d_, e_) {
+				return _Utils_Tuple2(
+					A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, a_, b_, c_, d_, e_),
+					$0ui$elm_task_parallel$Task$Parallel$toCmd(
+						A6($elm$core$Maybe$map5, onSuccess, a_, b_, c_, d_, e_)));
+			});
+		switch (msg.$) {
+			case 'LoadedA5':
+				var data = msg.a;
+				return A5(
+					next,
+					$elm$core$Maybe$Just(data),
+					b,
+					c,
+					d,
+					e);
+			case 'LoadedB5':
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					$elm$core$Maybe$Just(data),
+					c,
+					d,
+					e);
+			case 'LoadedC5':
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					b,
+					$elm$core$Maybe$Just(data),
+					d,
+					e);
+			case 'LoadedD5':
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					b,
+					c,
+					$elm$core$Maybe$Just(data),
+					e);
+			default:
+				var data = msg.a;
+				return A5(
+					next,
+					a,
+					b,
+					c,
+					d,
+					$elm$core$Maybe$Just(data));
+		}
+	});
+var $author$project$Session1$Session$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'ServerRespondedWithSomeData':
+				var downloadMsg = msg.a;
+				var _v1 = function () {
+					var _v2 = model.session1;
+					if (_v2.$ === 'Loading') {
+						var downloadState = _v2.a;
+						return A2(
+							$elm$core$Tuple$mapFirst,
+							$author$project$Session$Loading,
+							A2($0ui$elm_task_parallel$Task$Parallel$update5, downloadState, downloadMsg));
+					} else {
+						return _Utils_Tuple2(model.session1, $elm$core$Platform$Cmd$none);
+					}
+				}();
+				var updte = _v1.a;
+				var cmd = _v1.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{session1: updte}),
+					cmd);
+			case 'ServerRespondedWithSomeError':
+				var error = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu1: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(error)),
+							meaning: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(error)),
+							spellingLvl1: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(error))
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ServerRespondedWithAllData':
+				var meaning = msg.a;
+				var spelling = msg.b;
+				var cu1 = msg.c;
+				var presentation = msg.d;
+				var infos_ = msg.e;
+				var randomize = A2(
+					$elm$random$Random$generate,
+					$author$project$Session1$Session$StartSession,
+					A6(
+						$elm$random$Random$map5,
+						$author$project$Session1$Session$ShuffledSession1,
+						$elm_community$random_extra$Random$List$shuffle(meaning),
+						$elm_community$random_extra$Random$List$shuffle(spelling),
+						$elm_community$random_extra$Random$List$shuffle(cu1),
+						$elm_community$random_extra$Random$List$shuffle(presentation),
+						$elm$random$Random$constant(infos_)));
+				return _Utils_Tuple2(model, randomize);
+			default:
+				var tasks = msg.a;
+				var infos_ = tasks.infos_;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu1: A2($author$project$Session1$ContextUnderstanding$start, infos_, tasks.cu1),
+							meaning: A2($author$project$Session1$Meaning$start, infos_, tasks.meaning),
+							presentation: A2($author$project$Session1$Presentation$start, infos_, tasks.presentation),
+							session1: $author$project$Session$Ready,
+							spellingLvl1: A2($author$project$Session1$Spelling$start, infos_, tasks.spelling)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session1$Spelling$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session1$Spelling$iniState = {inputUid: '', userAnswer: '', userUID: ''};
+var $author$project$Session1$Spelling$update = F2(
+	function (msg, model) {
+		var taskId = 'recJOpE5pMTCHJOSV';
+		var currentSpellingState = $author$project$Logic$getState(model.spellingLvl1);
+		switch (msg.$) {
+			case 'UserClickedFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spellingLvl1: $author$project$Logic$toggle(model.spellingLvl1)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedRadioButton':
+				var newChoice = msg.a;
+				if (currentSpellingState.$ === 'Just') {
+					var prevState = currentSpellingState.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								spellingLvl1: A2(
+									$author$project$Logic$update,
+									_Utils_update(
+										prevState,
+										{userAnswer: newChoice}),
+									model.spellingLvl1)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spellingLvl1: A2($author$project$Logic$next, $author$project$Session1$Spelling$initState, model.spellingLvl1)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMainloop':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spellingLvl1: A2($author$project$Logic$startMain, model.spellingLvl1, $author$project$Session1$Spelling$iniState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedSavedData':
+				var responseHandler = $author$project$Session1$Spelling$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.spellingLvl1));
+			case 'ServerRespondedWithLastRecords':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'UserClickedPlayAudio':
+				var url = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Ports$playAudio(url));
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spellingLvl1: $author$project$Logic$startTraining(model.spellingLvl1)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session2$CU2$Answering = {$: 'Answering'};
+var $author$project$Session2$CU2$Listening = function (a) {
+	return {$: 'Listening', a: a};
+};
+var $author$project$Session2$CU2$RuntimeShuffledOptionsOrder = function (a) {
+	return {$: 'RuntimeShuffledOptionsOrder', a: a};
+};
+var $author$project$Session2$CU2$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session2$CU2$UserClickedStartAnswering = {$: 'UserClickedStartAnswering'};
+var $author$project$Session2$CU2$decrement = function (step) {
+	if (step.$ === 'Listening') {
+		var nTimes = step.a;
+		return $author$project$Session2$CU2$Listening(nTimes - 1);
+	} else {
+		return $author$project$Session2$CU2$Answering;
+	}
+};
+var $author$project$Session2$CU2$State = F2(
+	function (userAnswer, step) {
+		return {step: step, userAnswer: userAnswer};
+	});
+var $author$project$Session2$CU2$initState = A2(
+	$author$project$Session2$CU2$State,
+	'',
+	$author$project$Session2$CU2$Listening(3));
 var $author$project$Session2$CU2$taskId = 'recwxsmowpB18bpLj';
+var $author$project$Session2$CU2$update = F2(
+	function (msg, model) {
+		var prevState = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$Session2$CU2$initState,
+			$author$project$Logic$getState(model.cuLvl2));
+		switch (msg.$) {
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: A2($author$project$Logic$next, $author$project$Session2$CU2$initState, model.cuLvl2)
+						}),
+					A2(
+						$elm$random$Random$generate,
+						$author$project$Session2$CU2$RuntimeShuffledOptionsOrder,
+						$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
+			case 'UserClickedToggleFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: $author$project$Logic$toggle(model.cuLvl2)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedRadioButton':
+				var newChoice = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									prevState,
+									{userAnswer: newChoice}),
+								model.cuLvl2)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: A2($author$project$Logic$startMain, model.cuLvl2, $author$project$Session2$CU2$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ServerRespondedWithLastRecords':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Session2$CU2$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session2$CU2$taskId, model.cuLvl2));
+			case 'UserClickedAudio':
+				var url = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									prevState,
+									{
+										step: $author$project$Session2$CU2$decrement(prevState.step)
+									}),
+								model.cuLvl2)
+						}),
+					(!_Utils_eq(
+						prevState.step,
+						$author$project$Session2$CU2$Listening(0))) ? $author$project$Ports$playAudio(url) : A2($andrewMacmurray$elm_delay$Delay$after, 0, $author$project$Session2$CU2$UserClickedStartAnswering));
+			case 'RuntimeShuffledOptionsOrder':
+				var ls = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{optionsOrder: ls}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: $author$project$Logic$startTraining(model.cuLvl2)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									prevState,
+									{step: $author$project$Session2$CU2$Answering}),
+								model.cuLvl2)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session$Error = function (a) {
+	return {$: 'Error', a: a};
+};
+var $author$project$Session2$Session$ShuffledSession2 = F4(
+	function (cu, spelling, translation, infos) {
+		return {cu: cu, infos: infos, spelling: spelling, translation: translation};
+	});
+var $author$project$Session2$Session$StartSession = function (a) {
+	return {$: 'StartSession', a: a};
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $elm$core$String$cons = _String_cons;
+var $elm$core$String$fromChar = function (_char) {
+	return A2($elm$core$String$cons, _char, '');
+};
+var $elm$random$Random$map4 = F5(
+	function (func, _v0, _v1, _v2, _v3) {
+		var genA = _v0.a;
+		var genB = _v1.a;
+		var genC = _v2.a;
+		var genD = _v3.a;
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v4 = genA(seed0);
+				var a = _v4.a;
+				var seed1 = _v4.b;
+				var _v5 = genB(seed1);
+				var b = _v5.a;
+				var seed2 = _v5.b;
+				var _v6 = genC(seed2);
+				var c = _v6.a;
+				var seed3 = _v6.b;
+				var _v7 = genD(seed3);
+				var d = _v7.a;
+				var seed4 = _v7.b;
+				return _Utils_Tuple2(
+					A4(func, a, b, c, d),
+					seed4);
+			});
+	});
 var $author$project$Session2$CU2$start = F2(
 	function (info, trials) {
 		var relatedInfos = A2(
@@ -15952,8 +18536,13 @@ var $author$project$Session2$CU2$start = F2(
 				trials),
 			$author$project$Session2$CU2$initState);
 	});
-var $author$project$Session2$Scrabble$taskId = 'recSL8cthViyXRx8u';
-var $author$project$Session2$Scrabble$dedupeHelper = F2(
+var $author$project$Session2$Spelling$State = F3(
+	function (uid, userAnswer, scrambledLetter) {
+		return {scrambledLetter: scrambledLetter, uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Session2$Spelling$initState = A3($author$project$Session2$Spelling$State, 'DefaultUid', '', _List_Nil);
+var $author$project$Session2$Spelling$taskId = 'recSL8cthViyXRx8u';
+var $author$project$Session2$Spelling$dedupeHelper = F2(
 	function (letters, acc) {
 		var lettersInAcc = A2($elm$core$List$map, $elm$core$Tuple$first, acc);
 		var countRecLetters = function (target) {
@@ -15972,7 +18561,7 @@ var $author$project$Session2$Scrabble$dedupeHelper = F2(
 			var x = letters.a;
 			var xs = letters.b;
 			return A2($elm$core$List$member, x, lettersInAcc) ? A2(
-				$author$project$Session2$Scrabble$dedupeHelper,
+				$author$project$Session2$Spelling$dedupeHelper,
 				xs,
 				A2(
 					$elm$core$List$cons,
@@ -15980,7 +18569,7 @@ var $author$project$Session2$Scrabble$dedupeHelper = F2(
 						x,
 						countRecLetters(x)),
 					acc)) : A2(
-				$author$project$Session2$Scrabble$dedupeHelper,
+				$author$project$Session2$Spelling$dedupeHelper,
 				xs,
 				A2(
 					$elm$core$List$cons,
@@ -15988,10 +18577,10 @@ var $author$project$Session2$Scrabble$dedupeHelper = F2(
 					acc));
 		}
 	});
-var $author$project$Session2$Scrabble$dedupe = function (letters) {
-	return A2($author$project$Session2$Scrabble$dedupeHelper, letters, _List_Nil);
+var $author$project$Session2$Spelling$dedupe = function (letters) {
+	return A2($author$project$Session2$Spelling$dedupeHelper, letters, _List_Nil);
 };
-var $author$project$Session2$Scrabble$toKeyedItem = function (letters) {
+var $author$project$Session2$Spelling$toKeyedItem = function (letters) {
 	return A2(
 		$elm$core$List$map,
 		function (_v0) {
@@ -16001,27 +18590,27 @@ var $author$project$Session2$Scrabble$toKeyedItem = function (letters) {
 				'key-' + (lett + $elm$core$String$fromInt(rec)),
 				lett);
 		},
-		$author$project$Session2$Scrabble$dedupe(letters));
+		$author$project$Session2$Spelling$dedupe(letters));
 };
 var $elm$core$String$foldr = _String_foldr;
 var $elm$core$String$toList = function (string) {
 	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
 };
-var $author$project$Session2$Scrabble$toItems = function (string) {
-	return $author$project$Session2$Scrabble$toKeyedItem(
+var $author$project$Session2$Spelling$toItems = function (string) {
+	return $author$project$Session2$Spelling$toKeyedItem(
 		A2(
 			$elm$core$List$map,
 			$elm$core$String$fromChar,
 			$elm$core$String$toList(string)));
 };
-var $author$project$Session2$Scrabble$start = F2(
+var $author$project$Session2$Spelling$start = F2(
 	function (info, trials) {
 		var relatedInfos = A2(
 			$elm$core$Result$fromMaybe,
-			'I couldn\'t fetch the value associated with: ' + $author$project$Session2$Scrabble$taskId,
+			'I couldn\'t fetch the value associated with: ' + $author$project$Session2$Spelling$taskId,
 			A2(
 				$elm$core$Dict$get,
-				$author$project$Session2$Scrabble$taskId,
+				$author$project$Session2$Spelling$taskId,
 				$author$project$ExperimentInfo$toDict(info)));
 		var nextTrial = $elm$core$List$head(
 			A2(
@@ -16051,15 +18640,16 @@ var $author$project$Session2$Scrabble$start = F2(
 						}),
 					trials),
 				_Utils_update(
-					$author$project$Session2$Scrabble$initState,
+					$author$project$Session2$Spelling$initState,
 					{
-						scrambledLetter: $author$project$Session2$Scrabble$toItems(x.writtenWord),
+						scrambledLetter: $author$project$Session2$Spelling$toItems(x.writtenWord),
 						userAnswer: x.writtenWord
 					}));
 		} else {
 			return $author$project$Logic$Err('I tried to initate the state with the first trial but I couldn\'t find a first trial. Please report this error.');
 		}
 	});
+var $author$project$Session2$Translation$initState = {uid: '', userAnswer: ''};
 var $author$project$Session2$Translation$taskId = 'recf5HANE632FLKbc';
 var $author$project$Session2$Translation$start = F2(
 	function (info, trials) {
@@ -16086,658 +18676,6 @@ var $author$project$Session2$Translation$start = F2(
 				},
 				trials),
 			$author$project$Session2$Translation$initState);
-	});
-var $author$project$Session3$CU3$taskId = 'recFEtKbtuBSolHnI';
-var $author$project$Session3$CU3$start = F2(
-	function (info, trials) {
-		var relatedInfos = A2(
-			$elm$core$Result$fromMaybe,
-			'I couldn\'t fetch the value associated with: ' + $author$project$Session3$CU3$taskId,
-			A2(
-				$elm$core$Dict$get,
-				$author$project$Session3$CU3$taskId,
-				$author$project$ExperimentInfo$toDict(info)));
-		return A4(
-			$author$project$Logic$startIntro,
-			relatedInfos,
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return datum.isTraining;
-				},
-				trials),
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return !datum.isTraining;
-				},
-				trials),
-			$author$project$Session3$CU3$initState);
-	});
-var $author$project$Session3$Spelling3$taskId = 'recJucOXEZzJj6Uui';
-var $author$project$Session3$Spelling3$start = F2(
-	function (info, trials) {
-		var relatedInfos = A2(
-			$elm$core$Result$fromMaybe,
-			'I couldn\'t fetch the value associated with: ' + $author$project$Session3$Spelling3$taskId,
-			A2(
-				$elm$core$Dict$get,
-				$author$project$Session3$Spelling3$taskId,
-				$author$project$ExperimentInfo$toDict(info)));
-		return A4(
-			$author$project$Logic$startIntro,
-			relatedInfos,
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return datum.isTraining;
-				},
-				trials),
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return !datum.isTraining;
-				},
-				trials),
-			$author$project$Session3$Spelling3$initState);
-	});
-var $author$project$Session3$Synonym$taskId = 'recf5HANE632FLKbc';
-var $author$project$Session3$Synonym$start = F2(
-	function (info, trials) {
-		var relatedInfos = A2(
-			$elm$core$Result$fromMaybe,
-			'I couldn\'t fetch the value associated with: ' + $author$project$Session3$Synonym$taskId,
-			A2(
-				$elm$core$Dict$get,
-				$author$project$Session3$Synonym$taskId,
-				$author$project$ExperimentInfo$toDict(info)));
-		return A4(
-			$author$project$Logic$startIntro,
-			relatedInfos,
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return datum.isTraining;
-				},
-				trials),
-			A2(
-				$elm$core$List$filter,
-				function (datum) {
-					return !datum.isTraining;
-				},
-				trials),
-			$author$project$Session3$Synonym$initState);
-	});
-var $author$project$Logic$startMain = F2(
-	function (task, initState) {
-		if (task.$ === 'Intr') {
-			var data = task.a;
-			var _v1 = data.mainTrials;
-			if (_v1.b) {
-				if (_v1.b.b) {
-					var x = _v1.a;
-					var _v2 = _v1.b;
-					var y = _v2.a;
-					return $author$project$Logic$Main(
-						{
-							current: $elm$core$Maybe$Just(x),
-							feedback: false,
-							history: data.history,
-							infos: data.infos,
-							mainTrials: data.mainTrials,
-							next: $elm$core$Maybe$Just(y),
-							state: initState,
-							trainingTrials: _List_Nil
-						});
-				} else {
-					var x = _v1.a;
-					return $author$project$Logic$Main(
-						{
-							current: $elm$core$Maybe$Just(x),
-							feedback: false,
-							history: data.history,
-							infos: data.infos,
-							mainTrials: data.mainTrials,
-							next: $elm$core$Maybe$Nothing,
-							state: initState,
-							trainingTrials: _List_Nil
-						});
-				}
-			} else {
-				return $author$project$Logic$Main(
-					{current: $elm$core$Maybe$Nothing, feedback: false, history: data.history, infos: data.infos, mainTrials: data.mainTrials, next: $elm$core$Maybe$Nothing, state: initState, trainingTrials: _List_Nil});
-			}
-		} else {
-			return $author$project$Logic$Err('I can\'t go to Main from here');
-		}
-	});
-var $elm_community$list_extra$List$Extra$splitAt = F2(
-	function (n, xs) {
-		return _Utils_Tuple2(
-			A2($elm$core$List$take, n, xs),
-			A2($elm$core$List$drop, n, xs));
-	});
-var $elm_community$list_extra$List$Extra$uncons = function (list) {
-	if (!list.b) {
-		return $elm$core$Maybe$Nothing;
-	} else {
-		var first = list.a;
-		var rest = list.b;
-		return $elm$core$Maybe$Just(
-			_Utils_Tuple2(first, rest));
-	}
-};
-var $elm_community$list_extra$List$Extra$swapAt = F3(
-	function (index1, index2, l) {
-		swapAt:
-		while (true) {
-			if (_Utils_eq(index1, index2) || (index1 < 0)) {
-				return l;
-			} else {
-				if (_Utils_cmp(index1, index2) > 0) {
-					var $temp$index1 = index2,
-						$temp$index2 = index1,
-						$temp$l = l;
-					index1 = $temp$index1;
-					index2 = $temp$index2;
-					l = $temp$l;
-					continue swapAt;
-				} else {
-					var _v0 = A2($elm_community$list_extra$List$Extra$splitAt, index1, l);
-					var part1 = _v0.a;
-					var tail1 = _v0.b;
-					var _v1 = A2($elm_community$list_extra$List$Extra$splitAt, index2 - index1, tail1);
-					var head2 = _v1.a;
-					var tail2 = _v1.b;
-					var _v2 = _Utils_Tuple2(
-						$elm_community$list_extra$List$Extra$uncons(head2),
-						$elm_community$list_extra$List$Extra$uncons(tail2));
-					if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
-						var _v3 = _v2.a.a;
-						var value1 = _v3.a;
-						var part2 = _v3.b;
-						var _v4 = _v2.b.a;
-						var value2 = _v4.a;
-						var part3 = _v4.b;
-						return $elm$core$List$concat(
-							_List_fromArray(
-								[
-									part1,
-									A2($elm$core$List$cons, value2, part2),
-									A2($elm$core$List$cons, value1, part3)
-								]));
-					} else {
-						return l;
-					}
-				}
-			}
-		}
-	});
-var $elm$url$Url$addPort = F2(
-	function (maybePort, starter) {
-		if (maybePort.$ === 'Nothing') {
-			return starter;
-		} else {
-			var port_ = maybePort.a;
-			return starter + (':' + $elm$core$String$fromInt(port_));
-		}
-	});
-var $elm$url$Url$addPrefixed = F3(
-	function (prefix, maybeSegment, starter) {
-		if (maybeSegment.$ === 'Nothing') {
-			return starter;
-		} else {
-			var segment = maybeSegment.a;
-			return _Utils_ap(
-				starter,
-				_Utils_ap(prefix, segment));
-		}
-	});
-var $elm$url$Url$toString = function (url) {
-	var http = function () {
-		var _v0 = url.protocol;
-		if (_v0.$ === 'Http') {
-			return 'http://';
-		} else {
-			return 'https://';
-		}
-	}();
-	return A3(
-		$elm$url$Url$addPrefixed,
-		'#',
-		url.fragment,
-		A3(
-			$elm$url$Url$addPrefixed,
-			'?',
-			url.query,
-			_Utils_ap(
-				A2(
-					$elm$url$Url$addPort,
-					url.port_,
-					_Utils_ap(http, url.host)),
-				url.path)));
-};
-var $author$project$Logic$toggle = function (task) {
-	switch (task.$) {
-		case 'Main':
-			var data = task.a;
-			return $author$project$Logic$Main(
-				_Utils_update(
-					data,
-					{feedback: !data.feedback}));
-		case 'Loading':
-			return $author$project$Logic$Err('I tried to toggle the feedback but the task is still loading. Please report this error.');
-		case 'NotStarted':
-			return $author$project$Logic$Err('I tried to toggle the feedback but the task is not started. Please report this error.');
-		case 'Err':
-			var reason = task.a;
-			return $author$project$Logic$Err(reason + '|| I tried to toggle the feedback but the task is in its error state. Please report this error.');
-		default:
-			var data = task.a;
-			return $author$project$Logic$Intr(
-				_Utils_update(
-					data,
-					{feedback: !data.feedback}));
-	}
-};
-var $author$project$Postest$CloudWords$Known = {$: 'Known'};
-var $author$project$Postest$CloudWords$MaybeKnown = {$: 'MaybeKnown'};
-var $author$project$Postest$CloudWords$toggle = function (key) {
-	return A2(
-		$elm$core$Dict$update,
-		key,
-		function (old) {
-			if (old.$ === 'Just') {
-				var value = old.a;
-				switch (value.$) {
-					case 'NotKnown':
-						return $elm$core$Maybe$Just($author$project$Postest$CloudWords$MaybeKnown);
-					case 'MaybeKnown':
-						return $elm$core$Maybe$Just($author$project$Postest$CloudWords$Known);
-					default:
-						return $elm$core$Maybe$Just($author$project$Postest$CloudWords$NotKnown);
-				}
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		});
-};
-var $author$project$Logic$update = F2(
-	function (newState, task) {
-		switch (task.$) {
-			case 'Main':
-				var data = task.a;
-				return $author$project$Logic$Main(
-					_Utils_update(
-						data,
-						{state: newState}));
-			case 'Intr':
-				var data = task.a;
-				return $author$project$Logic$Intr(
-					_Utils_update(
-						data,
-						{state: newState}));
-			case 'Loading':
-				return $author$project$Logic$Err('You can\'t update anything while loading the data. Please report this error.');
-			case 'Err':
-				var reason = task.a;
-				return $author$project$Logic$Err(reason + '|| You can\'t update anything when you are in an error state. Please reports those errors');
-			default:
-				return $author$project$Logic$Err('You can\'t update anything until the task is started. Please report this error');
-		}
-	});
-var $author$project$Pretest$SPR$Feedback = {$: 'Feedback'};
-var $author$project$Pretest$SPR$Question = {$: 'Question'};
-var $author$project$Pretest$SPR$Reading = function (a) {
-	return {$: 'Reading', a: a};
-};
-var $author$project$Pretest$SPR$RuntimeShuffledTrials = function (a) {
-	return {$: 'RuntimeShuffledTrials', a: a};
-};
-var $author$project$Pretest$SPR$SPR = function (a) {
-	return {$: 'SPR', a: a};
-};
-var $author$project$Pretest$SPR$TaggedSegmentStarted = F2(
-	function (taggedSegment, startedAt) {
-		return {startedAt: startedAt, taggedSegment: taggedSegment};
-	});
-var $author$project$Pretest$SPR$NoAnswerYet = {$: 'NoAnswerYet'};
-var $author$project$Pretest$SPR$Start = {$: 'Start'};
-var $author$project$Pretest$SPR$initState = {
-	answer: $author$project$Pretest$SPR$NoAnswerYet,
-	currentSegment: $elm$core$Maybe$Nothing,
-	remainingSegments: _List_Nil,
-	seenSegments: _List_Nil,
-	step: $author$project$Pretest$SPR$SPR($author$project$Pretest$SPR$Start)
-};
-var $author$project$Pretest$SPR$taskId = 'rec7oxQBDY7rBTRDn';
-var $author$project$Pretest$SPR$init = F2(
-	function (infos, trials) {
-		var info = A2(
-			$elm$core$Result$fromMaybe,
-			'I couldn\'t find SPR infos',
-			A2(
-				$elm$core$Dict$get,
-				$author$project$Pretest$SPR$taskId,
-				$author$project$ExperimentInfo$toDict(infos)));
-		return A4(
-			$author$project$Logic$startIntro,
-			info,
-			A2(
-				$elm$core$List$filter,
-				function (trial) {
-					return trial.isTraining;
-				},
-				trials),
-			A2(
-				$elm$core$List$filter,
-				function (trial) {
-					return !trial.isTraining;
-				},
-				trials),
-			$author$project$Pretest$SPR$initState);
-	});
-var $elm$random$Random$pair = F2(
-	function (genA, genB) {
-		return A3(
-			$elm$random$Random$map2,
-			F2(
-				function (a, b) {
-					return _Utils_Tuple2(a, b);
-				}),
-			genA,
-			genB);
-	});
-var $elm$core$List$tail = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(xs);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $0ui$elm_task_parallel$Task$Parallel$toCmd = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$Maybe$map(
-		A2(
-			$elm$core$Basics$composeR,
-			$elm$core$Task$succeed,
-			$elm$core$Task$perform($elm$core$Basics$identity))),
-	$elm$core$Maybe$withDefault($elm$core$Platform$Cmd$none));
-var $0ui$elm_task_parallel$Task$Parallel$update2 = F2(
-	function (_v0, msg) {
-		var onSuccess = _v0.a;
-		var a = _v0.b;
-		var b = _v0.c;
-		var next = F2(
-			function (a_, b_) {
-				return _Utils_Tuple2(
-					A3($0ui$elm_task_parallel$Task$Parallel$State2, onSuccess, a_, b_),
-					$0ui$elm_task_parallel$Task$Parallel$toCmd(
-						A3($elm$core$Maybe$map2, onSuccess, a_, b_)));
-			});
-		if (msg.$ === 'LoadedA2') {
-			var data = msg.a;
-			return A2(
-				next,
-				$elm$core$Maybe$Just(data),
-				b);
-		} else {
-			var data = msg.a;
-			return A2(
-				next,
-				a,
-				$elm$core$Maybe$Just(data));
-		}
-	});
-var $author$project$Pretest$SPR$updateWithTime = F4(
-	function (msg, timestamp, prevModel, newModel) {
-		return _Utils_eq(timestamp, $elm$core$Maybe$Nothing) ? _Utils_Tuple2(
-			prevModel,
-			A2(
-				$elm$core$Task$perform,
-				$author$project$Pretest$SPR$TimestampedMsg(msg),
-				A2($elm$core$Task$map, $elm$core$Maybe$Just, $elm$time$Time$now))) : _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
-	});
-var $author$project$Pretest$SPR$update = F2(
-	function (msg, model) {
-		var prevState = A2(
-			$elm$core$Maybe$withDefault,
-			$author$project$Pretest$SPR$initState,
-			$author$project$Logic$getState(model.spr));
-		var currentTrial = $author$project$Logic$getTrial(model.spr);
-		switch (msg.$) {
-			case 'UserChoseNewAnswer':
-				var newAnswer = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: A2(
-								$author$project$Logic$update,
-								_Utils_update(
-									prevState,
-									{answer: newAnswer}),
-								model.spr)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'UserConfirmedChoice':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: A2(
-								$author$project$Logic$update,
-								_Utils_update(
-									prevState,
-									{step: $author$project$Pretest$SPR$Feedback}),
-								model.spr)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'UserClickedNextTrial':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: A2($author$project$Logic$next, $author$project$Pretest$SPR$initState, model.spr)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'UserClickedSaveData':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			case 'ServerRespondedWithLastRecords':
-				if (msg.a.$ === 'Ok') {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'StartMain':
-				var task = msg.a;
-				var trials = msg.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: A2($author$project$Logic$startMain, model.spr, $author$project$Pretest$SPR$initState)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'RuntimeShuffledTrials':
-				var _v1 = msg.a;
-				var infos = _v1.a;
-				var trials = _v1.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: A2($author$project$Pretest$SPR$init, trials, infos)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ServerRespondedWithSomePretestData':
-				var downloaded = msg.a;
-				var _v2 = A2($0ui$elm_task_parallel$Task$Parallel$update2, model.pretest, downloaded);
-				var nextState = _v2.a;
-				var nextCmd = _v2.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{pretest: nextState}),
-					nextCmd);
-			case 'ServerRespondedWithSomeError':
-				var error = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							spr: $author$project$Logic$Err(
-								$author$project$Data$buildErrorMessage(error))
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ServerRespondedWithAllPretestData':
-				var trials = msg.a;
-				var infos = msg.b;
-				return _Utils_Tuple2(
-					model,
-					A2(
-						$elm$random$Random$generate,
-						$author$project$Pretest$SPR$RuntimeShuffledTrials,
-						A2(
-							$elm$random$Random$pair,
-							$elm_community$random_extra$Random$List$shuffle(trials),
-							$elm$random$Random$constant(infos))));
-			case 'TimestampedMsg':
-				var subMsg = msg.a;
-				var timestamp = msg.b;
-				if (subMsg.$ === 'UserPressedSpaceToStartParagraph') {
-					return A4(
-						$author$project$Pretest$SPR$updateWithTime,
-						subMsg,
-						timestamp,
-						model,
-						_Utils_update(
-							model,
-							{
-								spr: function () {
-									if (currentTrial.$ === 'Nothing') {
-										return model.spr;
-									} else {
-										var tr = currentTrial.a;
-										var _v5 = tr.taggedSegments;
-										if (!_v5.b) {
-											return model.spr;
-										} else {
-											var x = _v5.a;
-											var xs = _v5.b;
-											return A2(
-												$author$project$Logic$update,
-												_Utils_update(
-													prevState,
-													{
-														currentSegment: $elm$core$Maybe$Just(
-															A2(
-																$author$project$Pretest$SPR$TaggedSegmentStarted,
-																x,
-																A2(
-																	$elm$core$Maybe$withDefault,
-																	$elm$time$Time$millisToPosix(0),
-																	timestamp))),
-														remainingSegments: xs,
-														step: $author$project$Pretest$SPR$SPR(
-															$author$project$Pretest$SPR$Reading('bla)'))
-													}),
-												model.spr);
-										}
-									}
-								}()
-							}));
-				} else {
-					return A4(
-						$author$project$Pretest$SPR$updateWithTime,
-						subMsg,
-						timestamp,
-						model,
-						_Utils_update(
-							model,
-							{
-								spr: function () {
-									var _v6 = prevState.remainingSegments;
-									if (!_v6.b) {
-										return A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												prevState,
-												{
-													seenSegments: A2(
-														$elm$core$List$cons,
-														A2(
-															$elm$core$Maybe$map,
-															function (_v7) {
-																var taggedSegment = _v7.taggedSegment;
-																var startedAt = _v7.startedAt;
-																return $elm$core$Maybe$Just(
-																	{
-																		endedAt: A2(
-																			$elm$core$Maybe$withDefault,
-																			$elm$time$Time$millisToPosix(0),
-																			timestamp),
-																		startedAt: startedAt,
-																		taggedSegment: taggedSegment
-																	});
-															},
-															prevState.currentSegment),
-														prevState.seenSegments),
-													step: $author$project$Pretest$SPR$Question
-												}),
-											model.spr);
-									} else {
-										var x = _v6.a;
-										var xs = _v6.b;
-										return A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												prevState,
-												{
-													currentSegment: $elm$core$Maybe$Just(
-														A2(
-															$author$project$Pretest$SPR$TaggedSegmentStarted,
-															x,
-															A2(
-																$elm$core$Maybe$withDefault,
-																$elm$time$Time$millisToPosix(0),
-																timestamp))),
-													remainingSegments: A2(
-														$elm$core$Maybe$withDefault,
-														_List_Nil,
-														$elm$core$List$tail(prevState.remainingSegments)),
-													seenSegments: A2(
-														$elm$core$List$cons,
-														A2(
-															$elm$core$Maybe$map,
-															function (_v8) {
-																var taggedSegment = _v8.taggedSegment;
-																var startedAt = _v8.startedAt;
-																return $elm$core$Maybe$Just(
-																	{
-																		endedAt: A2(
-																			$elm$core$Maybe$withDefault,
-																			$elm$time$Time$millisToPosix(0),
-																			timestamp),
-																		startedAt: startedAt,
-																		taggedSegment: taggedSegment
-																	});
-															},
-															prevState.currentSegment),
-														prevState.seenSegments),
-													step: $author$project$Pretest$SPR$SPR(
-														$author$project$Pretest$SPR$Reading('blo'))
-												}),
-											model.spr);
-									}
-								}()
-							}));
-				}
-			default:
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		}
 	});
 var $elm$core$Maybe$map4 = F5(
 	function (func, ma, mb, mc, md) {
@@ -16813,111 +18751,691 @@ var $0ui$elm_task_parallel$Task$Parallel$update4 = F2(
 					$elm$core$Maybe$Just(data));
 		}
 	});
-var $elm$core$Maybe$map5 = F6(
-	function (func, ma, mb, mc, md, me) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				if (mc.$ === 'Nothing') {
-					return $elm$core$Maybe$Nothing;
-				} else {
-					var c = mc.a;
-					if (md.$ === 'Nothing') {
-						return $elm$core$Maybe$Nothing;
+var $author$project$Session2$Session$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'ServerRespondedWithSomeData':
+				var dataSoFar = msg.a;
+				var _v1 = function () {
+					var _v2 = model.session2;
+					if (_v2.$ === 'Loading') {
+						var downloadState = _v2.a;
+						return A2(
+							$elm$core$Tuple$mapFirst,
+							$author$project$Session$Loading,
+							A2($0ui$elm_task_parallel$Task$Parallel$update4, downloadState, dataSoFar));
 					} else {
-						var d = md.a;
-						if (me.$ === 'Nothing') {
-							return $elm$core$Maybe$Nothing;
-						} else {
-							var e = me.a;
-							return $elm$core$Maybe$Just(
-								A5(func, a, b, c, d, e));
-						}
+						return _Utils_Tuple2(model.session2, $elm$core$Platform$Cmd$none);
 					}
-				}
-			}
+				}();
+				var updte = _v1.a;
+				var cmd = _v1.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{session2: updte}),
+					cmd);
+			case 'ServerRespondedWithAllData':
+				var cu = msg.a;
+				var spelling = msg.b;
+				var translation = msg.c;
+				var infos_ = msg.d;
+				var shuffleLetters = A2(
+					$elm$random$Random$andThen,
+					$elm_community$random_extra$Random$List$shuffle,
+					$elm_community$random_extra$Random$Extra$sequence(
+						A2(
+							$elm$core$List$map,
+							function (trial) {
+								return A6(
+									$elm$random$Random$map5,
+									$author$project$Session2$Spelling$Trial,
+									$elm$random$Random$constant(trial.uid),
+									A2(
+										$elm$random$Random$map,
+										function (letters_) {
+											return $elm$core$String$concat(
+												A2($elm$core$List$map, $elm$core$String$fromChar, letters_));
+										},
+										$elm_community$random_extra$Random$List$shuffle(
+											$elm$core$String$toList(trial.writtenWord))),
+									$elm$random$Random$constant(trial.audioWord),
+									$elm$random$Random$constant(trial.isTraining),
+									$elm$random$Random$constant(trial.writtenWord));
+							},
+							spelling)));
+				var randomizeTrials = A2(
+					$elm$random$Random$generate,
+					$author$project$Session2$Session$StartSession,
+					A5(
+						$elm$random$Random$map4,
+						$author$project$Session2$Session$ShuffledSession2,
+						$elm_community$random_extra$Random$List$shuffle(cu),
+						shuffleLetters,
+						$elm_community$random_extra$Random$List$shuffle(translation),
+						$elm$random$Random$constant(infos_)));
+				return _Utils_Tuple2(
+					model,
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[randomizeTrials])));
+			case 'ServerRespondedWithSomeError':
+				var reason = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(reason)),
+							scrabbleTask: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(reason)),
+							session2: $author$project$Session$Error(
+								$author$project$Data$buildErrorMessage(reason)),
+							translationTask: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(reason))
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var cu = msg.a.cu;
+				var spelling = msg.a.spelling;
+				var translation = msg.a.translation;
+				var infos = msg.a.infos;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cuLvl2: A2($author$project$Session2$CU2$start, infos, cu),
+							scrabbleTask: A2($author$project$Session2$Spelling$start, infos, spelling),
+							session2: $author$project$Session$Ready,
+							translationTask: A2($author$project$Session2$Translation$start, infos, translation)
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $0ui$elm_task_parallel$Task$Parallel$update5 = F2(
-	function (_v0, msg) {
-		var onSuccess = _v0.a;
-		var a = _v0.b;
-		var b = _v0.c;
-		var c = _v0.d;
-		var d = _v0.e;
-		var e = _v0.f;
-		var next = F5(
-			function (a_, b_, c_, d_, e_) {
-				return _Utils_Tuple2(
-					A6($0ui$elm_task_parallel$Task$Parallel$State5, onSuccess, a_, b_, c_, d_, e_),
-					$0ui$elm_task_parallel$Task$Parallel$toCmd(
-						A6($elm$core$Maybe$map5, onSuccess, a_, b_, c_, d_, e_)));
-			});
+var $author$project$Session2$Spelling$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session2$Spelling$update = F2(
+	function (msg, model) {
+		var currentScrabbleState = function () {
+			var _v4 = $author$project$Logic$getState(model.scrabbleTask);
+			if (_v4.$ === 'Just') {
+				var x = _v4.a;
+				return x;
+			} else {
+				return $author$project$Session2$Spelling$initState;
+			}
+		}();
 		switch (msg.$) {
-			case 'LoadedA5':
-				var data = msg.a;
-				return A5(
-					next,
-					$elm$core$Maybe$Just(data),
-					b,
-					c,
-					d,
-					e);
-			case 'LoadedB5':
-				var data = msg.a;
-				return A5(
-					next,
-					a,
-					$elm$core$Maybe$Just(data),
-					c,
-					d,
-					e);
-			case 'LoadedC5':
-				var data = msg.a;
-				return A5(
-					next,
-					a,
-					b,
-					$elm$core$Maybe$Just(data),
-					d,
-					e);
-			case 'LoadedD5':
-				var data = msg.a;
-				return A5(
-					next,
-					a,
-					b,
-					c,
-					$elm$core$Maybe$Just(data),
-					e);
+			case 'UserDragsLetter':
+				var dndmsg = msg.a;
+				var _v1 = A3($author$project$Session2$Spelling$system.update, dndmsg, model.dnd, currentScrabbleState.scrambledLetter);
+				var dnd = _v1.a;
+				var items = _v1.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							dnd: dnd,
+							scrabbleTask: A2(
+								$author$project$Logic$update,
+								_Utils_update(
+									currentScrabbleState,
+									{
+										scrambledLetter: items,
+										userAnswer: $elm$core$String$concat(
+											A2($elm$core$List$map, $elm$core$Tuple$second, items))
+									}),
+								model.scrabbleTask)
+						}),
+					$author$project$Session2$Spelling$system.commands(dnd));
+			case 'PlayAudio':
+				var url = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Ports$playAudio(url));
+			case 'UserClickedFeedbackButton':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							scrabbleTask: $author$project$Logic$toggle(model.scrabbleTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedNextTrial':
+				if (msg.a.$ === 'Just') {
+					var nextTrial = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								scrabbleTask: A2(
+									$author$project$Logic$next,
+									_Utils_update(
+										currentScrabbleState,
+										{
+											scrambledLetter: $author$project$Session2$Spelling$toItems(nextTrial.writtenWord),
+											userAnswer: nextTrial.writtenWord
+										}),
+									model.scrabbleTask)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var _v2 = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								scrabbleTask: A2($author$project$Logic$next, currentScrabbleState, model.scrabbleTask)
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Session2$Spelling$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session2$Spelling$taskId, model.scrabbleTask));
+			case 'ServerRespondedWithLastRecords':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMainloop':
+				var trials = msg.a;
+				if (!trials.b) {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								scrabbleTask: $author$project$Logic$Err('You gave no trial to start the main loop. Please report this error message.')
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var x = trials.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								scrabbleTask: A2(
+									$author$project$Logic$startMain,
+									model.scrabbleTask,
+									_Utils_update(
+										currentScrabbleState,
+										{
+											scrambledLetter: $author$project$Session2$Spelling$toItems(x.writtenWord),
+											userAnswer: x.writtenWord
+										}))
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							scrabbleTask: $author$project$Logic$startTraining(model.scrabbleTask)
+						}),
+					$elm$core$Platform$Cmd$none);
 			default:
-				var data = msg.a;
-				return A5(
-					next,
-					a,
-					b,
-					c,
-					d,
-					$elm$core$Maybe$Just(data));
+				var url = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Ports$playAudio(url));
+		}
+	});
+var $author$project$Session2$Translation$RuntimeShuffledOptionsOrder = function (a) {
+	return {$: 'RuntimeShuffledOptionsOrder', a: a};
+};
+var $author$project$Session2$Translation$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session2$Translation$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							translationTask: A2($author$project$Logic$next, $author$project$Session2$Translation$initState, model.translationTask)
+						}),
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								A2(
+								$elm$random$Random$generate,
+								$author$project$Session2$Translation$RuntimeShuffledOptionsOrder,
+								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder))
+							])));
+			case 'ServerRespondedWithLastRecords':
+				if (msg.a.$ === 'Ok') {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'UserClickedToggleFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							translationTask: $author$project$Logic$toggle(model.translationTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedRadioButton':
+				var newChoice = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							translationTask: A2(
+								$author$project$Logic$update,
+								{uid: '', userAnswer: newChoice},
+								model.translationTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							translationTask: $author$project$Logic$startTraining(model.translationTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							translationTask: A2($author$project$Logic$startMain, model.translationTask, $author$project$Session2$Translation$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Session2$Translation$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session2$Translation$taskId, model.translationTask));
+			default:
+				var ls = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{optionsOrder: ls}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session3$CU3$RuntimeShuffledOptionsOrder = function (a) {
+	return {$: 'RuntimeShuffledOptionsOrder', a: a};
+};
+var $author$project$Session3$CU3$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session3$CU3$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Session3$CU3$initState = A2($author$project$Session3$CU3$State, 'DefaultUid', '');
+var $author$project$Session3$CU3$taskId = 'recFEtKbtuBSolHnI';
+var $author$project$Session3$CU3$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu3: A2($author$project$Logic$next, $author$project$Session3$CU3$initState, model.cu3)
+						}),
+					A2(
+						$elm$random$Random$generate,
+						$author$project$Session3$CU3$RuntimeShuffledOptionsOrder,
+						$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
+			case 'UserClickedToggleFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu3: $author$project$Logic$toggle(model.cu3)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu3: A2($author$project$Logic$startMain, model.cu3, $author$project$Session3$CU3$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserChangedInput':
+				var _new = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu3: A2(
+								$author$project$Logic$update,
+								{uid: '', userAnswer: _new},
+								model.cu3)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Session3$CU3$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session3$CU3$taskId, model.scrabbleTask));
+			case 'ServerRespondedWithLastRecords':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu3: $author$project$Logic$startTraining(model.cu3)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var ls = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{optionsOrder: ls}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session3$Session$ShuffledSession3 = F4(
+	function (cu, spelling, synonym, infos) {
+		return {cu: cu, infos: infos, spelling: spelling, synonym: synonym};
+	});
+var $author$project$Session3$Session$StartSession = function (a) {
+	return {$: 'StartSession', a: a};
+};
+var $krisajenkins$remotedata$RemoteData$Success = function (a) {
+	return {$: 'Success', a: a};
+};
+var $author$project$Session3$CU3$start = F2(
+	function (info, trials) {
+		var relatedInfos = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t fetch the value associated with: ' + $author$project$Session3$CU3$taskId,
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Session3$CU3$taskId,
+				$author$project$ExperimentInfo$toDict(info)));
+		return A4(
+			$author$project$Logic$startIntro,
+			relatedInfos,
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return datum.isTraining;
+				},
+				trials),
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return !datum.isTraining;
+				},
+				trials),
+			$author$project$Session3$CU3$initState);
+	});
+var $author$project$Session3$Spelling3$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Session3$Spelling3$initState = A2($author$project$Session3$Spelling3$State, 'DefaultUid', '');
+var $author$project$Session3$Spelling3$taskId = 'recJucOXEZzJj6Uui';
+var $author$project$Session3$Spelling3$start = F2(
+	function (info, trials) {
+		var relatedInfos = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t fetch the value associated with: ' + $author$project$Session3$Spelling3$taskId,
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Session3$Spelling3$taskId,
+				$author$project$ExperimentInfo$toDict(info)));
+		return A4(
+			$author$project$Logic$startIntro,
+			relatedInfos,
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return datum.isTraining;
+				},
+				trials),
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return !datum.isTraining;
+				},
+				trials),
+			$author$project$Session3$Spelling3$initState);
+	});
+var $author$project$Session3$Synonym$State = F2(
+	function (uid, userAnswer) {
+		return {uid: uid, userAnswer: userAnswer};
+	});
+var $author$project$Session3$Synonym$initState = A2($author$project$Session3$Synonym$State, 'DefaultUserUID', '');
+var $author$project$Session3$Synonym$taskId = 'recf5HANE632FLKbc';
+var $author$project$Session3$Synonym$start = F2(
+	function (info, trials) {
+		var relatedInfos = A2(
+			$elm$core$Result$fromMaybe,
+			'I couldn\'t fetch the value associated with: ' + $author$project$Session3$Synonym$taskId,
+			A2(
+				$elm$core$Dict$get,
+				$author$project$Session3$Synonym$taskId,
+				$author$project$ExperimentInfo$toDict(info)));
+		return A4(
+			$author$project$Logic$startIntro,
+			relatedInfos,
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return datum.isTraining;
+				},
+				trials),
+			A2(
+				$elm$core$List$filter,
+				function (datum) {
+					return !datum.isTraining;
+				},
+				trials),
+			$author$project$Session3$Synonym$initState);
+	});
+var $author$project$Session3$Session$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'ServerRespondedWithSomeSession3Data':
+				var downloadMsg = msg.a;
+				var _v1 = function () {
+					var _v2 = model.session3;
+					if (_v2.$ === 'Loading') {
+						var downloadState = _v2.a;
+						return A2(
+							$elm$core$Tuple$mapFirst,
+							$author$project$Session$Loading,
+							A2($0ui$elm_task_parallel$Task$Parallel$update4, downloadState, downloadMsg));
+					} else {
+						return _Utils_Tuple2(model.session3, $elm$core$Platform$Cmd$none);
+					}
+				}();
+				var updte = _v1.a;
+				var cmd = _v1.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{session3: updte}),
+					cmd);
+			case 'ServerRespondedWithAllSession3Data':
+				var cu = msg.a;
+				var spelling = msg.b;
+				var synonym = msg.c;
+				var infos = msg.d;
+				var randomize = A2(
+					$elm$random$Random$generate,
+					$author$project$Session3$Session$StartSession,
+					A5(
+						$elm$random$Random$map4,
+						$author$project$Session3$Session$ShuffledSession3,
+						$elm_community$random_extra$Random$List$shuffle(cu),
+						$elm_community$random_extra$Random$List$shuffle(spelling),
+						$elm_community$random_extra$Random$List$shuffle(synonym),
+						$elm$random$Random$constant(infos)));
+				return _Utils_Tuple2(model, randomize);
+			case 'ServerRespondedWithSomeError':
+				var error = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu3: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(error)),
+							spelling3: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(error)),
+							synonymTask: $author$project$Logic$Err(
+								$author$project$Data$buildErrorMessage(error))
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var cu = msg.a.cu;
+				var spelling = msg.a.spelling;
+				var synonym = msg.a.synonym;
+				var infos = msg.a.infos;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							cu3: A2($author$project$Session3$CU3$start, infos, cu),
+							infos: $krisajenkins$remotedata$RemoteData$Success(
+								$author$project$ExperimentInfo$toDict(infos)),
+							session3: $author$project$Session$Ready,
+							spelling3: A2($author$project$Session3$Spelling3$start, infos, spelling),
+							synonymTask: A2($author$project$Session3$Synonym$start, infos, synonym)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session3$Spelling3$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session3$Spelling3$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spelling3: A2($author$project$Logic$next, $author$project$Session3$Spelling3$initState, model.spelling3)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedToggleFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spelling3: $author$project$Logic$toggle(model.spelling3)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartTraining':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spelling3: $author$project$Logic$startTraining(model.spelling3)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedStartMain':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spelling3: A2($author$project$Logic$startMain, model.spelling3, $author$project$Session3$Spelling3$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserChangedInput':
+				var _new = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spelling3: A2(
+								$author$project$Logic$update,
+								{uid: '', userAnswer: _new},
+								model.spelling3)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedSaveData':
+				var responseHandler = $author$project$Session3$Spelling3$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session3$Spelling3$taskId, model.scrabbleTask));
+			case 'ServerRespondedWithLastRecords':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			default:
+				var url = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Ports$playAudio(url));
+		}
+	});
+var $author$project$Session3$Synonym$ServerRespondedWithLastRecords = function (a) {
+	return {$: 'ServerRespondedWithLastRecords', a: a};
+};
+var $author$project$Session3$Synonym$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedFeedback':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							synonymTask: $author$project$Logic$toggle(model.synonymTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserChangedInput':
+				var newChoice = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							synonymTask: A2(
+								$author$project$Logic$update,
+								{uid: '', userAnswer: newChoice},
+								model.synonymTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserClickedNextTrial':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							synonymTask: A2($author$project$Logic$next, $author$project$Session3$Synonym$initState, model.synonymTask)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'SaveDataMsg':
+				var responseHandler = $author$project$Session3$Synonym$ServerRespondedWithLastRecords;
+				return _Utils_Tuple2(
+					model,
+					A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session3$Synonym$taskId, model.translationTask));
+			case 'UserClickedStartMainloop':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							synonymTask: A2($author$project$Logic$startMain, model.synonymTask, $author$project$Session3$Synonym$initState)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ServerRespondedWithLastRecords':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							synonymTask: $author$project$Logic$startTraining(model.synonymTask)
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var currentSpellingState = $author$project$Logic$getState(model.spellingLvl1);
-		var currentScrabbleState = function () {
-			var _v42 = $author$project$Logic$getState(model.scrabbleTask);
-			if (_v42.$ === 'Just') {
-				var x = _v42.a;
-				return x;
-			} else {
-				return $author$project$Session2$Scrabble$initState;
-			}
-		}();
 		switch (msg.$) {
 			case 'BrowserChangedUrl':
 				var url = msg.a;
@@ -16946,704 +19464,70 @@ var $author$project$Main$update = F2(
 						model,
 						$elm$browser$Browser$Navigation$load(url));
 				}
-			case 'ServerRespondedWithSomeSession1Data':
-				var downloadMsg = msg.a;
-				var _v2 = function () {
-					var _v3 = model.session1;
-					if (_v3.$ === 'Loading') {
-						var downloadState = _v3.a;
-						return A2(
-							$elm$core$Tuple$mapFirst,
-							$author$project$Session$Loading,
-							A2($0ui$elm_task_parallel$Task$Parallel$update5, downloadState, downloadMsg));
-					} else {
-						return _Utils_Tuple2(model.session1, $elm$core$Platform$Cmd$none);
-					}
-				}();
-				var updte = _v2.a;
-				var cmd = _v2.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{session1: updte}),
-					cmd);
-			case 'ServerRespondedWithSomeError':
-				var error = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							cu1: $author$project$Logic$Err(
-								$author$project$Data$buildErrorMessage(error)),
-							errorTracking: A2($elm$core$List$cons, error, model.errorTracking),
-							meaning: $author$project$Logic$Err(
-								$author$project$Data$buildErrorMessage(error)),
-							spellingLvl1: $author$project$Logic$Err(
-								$author$project$Data$buildErrorMessage(error))
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Informations':
-				var message = msg.a;
-				switch (message.$) {
-					case 'UserClickedSendData':
-						var email = message.a;
-						var body_ = $elm$http$Http$jsonBody(
-							$elm$json$Json$Encode$object(
-								_List_fromArray(
-									[
-										_Utils_Tuple2(
-										'Email',
-										$elm$json$Json$Encode$string(email))
-									])));
-						var doRequest = $elm$http$Http$post(
-							{
-								body: body_,
-								expect: $elm$http$Http$expectWhatever(
-									function (result) {
-										return $author$project$Main$Informations(
-											$author$project$Pretest$GeneralInfos$UserCreated(result));
-									}),
-								url: $author$project$Data$buildQuery(
-									{app: $author$project$Data$apps.spacing, base: 'users', view_: 'all'})
-							});
-						return _Utils_Tuple2(model, doRequest);
-					case 'UserUpdatedEmailField':
-						var email = message.a;
-						return $author$project$Main$pure(
-							_Utils_update(
-								model,
-								{informations: email}));
-					default:
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									route: $author$project$Route$Pretest($author$project$Route$EmailSent)
-								}),
-							A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'email-sent'));
-				}
-			case 'ServerRespondedWithAllSession1Data':
-				var meaning = msg.a;
-				var spelling = msg.b;
-				var cu1 = msg.c;
-				var presentation = msg.d;
-				var infos_ = msg.e;
-				var randomize = A2(
-					$elm$random$Random$generate,
-					$author$project$Main$StartSession1,
-					A6(
-						$elm$random$Random$map5,
-						$author$project$Main$ShuffledSession1,
-						$elm_community$random_extra$Random$List$shuffle(meaning),
-						$elm_community$random_extra$Random$List$shuffle(spelling),
-						$elm_community$random_extra$Random$List$shuffle(cu1),
-						$elm_community$random_extra$Random$List$shuffle(presentation),
-						$elm$random$Random$constant(infos_)));
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							infos: $krisajenkins$remotedata$RemoteData$Success(
-								$author$project$ExperimentInfo$toDict(infos_))
-						}),
-					randomize);
-			case 'StartSession1':
-				var tasks = msg.a;
-				var infos_ = tasks.infos_;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							cu1: A2($author$project$Session1$CU1$start, infos_, tasks.cu1),
-							meaning: A2($author$project$Session1$Meaning$start, infos_, tasks.meaning),
-							presentation: A2($author$project$Session1$Presentation$start, infos_, tasks.presentation),
-							session1: $author$project$Session$Ready,
-							spellingLvl1: A2($author$project$Session1$SpellingLvl1$start, infos_, tasks.spelling)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ServerRespondedWithSomeSession2Data':
-				var downloadMsg = msg.a;
-				var _v5 = function () {
-					var _v6 = model.session2;
-					if (_v6.$ === 'Loading') {
-						var downloadState = _v6.a;
-						return A2(
-							$elm$core$Tuple$mapFirst,
-							$author$project$Session$Loading,
-							A2($0ui$elm_task_parallel$Task$Parallel$update4, downloadState, downloadMsg));
-					} else {
-						return _Utils_Tuple2(model.session2, $elm$core$Platform$Cmd$none);
-					}
-				}();
-				var updte = _v5.a;
-				var cmd = _v5.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{session2: updte}),
-					cmd);
-			case 'ServerRespondedWithAllSession2Data':
-				var cu = msg.a;
-				var spelling = msg.b;
-				var translation = msg.c;
-				var infos_ = msg.d;
-				var shuffleLetters = A2(
-					$elm$random$Random$andThen,
-					$elm_community$random_extra$Random$List$shuffle,
-					$elm_community$random_extra$Random$Extra$sequence(
-						A2(
-							$elm$core$List$map,
-							function (trial) {
-								return A6(
-									$elm$random$Random$map5,
-									$author$project$Session2$Scrabble$Trial,
-									$elm$random$Random$constant(trial.uid),
-									A2(
-										$elm$random$Random$map,
-										function (letters_) {
-											return $elm$core$String$concat(
-												A2($elm$core$List$map, $elm$core$String$fromChar, letters_));
-										},
-										$elm_community$random_extra$Random$List$shuffle(
-											$elm$core$String$toList(trial.writtenWord))),
-									$elm$random$Random$constant(trial.audioWord),
-									$elm$random$Random$constant(trial.isTraining),
-									$elm$random$Random$constant(trial.writtenWord));
-							},
-							spelling)));
-				var randomizeTrials = A2(
-					$elm$random$Random$generate,
-					$author$project$Main$StartSession2,
-					A5(
-						$elm$random$Random$map4,
-						$author$project$Main$ShuffledSession2,
-						$elm_community$random_extra$Random$List$shuffle(cu),
-						shuffleLetters,
-						$elm_community$random_extra$Random$List$shuffle(translation),
-						$elm$random$Random$constant(infos_)));
-				return _Utils_Tuple2(
-					model,
-					$elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[randomizeTrials])));
-			case 'StartSession2':
-				var cu = msg.a.cu;
-				var spelling = msg.a.spelling;
-				var translation = msg.a.translation;
-				var infos = msg.a.infos;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							cuLvl2: A2($author$project$Session2$CU2$start, infos, cu),
-							scrabbleTask: A2($author$project$Session2$Scrabble$start, infos, spelling),
-							session2: $author$project$Session$Ready,
-							translationTask: A2($author$project$Session2$Translation$start, infos, translation)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ServerRespondedWithSomeSession3Data':
-				var downloadMsg = msg.a;
-				var _v7 = function () {
-					var _v8 = model.session3;
-					if (_v8.$ === 'Loading') {
-						var downloadState = _v8.a;
-						return A2(
-							$elm$core$Tuple$mapFirst,
-							$author$project$Session$Loading,
-							A2($0ui$elm_task_parallel$Task$Parallel$update4, downloadState, downloadMsg));
-					} else {
-						return _Utils_Tuple2(model.session3, $elm$core$Platform$Cmd$none);
-					}
-				}();
-				var updte = _v7.a;
-				var cmd = _v7.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{session3: updte}),
-					cmd);
-			case 'ServerRespondedWithAllSession3Data':
-				var cu = msg.a;
-				var spelling = msg.b;
-				var synonym = msg.c;
-				var infos = msg.d;
-				var randomize = A2(
-					$elm$random$Random$generate,
-					$author$project$Main$StartSession3,
-					A5(
-						$elm$random$Random$map4,
-						$author$project$Main$ShuffledSession3,
-						$elm_community$random_extra$Random$List$shuffle(cu),
-						$elm_community$random_extra$Random$List$shuffle(spelling),
-						$elm_community$random_extra$Random$List$shuffle(synonym),
-						$elm$random$Random$constant(infos)));
-				return _Utils_Tuple2(model, randomize);
-			case 'StartSession3':
-				var cu = msg.a.cu;
-				var spelling = msg.a.spelling;
-				var synonym = msg.a.synonym;
-				var infos = msg.a.infos;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							cu3: A2($author$project$Session3$CU3$start, infos, cu),
-							infos: $krisajenkins$remotedata$RemoteData$Success(
-								$author$project$ExperimentInfo$toDict(infos)),
-							session3: $author$project$Session$Ready,
-							spelling3: A2($author$project$Session3$Spelling3$start, infos, spelling),
-							synonymTask: A2($author$project$Session3$Synonym$start, infos, synonym)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ServerRespondedWithUserInfo':
-				if (msg.a.$ === 'Ok') {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'ToNextStep':
-				var newStep = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{acceptabilityTask: model.acceptabilityTask}),
-					$elm$core$Platform$Cmd$none);
-			case 'NewTick':
-				var _float = msg.a;
-				var prevState = $author$project$Logic$getState(model.acceptabilityTask);
-				if (prevState.$ === 'Just') {
-					var state = prevState.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				} else {
-					return $author$project$Main$pure(model);
-				}
 			case 'SPR':
 				var submsg = msg.a;
-				var _v10 = A2($author$project$Pretest$SPR$update, submsg, model);
-				var newModel = _v10.a;
-				var newCmd = _v10.b;
+				var _v2 = A2($author$project$Pretest$SPR$update, submsg, model);
+				var newModel = _v2.a;
+				var newCmd = _v2.b;
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$SPR, newCmd));
+			case 'Pretest':
+				var submsg = msg.a;
+				var _v3 = A2($author$project$Pretest$Pretest$update, submsg, model);
+				var newModel = _v3.a;
+				var newCmd = _v3.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Pretest, newCmd));
+			case 'Session1':
+				var submsg = msg.a;
+				var _v4 = A2($author$project$Session1$Session$update, submsg, model);
+				var newModel = _v4.a;
+				var newCmd = _v4.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Session1, newCmd));
+			case 'Session2':
+				var submsg = msg.a;
+				var _v5 = A2($author$project$Session2$Session$update, submsg, model);
+				var newModel = _v5.a;
+				var newCmd = _v5.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Session2, newCmd));
+			case 'Session3':
+				var submsg = msg.a;
+				var _v6 = A2($author$project$Session3$Session$update, submsg, model);
+				var newModel = _v6.a;
+				var newCmd = _v6.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Session3, newCmd));
+			case 'SentenceCompletion':
+				var submsg = msg.a;
+				var _v7 = A2($author$project$Pretest$SentenceCompletion$update, submsg, model);
+				var newModel = _v7.a;
+				var newCmd = _v7.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$SentenceCompletion, newCmd));
+			case 'VKS':
+				var submsg = msg.a;
+				var _v8 = A2($author$project$Pretest$VKS$update, submsg, model);
+				var newModel = _v8.a;
+				var newCmd = _v8.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$VKS, newCmd));
 			case 'Acceptability':
-				var message = msg.a;
-				var toNextStep = F2(
-					function (_int, step) {
-						return A2(
-							$andrewMacmurray$elm_delay$Delay$after,
-							_int,
-							$author$project$Main$Acceptability(
-								$author$project$Pretest$Acceptability$NextStepCinematic(step)));
-					});
-				var prevState = $author$project$Logic$getState(model.acceptabilityTask);
-				var getTrial = $author$project$Logic$getTrial(model.acceptabilityTask);
-				var _v11 = _Utils_Tuple2(prevState, getTrial);
-				if ((_v11.a.$ === 'Just') && (_v11.b.$ === 'Just')) {
-					var pState = _v11.a.a;
-					var trial = _v11.b.a;
-					switch (message.$) {
-						case 'NextStepCinematic':
-							var step = message.a;
-							switch (step.$) {
-								case 'Listening':
-									return _Utils_Tuple2(
-										_Utils_update(
-											model,
-											{
-												acceptabilityTask: A2(
-													$author$project$Logic$update,
-													_Utils_update(
-														pState,
-														{step: $author$project$Pretest$Acceptability$Listening}),
-													model.acceptabilityTask)
-											}),
-										A2(
-											$andrewMacmurray$elm_delay$Delay$after,
-											500,
-											$author$project$Main$PlaysoundInJS(trial.audio.url)));
-								case 'Answering':
-									return _Utils_Tuple2(
-										_Utils_update(
-											model,
-											{
-												acceptabilityTask: A2(
-													$author$project$Logic$update,
-													_Utils_update(
-														pState,
-														{step: $author$project$Pretest$Acceptability$Answering}),
-													model.acceptabilityTask)
-											}),
-										$elm$core$Platform$Cmd$none);
-								case 'End':
-									return _Utils_Tuple2(
-										_Utils_update(
-											model,
-											{
-												acceptabilityTask: A2(
-													$author$project$Logic$next,
-													pState,
-													A2(
-														$author$project$Logic$update,
-														_Utils_update(
-															pState,
-															{step: $author$project$Pretest$Acceptability$End}),
-														model.acceptabilityTask))
-											}),
-										A2(toNextStep, 0, $author$project$Pretest$Acceptability$Start));
-								case 'Start':
-									return _Utils_Tuple2(
-										_Utils_update(
-											model,
-											{
-												acceptabilityTask: A2($author$project$Logic$update, $author$project$Pretest$Acceptability$newLoop, model.acceptabilityTask)
-											}),
-										A2(
-											$andrewMacmurray$elm_delay$Delay$after,
-											0,
-											$author$project$Main$PlaysoundInJS($author$project$Main$beep)));
-								default:
-									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-							}
-						case 'StartMain':
-							var trials = message.a;
-							var infos = message.b;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										acceptabilityTask: A2($author$project$Logic$startMain, model.acceptabilityTask, $author$project$Pretest$Acceptability$initState)
-									}),
-								$elm$core$Platform$Cmd$none);
-						case 'UserPressedButton':
-							var maybeBool = message.a;
-							return _Utils_Tuple2(
-								model,
-								A2(
-									$elm$core$Task$perform,
-									function (timestamp) {
-										return $author$project$Main$Acceptability(
-											A2($author$project$Pretest$Acceptability$UserPressedButtonWithTimestamp, maybeBool, timestamp));
-									},
-									$elm$time$Time$now));
-						case 'UserPressedButtonWithTimestamp':
-							var maybeBool = message.a;
-							var timestamp = message.b;
-							if (maybeBool.$ === 'Just') {
-								var bool = maybeBool.a;
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											acceptabilityTask: A2(
-												$author$project$Logic$update,
-												_Utils_update(
-													pState,
-													{
-														evaluation: bool,
-														step: $author$project$Pretest$Acceptability$End,
-														userAnsweredAt: $elm$core$Maybe$Just(timestamp)
-													}),
-												model.acceptabilityTask)
-										}),
-									A2(toNextStep, model.endAcceptabilityDuration, $author$project$Pretest$Acceptability$End));
-							} else {
-								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-							}
-						case 'AudioEnded':
-							var _v15 = message.a;
-							var name = _v15.a;
-							var timestamp = _v15.b;
-							return _Utils_eq(name, $author$project$Main$beep) ? _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										acceptabilityTask: A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												pState,
-												{
-													beepEndedAt: $elm$core$Maybe$Just(timestamp)
-												}),
-											model.acceptabilityTask)
-									}),
-								$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										acceptabilityTask: A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												pState,
-												{
-													audioEndedAt: $elm$core$Maybe$Just(timestamp)
-												}),
-											model.acceptabilityTask)
-									}),
-								A2(toNextStep, 0, $author$project$Pretest$Acceptability$Answering));
-						case 'AudioStarted':
-							var _v16 = message.a;
-							var name = _v16.a;
-							var timestamp = _v16.b;
-							return _Utils_eq(name, $author$project$Main$beep) ? _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										acceptabilityTask: A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												pState,
-												{
-													beepStartedAt: $elm$core$Maybe$Just(timestamp)
-												}),
-											model.acceptabilityTask)
-									}),
-								A2(toNextStep, 0, $author$project$Pretest$Acceptability$Listening)) : _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										acceptabilityTask: A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												pState,
-												{
-													audioStartedAt: $elm$core$Maybe$Just(timestamp)
-												}),
-											model.acceptabilityTask)
-									}),
-								$elm$core$Platform$Cmd$none);
-						case 'StartTraining':
-							return _Utils_Tuple2(
-								model,
-								$elm$core$Platform$Cmd$batch(
-									_List_fromArray(
-										[
-											A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'start')
-										])));
-						default:
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					}
-				} else {
-					switch (message.$) {
-						case 'StartMain':
-							var trials = message.a;
-							var infos = message.b;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										acceptabilityTask: A2($author$project$Logic$startMain, model.acceptabilityTask, $author$project$Pretest$Acceptability$initState),
-										endAcceptabilityDuration: 500
-									}),
-								A2(toNextStep, 0, $author$project$Pretest$Acceptability$Init));
-						case 'RuntimeShuffledTrials':
-							var info = message.a;
-							var trials = message.b;
-							if (trials.$ === 'Ok') {
-								var shuffledTrials = trials.a;
-								return _Utils_eq(
-									A2(
-										$elm$core$List$filter,
-										function (block) {
-											return $elm$core$List$length(block) < 4;
-										},
-										shuffledTrials),
-									_List_fromArray(
-										[_List_Nil])) ? _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											acceptabilityTask: A2(
-												$author$project$Pretest$Acceptability$start,
-												info,
-												$elm$core$List$concat(shuffledTrials))
-										}),
-									$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
-									model,
-									A2(
-										$andrewMacmurray$elm_delay$Delay$after,
-										0,
-										A2(
-											$author$project$Main$ServerRespondedWithAllPretestData,
-											$elm$core$List$concat(shuffledTrials),
-											info)));
-							} else {
-								var _v19 = trials.a;
-								var reason = _v19.a;
-								var blockSoFar = _v19.b;
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											acceptabilityTask: $author$project$Logic$Err('Error whhen I tried to shuffle trials')
-										}),
-									$elm$core$Platform$Cmd$none);
-							}
-						case 'UserClickedSaveMsg':
-							var taskId = 'recR8areYkKRvQ6lU';
-							var responseHandler = function (records) {
-								return $author$project$Main$Acceptability(
-									$author$project$Pretest$Acceptability$ServerRespondedWithLastRecords(records));
-							};
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{acceptabilityTask: $author$project$Logic$Loading}),
-								A4($author$project$Logic$saveAcceptabilityData, responseHandler, model.user, taskId, model.acceptabilityTask));
-						case 'ServerRespondedWithLastRecords':
-							if (message.a.$ === 'Ok') {
-								var records = message.a.a;
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{acceptabilityTask: $author$project$Logic$Loading}),
-									A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'end'));
-							} else {
-								var reason = message.a.a;
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											acceptabilityTask: $author$project$Logic$Err(
-												$author$project$Data$buildErrorMessage(reason) + 'Please report this error message to yacourt@unice.fr with a nice screenshot!')
-										}),
-									$elm$core$Platform$Cmd$none);
-							}
-						default:
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					}
-				}
-			case 'ServerRespondedWithAllPretestData':
-				var trials = msg.a;
-				var info = msg.b;
-				var trainingTrials = A2(
-					$elm$core$List$filter,
-					function (datum) {
-						return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Training);
-					},
-					trials);
-				var targets_ = A2(
-					$elm$core$List$filter,
-					function (datum) {
-						return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Target);
-					},
-					trials);
-				var swapTargetWithOneDistractor = function (tr) {
-					return A2(
-						$elm$core$List$map,
-						function (block) {
-							return A2(
-								$elm$random$Random$andThen,
-								function (position) {
-									var swapedTarget = A3($elm_community$list_extra$List$Extra$swapAt, 0, position, block);
-									return $elm$random$Random$constant(
-										A3($elm_community$list_extra$List$Extra$swapAt, 0, position, block));
-								},
-								A2(
-									$elm$random$Random$int,
-									1,
-									$elm$core$List$length(block) - 1));
-						},
-						tr);
-				};
-				var generateOrganizedTrials = A2(
-					$elm$random$Random$generate,
-					function (st) {
-						return $author$project$Main$Acceptability(
-							A2($author$project$Pretest$Acceptability$RuntimeShuffledTrials, info, st));
-					},
-					A2(
-						$elm$random$Random$andThen,
-						function (shuffledTrials) {
-							var targets = A2(
-								$elm$core$List$filter,
-								function (datum) {
-									return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Target);
-								},
-								shuffledTrials);
-							var distractors = A2(
-								$elm$core$List$filter,
-								function (datum) {
-									return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Distractor);
-								},
-								shuffledTrials);
-							return A2(
-								$elm$random$Random$andThen,
-								function (organizedTrials_) {
-									if (organizedTrials_.$ === 'Err') {
-										var reason = organizedTrials_.a;
-										return $elm$random$Random$constant(
-											$elm$core$Result$Err(reason));
-									} else {
-										var tr = organizedTrials_.a;
-										return A2(
-											$elm$random$Random$andThen,
-											function (swapedTargets) {
-												return $elm$random$Random$constant(
-													$elm$core$Result$Ok(
-														A2($elm$core$List$cons, trainingTrials, swapedTargets)));
-											},
-											$elm_community$random_extra$Random$Extra$sequence(
-												swapTargetWithOneDistractor(tr)));
-									}
-								},
-								$elm$random$Random$constant(
-									A2($author$project$Main$organizeAcceptabilityTrials, targets, distractors)));
-						},
-						$elm_community$random_extra$Random$List$shuffle(trials)));
-				var distractors_ = A2(
-					$elm$core$List$filter,
-					function (datum) {
-						return _Utils_eq(datum.trialType, $author$project$Pretest$Acceptability$Distractor);
-					},
-					trials);
-				var gatherBySentenceType = A2(
-					$elm_community$list_extra$List$Extra$gatherEqualsBy,
-					function ($) {
-						return $.sentenceType;
-					},
-					distractors_);
+				var submsg = msg.a;
+				var _v9 = A2($author$project$Pretest$Acceptability$update, submsg, model);
+				var newModel = _v9.a;
+				var newCmd = _v9.b;
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							infos: $krisajenkins$remotedata$RemoteData$Success(
-								$author$project$ExperimentInfo$toDict(info))
-						}),
-					generateOrganizedTrials);
-			case 'ServerRespondedWithSomePretestData':
-				var downloadMsg = msg.a;
-				var _v21 = function () {
-					var _v22 = model.pilote;
-					if (_v22.$ === 'Loading') {
-						var downloadState = _v22.a;
-						return A2(
-							$elm$core$Tuple$mapFirst,
-							$author$project$Session$Loading,
-							A2($0ui$elm_task_parallel$Task$Parallel$update2, downloadState, downloadMsg));
-					} else {
-						return _Utils_Tuple2(model.pilote, $elm$core$Platform$Cmd$none);
-					}
-				}();
-				var updte = _v21.a;
-				var cmd = _v21.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{pilote: updte}),
-					cmd);
-			case 'UserPressedKey':
-				var evaluation = msg.a;
-				return _Utils_Tuple2(
-					model,
-					A2(
-						$elm$core$Task$perform,
-						function (time) {
-							return A2(
-								$author$project$Main$WithTime,
-								$author$project$Main$UserPressedKey(evaluation),
-								time);
-						},
-						$elm$time$Time$now));
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Acceptability, newCmd));
 			case 'UserToggledInCloudWords':
 				var word = msg.a;
 				return _Utils_Tuple2(
@@ -17653,471 +19537,68 @@ var $author$project$Main$update = F2(
 							cloudWords: A2($author$project$Postest$CloudWords$toggle, word, model.cloudWords)
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 'UserDragsLetter':
-				var dndmsg = msg.a;
-				var _v23 = A3($author$project$Main$system.update, dndmsg, model.dnd, currentScrabbleState.scrambledLetter);
-				var dnd = _v23.a;
-				var items = _v23.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dnd: dnd,
-							scrabbleTask: A2(
-								$author$project$Logic$update,
-								_Utils_update(
-									currentScrabbleState,
-									{
-										scrambledLetter: items,
-										userAnswer: $elm$core$String$concat(
-											A2($elm$core$List$map, $elm$core$Tuple$second, items))
-									}),
-								model.scrabbleTask)
-						}),
-					$author$project$Main$system.commands(dnd));
-			case 'WithTime':
-				var message = msg.a;
-				var time = msg.b;
-				if (message.$ === 'UserPressedKey') {
-					var evaluation = message.a;
-					var prevState = $author$project$Logic$getState(model.acceptabilityTask);
-					if (prevState.$ === 'Just') {
-						var pState = prevState.a;
-						if (evaluation.$ === 'Just') {
-							var x = evaluation.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										acceptabilityTask: A2(
-											$author$project$Logic$next,
-											$author$project$Pretest$Acceptability$initState,
-											A2(
-												$author$project$Logic$update,
-												_Utils_update(
-													pState,
-													{evaluation: x}),
-												model.acceptabilityTask))
-									}),
-								A2($andrewMacmurray$elm_delay$Delay$after, 500, $author$project$Main$playBeep));
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
-					} else {
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					}
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'RuntimeShuffledOptionsOrder':
-				var newOrder = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{optionsOrder: newOrder}),
-					$elm$core$Platform$Cmd$none);
 			case 'PlaysoundInJS':
 				var url = msg.a;
 				return _Utils_Tuple2(
 					model,
-					$author$project$Main$playAudio(url));
+					$author$project$Ports$playAudio(url));
 			case 'Spelling1':
 				var message = msg.a;
-				var taskId = 'recJOpE5pMTCHJOSV';
-				switch (message.$) {
-					case 'UserClickedFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									spellingLvl1: $author$project$Logic$toggle(model.spellingLvl1)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedRadioButton':
-						var newChoice = message.a;
-						if (currentSpellingState.$ === 'Just') {
-							var prevState = currentSpellingState.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										spellingLvl1: A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												prevState,
-												{userAnswer: newChoice}),
-											model.spellingLvl1)
-									}),
-								$elm$core$Platform$Cmd$none);
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									spellingLvl1: A2($author$project$Logic$next, $author$project$Session1$SpellingLvl1$initState, model.spellingLvl1)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMainloop':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									spellingLvl1: A2($author$project$Logic$startMain, model.spellingLvl1, $author$project$Session1$SpellingLvl1$iniState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedSavedData':
-						var responseHandler = function (records) {
-							return $author$project$Main$Spelling1(
-								$author$project$Session1$SpellingLvl1$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.spellingLvl1));
-					default:
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				var _v10 = A2($author$project$Session1$Spelling$update, message, model);
+				var newModel = _v10.a;
+				var newCmd = _v10.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Spelling1, newCmd));
 			case 'CU2':
 				var message = msg.a;
-				var taskId = 'recwxsmowpB18bpLj';
-				switch (message.$) {
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cuLvl2: A2($author$project$Logic$next, $author$project$Session2$CU2$initState, model.cuLvl2)
-								}),
-							A2(
-								$elm$random$Random$generate,
-								$author$project$Main$RuntimeShuffledOptionsOrder,
-								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
-					case 'UserClickedToggleFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cuLvl2: $author$project$Logic$toggle(model.cuLvl2)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedRadioButton':
-						var newChoice = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cuLvl2: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: newChoice},
-										model.cuLvl2)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cuLvl2: A2($author$project$Logic$startMain, model.cuLvl2, $author$project$Session2$CU2$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'ServerRespondedWithLastRecords':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					default:
-						var responseHandler = function (records) {
-							return $author$project$Main$CU2(
-								$author$project$Session2$CU2$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.cuLvl2));
-				}
+				var _v11 = A2($author$project$Session2$CU2$update, message, model);
+				var newModel = _v11.a;
+				var newCmd = _v11.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$CU2, newCmd));
 			case 'Spelling2':
 				var message = msg.a;
-				var taskId = 'recSL8cthViyXRx8u';
-				switch (message.$) {
-					case 'UserClickedFeedbackButton':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									scrabbleTask: $author$project$Logic$toggle(model.scrabbleTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartButton':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									scrabbleTask: $author$project$Logic$toggle(model.scrabbleTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedNextTrial':
-						if (message.a.$ === 'Just') {
-							var nextTrial = message.a.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										scrabbleTask: A2(
-											$author$project$Logic$next,
-											_Utils_update(
-												currentScrabbleState,
-												{
-													scrambledLetter: $author$project$Session2$Scrabble$toItems(nextTrial.writtenWord),
-													userAnswer: nextTrial.writtenWord
-												}),
-											model.scrabbleTask)
-									}),
-								$elm$core$Platform$Cmd$none);
-						} else {
-							var _v31 = message.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										scrabbleTask: A2($author$project$Logic$next, currentScrabbleState, model.scrabbleTask)
-									}),
-								$elm$core$Platform$Cmd$none);
-						}
-					case 'UserClickedSaveData':
-						var responseHandler = function (records) {
-							return $author$project$Main$Spelling2(
-								$author$project$Main$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.scrabbleTask));
-					case 'ServerRespondedWithLastRecords':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					default:
-						var trials = message.a;
-						var infos = message.b;
-						if (!trials.b) {
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										scrabbleTask: $author$project$Logic$Err('You gave no trial to start the main loop. Please report this error message.')
-									}),
-								$elm$core$Platform$Cmd$none);
-						} else {
-							var x = trials.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										scrabbleTask: A2(
-											$author$project$Logic$startMain,
-											model.scrabbleTask,
-											_Utils_update(
-												currentScrabbleState,
-												{
-													scrambledLetter: $author$project$Session2$Scrabble$toItems(x.writtenWord),
-													userAnswer: x.writtenWord
-												}))
-									}),
-								$elm$core$Platform$Cmd$none);
-						}
-				}
+				var _v12 = A2($author$project$Session2$Spelling$update, message, model);
+				var newModel = _v12.a;
+				var newCmd = _v12.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Spelling2, newCmd));
 			case 'CU1':
-				var message = msg.a;
-				var taskId = 'recsN8oyy3LIC8URx';
-				switch (message.$) {
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu1: A2($author$project$Logic$next, $author$project$Session1$CU1$initState, model.cu1)
-								}),
-							A2(
-								$elm$random$Random$generate,
-								$author$project$Main$RuntimeShuffledOptionsOrder,
-								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
-					case 'UserClickedToggleFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu1: $author$project$Logic$toggle(model.cu1)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedRadioButton':
-						var newChoice = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu1: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: newChoice},
-										model.cu1)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu1: A2($author$project$Logic$startMain, model.cu1, $author$project$Session1$CU1$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedSaveData':
-						var responseHandler = function (records) {
-							return $author$project$Main$CU1(
-								$author$project$Session1$CU1$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.cu1));
-					default:
-						if (message.a.$ === 'Ok') {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
-				}
+				var submsg = msg.a;
+				var _v13 = A2($author$project$Session1$ContextUnderstanding$update, submsg, model);
+				var newModel = _v13.a;
+				var newCmd = _v13.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$CU1, newCmd));
 			case 'CU3':
 				var message = msg.a;
-				var taskId = 'recFEtKbtuBSolHnI';
-				switch (message.$) {
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu3: A2($author$project$Logic$next, $author$project$Session1$CU1$initState, model.cu3)
-								}),
-							A2(
-								$elm$random$Random$generate,
-								$author$project$Main$RuntimeShuffledOptionsOrder,
-								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
-					case 'UserClickedToggleFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu3: $author$project$Logic$toggle(model.cu3)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedRadioButton':
-						var newChoice = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu3: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: newChoice},
-										model.cu3)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu3: A2($author$project$Logic$startMain, model.cu3, $author$project$Session3$CU3$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserChangedInput':
-						var _new = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									cu3: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: _new},
-										model.cu3)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedSaveData':
-						var responseHandler = function (records) {
-							return $author$project$Main$CU3(
-								$author$project$Session3$CU3$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.scrabbleTask));
-					default:
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				var _v14 = A2($author$project$Session3$CU3$update, message, model);
+				var newModel = _v14.a;
+				var newCmd = _v14.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$CU3, newCmd));
 			case 'Spelling3':
 				var message = msg.a;
-				var taskId = 'recJucOXEZzJj6Uui';
-				switch (message.$) {
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									spelling3: A2($author$project$Logic$next, $author$project$Session1$CU1$initState, model.spelling3)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedToggleFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									spelling3: $author$project$Logic$toggle(model.spelling3)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartIntro':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									spelling3: A2($author$project$Logic$startMain, model.spelling3, $author$project$Session3$Spelling3$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserChangedInput':
-						var _new = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									spelling3: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: _new},
-										model.spelling3)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedSaveData':
-						var responseHandler = function (records) {
-							return $author$project$Main$Spelling3(
-								$author$project$Session3$Spelling3$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.scrabbleTask));
-					default:
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				var _v15 = A2($author$project$Session3$Spelling3$update, message, model);
+				var newModel = _v15.a;
+				var newCmd = _v15.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Spelling3, newCmd));
 			case 'YN':
 				var message = msg.a;
-				var taskId = 'rechYdq4MyLcb2nRG';
 				switch (message.$) {
 					case 'UserClickedNextTrial':
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
-									yn: A2($author$project$Logic$next, $author$project$Session1$CU1$initState, model.yn)
+									yn: A2($author$project$Logic$next, $author$project$Session1$ContextUnderstanding$initState, model.yn)
 								}),
 							$elm$core$Platform$Cmd$none);
 					case 'UserClickedToggleFeedback':
@@ -18131,8 +19612,6 @@ var $author$project$Main$update = F2(
 					case 'UserClickedStartIntro':
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -18155,351 +19634,56 @@ var $author$project$Main$update = F2(
 				}
 			case 'Presentation':
 				var message = msg.a;
-				var taskId = 'rechYdq4MyLcb2nRG';
-				switch (message.$) {
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									presentation: A2($author$project$Logic$next, $author$project$Session1$Presentation$initState, model.presentation)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartIntro':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									presentation: A2($author$project$Logic$startMain, model.presentation, $author$project$Session1$Presentation$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					default:
-						var id = message.a;
-						var prevState = $author$project$Logic$getState(model.presentation);
-						if (prevState.$ === 'Just') {
-							var state = prevState.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										presentation: A2(
-											$author$project$Logic$update,
-											_Utils_update(
-												state,
-												{
-													toggledEntries: A3(
-														$elm$core$Dict$update,
-														id,
-														$elm$core$Maybe$map($elm$core$Basics$not),
-														state.toggledEntries)
-												}),
-											model.presentation)
-									}),
-								$elm$core$Platform$Cmd$none);
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
-				}
+				var _v17 = A2($author$project$Session1$Presentation$update, message, model);
+				var subModel = _v17.a;
+				var subCmd = _v17.b;
+				return _Utils_Tuple2(
+					subModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Presentation, subCmd));
 			case 'Synonym':
 				var message = msg.a;
-				switch (message.$) {
-					case 'UserClickedFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									synonymTask: $author$project$Logic$toggle(model.synonymTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserChangedInput':
-						var newChoice = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									synonymTask: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: newChoice},
-										model.synonymTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									synonymTask: A2($author$project$Logic$next, $author$project$Session3$Synonym$initState, model.synonymTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'SaveDataMsg':
-						var responseHandler = function (records) {
-							return $author$project$Main$Synonym(
-								$author$project$Session3$Synonym$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, $author$project$Session3$Synonym$taskId, model.translationTask));
-					case 'UserClickedStartMainloop':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									synonymTask: A2($author$project$Logic$startMain, model.synonymTask, $author$project$Session1$Meaning$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					default:
-						var records = message.a;
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				var _v18 = A2($author$project$Session3$Synonym$update, message, model);
+				var newModel = _v18.a;
+				var newCmd = _v18.b;
+				return _Utils_Tuple2(
+					newModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Synonym, newCmd));
 			case 'Meaning':
-				var message = msg.a;
-				var taskId = 'rec9fDmVOpqDJktmQ';
-				switch (message.$) {
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									meaning: A2($author$project$Logic$next, $author$project$Session1$Meaning$initState, model.meaning)
-								}),
-							A2(
-								$elm$random$Random$generate,
-								$author$project$Main$RuntimeShuffledOptionsOrder,
-								$elm_community$random_extra$Random$List$shuffle(model.optionsOrder)));
-					case 'UserClickedToggleFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									meaning: $author$project$Logic$toggle(model.meaning)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedRadioButton':
-						var newChoice = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									meaning: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: newChoice},
-										model.meaning)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartIntro':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									meaning: A2($author$project$Logic$startMain, model.meaning, $author$project$Session1$Meaning$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'SaveDataMsg':
-						var responseHandler = function (records) {
-							return $author$project$Main$Meaning(
-								$author$project$Session1$Meaning$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.meaning));
-					default:
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				var submsg = msg.a;
+				var _v19 = A2($author$project$Session1$Meaning$update, submsg, model);
+				var subModel = _v19.a;
+				var subCmd = _v19.b;
+				return _Utils_Tuple2(
+					subModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Meaning, subCmd));
+			case 'Translation':
+				var submsg = msg.a;
+				var _v20 = A2($author$project$Session2$Translation$update, submsg, model);
+				var subModel = _v20.a;
+				var subCmd = _v20.b;
+				return _Utils_Tuple2(
+					subModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$Translation, subCmd));
 			default:
-				var message = msg.a;
-				var taskId = 'recf5HANE632FLKbc';
-				switch (message.$) {
-					case 'UserClickedNextTrial':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									translationTask: A2($author$project$Logic$next, $author$project$Session2$Translation$initState, model.translationTask)
-								}),
-							$elm$core$Platform$Cmd$batch(
-								_List_fromArray(
-									[
-										A2(
-										$elm$random$Random$generate,
-										$author$project$Main$RuntimeShuffledOptionsOrder,
-										$elm_community$random_extra$Random$List$shuffle(model.optionsOrder))
-									])));
-					case 'ServerRespondedWithLastRecords':
-						if (message.a.$ === 'Ok') {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
-					case 'RuntimeSentData':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					case 'UserClickedToggleFeedback':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									translationTask: $author$project$Logic$toggle(model.translationTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedRadioButton':
-						var newChoice = message.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									translationTask: A2(
-										$author$project$Logic$update,
-										{uid: '', userAnswer: newChoice},
-										model.translationTask)
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'UserClickedStartIntro':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					case 'UserClickedStartMain':
-						var trials = message.a;
-						var infos = message.b;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									translationTask: A2($author$project$Logic$startMain, model.translationTask, $author$project$Session2$Translation$initState)
-								}),
-							$elm$core$Platform$Cmd$none);
-					default:
-						var responseHandler = function (records) {
-							return $author$project$Main$CU1(
-								$author$project$Session1$CU1$ServerRespondedWithLastRecords(records));
-						};
-						return _Utils_Tuple2(
-							model,
-							A4($author$project$Logic$saveData, responseHandler, model.user, taskId, model.translationTask));
-				}
+				var submsg = msg.a;
+				var _v21 = A2($author$project$Pretest$YesNo$update, submsg, model);
+				var subModel = _v21.a;
+				var subCmd = _v21.b;
+				return _Utils_Tuple2(
+					subModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$YesNo, subCmd));
 		}
 	});
-var $author$project$Main$Presentation = function (a) {
-	return {$: 'Presentation', a: a};
-};
-var $author$project$Session1$Meaning$SaveDataMsg = {$: 'SaveDataMsg'};
-var $author$project$Session3$Synonym$SaveDataMsg = {$: 'SaveDataMsg'};
-var $author$project$Pretest$Acceptability$StartMain = F2(
-	function (a, b) {
-		return {$: 'StartMain', a: a, b: b};
-	});
-var $author$project$Pretest$Acceptability$StartTraining = {$: 'StartTraining'};
-var $author$project$Main$Translation = function (a) {
-	return {$: 'Translation', a: a};
-};
+var $author$project$Main$NoOp = {$: 'NoOp'};
 var $author$project$Postest$YN$UserChangedInput = function (a) {
 	return {$: 'UserChangedInput', a: a};
 };
-var $author$project$Session3$CU3$UserChangedInput = function (a) {
-	return {$: 'UserChangedInput', a: a};
-};
-var $author$project$Session3$Spelling3$UserChangedInput = function (a) {
-	return {$: 'UserChangedInput', a: a};
-};
-var $author$project$Session3$Synonym$UserChangedInput = function (a) {
-	return {$: 'UserChangedInput', a: a};
-};
-var $author$project$Session1$SpellingLvl1$UserClickedFeedback = {$: 'UserClickedFeedback'};
-var $author$project$Session3$Synonym$UserClickedFeedback = {$: 'UserClickedFeedback'};
 var $author$project$Postest$YN$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session1$CU1$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session1$Meaning$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session1$Presentation$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session1$SpellingLvl1$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session2$CU2$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session2$Translation$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session3$CU3$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session3$Spelling3$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session3$Synonym$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session1$CU1$UserClickedRadioButton = function (a) {
-	return {$: 'UserClickedRadioButton', a: a};
-};
-var $author$project$Session1$Meaning$UserClickedRadioButton = function (a) {
-	return {$: 'UserClickedRadioButton', a: a};
-};
-var $author$project$Session1$SpellingLvl1$UserClickedRadioButton = function (a) {
-	return {$: 'UserClickedRadioButton', a: a};
-};
-var $author$project$Session2$CU2$UserClickedRadioButton = function (a) {
-	return {$: 'UserClickedRadioButton', a: a};
-};
-var $author$project$Session2$Translation$UserClickedRadioButton = function (a) {
-	return {$: 'UserClickedRadioButton', a: a};
-};
-var $author$project$Session1$CU1$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Session2$CU2$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Session2$Translation$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Session3$CU3$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Session3$Spelling3$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Pretest$Acceptability$UserClickedSaveMsg = {$: 'UserClickedSaveMsg'};
-var $author$project$Session1$SpellingLvl1$UserClickedSavedData = {$: 'UserClickedSavedData'};
-var $author$project$Pretest$GeneralInfos$UserClickedSendData = function (a) {
-	return {$: 'UserClickedSendData', a: a};
-};
 var $author$project$Postest$YN$UserClickedStartMain = F2(
 	function (a, b) {
 		return {$: 'UserClickedStartMain', a: a, b: b};
 	});
-var $author$project$Session1$CU1$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session1$Meaning$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session1$Presentation$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session2$CU2$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session2$Translation$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session3$CU3$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session3$Spelling3$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session1$SpellingLvl1$UserClickedStartMainloop = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMainloop', a: a, b: b};
-	});
-var $author$project$Session3$Synonym$UserClickedStartMainloop = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMainloop', a: a, b: b};
-	});
 var $author$project$Postest$YN$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$Session1$CU1$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$Session1$Meaning$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$Session2$CU2$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$Session2$Translation$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$Session3$CU3$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$Session3$Spelling3$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$Session1$Presentation$UserToggleElementOfEntry = function (a) {
-	return {$: 'UserToggleElementOfEntry', a: a};
-};
-var $author$project$Pretest$GeneralInfos$UserUpdatedEmailField = function (a) {
-	return {$: 'UserUpdatedEmailField', a: a};
-};
 var $author$project$Main$YN = function (a) {
 	return {$: 'YN', a: a};
 };
@@ -18538,6 +19722,7 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$class = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('className');
+var $elm$json$Json$Encode$bool = _Json_wrap;
 var $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty = F2(
 	function (key, bool) {
 		return A2(
@@ -20185,26 +21370,6 @@ var $author$project$View$container = function (content) {
 			]),
 		content);
 };
-var $elm_explorations$markdown$Markdown$defaultOptions = {
-	defaultHighlighting: $elm$core$Maybe$Nothing,
-	githubFlavored: $elm$core$Maybe$Just(
-		{breaks: false, tables: false}),
-	sanitize: true,
-	smartypants: false
-};
-var $author$project$View$def = $elm_explorations$markdown$Markdown$defaultOptions;
-var $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode = $rtfeldman$elm_css$VirtualDom$Styled$Unstyled;
-var $rtfeldman$elm_css$Html$Styled$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode;
-var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
-var $author$project$View$fromMarkdown = A2(
-	$elm$core$Basics$composeL,
-	$rtfeldman$elm_css$Html$Styled$fromUnstyled,
-	A2(
-		$elm_explorations$markdown$Markdown$toHtmlWith,
-		_Utils_update(
-			$author$project$View$def,
-			{sanitize: false}),
-		_List_Nil));
 var $rtfeldman$elm_css$Html$Styled$h1 = $rtfeldman$elm_css$Html$Styled$node('h1');
 var $rtfeldman$elm_css$Css$height = $rtfeldman$elm_css$Css$prop1('height');
 var $rtfeldman$elm_css$Html$Styled$Attributes$href = function (url) {
@@ -20493,9 +21658,29 @@ var $author$project$View$trainingBox = $rtfeldman$elm_css$Html$Styled$div(
 		[
 			$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col items-center justify-center w-full h-full border-4 border-green-500 border-rounded-lg border-dashed ')
 		]));
+var $elm_explorations$markdown$Markdown$defaultOptions = {
+	defaultHighlighting: $elm$core$Maybe$Nothing,
+	githubFlavored: $elm$core$Maybe$Just(
+		{breaks: false, tables: false}),
+	sanitize: true,
+	smartypants: false
+};
+var $author$project$View$def = $elm_explorations$markdown$Markdown$defaultOptions;
+var $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode = $rtfeldman$elm_css$VirtualDom$Styled$Unstyled;
+var $rtfeldman$elm_css$Html$Styled$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode;
+var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
+var $author$project$View$fromMarkdown = A2(
+	$elm$core$Basics$composeL,
+	$rtfeldman$elm_css$Html$Styled$fromUnstyled,
+	A2(
+		$elm_explorations$markdown$Markdown$toHtmlWith,
+		_Utils_update(
+			$author$project$View$def,
+			{sanitize: false}),
+		_List_Nil));
 var $rtfeldman$elm_css$Html$Styled$h2 = $rtfeldman$elm_css$Html$Styled$node('h2');
 var $rtfeldman$elm_css$Html$Styled$pre = $rtfeldman$elm_css$Html$Styled$node('pre');
-var $author$project$View$viewInstructions = function (instructions) {
+var $author$project$View$viewInstructions = function (instructions_) {
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
@@ -20527,7 +21712,7 @@ var $author$project$View$viewInstructions = function (instructions) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$author$project$View$fromMarkdown(instructions)
+								$author$project$View$fromMarkdown(instructions_)
 							]))
 					])),
 				A2(
@@ -20549,7 +21734,7 @@ var $author$project$View$viewInstructions = function (instructions) {
 			]));
 };
 var $author$project$View$viewTraining = F2(
-	function (instructions, content) {
+	function (instructions_, content) {
 		return A2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
@@ -20558,7 +21743,7 @@ var $author$project$View$viewTraining = F2(
 				]),
 			_List_fromArray(
 				[
-					$author$project$View$viewInstructions(instructions),
+					$author$project$View$viewInstructions(instructions_),
 					$author$project$View$trainingBox(content)
 				]));
 	});
@@ -20594,114 +21779,143 @@ var $author$project$Postest$YN$view = F2(
 						[
 							$rtfeldman$elm_css$Html$Styled$text(reason)
 						]));
-			case 'Intr':
-				var trainingTrials = exp.a.trainingTrials;
-				var mainTrials = exp.a.mainTrials;
-				var current = exp.a.current;
-				var state = exp.a.state;
-				var feedback = exp.a.feedback;
-				var history = exp.a.history;
-				var infos = exp.a.infos;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$author$project$View$viewTraining,
-								infos.instructions,
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_Nil,
-										feedback ? _List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
-												$author$project$View$button(
-												{isDisabled: false, message: nextTrialMsg, txt: 'Next Training Item'})
-											]) : _List_fromArray(
-											[
-												$author$project$View$button(
-												{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
-											]))
-									]))
-							]));
-				} else {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
-								$author$project$View$button(
-								{
-									isDisabled: false,
-									message: A2(startMainMsg, mainTrials, infos),
-									txt: 'Start'
-								})
-							]));
-				}
 			default:
-				var mainTrials = exp.a.mainTrials;
-				var current = exp.a.current;
-				var state = exp.a.state;
-				var feedback = exp.a.feedback;
-				var history = exp.a.history;
-				var infos = exp.a.infos;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$span,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text(trial.word)
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$fieldset,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-									]),
+				switch (exp.a.$) {
+					case 'Instructions':
+						var _v2 = exp.a;
+						return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+					case 'Training':
+						var _v3 = exp.a;
+						var mainTrials = exp.b.mainTrials;
+						var current = exp.b.current;
+						var feedback = exp.b.feedback;
+						var infos = exp.b.infos;
+						if (current.$ === 'Just') {
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
 								_List_fromArray(
 									[
 										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_Nil,
+										$author$project$View$viewTraining,
+										infos.instructions,
 										_List_fromArray(
 											[
 												A2(
-												$rtfeldman$elm_css$Html$Styled$input,
-												_List_fromArray(
+												$rtfeldman$elm_css$Html$Styled$div,
+												_List_Nil,
+												feedback ? _List_fromArray(
 													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$value('true'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$checked(state.userAnswer === 'true'),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput(userChangedInput),
-														$rtfeldman$elm_css$Html$Styled$Attributes$id('truecb')
-													]),
-												_List_Nil),
+														$rtfeldman$elm_css$Html$Styled$text('I\'m feedback'),
+														$author$project$View$button(
+														{isDisabled: false, message: nextTrialMsg, txt: 'Next Training Item'})
+													]) : _List_fromArray(
+													[
+														$author$project$View$button(
+														{isDisabled: false, message: toggleFeedback, txt: 'togglefeedback'})
+													]))
+											]))
+									]));
+						} else {
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Intro is over'),
+										$author$project$View$button(
+										{
+											isDisabled: false,
+											message: A2(startMainMsg, mainTrials, infos),
+											txt: 'Start'
+										})
+									]));
+						}
+					default:
+						var _v5 = exp.a;
+						var current = exp.b.current;
+						var state = exp.b.state;
+						var infos = exp.b.infos;
+						if (current.$ === 'Just') {
+							var trial = current.a;
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.word)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$fieldset,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+											]),
+										_List_fromArray(
+											[
 												A2(
-												$rtfeldman$elm_css$Html$Styled$label,
+												$rtfeldman$elm_css$Html$Styled$div,
+												_List_Nil,
 												_List_fromArray(
 													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$for('truecb'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 hover:underline')
-													]),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$input,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$value('true'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$checked(state.userAnswer === 'true'),
+																$rtfeldman$elm_css$Html$Styled$Events$onInput(userChangedInput),
+																$rtfeldman$elm_css$Html$Styled$Attributes$id('truecb')
+															]),
+														_List_Nil),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$label,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$for('truecb'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 hover:underline')
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text('Exists')
+															]))
+													])),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$div,
+												_List_Nil,
 												_List_fromArray(
 													[
-														$rtfeldman$elm_css$Html$Styled$text('Exists')
+														A2(
+														$rtfeldman$elm_css$Html$Styled$input,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$value('false'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$checked(state.userAnswer === 'false'),
+																$rtfeldman$elm_css$Html$Styled$Events$onInput(userChangedInput),
+																$rtfeldman$elm_css$Html$Styled$Attributes$id('falsecb')
+															]),
+														_List_Nil),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$label,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$for('falsecb'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 hover:underline')
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text('Does not exist')
+															]))
 													]))
 											])),
 										A2(
@@ -20709,44 +21923,19 @@ var $author$project$Postest$YN$view = F2(
 										_List_Nil,
 										_List_fromArray(
 											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$input,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$value('false'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$checked(state.userAnswer === 'false'),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput(userChangedInput),
-														$rtfeldman$elm_css$Html$Styled$Attributes$id('falsecb')
-													]),
-												_List_Nil),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$label,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$for('falsecb'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 hover:underline')
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('Does not exist')
-													]))
+												$author$project$View$button(
+												{isDisabled: false, message: nextTrialMsg, txt: 'Next Item'})
 											]))
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$author$project$View$button(
-										{isDisabled: false, message: nextTrialMsg, txt: 'Next Item'})
-									]))
-							]));
-				} else {
-					return $rtfeldman$elm_css$Html$Styled$text(infos.end);
+									]));
+						} else {
+							return $rtfeldman$elm_css$Html$Styled$text(infos.end);
+						}
 				}
 		}
 	});
+var $author$project$Pretest$Acceptability$StartMain = {$: 'StartMain'};
+var $author$project$Pretest$Acceptability$UserClickedSaveMsg = {$: 'UserClickedSaveMsg'};
+var $author$project$Pretest$Acceptability$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
 var $rtfeldman$elm_css$Html$Styled$Attributes$height = function (n) {
 	return A2(
 		$rtfeldman$elm_css$VirtualDom$Styled$attribute,
@@ -20754,6 +21943,28 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$height = function (n) {
 		$elm$core$String$fromInt(n));
 };
 var $rtfeldman$elm_css$Html$Styled$img = $rtfeldman$elm_css$Html$Styled$node('img');
+var $author$project$View$instructions = F2(
+	function (content, msgToTraining) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex text-xl flex-col items-center')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('Instructions')
+						])),
+					$author$project$View$fromMarkdown(content),
+					$author$project$View$button(
+					{isDisabled: false, message: msgToTraining, txt: 'Continue'})
+				]));
+	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$src = function (url) {
 	return A2($rtfeldman$elm_css$Html$Styled$Attributes$stringProperty, 'src', url);
 };
@@ -20784,619 +21995,427 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$width = function (n) {
 		'width',
 		$elm$core$String$fromInt(n));
 };
-var $author$project$Pretest$Acceptability$view = F2(
-	function (task, _v0) {
-		var startMainMsg = _v0.startMainMsg;
-		var startTraining = _v0.startTraining;
-		var saveDataMsg = _v0.saveDataMsg;
-		var prompt = A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
+var $author$project$Pretest$Acceptability$view = function (task) {
+	var prompt = A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center justify-center')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$img,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$src('/acceptability.png'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('items-center justify-center'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$width(500),
+						$rtfeldman$elm_css$Html$Styled$Attributes$height(500)
+					]),
+				_List_Nil)
+			]));
+	switch (task.$) {
+		case 'Loading':
+			return _List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center justify-center')
-				]),
-			_List_fromArray(
+					$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t exit this page, data may be lost.')
+				]);
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('not started')
+				]);
+		case 'Err':
+			var reason = task.a;
+			return _List_fromArray(
 				[
 					A2(
-					$rtfeldman$elm_css$Html$Styled$img,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$src('/acceptability.png'),
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('items-center justify-center'),
-							$rtfeldman$elm_css$Html$Styled$Attributes$width(500),
-							$rtfeldman$elm_css$Html$Styled$Attributes$height(500)
-						]),
-					_List_Nil)
-				]));
-		switch (task.$) {
-			case 'Intr':
-				var data = task.a;
-				var _v2 = data.current;
-				if (_v2.$ === 'Nothing') {
-					return _List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
-								]),
-							_List_fromArray(
-								[
-									$author$project$View$button(
-									{
-										isDisabled: false,
-										message: A2(startMainMsg, data.infos, data.mainTrials),
-										txt: 'That\'s it for the practice items'
-									})
-								]))
-						]);
-				} else {
-					var trial = _v2.a;
-					var _v3 = data.state.step;
-					switch (_v3.$) {
-						case 'Init':
-							return _List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$p,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col  text-center ')
-										]),
-									_List_fromArray(
-										[
-											$author$project$View$fromMarkdown(data.infos.instructions_short)
-										]))
-								]);
-						case 'End':
-							return _List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center justify-center')
-										]),
-									_List_fromArray(
-										[
-											$author$project$View$fromMarkdown(trial.feedback)
-										]))
-								]);
-						default:
-							return _List_fromArray(
-								[prompt]);
-					}
-				}
-			case 'Main':
-				var data = task.a;
-				var _v4 = data.current;
-				if (_v4.$ === 'Nothing') {
-					return _List_fromArray(
-						[
-							A3($author$project$Pretest$Acceptability$viewTransition, data.infos.end, saveDataMsg, 'Click to save your answers')
-						]);
-				} else {
-					var trial = _v4.a;
-					var _v5 = data.state.step;
-					switch (_v5.$) {
-						case 'Init':
-							return _List_fromArray(
-								[
-									A2(
-									$rtfeldman$elm_css$Html$Styled$p,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col  text-center ')
-										]),
-									_List_fromArray(
-										[
-											$author$project$View$fromMarkdown(data.infos.trainingWheel)
-										]))
-								]);
-						case 'End':
-							return _List_Nil;
-						default:
-							return _List_fromArray(
-								[prompt]);
-					}
-				}
-			case 'Loading':
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit this page, data might be lost.')
-					]);
-			case 'NotStarted':
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('not started')
-					]);
-			default:
-				var reason = task.a;
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Oups, I ran into the following error: ' + reason)
-							]))
-					]);
-		}
-	});
-var $author$project$Pretest$GeneralInfos$view = F3(
-	function (model, userUpdatedEmailField, sendUserDataMsg) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col items-center justify-center')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$h1,
+					$rtfeldman$elm_css$Html$Styled$pre,
 					_List_Nil,
 					_List_fromArray(
 						[
-							$rtfeldman$elm_css$Html$Styled$text('Hello')
-						])),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$label,
-					_List_fromArray(
+							$rtfeldman$elm_css$Html$Styled$text(reason)
+						]))
+				]);
+		default:
+			switch (task.a.$) {
+				case 'Training':
+					var _v1 = task.a;
+					var data = task.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Nothing') {
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$button(
+										{isDisabled: false, message: $author$project$Pretest$Acceptability$StartMain, txt: 'That\'s it for the practice items'})
+									]))
+							]);
+					} else {
+						var trial = _v2.a;
+						var _v3 = data.state.step;
+						switch (_v3.$) {
+							case 'Init':
+								return _List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col  text-center ')
+											]),
+										_List_fromArray(
+											[
+												$author$project$View$fromMarkdown(data.infos.instructions_short)
+											]))
+									]);
+							case 'End':
+								return _List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center justify-center')
+											]),
+										_List_fromArray(
+											[
+												$author$project$View$fromMarkdown(trial.feedback)
+											]))
+									]);
+							default:
+								return _List_fromArray(
+									[prompt]);
+						}
+					}
+				case 'Main':
+					var _v4 = task.a;
+					var data = task.b;
+					var _v5 = data.current;
+					if (_v5.$ === 'Nothing') {
+						return _List_fromArray(
+							[
+								A3($author$project$Pretest$Acceptability$viewTransition, data.infos.end, $author$project$Pretest$Acceptability$UserClickedSaveMsg, 'Click to save your answers')
+							]);
+					} else {
+						var _v6 = data.state.step;
+						switch (_v6.$) {
+							case 'Init':
+								return _List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col  text-center ')
+											]),
+										_List_fromArray(
+											[
+												$author$project$View$fromMarkdown(data.infos.trainingWheel)
+											]))
+									]);
+							case 'End':
+								return _List_Nil;
+							default:
+								return _List_fromArray(
+									[prompt]);
+						}
+					}
+				default:
+					var _v7 = task.a;
+					var data = task.b;
+					return _List_fromArray(
 						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$for('email')
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Enter your email')
-						])),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$input,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$type_('email'),
-							$rtfeldman$elm_css$Html$Styled$Attributes$value(model),
-							$rtfeldman$elm_css$Html$Styled$Attributes$id('email'),
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2'),
-							$rtfeldman$elm_css$Html$Styled$Events$onInput(userUpdatedEmailField)
-						]),
-					_List_Nil),
-					$author$project$View$button(
-					{
-						isDisabled: false,
-						message: sendUserDataMsg(model),
-						txt: 'S\'enregistrer'
-					})
-				]));
-	});
-var $author$project$Pretest$SPR$No = {$: 'No'};
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$Acceptability$UserClickedStartTraining)
+						]);
+			}
+	}
+};
 var $author$project$Pretest$SPR$StartMain = F2(
 	function (a, b) {
 		return {$: 'StartMain', a: a, b: b};
 	});
-var $author$project$Pretest$SPR$Unsure = {$: 'Unsure'};
-var $author$project$Pretest$SPR$UserChoseNewAnswer = function (a) {
-	return {$: 'UserChoseNewAnswer', a: a};
-};
-var $author$project$Pretest$SPR$UserConfirmedChoice = {$: 'UserConfirmedChoice'};
-var $author$project$Pretest$SPR$Yes = {$: 'Yes'};
-var $author$project$Pretest$SPR$answerFromString = function (str) {
-	switch (str) {
-		case 'Yes':
-			return $author$project$Pretest$SPR$Yes;
-		case 'No':
-			return $author$project$Pretest$SPR$No;
-		case 'I don\'t know':
-			return $author$project$Pretest$SPR$Unsure;
-		default:
-			return $author$project$Pretest$SPR$Unsure;
-	}
-};
-var $author$project$Pretest$SPR$answerToString = function (answer) {
-	switch (answer.$) {
-		case 'Yes':
-			return 'Yes';
-		case 'No':
-			return 'No';
-		case 'Unsure':
-			return 'I don\'t know';
-		default:
-			return '';
-	}
-};
-var $rtfeldman$elm_css$Html$Styled$legend = $rtfeldman$elm_css$Html$Styled$node('legend');
+var $author$project$Pretest$SPR$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Pretest$SPR$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
+var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
+var $author$project$View$pct = F2(
+	function (trialn, trials) {
+		return (trialn / $elm$core$List$length(trials)) * 100;
+	});
+var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
+var $author$project$Progressbar$progressBar = F2(
+	function (history, remainingTrials) {
+		var trialNumber = $elm$core$List$length(history) + 1;
+		var pct_ = A2(
+			$author$project$View$pct,
+			trialNumber,
+			_Utils_ap(
+				remainingTrials,
+				A2($elm$core$List$map, $elm$core$Tuple$first, history)));
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('shadow max-w-xl w-full bg-gray-300 mt-2 mb-12 transition duration-500')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-indigo-600 text-sm font-bold w-full leading-none py-1 text-center text-white '),
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Css$width(
+									$rtfeldman$elm_css$Css$pct(pct_))
+								]))
+						]),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$fromInt(
+								$elm$core$Basics$round(pct_)) + '%')
+						]))
+				]));
+	});
+var $author$project$View$unclickableButton = F2(
+	function (color, txt) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center m-2 p-4 rounded-lg ' + (color + ' justify-center'))
+				]),
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(txt)
+				]));
+	});
+var $author$project$Pretest$SPR$viewTask = F3(
+	function (data, trial, endTrialMsg) {
+		var _v0 = _Utils_Tuple2(data.state.step, data.state.currentSegment);
+		switch (_v0.a.$) {
+			case 'SPR':
+				if (_v0.b.$ === 'Just') {
+					var s = _v0.a.a;
+					var taggedSegment = _v0.b.a.taggedSegment;
+					if (s.$ === 'Start') {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$p,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('text-bold')
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('Press the space bar to start reading')
+								]));
+					} else {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('w-max h-max flex flex-col items-center pt-16 pb-16 border-2 font-bold text-xl')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('items-center')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(taggedSegment.b)
+										]))
+								]));
+					}
+				} else {
+					var _v2 = _v0.b;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$p,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Press the space bar to start reading')
+							]));
+				}
+			case 'Question':
+				var _v3 = _v0.a;
+				return A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('w-max h-max flex flex-col items-center pt-16 pb-16 border-2')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$rtfeldman$elm_css$Html$Styled$span,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg font-bold')
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(trial.question)
+								])),
+							A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row m-2')
+								]),
+							_List_fromArray(
+								[
+									A2($author$project$View$unclickableButton, 'bg-green-500', 'Y = Yes'),
+									A2($author$project$View$unclickableButton, 'bg-red-500', 'N = No'),
+									A2($author$project$View$unclickableButton, 'bg-gray-400', 'K = I don\'t know')
+								]))
+						]));
+			default:
+				var _v4 = _v0.a;
+				return A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('w-max h-max flex flex-col items-center pt-16 pb-16 border-2')
+						]),
+					_List_fromArray(
+						[
+							$author$project$View$fromMarkdown(trial.feedback)
+						]));
+		}
+	});
 var $author$project$Pretest$SPR$view = function (task) {
 	switch (task.$) {
 		case 'Loading':
 			return _List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$text('Loading')
+					$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t exit or data may be lost')
 				]);
-		case 'Intr':
-			var data = task.a;
-			var _v1 = data.current;
-			if (_v1.$ === 'Just') {
-				var trial = _v1.a;
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text(data.infos.instructions),
-						function () {
-						var _v2 = _Utils_Tuple2(data.state.step, data.state.currentSegment);
-						switch (_v2.a.$) {
-							case 'SPR':
-								if (_v2.b.$ === 'Just') {
-									var s = _v2.a.a;
-									var taggedSegment = _v2.b.a.taggedSegment;
-									if (s.$ === 'Start') {
-										return $rtfeldman$elm_css$Html$Styled$text('Press space to start reading');
-									} else {
-										var segment = s.a;
-										return $rtfeldman$elm_css$Html$Styled$text(taggedSegment.b);
-									}
-								} else {
-									var s = _v2.a.a;
-									var _v4 = _v2.b;
-									return $rtfeldman$elm_css$Html$Styled$text('Press space to start');
-								}
-							case 'Question':
-								var _v5 = _v2.a;
-								var yes = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$Yes);
-								var value = $author$project$Pretest$SPR$answerToString(data.state.answer);
-								var unsure = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$Unsure);
-								var no = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$No);
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$rtfeldman$elm_css$Html$Styled$fieldset,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-												]),
-											_List_fromArray(
-												[
-													A2(
-													$rtfeldman$elm_css$Html$Styled$legend,
-													_List_Nil,
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$text(trial.question)
-														])),
-													A2(
-													$rtfeldman$elm_css$Html$Styled$div,
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row')
-														]),
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$input,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$id(yes),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(yes),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-																	_Utils_eq(value, yes)),
-																	$rtfeldman$elm_css$Html$Styled$Events$onClick(
-																	$author$project$Pretest$SPR$UserChoseNewAnswer(
-																		$author$project$Pretest$SPR$answerFromString(yes)))
-																]),
-															_List_Nil),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$label,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$for(yes)
-																]),
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text(yes)
-																]))
-														])),
-													A2(
-													$rtfeldman$elm_css$Html$Styled$div,
-													_List_Nil,
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$input,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$id(no),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(no),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-																	_Utils_eq(value, no)),
-																	$rtfeldman$elm_css$Html$Styled$Events$onClick(
-																	$author$project$Pretest$SPR$UserChoseNewAnswer(
-																		$author$project$Pretest$SPR$answerFromString(no)))
-																]),
-															_List_Nil),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$label,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$for(no)
-																]),
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text(no)
-																]))
-														])),
-													A2(
-													$rtfeldman$elm_css$Html$Styled$div,
-													_List_Nil,
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$input,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$id(unsure),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(unsure),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-																	_Utils_eq(value, unsure)),
-																	$rtfeldman$elm_css$Html$Styled$Events$onClick(
-																	$author$project$Pretest$SPR$UserChoseNewAnswer(
-																		$author$project$Pretest$SPR$answerFromString(unsure)))
-																]),
-															_List_Nil),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$label,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$for(no),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(value)
-																]),
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text(unsure)
-																]))
-														]))
-												])),
-											$author$project$View$button(
-											{
-												isDisabled: $elm$core$String$isEmpty(value),
-												message: $author$project$Pretest$SPR$UserConfirmedChoice,
-												txt: 'feedback'
-											})
-										]));
-							default:
-								var _v6 = _v2.a;
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text(trial.feedback),
-											$author$project$View$button(
-											{isDisabled: false, message: $author$project$Pretest$SPR$UserClickedNextTrial, txt: 'Next trial'})
-										]));
-						}
-					}()
-					]);
-			} else {
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('end of training'),
-						$author$project$View$button(
-						{
-							isDisabled: false,
-							message: A2($author$project$Pretest$SPR$StartMain, data.infos, data.mainTrials),
-							txt: 'Start'
-						})
-					]);
-			}
-		case 'Main':
-			var data = task.a;
-			var _v7 = data.current;
-			if (_v7.$ === 'Just') {
-				var trial = _v7.a;
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text(data.infos.instructions),
-						function () {
-						var _v8 = _Utils_Tuple2(data.state.step, data.state.currentSegment);
-						switch (_v8.a.$) {
-							case 'SPR':
-								if (_v8.b.$ === 'Just') {
-									var s = _v8.a.a;
-									var taggedSegment = _v8.b.a.taggedSegment;
-									if (s.$ === 'Start') {
-										return $rtfeldman$elm_css$Html$Styled$text('Press space to start reading');
-									} else {
-										var segment = s.a;
-										return $rtfeldman$elm_css$Html$Styled$text(taggedSegment.b);
-									}
-								} else {
-									var s = _v8.a.a;
-									var _v10 = _v8.b;
-									return $rtfeldman$elm_css$Html$Styled$text('Press space to start');
-								}
-							case 'Question':
-								var _v11 = _v8.a;
-								var yes = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$Yes);
-								var value = $author$project$Pretest$SPR$answerToString(data.state.answer);
-								var unsure = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$Unsure);
-								var no = $author$project$Pretest$SPR$answerToString($author$project$Pretest$SPR$No);
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$rtfeldman$elm_css$Html$Styled$fieldset,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-												]),
-											_List_fromArray(
-												[
-													A2(
-													$rtfeldman$elm_css$Html$Styled$legend,
-													_List_Nil,
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$text(trial.question)
-														])),
-													A2(
-													$rtfeldman$elm_css$Html$Styled$div,
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row')
-														]),
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$input,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$id(yes),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(yes),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-																	_Utils_eq(value, yes)),
-																	$rtfeldman$elm_css$Html$Styled$Events$onClick(
-																	$author$project$Pretest$SPR$UserChoseNewAnswer(
-																		$author$project$Pretest$SPR$answerFromString(yes)))
-																]),
-															_List_Nil),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$label,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$for(yes)
-																]),
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text(yes)
-																]))
-														])),
-													A2(
-													$rtfeldman$elm_css$Html$Styled$div,
-													_List_Nil,
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$input,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$id(no),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(no),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-																	_Utils_eq(value, no)),
-																	$rtfeldman$elm_css$Html$Styled$Events$onClick(
-																	$author$project$Pretest$SPR$UserChoseNewAnswer(
-																		$author$project$Pretest$SPR$answerFromString(no)))
-																]),
-															_List_Nil),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$label,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$for(no)
-																]),
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text(no)
-																]))
-														])),
-													A2(
-													$rtfeldman$elm_css$Html$Styled$div,
-													_List_Nil,
-													_List_fromArray(
-														[
-															A2(
-															$rtfeldman$elm_css$Html$Styled$input,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$id(unsure),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(unsure),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-																	_Utils_eq(value, unsure)),
-																	$rtfeldman$elm_css$Html$Styled$Events$onClick(
-																	$author$project$Pretest$SPR$UserChoseNewAnswer(
-																		$author$project$Pretest$SPR$answerFromString(unsure)))
-																]),
-															_List_Nil),
-															A2(
-															$rtfeldman$elm_css$Html$Styled$label,
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$Attributes$for(no),
-																	$rtfeldman$elm_css$Html$Styled$Attributes$value(value)
-																]),
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Html$Styled$text(unsure)
-																]))
-														]))
-												])),
-											$author$project$View$button(
-											{
-												isDisabled: $elm$core$String$isEmpty(value),
-												message: $author$project$Pretest$SPR$UserConfirmedChoice,
-												txt: 'feedback'
-											})
-										]));
-							default:
-								var _v12 = _v8.a;
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text(trial.feedback),
-											$author$project$View$button(
-											{isDisabled: false, message: $author$project$Pretest$SPR$UserClickedNextTrial, txt: 'Next trial'})
-										]));
-						}
-					}()
-					]);
-			} else {
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('end of training'),
-						$author$project$View$button(
-						{
-							isDisabled: false,
-							message: A2($author$project$Pretest$SPR$StartMain, data.infos, data.mainTrials),
-							txt: 'Start'
-						})
-					]);
-			}
 		case 'Err':
 			var reason = task.a;
-			return _List_Nil;
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('I encountered the following error: ' + reason)
+				]);
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('Thanks for your participation !')
+						]))
+				]);
 		default:
-			return _List_Nil;
+			switch (task.a.$) {
+				case 'Training':
+					var _v1 = task.a;
+					var data = task.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						var trial = _v2.a;
+						return _List_fromArray(
+							[
+								A3($author$project$Pretest$SPR$viewTask, data, trial, $author$project$Pretest$SPR$UserConfirmedChoice)
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$fromMarkdown(data.infos.introToMain),
+										$author$project$View$button(
+										{
+											isDisabled: false,
+											message: A2($author$project$Pretest$SPR$StartMain, data.infos, data.mainTrials),
+											txt: 'Start'
+										})
+									]))
+							]);
+					}
+				case 'Main':
+					var _v3 = task.a;
+					var data = task.b;
+					var _v4 = data.current;
+					if (_v4.$ === 'Just') {
+						var trial = _v4.a;
+						return _List_fromArray(
+							[
+								A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
+								A3($author$project$Pretest$SPR$viewTask, data, trial, $author$project$Pretest$SPR$UserClickedNextTrial)
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$fromMarkdown(data.infos.end),
+										$author$project$View$button(
+										{isDisabled: false, message: $author$project$Pretest$SPR$UserClickedSaveData, txt: 'Click here to save your data'})
+									]))
+							]);
+					}
+				default:
+					var _v5 = task.a;
+					var data = task.b;
+					return _List_fromArray(
+						[
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$SPR$UserClickedStartTraining)
+						]);
+			}
 	}
 };
-var $author$project$View$bold = function (string) {
-	return '**' + (string + '**');
-};
+var $author$project$Pretest$SentenceCompletion$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Pretest$SentenceCompletion$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Pretest$SentenceCompletion$UserClickedStartMain = F2(
+	function (a, b) {
+		return {$: 'UserClickedStartMain', a: a, b: b};
+	});
+var $author$project$Pretest$SentenceCompletion$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Pretest$SentenceCompletion$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$Pretest$SentenceCompletion$UserUpdatedField = F2(
+	function (a, b) {
+		return {$: 'UserUpdatedField', a: a, b: b};
+	});
 var $author$project$View$end = F3(
 	function (endInfo, saveDataMsg, linkToNextTask) {
 		return A2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full items-center')
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col text-xl w-full items-center')
 				]),
 			_List_fromArray(
 				[
@@ -21414,6 +22433,557 @@ var $author$project$View$end = F3(
 						]))
 				]));
 	});
+var $author$project$View$navigationButton = F3(
+	function (toggleFeedbackMsg, nextTrialMsg, feedback) {
+		return $author$project$View$button(
+			(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'} : {isDisabled: false, message: nextTrialMsg, txt: 'Next item '});
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
+var $author$project$Pretest$SentenceCompletion$readOnlyAmorce = F2(
+	function (firstAmorce, firstProduction) {
+		return (_Utils_cmp(
+			$elm$core$String$length(firstProduction),
+			$elm$core$String$length(firstAmorce)) < 0) ? firstAmorce : firstProduction;
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$readonly = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('readOnly');
+var $author$project$Pretest$SentenceCompletion$readOnlyOnFeedback = function (data) {
+	return data.feedback ? $rtfeldman$elm_css$Html$Styled$Attributes$readonly(true) : $rtfeldman$elm_css$Html$Styled$Attributes$readonly(false);
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$spellcheck = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('spellcheck');
+var $rtfeldman$elm_css$Html$Styled$textarea = $rtfeldman$elm_css$Html$Styled$node('textarea');
+var $author$project$Pretest$SentenceCompletion$view = function (task) {
+	switch (task.$) {
+		case 'Err':
+			var reason = task.a;
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(reason)
+				]);
+		case 'Loading':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data may be lost')
+				]);
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('C\'est tout bon!')
+				]);
+		default:
+			switch (task.a.$) {
+				case 'Training':
+					var _v1 = task.a;
+					var data = task.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						var trial = _v2.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg  m-4 p-2')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.context)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$textarea,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$id('firstProd'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$value(
+												A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.firstAmorce, data.state.firstProduction)),
+												$rtfeldman$elm_css$Html$Styled$Events$onInput(
+												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$FirstProduction)),
+												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
+												$rtfeldman$elm_css$Html$Styled$Attributes$placeholder(trial.firstAmorce),
+												$author$project$Pretest$SentenceCompletion$readOnlyOnFeedback(data)
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.firstAmorce)
+											])),
+										data.feedback ? $author$project$View$fromMarkdown(trial.firstFeedback) : $rtfeldman$elm_css$Html$Styled$text(''),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$textarea,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$id('secondProd'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2'),
+												$rtfeldman$elm_css$Html$Styled$Events$onInput(
+												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$SecondProduction)),
+												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
+												$author$project$Pretest$SentenceCompletion$readOnlyOnFeedback(data),
+												$rtfeldman$elm_css$Html$Styled$Attributes$value(
+												A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.secondAmorce, data.state.secondProduction))
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.secondAmorce)
+											])),
+										data.feedback ? $author$project$View$fromMarkdown(trial.secondFeedback) : $rtfeldman$elm_css$Html$Styled$text('')
+									])),
+								A3($author$project$View$navigationButton, $author$project$Pretest$SentenceCompletion$UserClickedToggleFeedback, $author$project$Pretest$SentenceCompletion$UserClickedNextTrial, data.feedback)
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$fromMarkdown(data.infos.introToMain),
+										$author$project$View$button(
+										{
+											isDisabled: false,
+											message: A2($author$project$Pretest$SentenceCompletion$UserClickedStartMain, data.infos, data.mainTrials),
+											txt: 'Start'
+										})
+									]))
+							]);
+					}
+				case 'Main':
+					var _v3 = task.a;
+					var data = task.b;
+					var _v4 = data.current;
+					if (_v4.$ === 'Just') {
+						var trial = _v4.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full items-center')
+									]),
+								_List_fromArray(
+									[
+										A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$p,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg  m-4 p-2')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.context)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$textarea,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$id('firstProd'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2 w-full'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class(
+												_Utils_eq(data.state.order, $author$project$Pretest$SentenceCompletion$FirstProduction) ? 'order-2' : 'order-3'),
+												$rtfeldman$elm_css$Html$Styled$Events$onInput(
+												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$FirstProduction)),
+												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
+												$rtfeldman$elm_css$Html$Styled$Attributes$value(
+												A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.firstAmorce, data.state.firstProduction))
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.firstAmorce)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$textarea,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$id('secondProd'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 mt-4 p-2 w-full'),
+												$rtfeldman$elm_css$Html$Styled$Events$onInput(
+												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$SecondProduction)),
+												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class(
+												_Utils_eq(data.state.order, $author$project$Pretest$SentenceCompletion$SecondProduction) ? ' order-2' : ' order-3'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$value(
+												A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.secondAmorce, data.state.secondProduction))
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text(trial.secondAmorce)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('order-last')
+											]),
+										_List_fromArray(
+											[
+												$author$project$View$button(
+												{isDisabled: false, message: $author$project$Pretest$SentenceCompletion$UserClickedNextTrial, txt: 'Continue'})
+											]))
+									]))
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$SentenceCompletion$UserClickedSaveData, '')
+							]);
+					}
+				default:
+					var _v5 = task.a;
+					var data = task.b;
+					return _List_fromArray(
+						[
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$SentenceCompletion$UserClickedStartTraining)
+						]);
+			}
+	}
+};
+var $author$project$Pretest$VKS$UserClickedNewKnowledge = function (a) {
+	return {$: 'UserClickedNewKnowledge', a: a};
+};
+var $author$project$Pretest$VKS$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Pretest$VKS$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Pretest$VKS$UserClickedStartMain = {$: 'UserClickedStartMain'};
+var $author$project$Pretest$VKS$UserUpdatedField = F2(
+	function (a, b) {
+		return {$: 'UserUpdatedField', a: a, b: b};
+	});
+var $author$project$Pretest$VKS$view = function (task) {
+	switch (task.$) {
+		case 'Err':
+			var reason = task.a;
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(reason)
+				]);
+		case 'Loading':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data may be lost')
+				]);
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('C\'est tout bon!')
+				]);
+		default:
+			switch (task.a.$) {
+				case 'Training':
+					var _v1 = task.a;
+					var data = task.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						return _List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('vks')
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$fromMarkdown(data.infos.introToMain),
+										$author$project$View$button(
+										{isDisabled: false, message: $author$project$Pretest$VKS$UserClickedStartMain, txt: 'Start'})
+									]))
+							]);
+					}
+				case 'Main':
+					var _v3 = task.a;
+					var data = task.b;
+					var _v4 = data.current;
+					if (_v4.$ === 'Just') {
+						var trial = _v4.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$span,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg font-bold')
+									]),
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('to ' + trial.verb)
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$fieldset,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col m-2')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$label,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$input,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$id('ns'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$value('NeverSeen'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$checked(
+														_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$NeverSeen)),
+														$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
+													]),
+												_List_Nil),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$span,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text('I don’t remember having seen this verb before')
+													]))
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$label,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$input,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$value('PreviouslySeen'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$checked(
+														_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$PreviouslySeen)),
+														$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
+													]),
+												_List_Nil),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$span,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text('I have seen this verb before, but I don’t know what it means')
+													]))
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$label,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$input,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$value('Known'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$checked(
+														_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known)),
+														$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
+													]),
+												_List_Nil),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$span,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text('I have seen this verb before, and I think I know what it means')
+													]))
+											]))
+									])),
+								_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) ? A2(
+								$rtfeldman$elm_css$Html$Styled$fieldset,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col p-2')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$label,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('What do you think this verb means? (please provide a translation, synonym or definition or all meanings of this verb that you know):'),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$input,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$type_('text'),
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2'),
+														$rtfeldman$elm_css$Html$Styled$Events$onInput(
+														$author$project$Pretest$VKS$UserUpdatedField($author$project$Pretest$VKS$FirstProduction))
+													]),
+												_List_Nil)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$label,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col p-2')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('Please use this verb in a sentence. The sentence should show that you know what the word means.'),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$textarea,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2'),
+														$rtfeldman$elm_css$Html$Styled$Events$onInput(
+														$author$project$Pretest$VKS$UserUpdatedField($author$project$Pretest$VKS$SecondProduction))
+													]),
+												_List_Nil)
+											]))
+									])) : $rtfeldman$elm_css$Html$Styled$text(''),
+								$author$project$View$button(
+								{
+									isDisabled: (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) && A2(
+										$elm$core$List$all,
+										$elm$core$String$isEmpty,
+										_List_fromArray(
+											[data.state.usage, data.state.definition]))) ? true : (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$NoAnswer) ? true : false),
+									message: $author$project$Pretest$VKS$UserClickedNextTrial,
+									txt: 'Next Item'
+								})
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$VKS$UserClickedSaveData, '')
+							]);
+					}
+				default:
+					var _v5 = task.a;
+					var data = task.b;
+					return _List_fromArray(
+						[
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$VKS$UserClickedStartMain)
+						]);
+			}
+	}
+};
+var $author$project$Pretest$YesNo$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Pretest$YesNo$UserClickedStartTask = {$: 'UserClickedStartTask'};
+var $author$project$View$loading = A2(
+	$rtfeldman$elm_css$Html$Styled$div,
+	_List_Nil,
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data will be lost')
+		]));
+var $author$project$Pretest$YesNo$view = function (task) {
+	switch (task.$) {
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('C\'est Bon !')
+				]);
+		case 'Loading':
+			return _List_fromArray(
+				[$author$project$View$loading]);
+		case 'Running':
+			var step = task.a;
+			var data = task.b;
+			switch (step.$) {
+				case 'Instructions':
+					return _List_fromArray(
+						[
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$YesNo$UserClickedStartTask)
+						]);
+				case 'Training':
+					return _List_Nil;
+				default:
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						var trial = _v2.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center text-xl font-bold')
+									]),
+								_List_fromArray(
+									[
+										A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
+										$rtfeldman$elm_css$Html$Styled$text(trial.word),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row m-2')
+											]),
+										_List_fromArray(
+											[
+												A2($author$project$View$unclickableButton, 'bg-green-500', 'F = Exists'),
+												A2($author$project$View$unclickableButton, 'bg-red-500', 'J = Does not exist')
+											]))
+									]))
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$YesNo$UserClickedSaveData, '')
+							]);
+					}
+			}
+		default:
+			var reason = task.a;
+			return _List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(reason)
+						]))
+				]);
+	}
+};
+var $author$project$Session1$ContextUnderstanding$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session1$ContextUnderstanding$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
+};
+var $author$project$Session1$ContextUnderstanding$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Session1$ContextUnderstanding$UserClickedStartMain = F2(
+	function (a, b) {
+		return {$: 'UserClickedStartMain', a: a, b: b};
+	});
+var $author$project$Session1$ContextUnderstanding$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session1$ContextUnderstanding$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$View$bold = function (string) {
+	return '**' + (string + '**');
+};
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
@@ -21617,7 +23187,7 @@ var $author$project$View$introToMain = function (msg) {
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
 			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col w-full items-center justify-center')
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col text-xl w-full items-center justify-center')
 			]),
 		_List_fromArray(
 			[
@@ -21632,12 +23202,7 @@ var $author$project$View$introToMain = function (msg) {
 				{isDisabled: false, message: msg, txt: 'Start'})
 			]));
 };
-var $author$project$View$navigationButton = F3(
-	function (toggleFeedbackMsg, nextTrialMsg, feedback) {
-		return $author$project$View$button(
-			(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'} : {isDisabled: false, message: nextTrialMsg, txt: 'Next item '});
-	});
-var $author$project$Session1$CU1$paragraphWithInput = F3(
+var $author$project$Session1$ContextUnderstanding$paragraphWithInput = F3(
 	function (pre, userAnswer, post) {
 		return A2(
 			$rtfeldman$elm_css$Html$Styled$p,
@@ -21659,50 +23224,6 @@ var $author$project$Session1$CU1$paragraphWithInput = F3(
 							$rtfeldman$elm_css$Html$Styled$text(userAnswer)
 						])),
 					$rtfeldman$elm_css$Html$Styled$text(post)
-				]));
-	});
-var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
-var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
-var $author$project$View$pct = F2(
-	function (trialn, trials) {
-		return (trialn / $elm$core$List$length(trials)) * 100;
-	});
-var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
-var $author$project$Progressbar$progressBar = F2(
-	function (history, remainingTrials) {
-		var trialNumber = $elm$core$List$length(history) + 1;
-		var pct_ = A2(
-			$author$project$View$pct,
-			trialNumber,
-			_Utils_ap(
-				remainingTrials,
-				A2($elm$core$List$map, $elm$core$Tuple$first, history)));
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('shadow max-w-xl w-full bg-gray-300 mt-2 mb-12 transition duration-500')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('bg-indigo-600 text-sm font-bold w-full leading-none py-1 text-center text-white '),
-							$rtfeldman$elm_css$Html$Styled$Attributes$css(
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Css$width(
-									$rtfeldman$elm_css$Css$pct(pct_))
-								]))
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(
-							$elm$core$String$fromInt(
-								$elm$core$Basics$round(pct_)) + '%')
-						]))
 				]));
 	});
 var $elm$core$Tuple$pair = F2(
@@ -22684,7 +24205,7 @@ var $author$project$View$trainingWheelsGeneric = F3(
 			return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
 		}
 	});
-var $author$project$Session1$CU1$view = function (task) {
+var $author$project$Session1$ContextUnderstanding$view = function (task) {
 	var _v0 = task.task;
 	switch (_v0.$) {
 		case 'NotStarted':
@@ -22704,161 +24225,184 @@ var $author$project$Session1$CU1$view = function (task) {
 					[
 						$rtfeldman$elm_css$Html$Styled$text(reason)
 					]));
-		case 'Intr':
-			var data = _v0.a;
-			var _v1 = data.current;
-			if (_v1.$ === 'Just') {
-				var trial = _v1.a;
-				var _v2 = function () {
-					var _v3 = A2($elm$core$String$split, '/', trial.text);
-					if (_v3.b) {
-						if (_v3.b.b) {
-							var x = _v3.a;
-							var _v4 = _v3.b;
-							var y = _v4.a;
-							return _Utils_Tuple2(x, y);
-						} else {
-							var x = _v3.a;
-							return _Utils_Tuple2(x, 'defaultPost');
-						}
-					} else {
-						return _Utils_Tuple2('defautpre', 'defaultpOst');
-					}
-				}();
-				var pre = _v2.a;
-				var post = _v2.b;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$author$project$View$viewTraining,
-							data.infos.instructions,
+		case 'Loading':
+			return $rtfeldman$elm_css$Html$Styled$text('Loading...');
+		default:
+			switch (_v0.a.$) {
+				case 'Training':
+					var _v1 = _v0.a;
+					var data = _v0.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						var trial = _v2.a;
+						var _v3 = function () {
+							var _v4 = A2($elm$core$String$split, '/', trial.text);
+							if (_v4.b) {
+								if (_v4.b.b) {
+									var x = _v4.a;
+									var _v5 = _v4.b;
+									var y = _v5.a;
+									return _Utils_Tuple2(x, y);
+								} else {
+									var x = _v4.a;
+									return _Utils_Tuple2(x, 'defaultPost');
+								}
+							} else {
+								return _Utils_Tuple2('defautpre', 'defaultpOst');
+							}
+						}();
+						var pre = _v3.a;
+						var post = _v3.b;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
 							_List_fromArray(
 								[
-									A3(
-									$author$project$View$trainingWheelsGeneric,
-									$elm$core$List$length(data.history),
-									data.infos.trainingWheel,
-									_List_fromArray(
-										[
-											$author$project$View$bold(trial.target)
-										])),
-									A3($author$project$Session1$CU1$paragraphWithInput, pre, data.state.userAnswer, post),
 									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
+									$author$project$View$viewTraining,
+									data.infos.instructions,
 									_List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full max-w-2xl')
-										]),
-									A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder)),
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
-										]),
-									_List_fromArray(
-										[
-											$author$project$View$genericSingleChoiceFeedback(
-											{
-												button: A3($author$project$View$navigationButton, task.toggleFeedbackMsg, task.nextTrialMsg, data.feedback),
-												feedback_Correct: _Utils_Tuple2(
-													data.infos.feedback_correct,
-													_List_fromArray(
-														[
-															$author$project$View$bold(trial.target),
-															$author$project$View$bold(trial.definition)
-														])),
-												feedback_Incorrect: _Utils_Tuple2(
-													data.infos.feedback_incorrect,
-													_List_fromArray(
-														[
-															$author$project$View$bold(trial.target),
-															$author$project$View$bold(trial.definition)
-														])),
-												isVisible: data.feedback,
-												target: trial.target,
-												userAnswer: data.state.userAnswer
-											})
+											A3(
+											$author$project$View$trainingWheelsGeneric,
+											$elm$core$List$length(data.history),
+											data.infos.trainingWheel,
+											_List_fromArray(
+												[
+													$author$project$View$bold(trial.target)
+												])),
+											A3($author$project$Session1$ContextUnderstanding$paragraphWithInput, pre, data.state.userAnswer, post),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full max-w-2xl')
+												]),
+											A5($author$project$View$shuffledOptions, data.state, data.feedback, $author$project$Session1$ContextUnderstanding$UserClickedRadioButton, trial, task.optionsOrder)),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+												]),
+											_List_fromArray(
+												[
+													$author$project$View$genericSingleChoiceFeedback(
+													{
+														button: A3($author$project$View$navigationButton, $author$project$Session1$ContextUnderstanding$UserClickedToggleFeedback, $author$project$Session1$ContextUnderstanding$UserClickedNextTrial, data.feedback),
+														feedback_Correct: _Utils_Tuple2(
+															data.infos.feedback_correct,
+															_List_fromArray(
+																[
+																	$author$project$View$bold(trial.target),
+																	$author$project$View$bold(trial.definition)
+																])),
+														feedback_Incorrect: _Utils_Tuple2(
+															data.infos.feedback_incorrect,
+															_List_fromArray(
+																[
+																	$author$project$View$bold(trial.target),
+																	$author$project$View$bold(trial.definition)
+																])),
+														isVisible: data.feedback,
+														target: trial.target,
+														userAnswer: data.state.userAnswer
+													})
+												]))
 										]))
-								]))
-						]));
-			} else {
-				return $author$project$View$introToMain(
-					A2(task.startMainMsg, data.mainTrials, data.infos));
-			}
-		case 'Main':
-			var data = _v0.a;
-			var _v5 = data.current;
-			if (_v5.$ === 'Just') {
-				var trial = _v5.a;
-				var _v6 = function () {
-					var _v7 = A2($elm$core$String$split, '/', trial.text);
-					if (_v7.b) {
-						if (_v7.b.b) {
-							var x = _v7.a;
-							var _v8 = _v7.b;
-							var y = _v8.a;
-							return _Utils_Tuple2(x, y);
-						} else {
-							var x = _v7.a;
-							return _Utils_Tuple2(x, 'defaultPost');
-						}
+								]));
 					} else {
-						return _Utils_Tuple2('defautpre', 'defaultpOst');
+						return $author$project$View$introToMain(
+							A2($author$project$Session1$ContextUnderstanding$UserClickedStartMain, data.mainTrials, data.infos));
 					}
-				}();
-				var pre = _v6.a;
-				var post = _v6.b;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col w-full w-max-3xl items-center justify-center ')
-						]),
-					_List_fromArray(
-						[
-							A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
-							$author$project$View$tooltip(data.infos.instructions_short),
-							A3($author$project$Session1$CU1$paragraphWithInput, pre, data.state.userAnswer, post),
-							A2(
+				case 'Main':
+					var _v6 = _v0.a;
+					var data = _v0.b;
+					var _v7 = data.current;
+					if (_v7.$ === 'Just') {
+						var trial = _v7.a;
+						var _v8 = function () {
+							var _v9 = A2($elm$core$String$split, '/', trial.text);
+							if (_v9.b) {
+								if (_v9.b.b) {
+									var x = _v9.a;
+									var _v10 = _v9.b;
+									var y = _v10.a;
+									return _Utils_Tuple2(x, y);
+								} else {
+									var x = _v9.a;
+									return _Utils_Tuple2(x, 'defaultPost');
+								}
+							} else {
+								return _Utils_Tuple2('defautpre', 'defaultpOst');
+							}
+						}();
+						var pre = _v8.a;
+						var post = _v8.b;
+						return A2(
 							$rtfeldman$elm_css$Html$Styled$div,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full max-w-xl')
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col w-full w-max-3xl items-center justify-center ')
 								]),
-							A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder)),
-							$author$project$View$genericSingleChoiceFeedback(
-							{
-								button: A3($author$project$View$navigationButton, task.toggleFeedbackMsg, task.nextTrialMsg, data.feedback),
-								feedback_Correct: _Utils_Tuple2(
-									data.infos.feedback_correct,
+							_List_fromArray(
+								[
+									A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
+									$author$project$View$tooltip(data.infos.instructions_short),
+									A3($author$project$Session1$ContextUnderstanding$paragraphWithInput, pre, data.state.userAnswer, post),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
 									_List_fromArray(
 										[
-											$author$project$View$bold(trial.target),
-											$author$project$View$bold(trial.definition)
-										])),
-								feedback_Incorrect: _Utils_Tuple2(
-									data.infos.feedback_incorrect,
-									_List_fromArray(
-										[
-											$author$project$View$bold(trial.target),
-											$author$project$View$bold(trial.definition)
-										])),
-								isVisible: data.feedback,
-								target: trial.target,
-								userAnswer: data.state.userAnswer
-							})
-						]));
-			} else {
-				return A3($author$project$View$end, data.infos.end, task.userClickedSaveData, './');
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full max-w-xl')
+										]),
+									A5($author$project$View$shuffledOptions, data.state, data.feedback, $author$project$Session1$ContextUnderstanding$UserClickedRadioButton, trial, task.optionsOrder)),
+									$author$project$View$genericSingleChoiceFeedback(
+									{
+										button: A3($author$project$View$navigationButton, $author$project$Session1$ContextUnderstanding$UserClickedToggleFeedback, $author$project$Session1$ContextUnderstanding$UserClickedNextTrial, data.feedback),
+										feedback_Correct: _Utils_Tuple2(
+											data.infos.feedback_correct,
+											_List_fromArray(
+												[
+													$author$project$View$bold(trial.target),
+													$author$project$View$bold(trial.definition)
+												])),
+										feedback_Incorrect: _Utils_Tuple2(
+											data.infos.feedback_incorrect,
+											_List_fromArray(
+												[
+													$author$project$View$bold(trial.target),
+													$author$project$View$bold(trial.definition)
+												])),
+										isVisible: data.feedback,
+										target: trial.target,
+										userAnswer: data.state.userAnswer
+									})
+								]));
+					} else {
+						return A3($author$project$View$end, data.infos.end, $author$project$Session1$ContextUnderstanding$UserClickedSaveData, './');
+					}
+				default:
+					var _v11 = _v0.a;
+					var data = _v0.b;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2($author$project$View$instructions, data.infos.instructions, $author$project$Session1$ContextUnderstanding$UserClickedStartTraining)
+							]));
 			}
-		default:
-			return $rtfeldman$elm_css$Html$Styled$text('Loading...');
 	}
 };
+var $author$project$Session1$Meaning$SaveDataMsg = {$: 'SaveDataMsg'};
+var $author$project$Session1$Meaning$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session1$Meaning$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
+};
+var $author$project$Session1$Meaning$UserClickedStartMain = {$: 'UserClickedStartMain'};
+var $author$project$Session1$Meaning$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session1$Meaning$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
 var $author$project$Session1$Meaning$viewQuestion = F2(
 	function (word, trialn) {
 		return A2(
@@ -22904,124 +24448,7 @@ var $author$project$Session1$Meaning$view = function (task) {
 					[
 						$rtfeldman$elm_css$Html$Styled$text(reason)
 					]));
-		case 'Intr':
-			var data = _v0.a;
-			var _v1 = data.current;
-			if (_v1.$ === 'Just') {
-				var trial = _v1.a;
-				return A2(
-					$author$project$View$viewTraining,
-					data.infos.instructions,
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A3(
-									$author$project$View$trainingWheelsGeneric,
-									$elm$core$List$length(data.history),
-									data.infos.trainingWheel,
-									_List_fromArray(
-										[
-											$author$project$View$bold(trial.writtenWord),
-											$author$project$View$bold(trial.target)
-										]))
-								])),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Session1$Meaning$viewQuestion,
-									trial.writtenWord,
-									$elm$core$List$length(data.history))
-								])),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
-									$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
-								]),
-							A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder)),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$author$project$View$genericSingleChoiceFeedback(
-									{
-										button: A3($author$project$View$navigationButton, task.toggleFeedbackMsg, task.nextTrialMsg, data.feedback),
-										feedback_Correct: _Utils_Tuple2(trial.feedbackIncorrect, _List_Nil),
-										feedback_Incorrect: _Utils_Tuple2(trial.feedbackCorrect, _List_Nil),
-										isVisible: data.feedback,
-										target: trial.target,
-										userAnswer: data.state.userAnswer
-									})
-								]))
-						]));
-			} else {
-				return $author$project$View$introToMain(
-					A2(task.startMainMsg, data.mainTrials, data.infos));
-			}
-		case 'Main':
-			var data = _v0.a;
-			var _v2 = data.current;
-			if (_v2.$ === 'Just') {
-				var trial = _v2.a;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col items-center justify-center')
-						]),
-					_List_fromArray(
-						[
-							A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
-							$author$project$View$tooltip(
-							A2(
-								$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
-								data.infos.instructions_short,
-								_List_fromArray(
-									[trial.writtenWord]))),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8 w-full max-w-xl')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Session1$Meaning$viewQuestion,
-									trial.writtenWord,
-									$elm$core$List$length(data.history)),
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 center-items justify-center max-w-xl w-full mt-6 '),
-											$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
-										]),
-									A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder)),
-									$author$project$View$genericSingleChoiceFeedback(
-									{
-										button: A3($author$project$View$navigationButton, task.toggleFeedbackMsg, task.nextTrialMsg, data.feedback),
-										feedback_Correct: _Utils_Tuple2(trial.feedbackIncorrect, _List_Nil),
-										feedback_Incorrect: _Utils_Tuple2(trial.feedbackCorrect, _List_Nil),
-										isVisible: data.feedback,
-										target: trial.target,
-										userAnswer: data.state.userAnswer
-									})
-								]))
-						]));
-			} else {
-				return A3($author$project$View$end, data.infos.end, task.saveDataMsg, 'spelling');
-			}
-		default:
+		case 'NotStarted':
 			return A2(
 				$rtfeldman$elm_css$Html$Styled$div,
 				_List_Nil,
@@ -23029,7 +24456,169 @@ var $author$project$Session1$Meaning$view = function (task) {
 					[
 						$rtfeldman$elm_css$Html$Styled$text('I did not start yet.')
 					]));
+		default:
+			switch (_v0.a.$) {
+				case 'Training':
+					var _v1 = _v0.a;
+					var data = _v0.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						var trial = _v2.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A3(
+											$author$project$View$trainingWheelsGeneric,
+											$elm$core$List$length(data.history),
+											data.infos.trainingWheel,
+											_List_fromArray(
+												[
+													$author$project$View$bold(trial.writtenWord),
+													$author$project$View$bold(trial.target)
+												]))
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$author$project$Session1$Meaning$viewQuestion,
+											trial.writtenWord,
+											$elm$core$List$length(data.history))
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 max-w-xl '),
+											$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
+										]),
+									A5($author$project$View$shuffledOptions, data.state, data.feedback, $author$project$Session1$Meaning$UserClickedRadioButton, trial, task.optionsOrder)),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$author$project$View$genericSingleChoiceFeedback(
+											{
+												button: A3($author$project$View$navigationButton, $author$project$Session1$Meaning$UserClickedToggleFeedback, $author$project$Session1$Meaning$UserClickedNextTrial, data.feedback),
+												feedback_Correct: _Utils_Tuple2(trial.feedbackIncorrect, _List_Nil),
+												feedback_Incorrect: _Utils_Tuple2(trial.feedbackCorrect, _List_Nil),
+												isVisible: data.feedback,
+												target: trial.target,
+												userAnswer: data.state.userAnswer
+											})
+										]))
+								]));
+					} else {
+						return $author$project$View$introToMain($author$project$Session1$Meaning$UserClickedStartMain);
+					}
+				case 'Main':
+					var _v3 = _v0.a;
+					var data = _v0.b;
+					var _v4 = data.current;
+					if (_v4.$ === 'Just') {
+						var trial = _v4.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col items-center justify-center')
+								]),
+							_List_fromArray(
+								[
+									A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
+									$author$project$View$tooltip(
+									A2(
+										$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+										data.infos.instructions_short,
+										_List_fromArray(
+											[trial.writtenWord]))),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8 w-full max-w-xl')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$author$project$Session1$Meaning$viewQuestion,
+											trial.writtenWord,
+											$elm$core$List$length(data.history)),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-6 center-items justify-center max-w-xl w-full mt-6 '),
+													$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
+												]),
+											A5($author$project$View$shuffledOptions, data.state, data.feedback, $author$project$Session1$Meaning$UserClickedRadioButton, trial, task.optionsOrder)),
+											$author$project$View$genericSingleChoiceFeedback(
+											{
+												button: A3($author$project$View$navigationButton, $author$project$Session1$Meaning$UserClickedToggleFeedback, $author$project$Session1$Meaning$UserClickedNextTrial, data.feedback),
+												feedback_Correct: _Utils_Tuple2(trial.feedbackIncorrect, _List_Nil),
+												feedback_Incorrect: _Utils_Tuple2(trial.feedbackCorrect, _List_Nil),
+												isVisible: data.feedback,
+												target: trial.target,
+												userAnswer: data.state.userAnswer
+											})
+										]))
+								]));
+					} else {
+						return A3($author$project$View$end, data.infos.end, $author$project$Session1$Meaning$SaveDataMsg, 'spelling');
+					}
+				default:
+					var _v5 = _v0.a;
+					var data = _v0.b;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$h1,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('Instructions')
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$author$project$View$fromMarkdown(data.infos.instructions)
+									])),
+								$author$project$View$button(
+								{isDisabled: false, message: $author$project$Session1$Meaning$UserClickedStartTraining, txt: 'Start training'})
+							]));
+			}
 	}
+};
+var $author$project$Session1$Presentation$NoOp = {$: 'NoOp'};
+var $author$project$Session1$Presentation$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session1$Presentation$UserClickedStartAudio = function (a) {
+	return {$: 'UserClickedStartAudio', a: a};
+};
+var $author$project$Session1$Presentation$UserClickedStartMain = F2(
+	function (a, b) {
+		return {$: 'UserClickedStartMain', a: a, b: b};
+	});
+var $author$project$Session1$Presentation$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session1$Presentation$UserToggleElementOfEntry = function (a) {
+	return {$: 'UserToggleElementOfEntry', a: a};
 };
 var $elm$svg$Svg$polygon = $elm$svg$Svg$trustedNode('polygon');
 var $author$project$Icons$music = A2(
@@ -23162,7 +24751,6 @@ var $author$project$Session1$Presentation$entries = F5(
 					var key = _v0.a;
 					var val = _v0.b;
 					var txt = val.txt;
-					var elements = val.elements;
 					return A2(
 						$rtfeldman$elm_css$Html$Styled$p,
 						_List_fromArray(
@@ -23225,8 +24813,7 @@ var $author$project$Session1$Presentation$entries = F5(
 					])));
 	});
 var $author$project$Session1$Presentation$view = function (task) {
-	var _v0 = task.task;
-	switch (_v0.$) {
+	switch (task.$) {
 		case 'NotStarted':
 			return A2(
 				$rtfeldman$elm_css$Html$Styled$div,
@@ -23236,7 +24823,7 @@ var $author$project$Session1$Presentation$view = function (task) {
 						$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
 					]));
 		case 'Err':
-			var reason = _v0.a;
+			var reason = task.a;
 			return A2(
 				$rtfeldman$elm_css$Html$Styled$div,
 				_List_Nil,
@@ -23252,182 +24839,159 @@ var $author$project$Session1$Presentation$view = function (task) {
 					[
 						$rtfeldman$elm_css$Html$Styled$text('Loading...')
 					]));
-		case 'Intr':
-			var data = _v0.a;
-			var _v1 = data.current;
-			if (_v1.$ === 'Just') {
-				var trial = _v1.a;
-				return A2(
-					$author$project$View$viewTraining,
-					data.infos.instructions,
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4 pt-4 text-3xl font-bold flex flex-row')
-								]),
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text(trial.text)
-								])),
-							A3($author$project$View$audioButton, task.userClickedAudio, trial.audio.url, 'Pronunciation'),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('w-56 pt-8')
-								]),
-							A5(
-								$author$project$Session1$Presentation$entries,
-								_List_fromArray(
-									[trial.definition]),
-								_List_fromArray(
-									[trial.example]),
-								_List_fromArray(
-									[trial.translation1, trial.translation2]),
-								task.userToggledElementOfEntry,
-								data.state.toggledEntries)),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-8')
-								]),
-							_List_fromArray(
-								[
-									$author$project$View$button(
-									{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Item'})
-								]))
-						]));
-			} else {
-				return $author$project$View$introToMain(
-					A2(task.startMainMsg, data.mainTrials, data.infos));
-			}
 		default:
-			var data = _v0.a;
-			var _v2 = data.current;
-			if (_v2.$ === 'Just') {
-				var trial = _v2.a;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
-						]),
-					_List_fromArray(
-						[
-							A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
-							A2(
+			switch (task.a.$) {
+				case 'Instructions':
+					var _v1 = task.a;
+					var data = task.b;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2($author$project$View$instructions, data.infos.instructions, $author$project$Session1$Presentation$UserClickedStartTraining)
+							]));
+				case 'Training':
+					var _v2 = task.a;
+					var data = task.b;
+					var _v3 = data.current;
+					if (_v3.$ === 'Just') {
+						var trial = _v3.a;
+						return A2(
 							$rtfeldman$elm_css$Html$Styled$div,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4 text-3xl font-bold flex flex-row')
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
 								]),
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$text(trial.text)
-								])),
-							A2(
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4 pt-4 text-3xl font-bold flex flex-row')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(trial.text)
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A3($author$project$View$audioButton, $author$project$Session1$Presentation$UserClickedStartAudio, trial.audio.url, 'Pronunciation')
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('w-56 pt-8')
+										]),
+									A5(
+										$author$project$Session1$Presentation$entries,
+										_List_fromArray(
+											[trial.definition]),
+										_List_fromArray(
+											[trial.example]),
+										_List_fromArray(
+											[trial.translation1, trial.translation2]),
+										$author$project$Session1$Presentation$UserToggleElementOfEntry,
+										data.state.toggledEntries)),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-8')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$button(
+											{isDisabled: false, message: $author$project$Session1$Presentation$UserClickedNextTrial, txt: 'Next Item'})
+										]))
+								]));
+					} else {
+						return $author$project$View$introToMain(
+							A2($author$project$Session1$Presentation$UserClickedStartMain, data.mainTrials, data.infos));
+					}
+				default:
+					var _v4 = task.a;
+					var data = task.b;
+					var _v5 = data.current;
+					if (_v5.$ === 'Just') {
+						var trial = _v5.a;
+						return A2(
 							$rtfeldman$elm_css$Html$Styled$div,
 							_List_fromArray(
 								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('w-1/3')
-								]),
-							A2(
-								$elm$core$List$cons,
-								A3($author$project$View$audioButton, task.userClickedAudio, trial.audio.url, 'Pronunciation'),
-								A5(
-									$author$project$Session1$Presentation$entries,
-									_List_fromArray(
-										[trial.definition]),
-									_List_fromArray(
-										[trial.example]),
-									_List_fromArray(
-										[trial.translation1, trial.translation2]),
-									task.userToggledElementOfEntry,
-									data.state.toggledEntries))),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$div,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('')
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
 								]),
 							_List_fromArray(
 								[
-									$author$project$View$button(
-									{isDisabled: false, message: task.nextTrialMsg, txt: 'Next Item'})
-								]))
-						]));
-			} else {
-				return A3($author$project$View$end, data.infos.end, task.saveDataMsg, 'meaning');
+									A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4 text-3xl font-bold flex flex-row')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(trial.text)
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('w-1/3')
+										]),
+									A2(
+										$elm$core$List$cons,
+										A3($author$project$View$audioButton, $author$project$Session1$Presentation$UserClickedStartAudio, trial.audio.url, 'Pronunciation'),
+										A5(
+											$author$project$Session1$Presentation$entries,
+											_List_fromArray(
+												[trial.definition]),
+											_List_fromArray(
+												[trial.example]),
+											_List_fromArray(
+												[trial.translation1, trial.translation2]),
+											$author$project$Session1$Presentation$UserToggleElementOfEntry,
+											data.state.toggledEntries))),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$button(
+											{isDisabled: false, message: $author$project$Session1$Presentation$UserClickedNextTrial, txt: 'Next Item'})
+										]))
+								]));
+					} else {
+						return A3($author$project$View$end, data.infos.end, $author$project$Session1$Presentation$NoOp, 'meaning');
+					}
 			}
 	}
 };
-var $author$project$Session1$SpellingLvl1$trainingBox = $rtfeldman$elm_css$Html$Styled$div(
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col')
-		]));
-var $author$project$Session1$SpellingLvl1$viewInstructions = function (txt) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$div,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$rtfeldman$elm_css$Html$Styled$h2,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-					]),
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('Instructions')
-					])),
-				A2(
-				$rtfeldman$elm_css$Html$Styled$p,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 pb-8 font-medium')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$pre,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text(txt)
-							]))
-					])),
-				A2(
-				$rtfeldman$elm_css$Html$Styled$div,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg text-green-500 font-bold pb-2')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$span,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('Practice here !')
-							]))
-					]))
-			]));
+var $author$project$Session1$Spelling$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
 };
-var $author$project$Session1$SpellingLvl1$viewTask = F4(
-	function (data, currentTrial, msgs, ordoredOptions) {
+var $author$project$Session1$Spelling$UserClickedSavedData = {$: 'UserClickedSavedData'};
+var $author$project$Session1$Spelling$UserClickedStartMainloop = {$: 'UserClickedStartMainloop'};
+var $author$project$Session1$Spelling$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session1$Spelling$UserClickedFeedback = {$: 'UserClickedFeedback'};
+var $author$project$Session1$Spelling$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session1$Spelling$UserClickedPlayAudio = function (a) {
+	return {$: 'UserClickedPlayAudio', a: a};
+};
+var $author$project$Session1$Spelling$viewTask = F3(
+	function (data, currentTrial, ordoredOptions) {
 		return _List_fromArray(
 			[
-				A3($author$project$View$audioButton, msgs.playAudio, currentTrial.audio.url, 'word'),
+				A3($author$project$View$audioButton, $author$project$Session1$Spelling$UserClickedPlayAudio, currentTrial.audio.url, 'word'),
 				A2(
 				$rtfeldman$elm_css$Html$Styled$div,
 				_List_fromArray(
@@ -23440,7 +25004,7 @@ var $author$project$Session1$SpellingLvl1$viewTask = F4(
 						A2($rtfeldman$elm_css$Html$Styled$fieldset, _List_Nil, ordoredOptions),
 						$author$project$View$genericSingleChoiceFeedback(
 						{
-							button: A3($author$project$View$navigationButton, msgs.toggleFeedbackMsg, msgs.nextTrialMsg, data.feedback),
+							button: A3($author$project$View$navigationButton, $author$project$Session1$Spelling$UserClickedFeedback, $author$project$Session1$Spelling$UserClickedNextTrial, data.feedback),
 							feedback_Correct: _Utils_Tuple2(
 								data.infos.feedback_correct,
 								_List_fromArray(
@@ -23460,14 +25024,8 @@ var $author$project$Session1$SpellingLvl1$viewTask = F4(
 					]))
 			]);
 	});
-var $author$project$Session1$SpellingLvl1$view = F3(
-	function (exp, optionsOrder, msgs) {
-		var radioMsg = msgs.radioMsg;
-		var nextTrialMsg = msgs.nextTrialMsg;
-		var toggleFeedbackMsg = msgs.toggleFeedbackMsg;
-		var startMainloopMsg = msgs.startMainloopMsg;
-		var playAudio = msgs.playAudio;
-		var saveDataMsg = msgs.saveDataMsg;
+var $author$project$Session1$Spelling$view = F2(
+	function (exp, optionsOrder) {
 		switch (exp.$) {
 			case 'Loading':
 				return $rtfeldman$elm_css$Html$Styled$text('Loading...');
@@ -23476,50 +25034,62 @@ var $author$project$Session1$SpellingLvl1$view = F3(
 			case 'Err':
 				var reason = exp.a;
 				return $rtfeldman$elm_css$Html$Styled$text('Error: ' + reason);
-			case 'Intr':
-				var data = exp.a;
-				var trainingTrials = data.trainingTrials;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				var infos = data.infos;
-				if (current.$ === 'Just') {
-					var x = current.a;
-					var isCorrect = function (optionN) {
-						return _Utils_eq(optionN, x.target);
-					};
-					var option = function (id) {
-						return A5(
-							$author$project$View$radio,
-							id,
-							_Utils_eq(state.userAnswer, id),
-							isCorrect(id),
-							feedback,
-							radioMsg(id));
-					};
-					var options = _List_fromArray(
-						[
-							option(x.distractor1),
-							option(x.distractor2),
-							option(x.distractor3),
-							option(x.target)
-						]);
-					var ordoredOptions = A2(
-						$elm$core$List$map,
-						$elm$core$Tuple$second,
-						A2(
-							$elm$core$List$sortBy,
-							$elm$core$Tuple$first,
-							A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$author$project$Session1$SpellingLvl1$viewInstructions(infos.instructions),
-								$author$project$Session1$SpellingLvl1$trainingBox(
+			default:
+				switch (exp.a.$) {
+					case 'Instructions':
+						var _v1 = exp.a;
+						var data = exp.b;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									A2($author$project$View$instructions, data.infos.instructions, $author$project$Session1$Spelling$UserClickedStartTraining)
+								]));
+					case 'Training':
+						var _v2 = exp.a;
+						var data = exp.b;
+						var trainingTrials = data.trainingTrials;
+						var mainTrials = data.mainTrials;
+						var current = data.current;
+						var state = data.state;
+						var feedback = data.feedback;
+						var history = data.history;
+						var infos = data.infos;
+						if (current.$ === 'Just') {
+							var x = current.a;
+							var isCorrect = function (optionN) {
+								return _Utils_eq(optionN, x.target);
+							};
+							var option = function (id) {
+								return A5(
+									$author$project$View$radio,
+									id,
+									_Utils_eq(state.userAnswer, id),
+									isCorrect(id),
+									feedback,
+									$author$project$Session1$Spelling$UserClickedRadioButton(id));
+							};
+							var options = _List_fromArray(
+								[
+									option(x.distractor1),
+									option(x.distractor2),
+									option(x.distractor3),
+									option(x.target)
+								]);
+							var ordoredOptions = A2(
+								$elm$core$List$map,
+								$elm$core$Tuple$second,
+								A2(
+									$elm$core$List$sortBy,
+									$elm$core$Tuple$first,
+									A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
 								A2(
 									$elm$core$List$cons,
 									A3(
@@ -23530,70 +25100,69 @@ var $author$project$Session1$SpellingLvl1$view = F3(
 											[
 												$author$project$View$bold(x.target)
 											])),
-									A4($author$project$Session1$SpellingLvl1$viewTask, data, x, msgs, ordoredOptions)))
-							]));
-				} else {
-					return $author$project$View$introToMain(
-						A2(startMainloopMsg, mainTrials, infos));
-				}
-			default:
-				var data = exp.a;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				var infos = data.infos;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					var trialn = $elm$core$List$length(history) + 1;
-					var isCorrect = function (optionN) {
-						return _Utils_eq(optionN, trial.target);
-					};
-					var option = function (id) {
-						return A5(
-							$author$project$View$radio,
-							id,
-							_Utils_eq(state.userAnswer, id),
-							isCorrect(id),
-							feedback,
-							radioMsg(id));
-					};
-					var options = _List_fromArray(
-						[
-							option(trial.distractor1),
-							option(trial.distractor2),
-							option(trial.distractor3),
-							option(trial.target)
-						]);
-					var ordoredOptions = A2(
-						$elm$core$List$map,
-						$elm$core$Tuple$second,
-						A2(
-							$elm$core$List$sortBy,
-							$elm$core$Tuple$first,
-							A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full flex flex-col justify-center items-center')
-							]),
-						_List_fromArray(
-							[
+									A3($author$project$Session1$Spelling$viewTask, data, x, ordoredOptions)));
+						} else {
+							return $author$project$View$introToMain($author$project$Session1$Spelling$UserClickedStartMainloop);
+						}
+					default:
+						var _v4 = exp.a;
+						var data = exp.b;
+						var mainTrials = data.mainTrials;
+						var current = data.current;
+						var state = data.state;
+						var feedback = data.feedback;
+						var history = data.history;
+						var infos = data.infos;
+						if (current.$ === 'Just') {
+							var trial = current.a;
+							var isCorrect = function (optionN) {
+								return _Utils_eq(optionN, trial.target);
+							};
+							var option = function (id) {
+								return A5(
+									$author$project$View$radio,
+									id,
+									_Utils_eq(state.userAnswer, id),
+									isCorrect(id),
+									feedback,
+									$author$project$Session1$Spelling$UserClickedRadioButton(id));
+							};
+							var options = _List_fromArray(
+								[
+									option(trial.distractor1),
+									option(trial.distractor2),
+									option(trial.distractor3),
+									option(trial.target)
+								]);
+							var ordoredOptions = A2(
+								$elm$core$List$map,
+								$elm$core$Tuple$second,
 								A2(
+									$elm$core$List$sortBy,
+									$elm$core$Tuple$first,
+									A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
+							return A2(
 								$rtfeldman$elm_css$Html$Styled$div,
 								_List_fromArray(
 									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8 w-full max-w-xl')
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full flex flex-col justify-center items-center')
 									]),
-								A2(
-									$elm$core$List$cons,
-									A2($author$project$Progressbar$progressBar, history, mainTrials),
-									A4($author$project$Session1$SpellingLvl1$viewTask, data, trial, msgs, ordoredOptions)))
-							]));
-				} else {
-					return A3($author$project$View$end, infos.end, saveDataMsg, 'context-understanding');
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8 w-full max-w-xl')
+											]),
+										A2(
+											$elm$core$List$cons,
+											A2($author$project$Progressbar$progressBar, history, mainTrials),
+											A3($author$project$Session1$Spelling$viewTask, data, trial, ordoredOptions)))
+									]));
+						} else {
+							return A3($author$project$View$end, infos.end, $author$project$Session1$Spelling$UserClickedSavedData, 'context-understanding');
+						}
 				}
 		}
 	});
@@ -23786,14 +25355,22 @@ var $author$project$Session1$Top$view = function (infos) {
 				]))
 		]);
 };
-var $author$project$Session2$CU2$view = F3(
-	function (exp, optionsOrder, _v0) {
-		var userClickedAudio = _v0.userClickedAudio;
-		var radioMsg = _v0.radioMsg;
-		var toggleFeedback = _v0.toggleFeedback;
-		var nextTrialMsg = _v0.nextTrialMsg;
-		var startMainMsg = _v0.startMainMsg;
-		var saveData = _v0.saveData;
+var $author$project$Session2$CU2$UserClickedAudio = function (a) {
+	return {$: 'UserClickedAudio', a: a};
+};
+var $author$project$Session2$CU2$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session2$CU2$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
+};
+var $author$project$Session2$CU2$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Session2$CU2$UserClickedStartMain = F2(
+	function (a, b) {
+		return {$: 'UserClickedStartMain', a: a, b: b};
+	});
+var $author$project$Session2$CU2$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session2$CU2$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$Session2$CU2$view = F2(
+	function (exp, optionsOrder) {
 		switch (exp.$) {
 			case 'NotStarted':
 				return A2(
@@ -23820,108 +25397,176 @@ var $author$project$Session2$CU2$view = F3(
 						[
 							$rtfeldman$elm_css$Html$Styled$text(reason)
 						]));
-			case 'Intr':
-				var data = exp.a;
-				var trainingTrials = data.trainingTrials;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$author$project$View$viewTraining,
-								data.infos.instructions,
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$p,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-4')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(trial.context)
-											])),
-										A3($author$project$View$audioButton, userClickedAudio, trial.audioSentence.url, 'dialog'),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_Nil,
-										A5($author$project$View$shuffledOptions, state, feedback, radioMsg, trial, optionsOrder)),
-										$author$project$View$genericSingleChoiceFeedback(
-										{
-											button: A3($author$project$View$navigationButton, toggleFeedback, nextTrialMsg, feedback),
-											feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
-											feedback_Incorrect: _Utils_Tuple2(trial.feedback, _List_Nil),
-											isVisible: feedback,
-											target: trial.target,
-											userAnswer: state.userAnswer
-										})
-									]))
-							]));
-				} else {
-					return $author$project$View$introToMain(
-						A2(startMainMsg, mainTrials, data.infos));
-				}
 			default:
-				var data = exp.a;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full items-center')
-							]),
-						_List_fromArray(
-							[
-								$author$project$View$tooltip(data.infos.instructions_short),
-								A2($author$project$Progressbar$progressBar, history, mainTrials),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-8 text-lg')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text(trial.context)
-									])),
-								A3($author$project$View$audioButton, userClickedAudio, trial.audioSentence.url, 'dialog'),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-2xl pt-4')
-									]),
-								A5($author$project$View$shuffledOptions, state, feedback, radioMsg, trial, optionsOrder)),
-								$author$project$View$genericSingleChoiceFeedback(
-								{
-									button: A3($author$project$View$navigationButton, toggleFeedback, nextTrialMsg, feedback),
-									feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
-									feedback_Incorrect: _Utils_Tuple2(trial.feedback, _List_Nil),
-									isVisible: feedback,
-									target: trial.target,
-									userAnswer: state.userAnswer
-								})
-							]));
-				} else {
-					return A3($author$project$View$end, data.infos.end, saveData, '/');
+				switch (exp.a.$) {
+					case 'Instructions':
+						var _v1 = exp.a;
+						var data = exp.b;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2($author$project$View$instructions, data.infos.instructions, $author$project$Session2$CU2$UserClickedStartTraining)
+								]));
+					case 'Training':
+						var _v2 = exp.a;
+						var data = exp.b;
+						var mainTrials = data.mainTrials;
+						var current = data.current;
+						var state = data.state;
+						var feedback = data.feedback;
+						var _v3 = _Utils_Tuple2(current, data.state.step);
+						if (_v3.a.$ === 'Just') {
+							if (_v3.b.$ === 'Listening') {
+								var trial = _v3.a.a;
+								var nTimes = _v3.b.a;
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col text-lg items-center')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$p,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('p-4')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(trial.context)
+												])),
+											(nTimes > 0) ? A3(
+											$author$project$View$audioButton,
+											$author$project$Session2$CU2$UserClickedAudio,
+											trial.audioSentence.url,
+											'dialog ' + $elm$core$String$fromInt(nTimes)) : $author$project$View$button(
+											{isDisabled: !nTimes, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'What happened ?'}),
+											$author$project$View$button(
+											{isDisabled: nTimes === 3, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'See descriptions and respond to question'})
+										]));
+							} else {
+								var trial = _v3.a.a;
+								var _v4 = _v3.b;
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_Nil,
+											A5($author$project$View$shuffledOptions, state, feedback, $author$project$Session2$CU2$UserClickedRadioButton, trial, optionsOrder)),
+											$author$project$View$genericSingleChoiceFeedback(
+											{
+												button: A3($author$project$View$navigationButton, $author$project$Session2$CU2$UserClickedToggleFeedback, $author$project$Session2$CU2$UserClickedNextTrial, feedback),
+												feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
+												feedback_Incorrect: _Utils_Tuple2(trial.feedback, _List_Nil),
+												isVisible: feedback,
+												target: trial.target,
+												userAnswer: state.userAnswer
+											})
+										]));
+							}
+						} else {
+							var _v5 = _v3.a;
+							return $author$project$View$introToMain(
+								A2($author$project$Session2$CU2$UserClickedStartMain, mainTrials, data.infos));
+						}
+					default:
+						var _v6 = exp.a;
+						var data = exp.b;
+						var mainTrials = data.mainTrials;
+						var current = data.current;
+						var state = data.state;
+						var feedback = data.feedback;
+						var history = data.history;
+						var _v7 = _Utils_Tuple2(current, data.state.step);
+						if (_v7.a.$ === 'Just') {
+							if (_v7.b.$ === 'Listening') {
+								var trial = _v7.a.a;
+								var nTimes = _v7.b.a;
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full items-center')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$tooltip(data.infos.instructions_short),
+											A2($author$project$Progressbar$progressBar, history, mainTrials),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$p,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('p-8 text-lg')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(trial.context)
+												])),
+											(nTimes > 0) ? A3(
+											$author$project$View$audioButton,
+											$author$project$Session2$CU2$UserClickedAudio,
+											trial.audioSentence.url,
+											'dialog ' + $elm$core$String$fromInt(nTimes)) : $author$project$View$button(
+											{isDisabled: !nTimes, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'What happened ?'}),
+											$author$project$View$button(
+											{isDisabled: nTimes === 3, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'What happened?'})
+										]));
+							} else {
+								var trial = _v7.a.a;
+								var _v8 = _v7.b;
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full items-center')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$tooltip(data.infos.instructions_short),
+											A2($author$project$Progressbar$progressBar, history, mainTrials),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-2xl pt-4')
+												]),
+											A5($author$project$View$shuffledOptions, state, feedback, $author$project$Session2$CU2$UserClickedRadioButton, trial, optionsOrder)),
+											$author$project$View$genericSingleChoiceFeedback(
+											{
+												button: A3($author$project$View$navigationButton, $author$project$Session2$CU2$UserClickedToggleFeedback, $author$project$Session2$CU2$UserClickedNextTrial, feedback),
+												feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
+												feedback_Incorrect: _Utils_Tuple2(trial.feedback, _List_Nil),
+												isVisible: feedback,
+												target: trial.target,
+												userAnswer: state.userAnswer
+											})
+										]));
+							}
+						} else {
+							var _v9 = _v7.a;
+							return A3($author$project$View$end, data.infos.end, $author$project$Session2$CU2$UserClickedSaveData, '/');
+						}
 				}
 		}
 	});
+var $author$project$Session2$Translation$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Session2$Translation$UserClickedStartMain = {$: 'UserClickedStartMain'};
+var $author$project$Session2$Translation$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session2$Translation$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session2$Translation$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
+};
+var $author$project$Session2$Translation$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
 var $author$project$Session2$Translation$renderTask = F5(
 	function (task, trial, data, history, allTrials) {
 		return A2(
@@ -23941,10 +25586,10 @@ var $author$project$Session2$Translation$renderTask = F5(
 							$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full max-w-1/3 pt-8'),
 							$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
 						]),
-					A5($author$project$View$shuffledOptions, data.state, data.feedback, task.radioMsg, trial, task.optionsOrder)),
+					A5($author$project$View$shuffledOptions, data.state, data.feedback, $author$project$Session2$Translation$UserClickedRadioButton, trial, task.optionsOrder)),
 					$author$project$View$genericSingleChoiceFeedback(
 					{
-						button: A3($author$project$View$navigationButton, task.toggleFeedbackMsg, task.nextTrialMsg, data.feedback),
+						button: A3($author$project$View$navigationButton, $author$project$Session2$Translation$UserClickedToggleFeedback, $author$project$Session2$Translation$UserClickedNextTrial, data.feedback),
 						feedback_Correct: _Utils_Tuple2(
 							data.infos.feedback_correct,
 							_List_fromArray(
@@ -23962,46 +25607,6 @@ var $author$project$Session2$Translation$renderTask = F5(
 var $author$project$Session2$Translation$view = function (task) {
 	var _v0 = task.task;
 	switch (_v0.$) {
-		case 'Intr':
-			var data = _v0.a;
-			var _v1 = data.current;
-			if (_v1.$ === 'Just') {
-				var trial = _v1.a;
-				return A2(
-					$author$project$View$viewTraining,
-					data.infos.instructions,
-					_List_fromArray(
-						[
-							A3(
-							$author$project$View$trainingWheelsGeneric,
-							$elm$core$List$length(data.history),
-							data.infos.trainingWheel,
-							_List_fromArray(
-								[trial.target])),
-							A5($author$project$Session2$Translation$renderTask, task, trial, data, data.history, data.trainingTrials)
-						]));
-			} else {
-				return $author$project$View$introToMain(
-					A2(task.startMainMsg, data.mainTrials, data.infos));
-			}
-		case 'Main':
-			var data = _v0.a;
-			var _v2 = data.current;
-			if (_v2.$ === 'Just') {
-				var trial = _v2.a;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
-						]),
-					_List_fromArray(
-						[
-							A5($author$project$Session2$Translation$renderTask, task, trial, data, data.history, data.mainTrials)
-						]));
-			} else {
-				return A3($author$project$View$end, data.infos.end, task.saveDataMsg, 'spelling');
-			}
 		case 'Loading':
 			return A2(
 				$rtfeldman$elm_css$Html$Styled$div,
@@ -24018,7 +25623,7 @@ var $author$project$Session2$Translation$view = function (task) {
 					[
 						$rtfeldman$elm_css$Html$Styled$text('The experiment is not started yet')
 					]));
-		default:
+		case 'Err':
 			var reason = _v0.a;
 			return A2(
 				$rtfeldman$elm_css$Html$Styled$div,
@@ -24027,16 +25632,79 @@ var $author$project$Session2$Translation$view = function (task) {
 					[
 						$rtfeldman$elm_css$Html$Styled$text(reason)
 					]));
+		default:
+			switch (_v0.a.$) {
+				case 'Training':
+					var _v1 = _v0.a;
+					var data = _v0.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						var trial = _v2.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									A3(
+									$author$project$View$trainingWheelsGeneric,
+									$elm$core$List$length(data.history),
+									data.infos.trainingWheel,
+									_List_fromArray(
+										[trial.target])),
+									A5($author$project$Session2$Translation$renderTask, task, trial, data, data.history, data.trainingTrials)
+								]));
+					} else {
+						return $author$project$View$introToMain($author$project$Session2$Translation$UserClickedStartMain);
+					}
+				case 'Main':
+					var _v3 = _v0.a;
+					var data = _v0.b;
+					var _v4 = data.current;
+					if (_v4.$ === 'Just') {
+						var trial = _v4.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									A5($author$project$Session2$Translation$renderTask, task, trial, data, data.history, data.mainTrials)
+								]));
+					} else {
+						return A3($author$project$View$end, data.infos.end, $author$project$Session2$Translation$UserClickedSaveData, 'spelling');
+					}
+				default:
+					var _v5 = _v0.a;
+					var data = _v0.b;
+					return A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2($author$project$View$instructions, data.infos.instructions, $author$project$Session2$Translation$UserClickedStartTraining)
+							]));
+			}
 	}
 };
+var $author$project$Session3$CU3$UserChangedInput = function (a) {
+	return {$: 'UserChangedInput', a: a};
+};
+var $author$project$Session3$CU3$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session3$CU3$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Session3$CU3$UserClickedStartMain = {$: 'UserClickedStartMain'};
+var $author$project$Session3$CU3$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session3$CU3$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
 var $rtfeldman$elm_css$Html$Styled$br = $rtfeldman$elm_css$Html$Styled$node('br');
 var $rtfeldman$elm_css$Css$borderRadius = $rtfeldman$elm_css$Css$prop1('border-radius');
 var $rtfeldman$elm_css$Css$left = $rtfeldman$elm_css$Css$prop1('left');
 var $rtfeldman$elm_css$Css$none = {backgroundImage: $rtfeldman$elm_css$Css$Structure$Compatible, blockAxisOverflow: $rtfeldman$elm_css$Css$Structure$Compatible, borderStyle: $rtfeldman$elm_css$Css$Structure$Compatible, cursor: $rtfeldman$elm_css$Css$Structure$Compatible, display: $rtfeldman$elm_css$Css$Structure$Compatible, hoverCapability: $rtfeldman$elm_css$Css$Structure$Compatible, inlineAxisOverflow: $rtfeldman$elm_css$Css$Structure$Compatible, keyframes: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNone: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNoneOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNumberOrAutoOrNoneOrContent: $rtfeldman$elm_css$Css$Structure$Compatible, listStyleType: $rtfeldman$elm_css$Css$Structure$Compatible, listStyleTypeOrPositionOrImage: $rtfeldman$elm_css$Css$Structure$Compatible, none: $rtfeldman$elm_css$Css$Structure$Compatible, outline: $rtfeldman$elm_css$Css$Structure$Compatible, pointerDevice: $rtfeldman$elm_css$Css$Structure$Compatible, pointerEvents: $rtfeldman$elm_css$Css$Structure$Compatible, resize: $rtfeldman$elm_css$Css$Structure$Compatible, scriptingSupport: $rtfeldman$elm_css$Css$Structure$Compatible, textDecorationLine: $rtfeldman$elm_css$Css$Structure$Compatible, textTransform: $rtfeldman$elm_css$Css$Structure$Compatible, touchAction: $rtfeldman$elm_css$Css$Structure$Compatible, transform: $rtfeldman$elm_css$Css$Structure$Compatible, updateFrequency: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'none'};
 var $rtfeldman$elm_css$Css$padding = $rtfeldman$elm_css$Css$prop1('padding');
-var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
 var $rtfeldman$elm_css$Css$pointerEvents = $rtfeldman$elm_css$Css$prop1('pointer-events');
-var $rtfeldman$elm_css$Html$Styled$Attributes$readonly = $rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('readOnly');
 var $rtfeldman$elm_css$Css$top = $rtfeldman$elm_css$Css$prop1('top');
 var $rtfeldman$elm_css$Css$valuesOrNone = function (list) {
 	return $elm$core$List$isEmpty(list) ? {value: 'none'} : {
@@ -24198,301 +25866,330 @@ var $author$project$View$genericNeutralFeedback = function (data) {
 					[data.button]))
 			]));
 };
-var $author$project$Session3$CU3$view = F2(
-	function (exp, _v0) {
-		var userClickedAudio = _v0.userClickedAudio;
-		var toggleFeedback = _v0.toggleFeedback;
-		var nextTrialMsg = _v0.nextTrialMsg;
-		var startMainMsg = _v0.startMainMsg;
-		var userChangedInput = _v0.userChangedInput;
-		var saveDataMsg = _v0.saveDataMsg;
-		switch (exp.$) {
-			case 'NotStarted':
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Task is not started yet.')
-						]));
-			case 'Loading':
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Loading...')
-						]));
-			case 'Err':
-				var reason = exp.a;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('I stumbled into an error : ' + reason)
-						]));
-			case 'Intr':
-				var data = exp.a;
-				var trainingTrials = data.trainingTrials;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				if (current.$ === 'Just') {
-					var trial = current.a;
+var $author$project$Session3$CU3$view = function (exp) {
+	switch (exp.$) {
+		case 'NotStarted':
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Task is not started yet.')
+					]));
+		case 'Loading':
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Loading...')
+					]));
+		case 'Err':
+			var reason = exp.a;
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('I stumbled into an error : ' + reason)
+					]));
+		default:
+			switch (exp.a.$) {
+				case 'Instructions':
+					var _v1 = exp.a;
+					var data = exp.b;
 					return A2(
 						$rtfeldman$elm_css$Html$Styled$div,
 						_List_Nil,
 						_List_fromArray(
 							[
-								A2(
-								$author$project$View$viewTraining,
-								data.infos.instructions,
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$p,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-lg  text-lg m-4')
-											]),
-										_List_fromArray(
-											[
-												$author$project$View$fromMarkdown(trial.context),
-												A2($rtfeldman$elm_css$Html$Styled$br, _List_Nil, _List_Nil)
-											])),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row p-4 text-lg items-center')
-											]),
-										_List_fromArray(
-											[
-												$author$project$View$fromMarkdown(trial.amorce),
-												A4($author$project$View$floatingLabel, '', state.userAnswer, userChangedInput, feedback)
-											])),
-										$author$project$View$genericNeutralFeedback(
-										{
-											button: A3($author$project$View$navigationButton, toggleFeedback, nextTrialMsg, feedback),
-											feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
-											isVisible: feedback
-										})
-									]))
+								A2($author$project$View$instructions, data.infos.instructions, $author$project$Session3$CU3$UserClickedStartTraining)
 							]));
-				} else {
-					return $author$project$View$introToMain(
-						A2(startMainMsg, mainTrials, data.infos));
-				}
-			default:
-				var data = exp.a;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
-							]),
-						_List_fromArray(
-							[
-								$author$project$View$tooltip(data.infos.instructions_short),
-								A2($author$project$Progressbar$progressBar, history, mainTrials),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-lg  text-lg m-4')
-									]),
-								_List_fromArray(
-									[
-										$author$project$View$fromMarkdown(trial.context),
-										A2($rtfeldman$elm_css$Html$Styled$br, _List_Nil, _List_Nil)
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row p-4 text-lg items-center')
-									]),
-								_List_fromArray(
-									[
-										$author$project$View$fromMarkdown(trial.amorce),
-										A4($author$project$View$floatingLabel, '', state.userAnswer, userChangedInput, feedback)
-									])),
-								$author$project$View$genericNeutralFeedback(
-								{
-									button: A3($author$project$View$navigationButton, toggleFeedback, nextTrialMsg, feedback),
-									feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
-									isVisible: feedback
-								})
-							]));
-				} else {
-					return A3($author$project$View$end, data.infos.end, saveDataMsg, '/');
-				}
-		}
-	});
+				case 'Training':
+					var _v2 = exp.a;
+					var current = exp.b.current;
+					var state = exp.b.state;
+					var feedback = exp.b.feedback;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-lg  text-lg m-4')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$fromMarkdown(trial.context),
+											A2($rtfeldman$elm_css$Html$Styled$br, _List_Nil, _List_Nil)
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row p-4 text-lg items-center')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$span,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('pr-4')
+												]),
+											_List_fromArray(
+												[
+													$author$project$View$fromMarkdown(trial.amorce)
+												])),
+											A4($author$project$View$floatingLabel, '', state.userAnswer, $author$project$Session3$CU3$UserChangedInput, feedback)
+										])),
+									$author$project$View$genericNeutralFeedback(
+									{
+										button: A3($author$project$View$navigationButton, $author$project$Session3$CU3$UserClickedToggleFeedback, $author$project$Session3$CU3$UserClickedNextTrial, feedback),
+										feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
+										isVisible: feedback
+									})
+								]));
+					} else {
+						return $author$project$View$introToMain($author$project$Session3$CU3$UserClickedStartMain);
+					}
+				default:
+					var _v4 = exp.a;
+					var data = exp.b;
+					var mainTrials = data.mainTrials;
+					var current = data.current;
+					var state = data.state;
+					var feedback = data.feedback;
+					var history = data.history;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									$author$project$View$tooltip(data.infos.instructions_short),
+									A2($author$project$Progressbar$progressBar, history, mainTrials),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$p,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-lg  text-lg m-4')
+										]),
+									_List_fromArray(
+										[
+											$author$project$View$fromMarkdown(trial.context),
+											A2($rtfeldman$elm_css$Html$Styled$br, _List_Nil, _List_Nil)
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row p-4 text-lg items-center')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$span,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('pr-4')
+												]),
+											_List_fromArray(
+												[
+													$author$project$View$fromMarkdown(trial.amorce)
+												])),
+											A4($author$project$View$floatingLabel, '', state.userAnswer, $author$project$Session3$CU3$UserChangedInput, feedback)
+										])),
+									$author$project$View$genericNeutralFeedback(
+									{
+										button: A3($author$project$View$navigationButton, $author$project$Session3$CU3$UserClickedToggleFeedback, $author$project$Session3$CU3$UserClickedNextTrial, feedback),
+										feedback_Correct: _Utils_Tuple2(trial.feedback, _List_Nil),
+										isVisible: feedback
+									})
+								]));
+					} else {
+						return A3($author$project$View$end, data.infos.end, $author$project$Session3$CU3$UserClickedSaveData, '/');
+					}
+			}
+	}
+};
+var $author$project$Session3$Spelling3$UserChangedInput = function (a) {
+	return {$: 'UserChangedInput', a: a};
+};
+var $author$project$Session3$Spelling3$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session3$Spelling3$UserClickedPlayAudio = function (a) {
+	return {$: 'UserClickedPlayAudio', a: a};
+};
+var $author$project$Session3$Spelling3$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Session3$Spelling3$UserClickedStartMain = {$: 'UserClickedStartMain'};
+var $author$project$Session3$Spelling3$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session3$Spelling3$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
 var $elm$core$String$trim = _String_trim;
-var $author$project$Session3$Spelling3$view = F2(
-	function (exp, _v0) {
-		var userClickedAudio = _v0.userClickedAudio;
-		var toggleFeedback = _v0.toggleFeedback;
-		var nextTrialMsg = _v0.nextTrialMsg;
-		var saveData = _v0.saveData;
-		var startMainMsg = _v0.startMainMsg;
-		var userChangedInput = _v0.userChangedInput;
-		switch (exp.$) {
-			case 'NotStarted':
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
-						]));
-			case 'Intr':
-				var data = exp.a;
-				var trainingTrials = data.trainingTrials;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				if (current.$ === 'Just') {
-					var trial = current.a;
+var $author$project$Session3$Spelling3$view = function (exp) {
+	switch (exp.$) {
+		case 'NotStarted':
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('experiment did not start yet')
+					]));
+		case 'Running':
+			switch (exp.a.$) {
+				case 'Instructions':
+					var _v1 = exp.a;
+					var data = exp.b;
 					return A2(
 						$rtfeldman$elm_css$Html$Styled$div,
 						_List_Nil,
 						_List_fromArray(
 							[
-								A2(
-								$author$project$View$viewTraining,
-								data.infos.instructions,
-								_List_fromArray(
-									[
-										A3(
-										$author$project$View$trainingWheelsGeneric,
-										$elm$core$List$length(history),
-										data.infos.trainingWheel,
-										_List_Nil),
-										A3($author$project$View$audioButton, userClickedAudio, trial.audioSentence.url, 'word'),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-8')
-											]),
-										_List_fromArray(
-											[
-												A4($author$project$View$floatingLabel, '', state.userAnswer, userChangedInput, feedback)
-											])),
-										$author$project$View$genericSingleChoiceFeedback(
-										{
-											button: A3($author$project$View$navigationButton, toggleFeedback, nextTrialMsg, feedback),
-											feedback_Correct: _Utils_Tuple2(
-												data.infos.feedback_correct,
-												_List_fromArray(
-													[trial.writtenWord])),
-											feedback_Incorrect: _Utils_Tuple2(
-												data.infos.feedback_incorrect,
-												_List_fromArray(
-													[trial.writtenWord])),
-											isVisible: feedback,
-											target: trial.writtenWord,
-											userAnswer: $elm$core$String$toLower(
-												$elm$core$String$trim(state.userAnswer))
-										})
-									]))
+								A2($author$project$View$instructions, data.infos.instructions, $author$project$Session3$Spelling3$UserClickedStartTraining)
 							]));
-				} else {
-					return $author$project$View$introToMain(
-						A2(startMainMsg, mainTrials, data.infos));
-				}
-			case 'Main':
-				var data = exp.a;
-				var mainTrials = data.mainTrials;
-				var current = data.current;
-				var state = data.state;
-				var feedback = data.feedback;
-				var history = data.history;
-				if (current.$ === 'Just') {
-					var trial = current.a;
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col justify-center items-center max-w-3xl m-4 p-4')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('h-8 w-8 pb-16'),
-										$rtfeldman$elm_css$Html$Styled$Events$onClick(
-										userClickedAudio(trial.audioSentence.url))
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-8')
-									]),
-								_List_fromArray(
-									[
-										A4($author$project$View$floatingLabel, 'Type here', state.userAnswer, userChangedInput, feedback)
-									])),
-								$author$project$View$genericSingleChoiceFeedback(
-								{
-									button: A3($author$project$View$navigationButton, toggleFeedback, nextTrialMsg, feedback),
-									feedback_Correct: _Utils_Tuple2(
-										data.infos.feedback_correct,
-										_List_fromArray(
-											[trial.writtenWord])),
-									feedback_Incorrect: _Utils_Tuple2(
-										data.infos.feedback_incorrect,
-										_List_fromArray(
-											[trial.writtenWord])),
-									isVisible: feedback,
-									target: trial.writtenWord,
-									userAnswer: $elm$core$String$toLower(
-										$elm$core$String$trim(state.userAnswer))
-								})
-							]));
-				} else {
-					return A3($author$project$View$end, data.infos.end, saveData, 'context-understanding');
-				}
-			case 'Err':
-				var reason = exp.a;
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('I stumbled into an error : ' + reason)
-						]));
-			default:
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text('Loading...')
-						]));
-		}
-	});
+				case 'Training':
+					var _v2 = exp.a;
+					var data = exp.b;
+					var current = data.current;
+					var state = data.state;
+					var feedback = data.feedback;
+					var history = data.history;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									A3(
+									$author$project$View$trainingWheelsGeneric,
+									$elm$core$List$length(history),
+									data.infos.trainingWheel,
+									_List_Nil),
+									A3($author$project$View$audioButton, $author$project$Session3$Spelling3$UserClickedPlayAudio, trial.audioSentence.url, 'word'),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('p-8')
+										]),
+									_List_fromArray(
+										[
+											A4($author$project$View$floatingLabel, '', state.userAnswer, $author$project$Session3$Spelling3$UserChangedInput, feedback)
+										])),
+									$author$project$View$genericSingleChoiceFeedback(
+									{
+										button: A3($author$project$View$navigationButton, $author$project$Session3$Spelling3$UserClickedToggleFeedback, $author$project$Session3$Spelling3$UserClickedNextTrial, feedback),
+										feedback_Correct: _Utils_Tuple2(
+											data.infos.feedback_correct,
+											_List_fromArray(
+												[trial.writtenWord])),
+										feedback_Incorrect: _Utils_Tuple2(
+											data.infos.feedback_incorrect,
+											_List_fromArray(
+												[trial.writtenWord])),
+										isVisible: feedback,
+										target: trial.writtenWord,
+										userAnswer: $elm$core$String$toLower(
+											$elm$core$String$trim(state.userAnswer))
+									})
+								]));
+					} else {
+						return $author$project$View$introToMain($author$project$Session3$Spelling3$UserClickedStartMain);
+					}
+				default:
+					var _v4 = exp.a;
+					var data = exp.b;
+					var current = data.current;
+					var state = data.state;
+					var feedback = data.feedback;
+					if (current.$ === 'Just') {
+						var trial = current.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col justify-center items-center max-w-3xl m-4 p-4')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('h-8 w-8 pb-16'),
+											$rtfeldman$elm_css$Html$Styled$Events$onClick(
+											$author$project$Session3$Spelling3$UserClickedPlayAudio(trial.audioSentence.url))
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$music)
+										])),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-8')
+										]),
+									_List_fromArray(
+										[
+											A4($author$project$View$floatingLabel, 'Type here', state.userAnswer, $author$project$Session3$Spelling3$UserChangedInput, feedback)
+										])),
+									$author$project$View$genericSingleChoiceFeedback(
+									{
+										button: A3($author$project$View$navigationButton, $author$project$Session3$Spelling3$UserClickedToggleFeedback, $author$project$Session3$Spelling3$UserClickedNextTrial, feedback),
+										feedback_Correct: _Utils_Tuple2(
+											data.infos.feedback_correct,
+											_List_fromArray(
+												[trial.writtenWord])),
+										feedback_Incorrect: _Utils_Tuple2(
+											data.infos.feedback_incorrect,
+											_List_fromArray(
+												[trial.writtenWord])),
+										isVisible: feedback,
+										target: trial.writtenWord,
+										userAnswer: $elm$core$String$toLower(
+											$elm$core$String$trim(state.userAnswer))
+									})
+								]));
+					} else {
+						return A3($author$project$View$end, data.infos.end, $author$project$Session3$Spelling3$UserClickedSaveData, 'context-understanding');
+					}
+			}
+		case 'Err':
+			var reason = exp.a;
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('I stumbled into an error : ' + reason)
+					]));
+		default:
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Loading...')
+					]));
+	}
+};
 var $author$project$Main$UserToggledInCloudWords = function (a) {
 	return {$: 'UserToggledInCloudWords', a: a};
 };
@@ -24506,7 +26203,6 @@ var $author$project$Main$viewCloud = function (model) {
 		A2(
 			$elm$core$List$map,
 			function (word) {
-				var value = A2($elm$core$Dict$get, word, model.cloudWords);
 				return A2(
 					$rtfeldman$elm_css$Html$Styled$label,
 					_List_fromArray(
@@ -24538,15 +26234,21 @@ var $author$project$Main$viewCloud = function (model) {
 			},
 			$elm$core$Dict$keys(model.cloudWords)));
 };
-var $author$project$Main$UserClickedFeedbackButton = {$: 'UserClickedFeedbackButton'};
-var $author$project$Main$UserClickedNextTrial = function (a) {
+var $author$project$Session2$Spelling$PlayAudio = function (a) {
+	return {$: 'PlayAudio', a: a};
+};
+var $author$project$Session2$Spelling$UserClickedFeedbackButton = {$: 'UserClickedFeedbackButton'};
+var $author$project$Session2$Spelling$UserClickedNextTrial = function (a) {
 	return {$: 'UserClickedNextTrial', a: a};
 };
-var $author$project$Main$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Main$UserClickedStartMainloop = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMainloop', a: a, b: b};
-	});
+var $author$project$Session2$Spelling$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Session2$Spelling$UserClickedStartAudio = function (a) {
+	return {$: 'UserClickedStartAudio', a: a};
+};
+var $author$project$Session2$Spelling$UserClickedStartMainloop = function (a) {
+	return {$: 'UserClickedStartMainloop', a: a};
+};
+var $author$project$Session2$Spelling$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
 var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
 	function (key, val) {
 		return A3(
@@ -24556,7 +26258,7 @@ var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
 			'');
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$style = $rtfeldman$elm_css$VirtualDom$Styled$style;
-var $author$project$Main$containerStyles = _List_fromArray(
+var $author$project$Session2$Spelling$containerStyles = _List_fromArray(
 	[
 		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex'),
 		A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'flex-wrap', 'wrap'),
@@ -24568,8 +26270,8 @@ var $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute = function (prop) {
 	return A3($rtfeldman$elm_css$VirtualDom$Styled$Attribute, prop, _List_Nil, '');
 };
 var $rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledAttribute;
-var $author$project$Main$ghostGreen = '#2f804e';
-var $author$project$Main$itemStyles = function (color) {
+var $author$project$Session2$Spelling$ghostGreen = '#2f804e';
+var $author$project$Session2$Spelling$itemStyles = function (color) {
 	return _List_fromArray(
 		[
 			A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'width', '5rem'),
@@ -24585,7 +26287,7 @@ var $author$project$Main$itemStyles = function (color) {
 		]);
 };
 var $elm$core$String$toUpper = _String_toUpper;
-var $author$project$Main$ghostView = F2(
+var $author$project$Session2$Spelling$ghostView = F2(
 	function (dnd, items) {
 		var maybeDragItem = A2(
 			$elm$core$Maybe$andThen,
@@ -24594,18 +26296,18 @@ var $author$project$Main$ghostView = F2(
 				return $elm$core$List$head(
 					A2($elm$core$List$drop, dragIndex, items));
 			},
-			$author$project$Main$system.info(dnd));
+			$author$project$Session2$Spelling$system.info(dnd));
 		if (maybeDragItem.$ === 'Just') {
 			var _v1 = maybeDragItem.a;
 			var item = _v1.b;
 			return A2(
 				$rtfeldman$elm_css$Html$Styled$div,
 				_Utils_ap(
-					$author$project$Main$itemStyles($author$project$Main$ghostGreen),
+					$author$project$Session2$Spelling$itemStyles($author$project$Session2$Spelling$ghostGreen),
 					A2(
 						$elm$core$List$map,
 						$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
-						$author$project$Main$system.ghostStyles(dnd))),
+						$author$project$Session2$Spelling$system.ghostStyles(dnd))),
 				_List_fromArray(
 					[
 						$rtfeldman$elm_css$Html$Styled$text(
@@ -24615,13 +26317,13 @@ var $author$project$Main$ghostView = F2(
 			return $rtfeldman$elm_css$Html$Styled$text('');
 		}
 	});
-var $author$project$Main$green = '#3da565';
-var $author$project$Main$itemView = F3(
+var $author$project$Session2$Spelling$green = '#3da565';
+var $author$project$Session2$Spelling$itemView = F3(
 	function (dnd, index, _v0) {
 		var key = _v0.a;
 		var item = _v0.b;
 		var itemId = 'id-' + key;
-		var _v1 = $author$project$Main$system.info(dnd);
+		var _v1 = $author$project$Session2$Spelling$system.info(dnd);
 		if (_v1.$ === 'Just') {
 			var dragIndex = _v1.a.dragIndex;
 			return (!_Utils_eq(dragIndex, index)) ? _Utils_Tuple2(
@@ -24632,11 +26334,11 @@ var $author$project$Main$itemView = F3(
 						$elm$core$List$cons,
 						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
 						_Utils_ap(
-							$author$project$Main$itemStyles($author$project$Main$green),
+							$author$project$Session2$Spelling$itemStyles($author$project$Session2$Spelling$green),
 							A2(
 								$elm$core$List$map,
 								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
-								A2($author$project$Main$system.dropEvents, index, itemId)))),
+								A2($author$project$Session2$Spelling$system.dropEvents, index, itemId)))),
 					_List_fromArray(
 						[
 							$rtfeldman$elm_css$Html$Styled$text(
@@ -24648,7 +26350,7 @@ var $author$project$Main$itemView = F3(
 					A2(
 						$elm$core$List$cons,
 						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
-						$author$project$Main$itemStyles('dimgray')),
+						$author$project$Session2$Spelling$itemStyles('dimgray')),
 					_List_Nil));
 		} else {
 			return _Utils_Tuple2(
@@ -24659,11 +26361,11 @@ var $author$project$Main$itemView = F3(
 						$elm$core$List$cons,
 						$rtfeldman$elm_css$Html$Styled$Attributes$id(itemId),
 						_Utils_ap(
-							$author$project$Main$itemStyles($author$project$Main$green),
+							$author$project$Session2$Spelling$itemStyles($author$project$Session2$Spelling$green),
 							A2(
 								$elm$core$List$map,
 								$rtfeldman$elm_css$Html$Styled$Attributes$fromUnstyled,
-								A2($author$project$Main$system.dragEvents, index, itemId)))),
+								A2($author$project$Session2$Spelling$system.dragEvents, index, itemId)))),
 					_List_fromArray(
 						[
 							$rtfeldman$elm_css$Html$Styled$text(
@@ -24673,140 +26375,24 @@ var $author$project$Main$itemView = F3(
 	});
 var $rtfeldman$elm_css$VirtualDom$Styled$keyedNode = $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode;
 var $rtfeldman$elm_css$Html$Styled$Keyed$node = $rtfeldman$elm_css$VirtualDom$Styled$keyedNode;
-var $author$project$Main$viewScrabbleTask = function (model) {
+var $author$project$Session2$Spelling$viewScrabbleTask = function (model) {
 	var viewLetters = function (scrambledLetters) {
 		return A3(
 			$rtfeldman$elm_css$Html$Styled$Keyed$node,
 			'div',
-			$author$project$Main$containerStyles,
+			$author$project$Session2$Spelling$containerStyles,
 			A2(
 				$elm$core$List$indexedMap,
-				$author$project$Main$itemView(model.dnd),
+				$author$project$Session2$Spelling$itemView(model.dnd),
 				scrambledLetters));
 	};
-	var feedback = F5(
-		function (pre_correct, pre_incorrect, feedback_, _v4, nextItem) {
-			var target = _v4.target;
-			var attempt = _v4.attempt;
-			var _v3 = _Utils_Tuple2(
-				feedback_,
-				_Utils_eq(target, attempt));
-			if (_v3.a) {
-				if (_v3.b) {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-green-300 m-8')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text(pre_correct),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$span,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(target)
-											]))
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
-									]),
-								_List_fromArray(
-									[
-										$author$project$View$button(
-										{
-											isDisabled: false,
-											message: $author$project$Main$Spelling2(
-												$author$project$Main$UserClickedNextTrial(nextItem)),
-											txt: 'Next'
-										})
-									]))
-							]));
-				} else {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-red-300 m-8')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text(pre_incorrect),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$span,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text(target)
-											]))
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
-									]),
-								_List_fromArray(
-									[
-										$author$project$View$button(
-										{
-											isDisabled: false,
-											message: $author$project$Main$Spelling2(
-												$author$project$Main$UserClickedNextTrial(nextItem)),
-											txt: 'Next'
-										})
-									]))
-							]));
-				}
-			} else {
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$author$project$View$button(
-							{
-								isDisabled: false,
-								message: $author$project$Main$Spelling2($author$project$Main$UserClickedFeedbackButton),
-								txt: 'Check my answer'
-							})
-						]));
-			}
-		});
 	var audioButton = function (url) {
 		return A2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
 					$rtfeldman$elm_css$Html$Styled$Events$onClick(
-					$author$project$Main$PlaysoundInJS(url)),
+					$author$project$Session2$Spelling$PlayAudio(url)),
 					$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4 h-8 w-8')
 				]),
 			_List_fromArray(
@@ -24817,144 +26403,134 @@ var $author$project$Main$viewScrabbleTask = function (model) {
 	var _v0 = model.scrabbleTask;
 	switch (_v0.$) {
 		case 'NotStarted':
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('Not Asked')
-				]);
-		case 'Main':
-			var data = _v0.a;
-			var _v1 = data.current;
-			if (_v1.$ === 'Just') {
-				var currentTrial = _v1.a;
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center w-full')
-							]),
-						_List_fromArray(
-							[
-								audioButton(currentTrial.audioWord.url)
-							])),
-						(!data.feedback) ? A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center w-full')
-							]),
-						_List_fromArray(
-							[
-								viewLetters(data.state.scrambledLetter),
-								A2($author$project$Main$ghostView, model.dnd, data.state.scrambledLetter)
-							])) : A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil),
-						$author$project$View$genericSingleChoiceFeedback(
-						{
-							button: A3(
-								$author$project$View$navigationButton,
-								$author$project$Main$Spelling2($author$project$Main$UserClickedFeedbackButton),
-								$author$project$Main$Spelling2(
-									$author$project$Main$UserClickedNextTrial(data.next)),
-								data.feedback),
-							feedback_Correct: _Utils_Tuple2(
-								data.infos.feedback_correct,
-								_List_fromArray(
-									[
-										$author$project$View$bold(currentTrial.target)
-									])),
-							feedback_Incorrect: _Utils_Tuple2(
-								data.infos.feedback_incorrect,
-								_List_fromArray(
-									[
-										$author$project$View$bold(currentTrial.target)
-									])),
-							isVisible: data.feedback,
-							target: currentTrial.target,
-							userAnswer: data.state.userAnswer
-						})
-					]);
-			} else {
-				return _List_fromArray(
-					[
-						A3(
-						$author$project$View$end,
-						data.infos.end,
-						$author$project$Main$Spelling2($author$project$Main$UserClickedSaveData),
-						'context-understanding')
-					]);
-			}
-		case 'Intr':
-			var data = _v0.a;
-			var _v2 = data.current;
-			if (_v2.$ === 'Just') {
-				var currentTrial = _v2.a;
-				return _List_fromArray(
-					[
-						A2(
-						$author$project$View$viewTraining,
-						data.infos.instructions,
-						_List_fromArray(
-							[
-								audioButton(currentTrial.audioWord.url),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
-									]),
-								_List_fromArray(
-									[
-										viewLetters(data.state.scrambledLetter)
-									])),
-								A2($author$project$Main$ghostView, model.dnd, data.state.scrambledLetter),
-								$author$project$View$genericSingleChoiceFeedback(
-								{
-									button: A3(
-										$author$project$View$navigationButton,
-										$author$project$Main$Spelling2($author$project$Main$UserClickedFeedbackButton),
-										$author$project$Main$Spelling2(
-											$author$project$Main$UserClickedNextTrial(data.next)),
-										data.feedback),
-									feedback_Correct: _Utils_Tuple2(
-										data.infos.feedback_correct,
-										_List_fromArray(
-											[
-												$author$project$View$bold(currentTrial.target)
-											])),
-									feedback_Incorrect: _Utils_Tuple2(
-										data.infos.feedback_incorrect,
-										_List_fromArray(
-											[
-												$author$project$View$bold(currentTrial.target)
-											])),
-									isVisible: data.feedback,
-									target: currentTrial.target,
-									userAnswer: data.state.userAnswer
-								})
-							]))
-					]);
-			} else {
-				return _List_fromArray(
-					[
-						$author$project$View$introToMain(
-						$author$project$Main$Spelling2(
-							A2($author$project$Main$UserClickedStartMainloop, data.mainTrials, data.infos)))
-					]);
+			return $rtfeldman$elm_css$Html$Styled$text('Not Asked');
+		case 'Running':
+			switch (_v0.a.$) {
+				case 'Instructions':
+					var _v1 = _v0.a;
+					var data = _v0.b;
+					return A2($author$project$View$instructions, data.infos.instructions, $author$project$Session2$Spelling$UserClickedStartTraining);
+				case 'Main':
+					var _v2 = _v0.a;
+					var data = _v0.b;
+					var _v3 = data.current;
+					if (_v3.$ === 'Just') {
+						var currentTrial = _v3.a;
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center justify-center')
+								]),
+							_List_fromArray(
+								[
+									A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
+									A3($author$project$View$audioButton, $author$project$Session2$Spelling$UserClickedStartAudio, currentTrial.audioWord.url, 'word'),
+									(!data.feedback) ? A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center w-full')
+										]),
+									_List_fromArray(
+										[
+											viewLetters(data.state.scrambledLetter),
+											A2($author$project$Session2$Spelling$ghostView, model.dnd, data.state.scrambledLetter)
+										])) : A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil),
+									$author$project$View$genericSingleChoiceFeedback(
+									{
+										button: A3(
+											$author$project$View$navigationButton,
+											$author$project$Session2$Spelling$UserClickedFeedbackButton,
+											$author$project$Session2$Spelling$UserClickedNextTrial(data.next),
+											data.feedback),
+										feedback_Correct: _Utils_Tuple2(
+											data.infos.feedback_correct,
+											_List_fromArray(
+												[
+													$author$project$View$bold(currentTrial.target)
+												])),
+										feedback_Incorrect: _Utils_Tuple2(
+											data.infos.feedback_incorrect,
+											_List_fromArray(
+												[
+													$author$project$View$bold(currentTrial.target)
+												])),
+										isVisible: data.feedback,
+										target: currentTrial.target,
+										userAnswer: data.state.userAnswer
+									})
+								]));
+					} else {
+						return A3($author$project$View$end, data.infos.end, $author$project$Session2$Spelling$UserClickedSaveData, 'context-understanding');
+					}
+				default:
+					var _v4 = _v0.a;
+					var data = _v0.b;
+					var _v5 = data.current;
+					if (_v5.$ === 'Just') {
+						var currentTrial = _v5.a;
+						return A2(
+							$author$project$View$viewTraining,
+							data.infos.instructions,
+							_List_fromArray(
+								[
+									audioButton(currentTrial.audioWord.url),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
+										]),
+									_List_fromArray(
+										[
+											viewLetters(data.state.scrambledLetter)
+										])),
+									A2($author$project$Session2$Spelling$ghostView, model.dnd, data.state.scrambledLetter),
+									$author$project$View$genericSingleChoiceFeedback(
+									{
+										button: A3(
+											$author$project$View$navigationButton,
+											$author$project$Session2$Spelling$UserClickedFeedbackButton,
+											$author$project$Session2$Spelling$UserClickedNextTrial(data.next),
+											data.feedback),
+										feedback_Correct: _Utils_Tuple2(
+											data.infos.feedback_correct,
+											_List_fromArray(
+												[
+													$author$project$View$bold(currentTrial.target)
+												])),
+										feedback_Incorrect: _Utils_Tuple2(
+											data.infos.feedback_incorrect,
+											_List_fromArray(
+												[
+													$author$project$View$bold(currentTrial.target)
+												])),
+										isVisible: data.feedback,
+										target: currentTrial.target,
+										userAnswer: data.state.userAnswer
+									})
+								]));
+					} else {
+						return $author$project$View$introToMain(
+							$author$project$Session2$Spelling$UserClickedStartMainloop(data.mainTrials));
+					}
 			}
 		case 'Loading':
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('Loading...')
-				]);
+			return $rtfeldman$elm_css$Html$Styled$text('Loading...');
 		default:
 			var reason = _v0.a;
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text(reason)
-				]);
+			return $rtfeldman$elm_css$Html$Styled$text(reason);
 	}
 };
+var $author$project$Session3$Synonym$SaveDataMsg = {$: 'SaveDataMsg'};
+var $author$project$Session3$Synonym$UserCLickedStartTraining = {$: 'UserCLickedStartTraining'};
+var $author$project$Session3$Synonym$UserChangedInput = function (a) {
+	return {$: 'UserChangedInput', a: a};
+};
+var $author$project$Session3$Synonym$UserClickedFeedback = {$: 'UserClickedFeedback'};
+var $author$project$Session3$Synonym$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session3$Synonym$UserClickedStartMainloop = {$: 'UserClickedStartMainloop'};
 var $rtfeldman$elm_css$Html$Styled$h4 = $rtfeldman$elm_css$Html$Styled$node('h4');
 var $author$project$View$sentenceInSynonym = F4(
 	function (t, state, msg, feedback_) {
@@ -25035,287 +26611,237 @@ var $author$project$Session3$Synonym$trainingWheels = F3(
 			return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
 		}
 	});
-var $author$project$Session3$Synonym$viewTask = F2(
-	function (experiment, _v0) {
-		var toggleFeedbackMsg = _v0.toggleFeedbackMsg;
-		var updateInputMsg = _v0.updateInputMsg;
-		var nextTrialMsg = _v0.nextTrialMsg;
-		var toMainloopMsg = _v0.toMainloopMsg;
-		var saveDataMsg = _v0.saveDataMsg;
-		switch (experiment.$) {
-			case 'Err':
-				var reason = experiment.a;
-				return _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$h4,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Failure' + reason)
-									]))
-							]))
-					]);
-			case 'NotStarted':
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('I\'m not started yet. Obviously.')
-					]);
-			case 'Loading':
-				return _List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('Loading...')
-					]);
-			case 'Intr':
-				var task = experiment.a;
-				var viewInstructions = function (x) {
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$h2,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Instructions')
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 pb-8 font-medium')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$pre,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$author$project$View$fromMarkdown(task.infos.instructions)
-											]))
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg text-green-500 font-bold pb-2')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$span,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('Practice here !')
-											]))
-									]))
-							]));
-				};
-				var trainingBox = $rtfeldman$elm_css$Html$Styled$div(
+var $author$project$Session3$Synonym$viewTask = function (experiment) {
+	switch (experiment.$) {
+		case 'Err':
+			var reason = experiment.a;
+			return _List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$h4,
+					_List_Nil,
 					_List_fromArray(
 						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center ')
-						]));
-				var toggleFeedback = $author$project$View$button(
-					{isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'});
-				var _v2 = _Utils_Tuple2(task.current, task.feedback);
-				if (_v2.a.$ === 'Just') {
-					if (!_v2.b) {
-						var x = _v2.a.a;
-						return _List_fromArray(
-							[
-								viewInstructions(x),
-								trainingBox(
-								_List_fromArray(
-									[
-										A3(
-										$author$project$Session3$Synonym$trainingWheels,
-										$elm$core$List$length(task.history),
-										x.radical,
-										x.target),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('p-8')
-											]),
-										_List_fromArray(
-											[
-												A4($author$project$View$sentenceInSynonym, x, task.state, updateInputMsg, task.feedback)
-											])),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('m-8')
-											]),
-										_List_fromArray(
-											[toggleFeedback]))
-									]))
-							]);
-					} else {
-						var x = _v2.a.a;
-						return _List_fromArray(
-							[
-								viewInstructions(x),
-								trainingBox(
-								_List_fromArray(
-									[
-										A3(
-										$author$project$Session3$Synonym$trainingWheels,
-										$elm$core$List$length(task.history),
-										x.stimulus,
-										x.target),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('m-8')
-											]),
-										_List_fromArray(
-											[
-												A4($author$project$View$sentenceInSynonym, x, task.state, updateInputMsg, task.feedback)
-											])),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-green-300 m-8')
-											]),
-										_List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$p,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('The correct synonym for '),
-														$rtfeldman$elm_css$Html$Styled$text(x.radical),
-														$rtfeldman$elm_css$Html$Styled$text(' is '),
-														A2(
-														$rtfeldman$elm_css$Html$Styled$span,
-														_List_fromArray(
-															[
-																$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-															]),
-														_List_fromArray(
-															[
-																$rtfeldman$elm_css$Html$Styled$text(x.target)
-															]))
-													])),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$div,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
-													]),
-												_List_fromArray(
-													[
-														$author$project$View$button(
-														{isDisabled: false, message: nextTrialMsg, txt: 'Next'})
-													]))
-											]))
-									]))
-							]);
-					}
-				} else {
-					var _v3 = _v2.a;
+							A2(
+							$rtfeldman$elm_css$Html$Styled$p,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('Failure' + reason)
+								]))
+						]))
+				]);
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('I\'m not started yet.')
+				]);
+		case 'Loading':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Loading...')
+				]);
+		default:
+			switch (experiment.a.$) {
+				case 'Instructions':
+					var _v1 = experiment.a;
+					var data = experiment.b;
 					return _List_fromArray(
 						[
-							$author$project$View$introToMain(
-							A2(toMainloopMsg, task.mainTrials, task.infos))
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Session3$Synonym$UserCLickedStartTraining)
 						]);
-				}
-			default:
-				var task = experiment.a;
-				var _v4 = _Utils_Tuple2(task.current, task.feedback);
-				if (_v4.a.$ === 'Just') {
-					if (!_v4.b) {
-						var t = _v4.a.a;
-						return _List_fromArray(
+				case 'Training':
+					var _v2 = experiment.a;
+					var task = experiment.b;
+					var trainingBox = $rtfeldman$elm_css$Html$Styled$div(
+						_List_fromArray(
 							[
-								$author$project$View$tooltip('Type the synonym of the word in the box'),
-								A4($author$project$View$sentenceInSynonym, t, task.state, updateInputMsg, task.feedback),
-								$author$project$View$button(
-								{isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'})
-							]);
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center ')
+							]));
+					var toggleFeedback = $author$project$View$button(
+						{isDisabled: false, message: $author$project$Session3$Synonym$UserClickedFeedback, txt: 'Check my answer'});
+					var _v3 = _Utils_Tuple2(task.current, task.feedback);
+					if (_v3.a.$ === 'Just') {
+						if (!_v3.b) {
+							var x = _v3.a.a;
+							return _List_fromArray(
+								[
+									trainingBox(
+									_List_fromArray(
+										[
+											A3(
+											$author$project$Session3$Synonym$trainingWheels,
+											$elm$core$List$length(task.history),
+											x.radical,
+											x.target),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('p-8')
+												]),
+											_List_fromArray(
+												[
+													A4($author$project$View$sentenceInSynonym, x, task.state, $author$project$Session3$Synonym$UserChangedInput, task.feedback)
+												])),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('m-8')
+												]),
+											_List_fromArray(
+												[toggleFeedback]))
+										]))
+								]);
+						} else {
+							var x = _v3.a.a;
+							return _List_fromArray(
+								[
+									trainingBox(
+									_List_fromArray(
+										[
+											A3(
+											$author$project$Session3$Synonym$trainingWheels,
+											$elm$core$List$length(task.history),
+											x.stimulus,
+											x.target),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('m-8')
+												]),
+											_List_fromArray(
+												[
+													A4($author$project$View$sentenceInSynonym, x, task.state, $author$project$Session3$Synonym$UserChangedInput, task.feedback)
+												])),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class(' rounded-md text-center object-center bg-green-300 m-8')
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$rtfeldman$elm_css$Html$Styled$p,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$class('p-6 text-xl text-white')
+														]),
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$text('The correct synonym for '),
+															$rtfeldman$elm_css$Html$Styled$text(x.radical),
+															$rtfeldman$elm_css$Html$Styled$text(' is '),
+															A2(
+															$rtfeldman$elm_css$Html$Styled$span,
+															_List_fromArray(
+																[
+																	$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
+																]),
+															_List_fromArray(
+																[
+																	$rtfeldman$elm_css$Html$Styled$text(x.target)
+																]))
+														])),
+													A2(
+													$rtfeldman$elm_css$Html$Styled$div,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-4')
+														]),
+													_List_fromArray(
+														[
+															$author$project$View$button(
+															{isDisabled: false, message: $author$project$Session3$Synonym$UserClickedNextTrial, txt: 'Next'})
+														]))
+												]))
+										]))
+								]);
+						}
 					} else {
-						var t = _v4.a.a;
+						var _v4 = _v3.a;
 						return _List_fromArray(
 							[
-								A4($author$project$View$sentenceInSynonym, t, task.state, updateInputMsg, task.feedback),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('p-4')
-									]),
-								_List_Nil),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full rounded-lg h-48 bg-green-300 items-center text-center')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$p,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 text-lg text-white')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('The best synonym for ' + (t.radical + ' is ')),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$span,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text(t.target)
-													]))
-											])),
-										$author$project$View$button(
-										{isDisabled: false, message: nextTrialMsg, txt: 'Next'})
-									]))
+								$author$project$View$introToMain($author$project$Session3$Synonym$UserClickedStartMainloop)
 							]);
 					}
-				} else {
-					var _v5 = _v4.a;
-					return _List_fromArray(
-						[
-							A3($author$project$View$end, task.infos.end, saveDataMsg, 'spelling')
-						]);
-				}
-		}
-	});
+				default:
+					var _v5 = experiment.a;
+					var task = experiment.b;
+					var _v6 = _Utils_Tuple2(task.current, task.feedback);
+					if (_v6.a.$ === 'Just') {
+						if (!_v6.b) {
+							var t = _v6.a.a;
+							return _List_fromArray(
+								[
+									$author$project$View$tooltip('Type the synonym of the word in the box'),
+									A4($author$project$View$sentenceInSynonym, t, task.state, $author$project$Session3$Synonym$UserChangedInput, task.feedback),
+									$author$project$View$button(
+									{isDisabled: false, message: $author$project$Session3$Synonym$UserClickedFeedback, txt: 'Check my answer'})
+								]);
+						} else {
+							var t = _v6.a.a;
+							return _List_fromArray(
+								[
+									A4($author$project$View$sentenceInSynonym, t, task.state, $author$project$Session3$Synonym$UserChangedInput, task.feedback),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('p-4')
+										]),
+									_List_Nil),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col w-full rounded-lg h-48 bg-green-300 items-center text-center')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$p,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-8 text-lg text-white')
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text('The best synonym for ' + (t.radical + ' is ')),
+													A2(
+													$rtfeldman$elm_css$Html$Styled$span,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$class('font-bold')
+														]),
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$text(t.target)
+														]))
+												])),
+											$author$project$View$button(
+											{isDisabled: false, message: $author$project$Session3$Synonym$UserClickedNextTrial, txt: 'Next'})
+										]))
+								]);
+						}
+					} else {
+						var _v7 = _v6.a;
+						return _List_fromArray(
+							[
+								A3($author$project$View$end, task.infos.end, $author$project$Session3$Synonym$SaveDataMsg, 'spelling')
+							]);
+					}
+			}
+	}
+};
 var $author$project$Main$body = function (model) {
 	var infos = function () {
-		var _v8 = model.infos;
-		if (_v8.$ === 'Success') {
-			var infos_ = _v8.a;
+		var _v6 = model.infos;
+		if (_v6.$ === 'Success') {
+			var infos_ = _v6.a;
 			return infos_;
 		} else {
 			return $elm$core$Dict$empty;
@@ -25339,218 +26865,92 @@ var $author$project$Main$body = function (model) {
 							case 'TopSession1':
 								return $author$project$Session1$Top$view(infos);
 							case 'Meaning':
-								var infos_ = A2($elm$core$Dict$get, 'Meaning', infos);
 								return _List_fromArray(
 									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$Meaning,
 										$author$project$Session1$Meaning$view(
-										{
-											nextTrialMsg: $author$project$Main$Meaning($author$project$Session1$Meaning$UserClickedNextTrial),
-											optionsOrder: model.optionsOrder,
-											radioMsg: function (val) {
-												return $author$project$Main$Meaning(
-													$author$project$Session1$Meaning$UserClickedRadioButton(val));
-											},
-											saveDataMsg: $author$project$Main$Meaning($author$project$Session1$Meaning$SaveDataMsg),
-											startMainMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$Meaning(
-														A2($author$project$Session1$Meaning$UserClickedStartMain, trials, informations));
-												}),
-											task: model.meaning,
-											toggleFeedbackMsg: $author$project$Main$Meaning($author$project$Session1$Meaning$UserClickedToggleFeedback)
-										})
+											{optionsOrder: model.optionsOrder, task: model.meaning}))
 									]);
 							case 'Presentation':
-								var synonymInfos = A2($elm$core$Dict$get, 'Presentation', infos);
 								return _List_fromArray(
 									[
-										$author$project$Session1$Presentation$view(
-										{
-											infos: synonymInfos,
-											nextTrialMsg: $author$project$Main$Presentation($author$project$Session1$Presentation$UserClickedNextTrial),
-											saveDataMsg: $author$project$Main$NoOp,
-											startMainMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$Presentation(
-														A2($author$project$Session1$Presentation$UserClickedStartMain, trials, informations));
-												}),
-											task: model.presentation,
-											userClickedAudio: $author$project$Main$PlaysoundInJS,
-											userToggledElementOfEntry: function (entryId) {
-												return $author$project$Main$Presentation(
-													$author$project$Session1$Presentation$UserToggleElementOfEntry(entryId));
-											}
-										})
+										A2(
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$Presentation,
+										$author$project$Session1$Presentation$view(model.presentation))
 									]);
 							case 'SpellingLevel1':
 								return _List_fromArray(
 									[
-										A3(
-										$author$project$Session1$SpellingLvl1$view,
-										model.spellingLvl1,
-										model.optionsOrder,
-										{
-											nextTrialMsg: $author$project$Main$Spelling1($author$project$Session1$SpellingLvl1$UserClickedNextTrial),
-											playAudio: $author$project$Main$PlaysoundInJS,
-											radioMsg: function (choice) {
-												return $author$project$Main$Spelling1(
-													$author$project$Session1$SpellingLvl1$UserClickedRadioButton(choice));
-											},
-											saveDataMsg: $author$project$Main$Spelling1($author$project$Session1$SpellingLvl1$UserClickedSavedData),
-											startMainloopMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$Spelling1(
-														A2($author$project$Session1$SpellingLvl1$UserClickedStartMainloop, trials, informations));
-												}),
-											toggleFeedbackMsg: $author$project$Main$Spelling1($author$project$Session1$SpellingLvl1$UserClickedFeedback)
-										})
+										A2(
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$Spelling1,
+										A2($author$project$Session1$Spelling$view, model.spellingLvl1, model.optionsOrder))
 									]);
 							default:
-								var cu1Infos = A2($elm$core$Dict$get, 'Context Understanding level 1', infos);
 								return _List_fromArray(
 									[
-										$author$project$Session1$CU1$view(
-										{
-											infos: cu1Infos,
-											nextTrialMsg: $author$project$Main$CU1($author$project$Session1$CU1$UserClickedNextTrial),
-											optionsOrder: model.optionsOrder,
-											radioMsg: function (id) {
-												return $author$project$Main$CU1(
-													$author$project$Session1$CU1$UserClickedRadioButton(id));
-											},
-											startMainMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$CU1(
-														A2($author$project$Session1$CU1$UserClickedStartMain, trials, informations));
-												}),
-											task: model.cu1,
-											toggleFeedbackMsg: $author$project$Main$CU1($author$project$Session1$CU1$UserClickedToggleFeedback),
-											userClickedSaveData: $author$project$Main$CU1($author$project$Session1$CU1$UserClickedSaveData)
-										})
+										A2(
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$CU1,
+										$author$project$Session1$ContextUnderstanding$view(
+											{optionsOrder: model.optionsOrder, task: model.cu1}))
 									]);
 						}
 					case 'AuthenticatedSession2':
 						var task = _v0.b;
 						switch (task.$) {
-							case 'CULevel2':
-								var cu2Infos = A2($elm$core$Dict$get, 'Context Understanding level 2', infos);
+							case 'CU':
 								return _List_fromArray(
 									[
-										A3(
-										$author$project$Session2$CU2$view,
-										model.cuLvl2,
-										model.optionsOrder,
-										{
-											nextTrialMsg: $author$project$Main$CU2($author$project$Session2$CU2$UserClickedNextTrial),
-											radioMsg: function (id) {
-												return $author$project$Main$CU2(
-													$author$project$Session2$CU2$UserClickedRadioButton(id));
-											},
-											saveData: $author$project$Main$CU2($author$project$Session2$CU2$UserClickedSaveData),
-											startMainMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$CU2(
-														A2($author$project$Session2$CU2$UserClickedStartMain, trials, informations));
-												}),
-											toggleFeedback: $author$project$Main$CU2($author$project$Session2$CU2$UserClickedToggleFeedback),
-											userClickedAudio: $author$project$Main$PlaysoundInJS,
-											userClickedNextTrial: $author$project$Main$CU2($author$project$Session2$CU2$UserClickedNextTrial)
-										})
+										A2(
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$CU2,
+										A2($author$project$Session2$CU2$view, model.cuLvl2, model.optionsOrder))
 									]);
 							case 'Translation':
-								var infos_ = A2($elm$core$Dict$get, 'Translation', infos);
 								return _List_fromArray(
 									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$Translation,
 										$author$project$Session2$Translation$view(
-										{
-											infos: infos_,
-											nextTrialMsg: $author$project$Main$Translation($author$project$Session2$Translation$UserClickedNextTrial),
-											optionsOrder: model.optionsOrder,
-											radioMsg: function (val) {
-												return $author$project$Main$Translation(
-													$author$project$Session2$Translation$UserClickedRadioButton(val));
-											},
-											saveDataMsg: $author$project$Main$Translation($author$project$Session2$Translation$UserClickedSaveData),
-											startMainMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$Translation(
-														A2($author$project$Session2$Translation$UserClickedStartMain, trials, informations));
-												}),
-											task: model.translationTask,
-											toggleFeedbackMsg: $author$project$Main$Translation($author$project$Session2$Translation$UserClickedToggleFeedback)
-										})
+											{optionsOrder: model.optionsOrder, task: model.translationTask}))
 									]);
 							default:
-								var info = A2($elm$core$Dict$get, 'Spelling level 2', infos);
-								return $author$project$Main$viewScrabbleTask(model);
+								return _List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$Spelling2,
+										$author$project$Session2$Spelling$viewScrabbleTask(model))
+									]);
 						}
 					case 'AuthenticatedSession3':
 						var task = _v0.b;
 						switch (task.$) {
 							case 'CU3':
-								var cu3Infos = A2($elm$core$Dict$get, 'Context Understanding level 3', infos);
 								return _List_fromArray(
 									[
 										A2(
-										$author$project$Session3$CU3$view,
-										model.cu3,
-										{
-											nextTrialMsg: $author$project$Main$CU3($author$project$Session3$CU3$UserClickedNextTrial),
-											saveDataMsg: $author$project$Main$CU3($author$project$Session3$CU3$UserClickedSaveData),
-											startMainMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$CU3(
-														A2($author$project$Session3$CU3$UserClickedStartMain, trials, informations));
-												}),
-											toggleFeedback: $author$project$Main$CU3($author$project$Session3$CU3$UserClickedToggleFeedback),
-											userChangedInput: function (_new) {
-												return $author$project$Main$CU3(
-													$author$project$Session3$CU3$UserChangedInput(_new));
-											},
-											userClickedAudio: $author$project$Main$PlaysoundInJS
-										})
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$CU3,
+										$author$project$Session3$CU3$view(model.cu3))
 									]);
 							case 'Synonym':
-								var synonymInfos = A2($elm$core$Dict$get, 'recB3kUQW4jNTlou6', infos);
 								return A2(
-									$author$project$Session3$Synonym$viewTask,
-									model.synonymTask,
-									{
-										nextTrialMsg: $author$project$Main$Synonym($author$project$Session3$Synonym$UserClickedNextTrial),
-										saveDataMsg: $author$project$Main$Synonym($author$project$Session3$Synonym$SaveDataMsg),
-										toMainloopMsg: F2(
-											function (trials, inf) {
-												return $author$project$Main$Synonym(
-													A2($author$project$Session3$Synonym$UserClickedStartMainloop, trials, inf));
-											}),
-										toggleFeedbackMsg: $author$project$Main$Synonym($author$project$Session3$Synonym$UserClickedFeedback),
-										updateInputMsg: function (input) {
-											return $author$project$Main$Synonym(
-												$author$project$Session3$Synonym$UserChangedInput(input));
-										}
-									});
+									$elm$core$List$map,
+									$rtfeldman$elm_css$Html$Styled$map($author$project$Main$Synonym),
+									$author$project$Session3$Synonym$viewTask(model.synonymTask));
 							default:
-								var infos_ = A2($elm$core$Dict$get, 'Spelling level 3', infos);
 								return _List_fromArray(
 									[
 										A2(
-										$author$project$Session3$Spelling3$view,
-										model.spelling3,
-										{
-											nextTrialMsg: $author$project$Main$Spelling3($author$project$Session3$Spelling3$UserClickedNextTrial),
-											saveData: $author$project$Main$Spelling3($author$project$Session3$Spelling3$UserClickedSaveData),
-											startMainMsg: F2(
-												function (trials, informations) {
-													return $author$project$Main$Spelling3(
-														A2($author$project$Session3$Spelling3$UserClickedStartMain, trials, informations));
-												}),
-											toggleFeedback: $author$project$Main$Spelling3($author$project$Session3$Spelling3$UserClickedToggleFeedback),
-											userChangedInput: function (_new) {
-												return $author$project$Main$Spelling3(
-													$author$project$Session3$Spelling3$UserChangedInput(_new));
-											},
-											userClickedAudio: $author$project$Main$PlaysoundInJS
-										})
+										$rtfeldman$elm_css$Html$Styled$map,
+										$author$project$Main$Spelling3,
+										$author$project$Session3$Spelling3$view(model.spelling3))
 									]);
 						}
 					case 'Posttest':
@@ -25559,114 +26959,10 @@ var $author$project$Main$body = function (model) {
 							[
 								$author$project$Main$viewCloud(model)
 							]);
-					case 'Pilote':
-						var task = _v0.b;
-						switch (task.$) {
-							case 'AcceptabilityEnd':
-								return _List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$p,
-										_List_Nil,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('Thanks again for your time and your help with this project. \nContact shona.whyte@univ-cotedazur.fr if you have any questions or comments.')
-											]))
-									]);
-							case 'AcceptabilityStart':
-								return A2(
-									$author$project$Pretest$Acceptability$view,
-									model.acceptabilityTask,
-									{
-										saveDataMsg: $author$project$Main$Acceptability($author$project$Pretest$Acceptability$UserClickedSaveMsg),
-										startMainMsg: F2(
-											function (informations, trials) {
-												return $author$project$Main$Acceptability(
-													A2($author$project$Pretest$Acceptability$StartMain, trials, informations));
-											}),
-										startTraining: $author$project$Main$Acceptability($author$project$Pretest$Acceptability$StartTraining)
-									});
-							default:
-								var _v6 = model.infos;
-								switch (_v6.$) {
-									case 'Success':
-										var informations = _v6.a;
-										var taskInfo = A2(
-											$elm$core$Maybe$withDefault,
-											'I couldn\'t find the infos of the task : recR8areYkKRvQ6lU ',
-											A2(
-												$elm$core$Maybe$map,
-												function ($) {
-													return $.instructions;
-												},
-												A2($elm$core$Dict$get, 'recR8areYkKRvQ6lU', informations)));
-										return _List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$div,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col items-center justify-center w-full max-w-2-xl')
-													]),
-												_List_fromArray(
-													[
-														A2(
-														$rtfeldman$elm_css$Html$Styled$h1,
-														_List_fromArray(
-															[
-																$rtfeldman$elm_css$Html$Styled$Attributes$class('')
-															]),
-														_List_fromArray(
-															[
-																$rtfeldman$elm_css$Html$Styled$text('Instructions')
-															])),
-														A2(
-														$rtfeldman$elm_css$Html$Styled$p,
-														_List_fromArray(
-															[
-																$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-2xl text-xl text-center mb-8')
-															]),
-														_List_fromArray(
-															[
-																$author$project$View$fromMarkdown(taskInfo)
-															])),
-														$author$project$View$button(
-														{
-															isDisabled: false,
-															message: $author$project$Main$Acceptability($author$project$Pretest$Acceptability$StartTraining),
-															txt: 'start'
-														})
-													]))
-											]);
-									case 'Failure':
-										var reason = _v6.a;
-										return _List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$p,
-												_List_Nil,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('I couldn\'t find the tasks infos. Please report this error.')
-													]))
-											]);
-									case 'Loading':
-										return _List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('Loading...')
-											]);
-									default:
-										return _List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('Info not asked')
-											]);
-								}
-						}
 					case 'Pretest':
 						var task = _v0.a;
 						switch (task.$) {
 							case 'YN':
-								var infos_ = A2($elm$core$Dict$get, 'YesNo task', infos);
 								return _List_fromArray(
 									[
 										A2(
@@ -25696,21 +26992,29 @@ var $author$project$Main$body = function (model) {
 									$elm$core$List$map,
 									$rtfeldman$elm_css$Html$Styled$map($author$project$Main$SPR),
 									$author$project$Pretest$SPR$view(model.spr));
+							case 'SentenceCompletion':
+								return A2(
+									$elm$core$List$map,
+									$rtfeldman$elm_css$Html$Styled$map($author$project$Main$SentenceCompletion),
+									$author$project$Pretest$SentenceCompletion$view(model.sentenceCompletion));
+							case 'GeneralInfos':
+								return _List_Nil;
+							case 'VKS':
+								return A2(
+									$elm$core$List$map,
+									$rtfeldman$elm_css$Html$Styled$map($author$project$Main$VKS),
+									$author$project$Pretest$VKS$view(model.vks));
+							case 'Acceptability':
+								var sub = task.a;
+								return A2(
+									$elm$core$List$map,
+									$rtfeldman$elm_css$Html$Styled$map($author$project$Main$Acceptability),
+									$author$project$Pretest$Acceptability$view(model.acceptabilityTask));
 							default:
-								return _List_fromArray(
-									[
-										A3(
-										$author$project$Pretest$GeneralInfos$view,
-										model.informations,
-										function (input) {
-											return $author$project$Main$Informations(
-												$author$project$Pretest$GeneralInfos$UserUpdatedEmailField(input));
-										},
-										function (email) {
-											return $author$project$Main$Informations(
-												$author$project$Pretest$GeneralInfos$UserClickedSendData(email));
-										})
-									]);
+								return A2(
+									$elm$core$List$map,
+									$rtfeldman$elm_css$Html$Styled$map($author$project$Main$YesNo),
+									$author$project$Pretest$YesNo$view(model.yesno));
 						}
 					case 'Home':
 						return _List_fromArray(
@@ -26254,7 +27558,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"User.AuthenticatedInfo":{"args":[],"type":"{ uid : String.String, firstName : String.String, email : String.String, role : User.Role }"},"Main.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.SpellingLvl1.Trial, cu1 : List.List Session1.CU1.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Main.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Scrabble.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Main.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String }"},"Session1.CU1.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.SpellingLvl1.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session2.Scrabble.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Session2.Translation.SummarizedTrial":{"args":[],"type":"{ trialuid : String.String, userUid : String.String, attempt : String.String }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"Postest.YN.Trial":{"args":[],"type":"{ uid : String.String, word : String.String, exists : Basics.Bool }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"ServerRespondedWithUserInfo":["Result.Result Http.Error User.AuthenticatedInfo"],"UserToggledInCloudWords":["String.String"],"PlaysoundInJS":["String.String"],"WithTime":["Main.Msg","Time.Posix"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserDragsLetter":["DnDList.Msg"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"NewTick":["Time.Posix"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"UserPressedKey":["Maybe.Maybe Basics.Bool"],"Informations":["Pretest.GeneralInfos.Msg"],"ServerRespondedWithSomePretestData":["Task.Parallel.Msg2 (List.List Pretest.Acceptability.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllPretestData":["List.List Pretest.Acceptability.Trial","List.List ExperimentInfo.Task"],"ToNextStep":["Pretest.Acceptability.Step"],"SPR":["Pretest.SPR.Msg"],"CU1":["Session1.CU1.CU1Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.SpellingLvl1.Msg"],"ServerRespondedWithSomeSession1Data":["Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.SpellingLvl1.Trial) (List.List Session1.CU1.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllSession1Data":["List.List Session1.Meaning.Trial","List.List Session1.SpellingLvl1.Trial","List.List Session1.CU1.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession1":["Main.ShuffledSession1"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Main.Spelling2Msg"],"Translation":["Session2.Translation.Msg"],"ServerRespondedWithSomeSession2Data":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Scrabble.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession2Data":["List.List Session2.CU2.Trial","List.List Session2.Scrabble.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"StartSession2":["Main.ShuffledSession2"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"YN":["Postest.YN.Msg"],"Synonym":["Session3.Synonym.Msg"],"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"StartSession3":["Main.ShuffledSession3"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Session1.CU1.CU1Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.CU1.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Postest.YN.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartIntro":["List.List Postest.YN.Trial"],"UserClickedStartMain":["List.List Postest.YN.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["List.List Pretest.Acceptability.Trial","ExperimentInfo.Task"],"RuntimeShuffledTrials":["List.List ExperimentInfo.Task","Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial))"]}},"Pretest.GeneralInfos.Msg":{"args":[],"tags":{"UserClickedSendData":["String.String"],"UserUpdatedEmailField":["String.String"],"UserCreated":["Result.Result Http.Error ()"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"UserChoseNewAnswer":["Pretest.SPR.Answer"],"UserConfirmedChoice":[],"UserClickedNextTrial":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"RuntimeShuffledTrials":["( List.List Pretest.SPR.Trial, List.List ExperimentInfo.Task )"],"NoOp":[],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"ServerRespondedWithSomePretestData":["Task.Parallel.Msg2 (List.List Pretest.SPR.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List ExperimentInfo.Task"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartIntro":["List.List Session1.Meaning.Trial"],"UserClickedStartMain":["List.List Session1.Meaning.Trial","ExperimentInfo.Task"],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartIntro":["List.List Session1.Presentation.Trial"],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"]}},"Session1.SpellingLvl1.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":["List.List Session1.SpellingLvl1.Trial","ExperimentInfo.Task"],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartIntro":["List.List Session2.Translation.Trial"],"UserClickedStartMain":["List.List Session2.Translation.Trial","ExperimentInfo.Task"],"RuntimeSentData":["List.List Session2.Translation.SummarizedTrial"],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session3.CU3.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartIntro":["List.List Session3.Spelling3.Trial"],"UserClickedStartMain":["List.List Session3.Spelling3.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":["List.List Session3.Synonym.Trial","ExperimentInfo.Task"],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Task.Parallel.Msg2":{"args":["a","b"],"tags":{"LoadedA2":["a"],"LoadedB2":["b"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"User.Role":{"args":[],"tags":{"Volunteer":[],"Admin":[]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"Main.Spelling2Msg":{"args":[],"tags":{"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Scrabble.Trial"],"UserClickedStartButton":[],"UserClickedStartMainloop":["List.List Session2.Scrabble.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Session1.Session.LoadingMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.Spelling.Trial) (List.List Session1.ContextUnderstanding.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"},"Pretest.Pretest.ParaMsg":{"args":[],"type":"Task.Parallel.Msg6 (List.List Pretest.SPR.Trial) (List.List Pretest.SentenceCompletion.Trial) (List.List ExperimentInfo.Task) (List.List Pretest.VKS.Trial) (List.List Pretest.Acceptability.Trial) (List.List Pretest.YesNo.Trial)"},"Pretest.Pretest.ShuffledPretest":{"args":[],"type":"{ spr : List.List Pretest.SPR.Trial, sc : List.List Pretest.SentenceCompletion.Trial, infos : List.List ExperimentInfo.Task, vks : List.List Pretest.VKS.Trial, acceptability : Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial)), yn : List.List Pretest.YesNo.Trial }"},"Session1.Session.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.Spelling.Trial, cu1 : List.List Session1.ContextUnderstanding.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Session2.Session.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Spelling.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Session3.Session.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String, introToMain : String.String }"},"Postest.YN.Trial":{"args":[],"type":"{ uid : String.String, word : String.String, exists : Basics.Bool }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String, timeout : Basics.Int }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"},"Pretest.SentenceCompletion.Trial":{"args":[],"type":"{ id : String.String, context : String.String, firstAmorce : String.String, secondAmorce : String.String, isTraining : Basics.Bool, firstFeedback : String.String, secondFeedback : String.String }"},"Pretest.VKS.Trial":{"args":[],"type":"{ id : String.String, verb : String.String, isTraining : Basics.Bool }"},"Pretest.YesNo.Trial":{"args":[],"type":"{ id : String.String, word : String.String, exists : Basics.Bool }"},"Session1.ContextUnderstanding.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.Spelling.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session2.Spelling.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UserToggledInCloudWords":["String.String"],"PlaysoundInJS":["String.String"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"Pretest":["Pretest.Pretest.Msg"],"SentenceCompletion":["Pretest.SentenceCompletion.Msg"],"SPR":["Pretest.SPR.Msg"],"VKS":["Pretest.VKS.Msg"],"YesNo":["Pretest.YesNo.Msg"],"CU1":["Session1.ContextUnderstanding.Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.Spelling.Msg"],"Session1":["Session1.Session.Msg"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Session2.Spelling.Msg"],"Translation":["Session2.Translation.Msg"],"Session2":["Session2.Session.Msg"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"YN":["Postest.YN.Msg"],"Synonym":["Session3.Synonym.Msg"],"Session3":["Session3.Session.Msg"]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedAudio":["String.String"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedStartTraining":[],"UserClickedStartAnswering":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Postest.YN.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartIntro":["List.List Postest.YN.Trial"],"UserClickedStartMain":["List.List Postest.YN.Trial","ExperimentInfo.Task"],"UserChangedInput":["String.String"]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":[],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Pretest.Pretest.Msg":{"args":[],"tags":{"ServerRespondedWithSomePretestData":["Pretest.Pretest.ParaMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List Pretest.SentenceCompletion.Trial","List.List ExperimentInfo.Task","List.List Pretest.VKS.Trial","List.List Pretest.Acceptability.Trial","List.List Pretest.YesNo.Trial"],"StartPretest":["Pretest.Pretest.ShuffledPretest"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"NoOp":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"UserClickedNextTrial":["Pretest.SPR.Answer"],"UserClickedSaveData":[],"UserConfirmedChoice":["Pretest.SPR.Answer"],"UserClickedStartTraining":[]}},"Pretest.SentenceCompletion.Msg":{"args":[],"tags":{"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":["ExperimentInfo.Task","List.List Pretest.SentenceCompletion.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.SentenceCompletion.Field","String.String"],"RuntimeReordedAmorces":["Pretest.SentenceCompletion.Field"],"UserClickedStartTraining":[]}},"Pretest.VKS.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.VKS.Field","String.String"],"RuntimeReordedAmorces":["Pretest.VKS.Field"],"UserClickedNewKnowledge":["String.String"]}},"Pretest.YesNo.Msg":{"args":[],"tags":{"NoOp":[],"UserClickedStartTask":[],"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserClickedSaveData":[],"ServerRespondedWithUpdatedUser":["Result.Result Http.Error String.String"]}},"Session1.ContextUnderstanding.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.ContextUnderstanding.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"],"UserClickedStartAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Session1.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Session1.Session.LoadingMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllData":["List.List Session1.Meaning.Trial","List.List Session1.Spelling.Trial","List.List Session1.ContextUnderstanding.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession":["Session1.Session.ShuffledSession1"]}},"Session1.Spelling.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":[],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[]}},"Session2.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Spelling.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllData":["List.List Session2.CU2.Trial","List.List Session2.Spelling.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session2.Session.ShuffledSession2"]}},"Session2.Spelling.Msg":{"args":[],"tags":{"UserDragsLetter":["DnDList.Msg"],"PlayAudio":["String.String"],"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Spelling.Trial"],"UserClickedStartMainloop":["List.List Session2.Spelling.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"UserClickedStartAudio":["String.String"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartTraining":[],"UserClickedStartMain":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session3.Session.ShuffledSession3"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartTraining":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserCLickedStartTraining":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Pretest.SentenceCompletion.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"Pretest.VKS.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"List.List":{"args":["a"],"tags":{}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Task.Parallel.Msg6":{"args":["a","b","c","d","e","f"],"tags":{"LoadedA6":["a"],"LoadedB6":["b"],"LoadedC6":["c"],"LoadedD6":["d"],"LoadedE6":["e"],"LoadedF6":["f"]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
@@ -26814,7 +28118,7 @@ function getBundleURL() {
 }
 
 function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)?\/[^/]+(?:\?.*)?$/, '$1') + '/';
 }
 
 exports.getBundleURL = getBundleURLCached;
@@ -30172,7 +31476,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40963" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55911" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

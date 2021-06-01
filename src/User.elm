@@ -14,8 +14,7 @@ type Role
 
 
 type User
-    = Ano { firstName : String, email : String }
-    | Authenticated { uid : String, firstName : String, email : String, role : Role }
+    = Authenticated { uid : String, firstName : String, email : String, role : Role }
 
 
 type alias AnoInfo =
@@ -29,13 +28,6 @@ type alias AuthenticatedInfo =
 encoder : User -> Encode.Value
 encoder user =
     case user of
-        Ano info ->
-            Encode.object
-                [ ( "First Name", Encode.string info.firstName )
-                , ( "Email", Encode.string info.email )
-                , ( "role", Encode.string "Volunteer" )
-                ]
-
         Authenticated info ->
             Encode.object
                 [ ( "First Name", Encode.string info.firstName )

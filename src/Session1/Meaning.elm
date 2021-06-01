@@ -1,37 +1,34 @@
 module Session1.Meaning exposing (..)
 
-import Browser
-import Css exposing (visibility)
 import Data exposing (decodeRecords)
 import Dict
-import ExperimentInfo exposing (Task)
-import Html
+import ExperimentInfo
 import Html.Styled
     exposing
         ( Html
         , div
-        , fieldset
         , h1
-        , h2
         , h3
-        , h4
-        , h5
-        , h6
-        , input
-        , label
         , p
         , span
         , text
         )
-import Html.Styled.Attributes exposing (checked, class, disabled, for, id, type_)
+import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Progressbar
+import Random
+import Random.List
+import Session2.Translation exposing (Msg(..))
 import String.Interpolate exposing (interpolate)
-import Url exposing (Url)
 import View
+import Json.Decode exposing (bool)
+
+
+type alias Meaning =
+    Logic.Task Trial State
 
 
 taskId =
@@ -42,10 +39,11 @@ type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
-    | UserClickedStartIntro (List Trial)
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
+    | UserClickedStartMain
     | SaveDataMsg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedStartTraining
+    | RuntimeShuffledOptionsOrder (List Int)
 
 
 decodeMeaningInput : Decoder (List Trial)
@@ -61,7 +59,7 @@ decodeMeaningInput =
                 |> optional "Distractor_3_Meaning" string "MISSING"
                 |> required "Feedback_Incorrect_Meaning" string
                 |> required "Feedback_Correct_Meaning" string
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" bool False
     in
     decodeRecords decoder
 
@@ -119,14 +117,9 @@ viewQuestion word trialn =
 
 view :
     { task : Logic.Task Trial State
-    , radioMsg : String -> msg
-    , toggleFeedbackMsg : msg
-    , nextTrialMsg : msg
     , optionsOrder : List comparable
-    , startMainMsg : List Trial -> Task -> msg
-    , saveDataMsg : msg
     }
-    -> Html msg
+    -> Html Msg
 view task =
     case task.task of
         Logic.Loading ->
@@ -135,10 +128,10 @@ view task =
         Logic.Err reason ->
             div [] [ text reason ]
 
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    View.viewTraining data.infos.instructions
+                    div [ class "flex flex-col items-center" ]
                         [ p [] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.writtenWord, View.bold trial.target ] ]
                         , p [] [ viewQuestion trial.writtenWord (List.length data.history) ]
                         , div
@@ -147,25 +140,25 @@ view task =
                             View.shuffledOptions
                                 data.state
                                 data.feedback
-                                task.radioMsg
+                                UserClickedRadioButton
                                 trial
                                 task.optionsOrder
-                        , div [] <|
+                        , div []
                             [ View.genericSingleChoiceFeedback
                                 { isVisible = data.feedback
                                 , userAnswer = data.state.userAnswer
                                 , target = trial.target
                                 , feedback_Correct = ( trial.feedbackIncorrect, [] )
                                 , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                                , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
                                 }
                             ]
                         ]
 
                 Nothing ->
-                    View.introToMain (task.startMainMsg data.mainTrials data.infos)
+                    View.introToMain UserClickedStartMain
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
                     div [ class "container flex flex-col items-center justify-center" ]
@@ -179,7 +172,7 @@ view task =
                                 View.shuffledOptions
                                     data.state
                                     data.feedback
-                                    task.radioMsg
+                                    UserClickedRadioButton
                                     trial
                                     task.optionsOrder
                             , View.genericSingleChoiceFeedback
@@ -188,16 +181,27 @@ view task =
                                 , target = trial.target
                                 , feedback_Correct = ( trial.feedbackIncorrect, [] )
                                 , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                                , button = View.navigationButton task.toggleFeedbackMsg task.nextTrialMsg data.feedback
+                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
                                 }
                             ]
                         ]
 
                 Nothing ->
-                    View.end data.infos.end task.saveDataMsg "spelling"
+                    View.end data.infos.end SaveDataMsg "spelling"
 
         Logic.NotStarted ->
             div [] [ text "I did not start yet." ]
+
+        Logic.Running Logic.Instructions data ->
+            div []
+                [ h1 [] [ text "Instructions" ]
+                , p [] [ View.fromMarkdown data.infos.instructions ]
+                , View.button
+                    { isDisabled = False
+                    , message = UserClickedStartTraining
+                    , txt = "Start training"
+                    }
+                ]
 
 
 getRecords =
@@ -226,3 +230,30 @@ start info trials =
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | meaning = Logic.next initState model.meaning }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
+
+        UserClickedToggleFeedback ->
+            ( { model | meaning = Logic.toggle model.meaning }, Cmd.none )
+
+        UserClickedRadioButton newChoice ->
+            ( { model | meaning = Logic.update { uid = "", userAnswer = newChoice } model.meaning }, Cmd.none )
+
+        UserClickedStartMain ->
+            ( { model | meaning = Logic.startMain model.meaning initState }, Cmd.none )
+
+        SaveDataMsg ->
+            ( model, Logic.saveData ServerRespondedWithLastRecords model.user taskId model.meaning )
+
+        ServerRespondedWithLastRecords _ ->
+            ( model, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | meaning = Logic.startTraining model.meaning }, Cmd.none )
+
+        RuntimeShuffledOptionsOrder newOrder ->
+            ( { model | optionsOrder = newOrder }, Cmd.none )

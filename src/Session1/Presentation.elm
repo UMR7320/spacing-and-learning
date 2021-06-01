@@ -2,26 +2,28 @@ module Session1.Presentation exposing (..)
 
 import Data
 import Dict exposing (Dict)
-import ExperimentInfo exposing (Task)
-import Html.Styled as Html exposing (Html, div, fromUnstyled, p, span, text)
+import ExperimentInfo
+import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
-import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
+import Ports
 import Progressbar exposing (progressBar)
 import Session3.Synonym exposing (Msg(..))
-import String.Interpolate exposing (interpolate)
 import Task
 import View
+import Json.Decode exposing (bool)
 
 
 type Entry
-    = Definition
-    | Example
-    | Translation
+    = Translation
+
+
+type alias Presentation =
+    Logic.Task Trial State
 
 
 viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
@@ -56,7 +58,7 @@ entries d e t msg toggledEntries =
     , ( "translation", { txt = "Translation: ", elements = List.filter ((/=) "missing") t } )
     ]
         |> List.map
-            (\( key, { txt, elements } as val ) ->
+            (\( key, { txt } as val ) ->
                 p [ class "flex flex-col", Html.Styled.Events.onClick (msg key) ]
                     [ div [ class "text-lg hover:underline cursor-pointer" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
                     , span [ class "p-2" ] [ viewEntry key val toggledEntries ]
@@ -66,38 +68,34 @@ entries d e t msg toggledEntries =
 
 
 view :
-    { task : Logic.Task Trial State
-    , infos : Maybe ExperimentInfo.Task
-    , nextTrialMsg : msg
-    , userClickedAudio : String -> msg
-    , startMainMsg : List Trial -> Task -> msg
-    , userToggledElementOfEntry : String -> msg
-    , saveDataMsg : msg
-    }
-    -> Html msg
+    Logic.Task Trial State
+    -> Html Msg
 view task =
-    case task.task of
+    case task of
         Logic.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
         Logic.Err reason ->
             div [] [ text reason ]
 
+        Logic.Running Logic.Instructions data ->
+            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+
         Logic.Loading ->
             div [] [ text "Loading..." ]
 
-        Logic.Intr data ->
+        Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    View.viewTraining data.infos.instructions
+                    div [ class "flex flex-col items-center" ]
                         [ div [ class <| "pb-4 pt-4 text-3xl font-bold flex flex-row" ]
                             [ text trial.text
                             ]
-                        , View.audioButton task.userClickedAudio trial.audio.url "Pronunciation"
-                        , div [ class "w-56 pt-8" ] <| entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] task.userToggledElementOfEntry data.state.toggledEntries
+                        , div [] [ View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation" ]
+                        , div [ class "w-56 pt-8" ] <| entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
                         , div [ class "pb-8" ]
                             [ View.button
-                                { message = task.nextTrialMsg
+                                { message = UserClickedNextTrial
                                 , isDisabled = False
                                 , txt = "Next Item"
                                 }
@@ -105,9 +103,9 @@ view task =
                         ]
 
                 Nothing ->
-                    View.introToMain (task.startMainMsg data.mainTrials data.infos)
+                    View.introToMain (UserClickedStartMain data.mainTrials data.infos)
 
-        Logic.Main data ->
+        Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
@@ -116,11 +114,11 @@ view task =
                             [ text trial.text
                             ]
                         , div [ class "w-1/3" ] <|
-                            View.audioButton task.userClickedAudio trial.audio.url "Pronunciation"
-                                :: entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] task.userToggledElementOfEntry data.state.toggledEntries
+                            View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
+                                :: entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
                         , div [ class "" ]
                             [ View.button
-                                { message = task.nextTrialMsg
+                                { message = UserClickedNextTrial
                                 , isDisabled = False
                                 , txt = "Next Item"
                                 }
@@ -128,14 +126,16 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end task.saveDataMsg "meaning"
+                    View.end data.infos.end NoOp "meaning"
 
 
 type Msg
     = UserClickedNextTrial
-    | UserClickedStartIntro (List Trial)
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserToggleElementOfEntry String
+    | UserClickedStartAudio String
+    | UserClickedStartTraining
+    | NoOp
 
 
 sep : Html msg
@@ -160,7 +160,7 @@ decodeTranslationInput =
                 |> required "Translation_1" string
                 |> optional "Translation_2" string "missing"
                 |> required "Word_Audio" Data.decodeAudioFiles
-                |> Data.decodeBool "isTraining"
+                |> optional "isTraining" bool False
     in
     Data.decodeRecords decoder
 
@@ -191,6 +191,36 @@ initState =
             , ( "translation", False )
             ]
         )
+
+
+update msg model =
+    case msg of
+        UserClickedNextTrial ->
+            ( { model | presentation = Logic.next initState model.presentation }, Cmd.none )
+
+        UserClickedStartMain _ _ ->
+            ( { model | presentation = Logic.startMain model.presentation initState }, Cmd.none )
+
+        UserToggleElementOfEntry id ->
+            let
+                prevState =
+                    Logic.getState model.presentation
+            in
+            case prevState of
+                Just state ->
+                    ( { model | presentation = Logic.update { state | toggledEntries = Dict.update id (Maybe.map not) state.toggledEntries } model.presentation }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        UserClickedStartAudio url ->
+            ( model, Ports.playAudio url )
+
+        UserClickedStartTraining ->
+            ( { model | presentation = Logic.startTraining model.presentation }, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
 
 
 defaultTrial : Trial
