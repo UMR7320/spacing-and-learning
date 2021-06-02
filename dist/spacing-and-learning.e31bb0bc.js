@@ -4744,7 +4744,7 @@ function _Browser_application(impl)
 	var onUrlChange = impl.onUrlChange;
 	var onUrlRequest = impl.onUrlRequest;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
-key['elm-hot-nav-key'] = true
+key['elm-hot-nav-key'] = true;
 
 	return _Browser_document({
 		setup: function(sendToApp)
@@ -12610,24 +12610,12 @@ var $author$project$Session1$ContextUnderstanding$Trial = F8(
 	function (uid, text, target, distractor1, distractor2, distractor3, definition, isTraining) {
 		return {definition: definition, distractor1: distractor1, distractor2: distractor2, distractor3: distractor3, isTraining: isTraining, target: target, text: text, uid: uid};
 	});
-var $author$project$Data$decodeBool = function (fieldname) {
-	var stringToBoolDecoder = function (str) {
-		if (str === 'true') {
-			return $elm$json$Json$Decode$succeed(true);
-		} else {
-			return $elm$json$Json$Decode$succeed(false);
-		}
-	};
-	return $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom(
-		A2(
-			$elm$json$Json$Decode$andThen,
-			stringToBoolDecoder,
-			A2($elm$json$Json$Decode$field, fieldname, $elm$json$Json$Decode$string)));
-};
 var $author$project$Session1$ContextUnderstanding$decodeTranslationInput = function () {
-	var decoder = A2(
-		$author$project$Data$decodeBool,
+	var decoder = A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
 		'isTraining',
+		$elm$json$Json$Decode$bool,
+		false,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 			'Definition',
@@ -31476,7 +31464,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55911" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60947" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
