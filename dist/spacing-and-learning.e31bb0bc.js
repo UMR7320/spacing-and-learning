@@ -21937,7 +21937,7 @@ var $author$project$View$instructions = F2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex text-xl flex-col items-center')
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex text-lg flex-col items-center')
 				]),
 			_List_fromArray(
 				[
@@ -22403,7 +22403,7 @@ var $author$project$View$end = F3(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col text-xl w-full items-center')
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col text-lg w-full items-center')
 				]),
 			_List_fromArray(
 				[
@@ -22424,7 +22424,7 @@ var $author$project$View$end = F3(
 var $author$project$View$navigationButton = F3(
 	function (toggleFeedbackMsg, nextTrialMsg, feedback) {
 		return $author$project$View$button(
-			(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'} : {isDisabled: false, message: nextTrialMsg, txt: 'Next item '});
+			(!feedback) ? {isDisabled: false, message: toggleFeedbackMsg, txt: 'Check my answer'} : {isDisabled: false, message: nextTrialMsg, txt: 'Continue'});
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
 var $author$project$Pretest$SentenceCompletion$readOnlyAmorce = F2(
@@ -23119,7 +23119,7 @@ var $author$project$View$genericSingleChoiceFeedback = function (data) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$class(
-				' w-full max-w-2xl rounded-md text-center object-center  mb-8 ' + ((data.isVisible && _Utils_eq(data.userAnswer, data.target)) ? 'bg-green-700' : ((data.isVisible && (!_Utils_eq(data.userAnswer, data.target))) ? 'bg-red-700' : ((!data.isVisible) ? '' : ''))))
+				' w-full max-w-2xl rounded-md text-center object-center ' + ((data.isVisible && _Utils_eq(data.userAnswer, data.target)) ? 'bg-green-700' : ((data.isVisible && (!_Utils_eq(data.userAnswer, data.target))) ? 'bg-red-700' : ((!data.isVisible) ? '' : ''))))
 			]),
 		_List_fromArray(
 			[
@@ -23128,7 +23128,7 @@ var $author$project$View$genericSingleChoiceFeedback = function (data) {
 				_List_fromArray(
 					[
 						$rtfeldman$elm_css$Html$Styled$Attributes$class(
-						'text-xl py-4 w-full flex flex-col items-center justify-center  text-white p-2' + (' ' + (data.isVisible ? 'visible' : 'invisible')))
+						'text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2' + (' ' + (data.isVisible ? 'visible' : 'invisible')))
 					]),
 				_Utils_eq(data.userAnswer, data.target) ? _List_fromArray(
 					[
@@ -23175,7 +23175,7 @@ var $author$project$View$introToMain = function (msg) {
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
 			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col text-xl w-full items-center justify-center')
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col text-lg w-full items-center justify-center')
 			]),
 		_List_fromArray(
 			[
@@ -24179,7 +24179,7 @@ var $author$project$View$trainingWheelsGeneric = F3(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col pt-4 pb-4 italic text-xl max-w-xl')
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col pt-4 pb-4 italic text-lg max-w-xl')
 				]),
 			_List_fromArray(
 				[
@@ -25430,16 +25430,25 @@ var $author$project$Session2$CU2$view = F2(
 												]),
 											_List_fromArray(
 												[
-													$rtfeldman$elm_css$Html$Styled$text(trial.context)
+													$author$project$View$fromMarkdown(trial.context)
 												])),
-											(nTimes > 0) ? A3(
-											$author$project$View$audioButton,
-											$author$project$Session2$CU2$UserClickedAudio,
-											trial.audioSentence.url,
-											'dialog ' + $elm$core$String$fromInt(nTimes)) : $author$project$View$button(
-											{isDisabled: !nTimes, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'What happened ?'}),
-											$author$project$View$button(
-											{isDisabled: nTimes === 3, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'See descriptions and respond to question'})
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row')
+												]),
+											_List_fromArray(
+												[
+													(nTimes > 0) ? A3(
+													$author$project$View$audioButton,
+													$author$project$Session2$CU2$UserClickedAudio,
+													trial.audioSentence.url,
+													'dialog ' + $elm$core$String$fromInt(nTimes)) : $author$project$View$button(
+													{isDisabled: !nTimes, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'What happened ?'}),
+													$author$project$View$button(
+													{isDisabled: nTimes === 3, message: $author$project$Session2$CU2$UserClickedStartAnswering, txt: 'Now choose the best description'})
+												]))
 										]));
 							} else {
 								var trial = _v3.a.a;
@@ -25503,7 +25512,7 @@ var $author$project$Session2$CU2$view = F2(
 												]),
 											_List_fromArray(
 												[
-													$rtfeldman$elm_css$Html$Styled$text(trial.context)
+													$author$project$View$fromMarkdown(trial.context)
 												])),
 											(nTimes > 0) ? A3(
 											$author$project$View$audioButton,
@@ -26531,7 +26540,7 @@ var $author$project$View$sentenceInSynonym = F4(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex w-full border-2 p-4  space-x-4 text-xl text-center items-center')
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex w-full border-2 p-4  space-x-4 text-lg text-center items-center')
 				]),
 			_List_fromArray(
 				[

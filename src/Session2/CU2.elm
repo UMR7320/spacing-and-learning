@@ -37,18 +37,20 @@ view exp optionsOrder =
             case ( current, data.state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col text-lg items-center" ]
-                        [ Html.p [ class "p-4" ] [ text trial.context ]
-                        , if nTimes > 0 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url ("dialog " ++ String.fromInt nTimes)
+                        [ Html.p [ class "p-4" ] [ View.fromMarkdown trial.context ]
+                        , div [ class "flex flex-row" ]
+                            [ if nTimes > 0 then
+                                View.audioButton UserClickedAudio trial.audioSentence.url ("dialog " ++ String.fromInt nTimes)
 
-                          else
-                            View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
-                        , View.button
-                            { isDisabled =
-                                nTimes == 3
-                            , message = UserClickedStartAnswering
-                            , txt = "See descriptions and respond to question"
-                            }
+                              else
+                                View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
+                            , View.button
+                                { isDisabled =
+                                    nTimes == 3
+                                , message = UserClickedStartAnswering
+                                , txt = "Now choose the best description"
+                                }
+                            ]
                         ]
 
                 ( Just trial, Answering ) ->
@@ -73,7 +75,7 @@ view exp optionsOrder =
                     div [ class "flex flex-col w-full items-center" ]
                         [ View.tooltip data.infos.instructions_short
                         , progressBar history mainTrials
-                        , Html.p [ class "p-8 text-lg" ] [ text trial.context ]
+                        , Html.p [ class "p-8 text-lg" ] [ View.fromMarkdown trial.context ]
                         , if nTimes > 0 then
                             View.audioButton UserClickedAudio trial.audioSentence.url ("dialog " ++ String.fromInt nTimes)
 

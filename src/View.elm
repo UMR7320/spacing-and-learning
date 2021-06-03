@@ -98,7 +98,7 @@ loading =
 
 
 instructions content msgToTraining =
-    div [ class "flex text-xl flex-col items-center" ]
+    div [ class "flex text-lg flex-col items-center" ]
         [ h1 [] [ text "Instructions" ]
         , fromMarkdown content
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
@@ -106,7 +106,7 @@ instructions content msgToTraining =
 
 
 end endInfo saveDataMsg linkToNextTask =
-    div [ class "flex flex-col text-xl w-full items-center" ]
+    div [ class "flex flex-col text-lg w-full items-center" ]
         [ fromMarkdown endInfo
         , a [ href linkToNextTask ]
             [ button
@@ -128,7 +128,7 @@ navigationButton toggleFeedbackMsg nextTrialMsg feedback =
 
         else
             { message = nextTrialMsg
-            , txt = "Next item "
+            , txt = "Continue"
             , isDisabled = False
             }
 
@@ -149,7 +149,7 @@ genericSingleChoiceFeedback :
 genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
     div
         [ class
-            (" w-full max-w-2xl rounded-md text-center object-center  mb-8 "
+            (" w-full max-w-2xl rounded-md text-center object-center "
                 ++ (if data.isVisible && data.userAnswer == data.target then
                         "bg-green-700"
 
@@ -166,7 +166,7 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
         ]
         [ p
             [ class
-                ("text-xl py-4 w-full flex flex-col items-center justify-center  text-white p-2"
+                ("text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2"
                     ++ " "
                     ++ (if data.isVisible then
                             "visible"
@@ -245,7 +245,7 @@ trainingWheelsGeneric : Int -> String -> List String -> Html msg
 trainingWheelsGeneric trialn pattern_ variables =
     let
         helpSentence =
-            div [ class "flex flex-col pt-4 pb-4 italic text-xl max-w-xl" ] [ p [] [ fromMarkdown <| interpolate pattern_ variables ] ]
+            div [ class "flex flex-col pt-4 pb-4 italic text-lg max-w-xl" ] [ p [] [ fromMarkdown <| interpolate pattern_ variables ] ]
     in
     case trialn of
         0 ->
@@ -428,7 +428,7 @@ radio value isChecked isCorrect feedbackMode msg =
 
 introToMain : msg -> Html msg
 introToMain msg =
-    div [ class "container flex flex-col text-xl w-full items-center justify-center" ]
+    div [ class "container flex flex-col text-lg w-full items-center justify-center" ]
         [ h3 [] [ text "Now you understand the activity, let's try our target words." ]
         , button
             { message = msg
@@ -547,7 +547,7 @@ tooltip text_ =
 
 sentenceInSynonym : { a | pre : String, stimulus : String, post : String } -> { b | userAnswer : String } -> (String -> msg) -> Bool -> Html msg
 sentenceInSynonym t state msg feedback_ =
-    div [ class "flex w-full border-2 p-4  space-x-4 text-xl text-center items-center" ]
+    div [ class "flex w-full border-2 p-4  space-x-4 text-lg text-center items-center" ]
         [ span [] [ text t.pre ]
         , floatingLabel t.stimulus state.userAnswer msg feedback_
         , span [] [ text t.post ]
