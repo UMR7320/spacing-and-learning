@@ -20,8 +20,8 @@ module.exports = async (event) => {
   try {
     const base = Airtable.base(event.queryStringParameters.app);
     const learningData = await base(handleTableRequest(event.queryStringParameters.base))
-      .select({ maxRecords: 100, view: (event.queryStringParameters.view) })
-      .firstPage();
+      .select({ maxRecords: 200, view: (event.queryStringParameters.view) })
+      .all();
 
     const formattedLearningData = learningData.map((datum) => ({
       id: datum.id,

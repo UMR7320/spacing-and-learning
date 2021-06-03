@@ -19,8 +19,8 @@ const formattedReturn = require("./formattedReturn");
 module.exports = async (event) => {
   try {
     const base = Airtable.base(event.queryStringParameters.app);
-    const learningData = await base(handleTableRequest(event.queryStringParameters.base))
-      .select({ maxRecords: 250, view: (event.queryStringParameters.view) })
+    const learningData = await base(handleTableRequest("ba-"))
+      .select({ maxRecords: 30, view: (event.queryStringParameters.view) })
       .firstPage();
     const formattedLearningData = learningData.map((datum) => ({
       id: datum.id,
