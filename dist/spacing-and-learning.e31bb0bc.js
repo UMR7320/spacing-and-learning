@@ -19199,7 +19199,7 @@ var $author$project$Session3$Synonym$State = F2(
 		return {uid: uid, userAnswer: userAnswer};
 	});
 var $author$project$Session3$Synonym$initState = A2($author$project$Session3$Synonym$State, 'DefaultUserUID', '');
-var $author$project$Session3$Synonym$taskId = 'recf5HANE632FLKbc';
+var $author$project$Session3$Synonym$taskId = 'recB3kUQW4jNTlou6';
 var $author$project$Session3$Synonym$start = F2(
 	function (info, trials) {
 		var relatedInfos = A2(
@@ -23314,7 +23314,12 @@ var $author$project$View$shuffledOptions = F5(
 				$elm$core$List$sortBy,
 				$elm$core$Tuple$first,
 				A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
-		return ordoredOptions;
+		return _Utils_ap(
+			ordoredOptions,
+			_List_fromArray(
+				[
+					option('I don\'t know')
+				]));
 	});
 var $rtfeldman$elm_css$Css$absolute = {position: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
 var $rtfeldman$elm_css$Css$Structure$PseudoElement = function (a) {
@@ -31464,7 +31469,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60947" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62778" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

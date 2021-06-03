@@ -86,7 +86,7 @@ shuffledOptions state fb radioMsg trial optionsOrder =
                 |> List.sortBy Tuple.first
                 |> List.map Tuple.second
     in
-    ordoredOptions
+    ordoredOptions ++ [ option "I don't know" ]
 
 
 unclickableButton color txt =

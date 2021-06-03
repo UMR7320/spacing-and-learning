@@ -15,7 +15,7 @@ import Html.Styled
         )
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
-import Json.Decode as Decode exposing (Decoder, string)
+import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Progressbar
@@ -24,7 +24,6 @@ import Random.List
 import Session2.Translation exposing (Msg(..))
 import String.Interpolate exposing (interpolate)
 import View
-import Json.Decode exposing (bool)
 
 
 type alias Meaning =
