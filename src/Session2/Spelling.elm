@@ -296,7 +296,7 @@ viewScrabbleTask model =
                                 , [ View.bold currentTrial.target ]
                                 )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-                            , button = View.navigationButton UserClickedFeedbackButton (UserClickedNextTrial data.next) data.feedback
+                            , button = View.navigationButton UserClickedFeedbackButton (UserClickedNextTrial data.next) data.feedback data.state.userAnswer
                             }
                         ]
 
@@ -319,7 +319,7 @@ viewScrabbleTask model =
                                 , [ View.bold currentTrial.target ]
                                 )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-                            , button = View.navigationButton UserClickedFeedbackButton (UserClickedNextTrial data.next) data.feedback
+                            , button = View.navigationButton UserClickedFeedbackButton (UserClickedNextTrial data.next) data.feedback data.state.userAnswer
                             }
                         ]
 

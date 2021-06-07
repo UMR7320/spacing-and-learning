@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation as Nav exposing (pushUrl)
+import Consent
 import Dict
 import DnDList
 import DnDList.Groups exposing (Model)
@@ -409,11 +410,11 @@ body model =
                         List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
             Home ->
-                [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
+                [ div [ class "container flex flex-col items-center" ]
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
                     , p
                         [ class "max-w-2xl text-xl text-center mb-8" ]
-                        [ text "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n Sapien et ligula ullamcorper malesuada proin libero nunc consequat. Sed sed risus pretium quam vulputate dignissim. Aliquam sem fringilla ut morbi tincidunt augue interdum velit euismod. Ultrices tincidunt arcu non sodales neque."
+                        [ View.fromMarkdown Consent.consent
                         ]
                     , a [ href "/pretest/informations" ] [ View.button { message = NoOp, txt = "Commencer les prétests", isDisabled = False } ]
                     ]

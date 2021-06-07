@@ -190,7 +190,7 @@ view task =
                     case data.current of
                         Just trial ->
                             [ div [ class "flex flex-col items-center text-xl font-bold" ]
-                                [ progressBar data.history data.mainTrials
+                                [ Progressbar.progressBarWhenNoTraining data.history data.mainTrials
                                 , text trial.word
                                 , div [ class "flex flex-row m-2" ]
                                     [ unclickableButton "bg-green-500" "F = Exists"

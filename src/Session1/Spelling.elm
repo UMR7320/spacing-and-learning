@@ -81,7 +81,7 @@ viewTask data currentTrial ordoredOptions =
             , target = currentTrial.target
             , feedback_Correct = ( data.infos.feedback_correct, [ View.bold currentTrial.target ] )
             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial data.feedback
+            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial data.feedback data.state.userAnswer
             }
         ]
     ]

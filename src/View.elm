@@ -17,8 +17,10 @@ module View exposing
     , notFound
     , pct
     , radio
+    , readOnlyAmorce
     , sentenceInSynonym
     , shuffledOptions
+    , textAreaWithReadonlyAmorce
     , tooltip
     , trainingWheelsGeneric
     , unclickableButton
@@ -38,10 +40,13 @@ import Html.Styled.Attributes
         , href
         , id
         , name
+        , readonly
+        , spellcheck
         , target
         , type_
+        , value
         )
-import Html.Styled.Events exposing (onClick)
+import Html.Styled.Events exposing (onClick, onInput)
 import Icons
 import Markdown
 import String.Interpolate exposing (interpolate)
@@ -118,12 +123,12 @@ end endInfo saveDataMsg linkToNextTask =
         ]
 
 
-navigationButton toggleFeedbackMsg nextTrialMsg feedback =
+navigationButton toggleFeedbackMsg nextTrialMsg feedback userAnswer =
     button <|
         if not feedback then
             { message = toggleFeedbackMsg
             , txt = "Check my answer"
-            , isDisabled = False
+            , isDisabled = String.isEmpty userAnswer
             }
 
         else
@@ -154,7 +159,7 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
                         "bg-green-700"
 
                     else if data.isVisible && data.userAnswer /= data.target then
-                        "bg-red-700"
+                        "bg-gray-700"
 
                     else if data.isVisible == False then
                         ""
@@ -164,26 +169,22 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
                    )
             )
         ]
-        [ p
-            [ class
-                ("text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2"
-                    ++ " "
-                    ++ (if data.isVisible then
-                            "visible"
-
-                        else
-                            "invisible"
-                       )
-                )
-            ]
-            (if data.userAnswer == data.target then
-                [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.checkCircle ], fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
-
-             else
-                [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.xCircle ]
-                , fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
+        [ if data.isVisible then
+            p
+                [ class
+                    "text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2"
                 ]
-            )
+                (if data.userAnswer == data.target then
+                    [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.checkCircle ], fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
+
+                 else
+                    [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.xCircle ]
+                    , fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
+                    ]
+                )
+
+          else
+            div [] []
         , div [ class "p-4" ] [ data.button ]
         ]
 
@@ -243,6 +244,11 @@ viewInstructions instructions_ =
 
 trainingWheelsGeneric : Int -> String -> List String -> Html msg
 trainingWheelsGeneric trialn pattern_ variables =
+    div [] []
+
+
+
+{--
     let
         helpSentence =
             div [ class "flex flex-col pt-4 pb-4 italic text-lg max-w-xl" ] [ p [] [ fromMarkdown <| interpolate pattern_ variables ] ]
@@ -253,6 +259,7 @@ trainingWheelsGeneric trialn pattern_ variables =
 
         _ ->
             div [] []
+    --}
 
 
 viewTraining : String -> List (Html msg) -> Html msg
@@ -575,4 +582,36 @@ audioButton msg url audioName =
         [ class "px-4 py-4 mt-4 mb-4 hover:opacity-75 cursor-pointer border-2 flex flex-row items-center justify-center bg-green-500 rounded-md shadow-sm"
         , Html.Styled.Events.onClick (msg url)
         ]
-        [ div [ class "h-6 w-6 text-white" ] [ fromUnstyled <| Icons.music ], span [ class "pl-4 text-lg font-bold text-white" ] [ text <| "Listen to the " ++ audioName ] ]
+        [ div [ class "h-6 w-6 text-white" ] [ fromUnstyled <| Icons.music ], span [ class "pl-4 text-lg font-bold text-white" ] [ text <| audioName ] ]
+
+
+readOnlyAmorce firstAmorce firstProduction =
+    if String.length firstProduction < String.length firstAmorce then
+        firstAmorce
+
+    else
+        firstProduction
+
+
+readOnlyOnFeedback fb =
+    if fb then
+        readonly True
+
+    else
+        readonly False
+
+
+textAreaWithReadonlyAmorce { id_, amorce, isFeedback, userAnswer, onInputMsg } =
+    Html.Styled.textarea
+        [ id id_
+        , class "border-2 p-2 w-full text-lg"
+        , value <|
+            readOnlyAmorce
+                amorce
+                userAnswer
+        , onInput onInputMsg
+        , spellcheck False
+        , readOnlyOnFeedback isFeedback
+        ]
+        [ text amorce ]
+

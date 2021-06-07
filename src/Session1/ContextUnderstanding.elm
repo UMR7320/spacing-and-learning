@@ -75,7 +75,7 @@ view task =
                                     , target = trial.target
                                     , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
                                     , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
-                                    , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
+                                    , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
                                     }
                                 ]
                             ]
@@ -110,7 +110,7 @@ view task =
                             , target = trial.target
                             , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
                             }
                         ]
 

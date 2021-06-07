@@ -149,7 +149,7 @@ view task =
                                 , target = trial.target
                                 , feedback_Correct = ( trial.feedbackIncorrect, [] )
                                 , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
+                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
                                 }
                             ]
                         ]
@@ -180,7 +180,7 @@ view task =
                                 , target = trial.target
                                 , feedback_Correct = ( trial.feedbackIncorrect, [] )
                                 , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
+                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
                                 }
                             ]
                         ]

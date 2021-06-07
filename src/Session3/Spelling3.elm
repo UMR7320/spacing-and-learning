@@ -1,6 +1,7 @@
 module Session3.Spelling3 exposing (..)
 
 import Data
+import Delay
 import Dict
 import ExperimentInfo
 import Html.Styled exposing (Html, div, fromUnstyled, text)
@@ -12,6 +13,7 @@ import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Ports
+import Progressbar exposing (progressBar)
 import Session1.Presentation exposing (Msg(..))
 import View
 
@@ -28,43 +30,49 @@ view exp =
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
         Logic.Running Logic.Training ({ current, state, feedback, history } as data) ->
-            case current of
-                Just trial ->
+            case ( current, state.step ) of
+                ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center" ]
-                        [ View.trainingWheelsGeneric (List.length history) data.infos.trainingWheel []
-                        , View.audioButton UserClickedPlayAudio trial.audioSentence.url "word"
-                        , div [ class "p-8" ] [ View.floatingLabel "" state.userAnswer UserChangedInput feedback ]
+                        [ viewLimitedTimesAudioButton nTimes trial
+                        , View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.writtenWord ] )
                             , userAnswer = state.userAnswer |> String.trim |> String.toLower
                             , target = trial.writtenWord
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback data.state.userAnswer
                             }
                         ]
 
-                Nothing ->
+                ( Nothing, _ ) ->
                     View.introToMain UserClickedStartMain
 
+                _ ->
+                    div [] []
+
         Logic.Running Logic.Main ({ current, state, feedback } as data) ->
-            case current of
-                Just trial ->
-                    div [ class "container flex flex-col justify-center items-center max-w-3xl m-4 p-4" ]
-                        [ div [ class "h-8 w-8 pb-16", Html.Styled.Events.onClick (UserClickedPlayAudio trial.audioSentence.url) ] [ fromUnstyled <| Icons.music ]
-                        , div [ class "pb-8" ] [ View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback ]
+            case ( current, state.step ) of
+                ( Just trial, Listening nTimes ) ->
+                    div [ class "flex flex-col items-center " ]
+                        [ progressBar data.history data.mainTrials
+                        , viewLimitedTimesAudioButton nTimes trial
+                        , View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.writtenWord ] )
                             , userAnswer = state.userAnswer |> String.trim |> String.toLower
                             , target = trial.writtenWord
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback data.state.userAnswer
                             }
                         ]
 
-                Nothing ->
+                ( Nothing, _ ) ->
                     View.end data.infos.end UserClickedSaveData "context-understanding"
+
+                _ ->
+                    div [] []
 
         Logic.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
@@ -82,6 +90,7 @@ type Msg
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedPlayAudio String
+    | UserClickedStartAnswering
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -90,6 +99,10 @@ getTrialsFromServer msgHandler =
 
 
 update msg model =
+    let
+        prevState =
+            Logic.getState model.spelling3 |> Maybe.withDefault initState
+    in
     case msg of
         UserClickedNextTrial ->
             ( { model | spelling3 = Logic.next initState model.spelling3 }, Cmd.none )
@@ -104,7 +117,7 @@ update msg model =
             ( { model | spelling3 = Logic.startMain model.spelling3 initState }, Cmd.none )
 
         UserChangedInput new ->
-            ( { model | spelling3 = Logic.update { uid = "", userAnswer = new } model.spelling3 }, Cmd.none )
+            ( { model | spelling3 = Logic.update { prevState | userAnswer = new } model.spelling3 }, Cmd.none )
 
         UserClickedSaveData ->
             let
@@ -117,7 +130,16 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedPlayAudio url ->
-            ( model, Ports.playAudio url )
+            ( { model | spelling3 = Logic.update { prevState | step = decrement prevState.step } model.spelling3 }
+            , if prevState.step /= Listening 0 then
+                Ports.playAudio url
+
+              else
+                Delay.after 0 UserClickedStartAnswering
+            )
+
+        UserClickedStartAnswering ->
+            ( { model | spelling3 = Logic.update { prevState | step = Answering } model.spelling3 }, Cmd.none )
 
 
 decodeTranslationInput : Decoder (List Trial)
@@ -135,7 +157,7 @@ decodeTranslationInput =
 
 initState : State
 initState =
-    State "DefaultUid" ""
+    State "DefaultUid" "" (Listening 3)
 
 
 defaultTrial : Trial
@@ -158,7 +180,23 @@ type alias Trial =
 type alias State =
     { uid : String
     , userAnswer : String
+    , step : Step
     }
+
+
+type Step
+    = Listening Int
+    | Answering
+
+
+decrement : Step -> Step
+decrement step =
+    case step of
+        Listening nTimes ->
+            Listening (nTimes - 1)
+
+        _ ->
+            Answering
 
 
 taskId =
@@ -191,3 +229,17 @@ start info trials =
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
+
+
+viewLimitedTimesAudioButton nTimes trial =
+    if nTimes == 3 then
+        View.audioButton UserClickedPlayAudio trial.audioSentence.url "Listen"
+
+    else if nTimes == 2 then
+        View.audioButton UserClickedPlayAudio trial.audioSentence.url "Listen again?"
+
+    else if nTimes == 1 then
+        View.audioButton UserClickedPlayAudio trial.audioSentence.url "Listen for the last time?"
+
+    else
+        View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }

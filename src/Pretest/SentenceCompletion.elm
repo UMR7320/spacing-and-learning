@@ -87,7 +87,7 @@ view task =
                           else
                             text ""
                         ]
-                    , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
+                    , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.firstProduction
                     ]
 
                 Nothing ->

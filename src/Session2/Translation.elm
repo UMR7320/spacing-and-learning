@@ -173,7 +173,7 @@ renderTask task trial data history allTrials =
             , target = trial.target
             , feedback_Correct = ( data.infos.feedback_correct, [ trial.target ] )
             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ trial.target ] )
-            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback
+            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
             }
         ]
 

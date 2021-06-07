@@ -7,8 +7,23 @@ import Tuple
 import View
 
 
-progressBar : List ( trial, state ) -> List trial -> Html msg
+progressBar : List ( { trial | isTraining : Bool }, state ) -> List { trial | isTraining : Bool } -> Html msg
 progressBar history remainingTrials =
+    let
+        trialNumber =
+            List.length filteredHistory + 1
+
+        filteredHistory =
+            List.filter (not << .isTraining << Tuple.first) history
+
+        pct_ =
+            View.pct trialNumber (remainingTrials ++ List.map Tuple.first filteredHistory)
+    in
+    viewProgressBar pct_
+
+
+progressBarWhenNoTraining : List ( trial, state ) -> List trial -> Html msg
+progressBarWhenNoTraining history remainingTrials =
     let
         trialNumber =
             List.length history + 1
@@ -16,6 +31,10 @@ progressBar history remainingTrials =
         pct_ =
             View.pct trialNumber (remainingTrials ++ List.map Tuple.first history)
     in
+    viewProgressBar pct_
+
+
+viewProgressBar pct_ =
     Html.div
         [ class "shadow max-w-xl w-full bg-gray-300 mt-2 mb-12 transition duration-500"
         ]
@@ -25,5 +44,5 @@ progressBar history remainingTrials =
                 [ Css.width (Css.pct pct_)
                 ]
             ]
-            [ Html.text <| String.fromInt (round pct_) ++ "%" ]
+            []
         ]

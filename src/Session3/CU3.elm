@@ -1,14 +1,17 @@
 module Session3.CU3 exposing (..)
 
 import Data
+import Delay
 import Dict
 import ExperimentInfo
 import Html.Styled as Html exposing (div, span, text)
 import Html.Styled.Attributes exposing (class)
+import Html.Styled.Events exposing (onInput)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
+import Ports
 import Progressbar exposing (progressBar)
 import Random
 import Random.List
@@ -31,49 +34,113 @@ view exp =
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
         Logic.Running Logic.Training { current, state, feedback } ->
-            case current of
-                Just trial ->
+            case ( current, state.step ) of
+                ( Just trial, Listening nTimes ) ->
+                    let
+                        ( context, dialog ) =
+                            case String.split "." trial.context of
+                                x :: xs ->
+                                    ( x, String.concat xs )
+
+                                _ ->
+                                    ( "Missing context", "Missing dialog" )
+                    in
                     div [ class "flex flex-col items-center" ]
-                        [ Html.p [ class "max-w-lg  text-lg m-4" ]
-                            [ View.fromMarkdown trial.context
-                            , Html.br [] []
+                        [ Html.h3 [] [ View.fromMarkdown context ]
+                        , viewLimitedTimesAudioButton nTimes trial
+                        , Html.pre [ class "text-lg m-4" ]
+                            [ View.fromMarkdown dialog
                             ]
-                        , div [ class "flex flex-row p-4 text-lg items-center" ]
-                            [ span [ class "pr-4" ] [ View.fromMarkdown trial.amorce ]
-                            , View.floatingLabel "" state.userAnswer UserChangedInput feedback
-                            ]
-                        , View.genericNeutralFeedback
-                            { isVisible = feedback
-                            , feedback_Correct = ( trial.feedback, [] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
+                        , View.button
+                            { isDisabled =
+                                nTimes == 3
+                            , message = UserClickedStartAnswering
+                            , txt = "What happened?"
                             }
                         ]
 
-                Nothing ->
+                ( Just trial, Answering ) ->
+                    let
+                        ( context, dialog ) =
+                            case String.split "." trial.context of
+                                x :: xs ->
+                                    ( x, String.concat xs )
+
+                                _ ->
+                                    ( "Missing context", "Missing dialog" )
+                    in
+                    div [ class "flex flex-col items-center" ]
+                        [ View.textAreaWithReadonlyAmorce
+                            { id_ = "production"
+                            , amorce = trial.amorce
+                            , isFeedback = feedback
+                            , userAnswer = state.userAnswer
+                            , onInputMsg = UserChangedInput
+                            }
+                        , View.genericNeutralFeedback
+                            { isVisible = feedback
+                            , feedback_Correct = ( trial.feedback, [] )
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
+                            }
+                        ]
+
+                ( Nothing, _ ) ->
                     View.introToMain UserClickedStartMain
 
         Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
-            case current of
-                Just trial ->
+            case ( current, state.step ) of
+                ( Just trial, Listening nTimes ) ->
+                    let
+                        ( context, dialog ) =
+                            case String.split "." trial.context of
+                                x :: xs ->
+                                    ( x, String.concat xs )
+
+                                _ ->
+                                    ( "Missing context", "Missing dialog" )
+                    in
                     div [ class "flex flex-col items-center" ]
-                        [ View.tooltip data.infos.instructions_short
-                        , progressBar history mainTrials
-                        , Html.p [ class "max-w-lg  text-lg m-4" ]
-                            [ View.fromMarkdown trial.context
-                            , Html.br [] []
+                        [ Html.h3 [] [ View.fromMarkdown context ]
+                        , viewLimitedTimesAudioButton nTimes trial
+                        , Html.pre [ class "text-lg m-4" ]
+                            [ View.fromMarkdown dialog
                             ]
-                        , div [ class "flex flex-row p-4 text-lg items-center" ]
-                            [ span [ class "pr-4" ] [ View.fromMarkdown trial.amorce ]
-                            , View.floatingLabel "" state.userAnswer UserChangedInput feedback
-                            ]
-                        , View.genericNeutralFeedback
-                            { isVisible = feedback
-                            , feedback_Correct = ( trial.feedback, [] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback
+                        , View.button
+                            { isDisabled =
+                                nTimes == 3
+                            , message = UserClickedStartAnswering
+                            , txt = "What happened?"
                             }
                         ]
 
-                Nothing ->
+                ( Just trial, Answering ) ->
+                    let
+                        ( context, dialog ) =
+                            case String.split "." trial.context of
+                                x :: xs ->
+                                    ( x, String.concat xs )
+
+                                _ ->
+                                    ( "Missing context", "Missing dialog" )
+                    in
+                    div [ class "flex flex-col items-center" ]
+                        [ View.tooltip data.infos.instructions_short
+                        , progressBar history mainTrials
+                        , View.textAreaWithReadonlyAmorce
+                            { id_ = "production"
+                            , amorce = trial.amorce
+                            , isFeedback = feedback
+                            , userAnswer = state.userAnswer
+                            , onInputMsg = UserChangedInput
+                            }
+                        , View.genericNeutralFeedback
+                            { isVisible = feedback
+                            , feedback_Correct = ( trial.feedback, [] )
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
+                            }
+                        ]
+
+                ( Nothing, _ ) ->
                     View.end data.infos.end UserClickedSaveData "/"
 
 
@@ -86,9 +153,15 @@ type Msg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedStartTraining
     | RuntimeShuffledOptionsOrder (List Int)
+    | UserClickedAudio String
+    | UserClickedStartAnswering
 
 
 update msg model =
+    let
+        prevState =
+            Logic.getState model.cu3 |> Maybe.withDefault initState
+    in
     case msg of
         UserClickedNextTrial ->
             ( { model | cu3 = Logic.next initState model.cu3 }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
@@ -100,7 +173,7 @@ update msg model =
             ( { model | cu3 = Logic.startMain model.cu3 initState }, Cmd.none )
 
         UserChangedInput new ->
-            ( { model | cu3 = Logic.update { uid = "", userAnswer = new } model.cu3 }, Cmd.none )
+            ( { model | cu3 = Logic.update { prevState | userAnswer = new } model.cu3 }, Cmd.none )
 
         UserClickedSaveData ->
             let
@@ -117,6 +190,32 @@ update msg model =
 
         RuntimeShuffledOptionsOrder ls ->
             ( { model | optionsOrder = ls }, Cmd.none )
+
+        UserClickedAudio url ->
+            ( { model | cu3 = Logic.update { prevState | step = decrement prevState.step } model.cu3 }
+            , if prevState.step /= Listening 0 then
+                Ports.playAudio url
+
+              else
+                Delay.after 0 UserClickedStartAnswering
+            )
+
+        UserClickedStartAnswering ->
+            ( { model | cu3 = Logic.update { prevState | step = Answering } model.cu3 }, Cmd.none )
+
+
+viewLimitedTimesAudioButton nTimes trial =
+    if nTimes == 3 then
+        View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
+
+    else if nTimes == 2 then
+        View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
+
+    else if nTimes == 1 then
+        View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+
+    else
+        View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -154,7 +253,7 @@ decodeTranslationInput =
 
 initState : State
 initState =
-    State "DefaultUid" ""
+    State "DefaultUid" "" (Listening 3)
 
 
 defaultTrial : Trial
@@ -183,7 +282,23 @@ type alias Trial =
 type alias State =
     { uid : String
     , userAnswer : String
+    , step : Step
     }
+
+
+type Step
+    = Listening Int
+    | Answering
+
+
+decrement : Step -> Step
+decrement step =
+    case step of
+        Listening nTimes ->
+            Listening (nTimes - 1)
+
+        _ ->
+            Answering
 
 
 taskId =
