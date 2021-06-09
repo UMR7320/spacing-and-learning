@@ -9,7 +9,7 @@ Airtable.configure({
 
 function handleTableRequest(table_name) {
   if (table_name == "users") {
-    throw Error({ statusCode: 403, error: "Forbidden", message: "You can't access the requested table" })
+    throw Error("You can't access users' table(please?)")
   } else {
     return table_name
   }
@@ -19,9 +19,10 @@ const formattedReturn = require("./formattedReturn");
 module.exports = async (event) => {
   try {
     const base = Airtable.base(event.queryStringParameters.app);
-    const learningData = await base(handleTableRequest("ba-"))
-      .select({ maxRecords: 30, view: (event.queryStringParameters.view) })
-      .firstPage();
+    const learningData = await base(handleTableRequest(event.queryStringParameters.base))
+      .select({ maxRecords: 200, view: (event.queryStringParameters.view) })
+      .all();
+
     const formattedLearningData = learningData.map((datum) => ({
       id: datum.id,
       ...datum.fields,
@@ -29,6 +30,6 @@ module.exports = async (event) => {
     return formattedReturn(200, { records: formattedLearningData });
   } catch (err) {
     console.error(err);
-    return formattedReturn(err.statusCode, { "error": err.error, "message": err.message });
+    return formattedReturn(500, { err });
   }
 };

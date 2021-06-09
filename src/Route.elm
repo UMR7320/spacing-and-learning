@@ -1,7 +1,8 @@
 module Route exposing
     ( AcceptabilityRoute(..)
+    , Group(..)
     , PosttestTask(..)
-    , PretestTask(..)
+    , Pretest(..)
     , Route(..)
     , Session1Task(..)
     , Session2Task(..)
@@ -25,7 +26,7 @@ import Url.Parser as Parser
 type Route
     = Home
     | NotFound
-    | Pretest PretestTask
+    | Pretest UserId Pretest
     | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
@@ -50,15 +51,20 @@ type Session2Task
     | CU
 
 
-type PretestTask
-    = YN
-    | GeneralInfos
+type Pretest
+    = GeneralInfos
     | EmailSent
     | SPR
     | SentenceCompletion
     | VKS
     | Acceptability AcceptabilityRoute
     | YesNo
+    | Calendar Group
+
+
+type Group
+    = Massed
+    | Distributed
 
 
 type AcceptabilityRoute
@@ -86,15 +92,17 @@ parser =
     oneOf
         [ map Home top
         , map Pretest
-            (s "pretest"
+            (s "user"
+                </> string
+                </> s "pretest"
                 </> oneOf
                         [ map SPR (s "spr")
-                        , map YN (s "yesno-task")
                         , map GeneralInfos (s "informations")
                         , map EmailSent (s "email-sent")
                         , map SentenceCompletion (s "sentence-completion")
                         , map VKS (s "vks")
                         , map YesNo (s "yes-no")
+                        , map Calendar (s "calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
                         , map Acceptability
                             (s "acceptability"
                                 </> oneOf
@@ -104,11 +112,6 @@ parser =
                                         ]
                             )
                         ]
-            )
-        , map Pretest
-            (s "posttest"
-                </> oneOf
-                        [ map YN (s "cloud-words") ]
             )
         , map Session1
             (s "user"

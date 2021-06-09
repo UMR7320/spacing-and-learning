@@ -71,24 +71,6 @@ update msg model =
                 history =
                     Logic.getHistory model.yesno
 
-                encodeUpdatedUser =
-                    Encode.object
-                        [ ( "records"
-                          , Encode.list
-                                (\score ->
-                                    Encode.object
-                                        [ ( "id", Encode.string userId )
-                                        , ( "fields"
-                                          , Encode.object
-                                                [ ( "VocabLevel", Encode.int score )
-                                                ]
-                                          )
-                                        ]
-                                )
-                                [ 1000 ]
-                          )
-                        ]
-
                 encode =
                     Encode.list
                         (\score ->
@@ -104,13 +86,45 @@ update msg model =
                         [ round scoreVoc ]
 
                 correctionFactor =
-                    1 - (weighted falseAlarms / weighted hits)
+                    1 - (weighted (clamp 0 10 falseAlarms) / weighted (clamp 0 10 hits))
 
                 scoreVoc =
                     hits * 100 * correctionFactor
 
-                weighted =
-                    (*) 0.2
+                weighted x =
+                    case x of
+                        0 ->
+                            0
+
+                        1 ->
+                            1
+
+                        2 ->
+                            3
+
+                        4 ->
+                            10
+
+                        5 ->
+                            15
+
+                        6 ->
+                            20
+
+                        7 ->
+                            24
+
+                        8 ->
+                            27
+
+                        9 ->
+                            29
+
+                        10 ->
+                            30
+
+                        _ ->
+                            30
 
                 ( hits, falseAlarms ) =
                     List.foldl

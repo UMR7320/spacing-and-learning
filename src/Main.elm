@@ -4,21 +4,25 @@ import Browser
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation as Nav exposing (pushUrl)
 import Consent
+import Data
+import Date
 import Dict
 import DnDList
 import DnDList.Groups exposing (Model)
 import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (accept, class, href, type_)
+import Html.Styled.Attributes exposing (accept, checked, class, href, type_)
 import Html.Styled.Events
 import Http
-import Json.Decode
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (optional, required)
+import Json.Encode as Encode
 import Logic
 import Ports
 import Postest.CloudWords as CloudWords
 import Postest.YN as YN
 import Pretest.Acceptability as Acceptability
-import Pretest.GeneralInfos
+import Pretest.GeneralInfos exposing (Msg(..))
 import Pretest.Pretest as Pretest
 import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
@@ -41,6 +45,7 @@ import Session3.CU3 as CU3
 import Session3.Session as Session3
 import Session3.Spelling3 as Spelling3
 import Session3.Synonym as Synonym
+import Task
 import Task.Parallel as Para
 import Time
 import Url exposing (Url)
@@ -131,8 +136,11 @@ type alias Model =
     --                                                             o.`Y8b 888888  dP__Yb  88"Yb  88""    8I  dY
     --                                                             8bodP' 88  88 dP""""Yb 88  Yb 888888 8888Y"
     , infos : RemoteData Http.Error (Dict.Dict String ExperimentInfo.Task)
+    , email : String
     , user : Maybe String
     , errorTracking : List Http.Error
+    , currentDate : Maybe ( Time.Zone, Time.Posix )
+    , preferedStartDate : Maybe Date.Date
     }
 
 
@@ -198,6 +206,9 @@ init _ url key =
             , optionsOrder = [ 0, 1, 2, 3 ]
             , infos = RemoteData.Loading
             , errorTracking = []
+            , email = ""
+            , currentDate = Nothing
+            , preferedStartDate = Nothing
             }
     in
     case route of
@@ -251,15 +262,16 @@ init _ url key =
             , Cmd.map Session3 fetchSession3
             )
 
-        Route.Pretest _ ->
+        Route.Pretest userid _ ->
             ( { defaultInit
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
                 , vks = Logic.Loading
                 , acceptabilityTask = Logic.Loading
                 , yesno = Logic.Loading
+                , user = Just userid
               }
-            , Cmd.map Pretest (Tuple.second Pretest.attempt)
+            , Cmd.batch [ Cmd.map Pretest (Tuple.second Pretest.attempt), Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now) ]
             )
 
         Route.Posttest _ ->
@@ -377,17 +389,8 @@ body model =
                     Route.CloudWords ->
                         [ viewCloud model ]
 
-            Route.Pretest task ->
+            Route.Pretest userId task ->
                 case task of
-                    Route.YN ->
-                        [ YN.view model.yn
-                            { toggleFeedback = YN YN.UserClickedToggleFeedback
-                            , nextTrialMsg = YN YN.UserClickedNextTrial
-                            , startMainMsg = \trials informations -> YN (YN.UserClickedStartMain trials informations)
-                            , userChangedInput = \str -> YN (YN.UserChangedInput str)
-                            }
-                        ]
-
                     Route.EmailSent ->
                         [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
 
@@ -409,6 +412,168 @@ body model =
                     Route.YesNo ->
                         List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
+                    Route.Calendar group ->
+                        case group of
+                            Route.Massed ->
+                                case model.currentDate of
+                                    Just ( zone, date_ ) ->
+                                        let
+                                            date =
+                                                Date.fromPosix zone date_
+
+                                            possibleDates =
+                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Weeks 1 date)
+                                                    |> List.map
+                                                        (\time ->
+                                                            label []
+                                                                [ input
+                                                                    [ type_ "radio"
+                                                                    , Html.Styled.Events.onClick (UserClickedChoseNewDate time)
+                                                                    , checked
+                                                                        (case model.preferedStartDate of
+                                                                            Just d ->
+                                                                                d == time
+
+                                                                            _ ->
+                                                                                False
+                                                                        )
+                                                                    ]
+                                                                    []
+                                                                , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
+                                                                ]
+                                                        )
+
+                                            datesToBook d =
+                                                List.map
+                                                    (\eachDate ->
+                                                        let
+                                                            formattedDate =
+                                                                Date.format "EEEE, d MMMM y" eachDate
+                                                        in
+                                                        div [] [ text formattedDate ]
+                                                    )
+                                                    (sessionsDates d)
+
+                                            sessionsDates d =
+                                                [ s2 d, s3 d, s4 d ]
+
+                                            s2 d =
+                                                Date.add Date.Days 0 d
+
+                                            s3 d =
+                                                Date.add Date.Days 2 (s2 d)
+
+                                            s4 d =
+                                                Date.add Date.Days 2 (s3 d)
+                                        in
+                                        [ p [] [ text "For your conveniance, you can choose the day you wish to start the next session" ]
+                                        , div [ class "flex flex-col" ] <|
+                                            possibleDates
+                                        , case model.preferedStartDate of
+                                            Nothing ->
+                                                div [] []
+
+                                            Just d ->
+                                                div []
+                                                    ([ h3 [] [ text "Save those dates" ] ]
+                                                        ++ datesToBook d
+                                                        ++ [ View.button
+                                                                { message =
+                                                                    UserConfirmedPreferedDates
+                                                                        ( Date.toIsoString (s2 d)
+                                                                        , Date.toIsoString (s3 d)
+                                                                        , Date.toIsoString (s4 d)
+                                                                        )
+                                                                , txt = "I confirm I'll be available at least 1 hour each of those days"
+                                                                , isDisabled = False
+                                                                }
+                                                           ]
+                                                    )
+                                        ]
+
+                                    Nothing ->
+                                        []
+
+                            Route.Distributed ->
+                                case model.currentDate of
+                                    Just ( zone, date_ ) ->
+                                        let
+                                            date =
+                                                Date.fromPosix zone date_
+
+                                            possibleDates =
+                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Weeks 1 date)
+                                                    |> List.map
+                                                        (\time ->
+                                                            label []
+                                                                [ input
+                                                                    [ type_ "radio"
+                                                                    , Html.Styled.Events.onClick (UserClickedChoseNewDate time)
+                                                                    , checked
+                                                                        (case model.preferedStartDate of
+                                                                            Just d ->
+                                                                                d == time
+
+                                                                            _ ->
+                                                                                False
+                                                                        )
+                                                                    ]
+                                                                    []
+                                                                , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
+                                                                ]
+                                                        )
+
+                                            datesToBook d =
+                                                List.map
+                                                    (\eachDate ->
+                                                        let
+                                                            formattedDate =
+                                                                Date.format "EEEE, d MMMM y" eachDate
+                                                        in
+                                                        div [] [ text formattedDate ]
+                                                    )
+                                                    (sessionsDates d)
+
+                                            sessionsDates d =
+                                                [ s2 d, s3 d, s4 d ]
+
+                                            s2 d =
+                                                Date.add Date.Days 0 d
+
+                                            s3 d =
+                                                Date.add Date.Days 7 (s2 d)
+
+                                            s4 d =
+                                                Date.add Date.Days 7 (s3 d)
+                                        in
+                                        [ p [] [ text "For your conveniance, you can choose the day you wish to start the next session" ]
+                                        , div [ class "flex flex-col" ] <|
+                                            possibleDates
+                                        , case model.preferedStartDate of
+                                            Nothing ->
+                                                div [] []
+
+                                            Just d ->
+                                                div []
+                                                    ([ h3 [] [ text "Save those dates" ] ]
+                                                        ++ datesToBook d
+                                                        ++ [ View.button
+                                                                { message =
+                                                                    UserConfirmedPreferedDates
+                                                                        ( Date.toIsoString (s2 d)
+                                                                        , Date.toIsoString (s3 d)
+                                                                        , Date.toIsoString (s4 d)
+                                                                        )
+                                                                , txt = "I confirm I'll be available at least 1 hour each of those days"
+                                                                , isDisabled = False
+                                                                }
+                                                           ]
+                                                    )
+                                        ]
+
+                                    Nothing ->
+                                        []
+
             Home ->
                 [ div [ class "container flex flex-col items-center" ]
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
@@ -416,7 +581,7 @@ body model =
                         [ class "max-w-2xl text-xl text-center mb-8" ]
                         [ View.fromMarkdown Consent.consent
                         ]
-                    , a [ href "/pretest/informations" ] [ View.button { message = NoOp, txt = "Commencer les prétests", isDisabled = False } ]
+                    , View.button { message = UserClickedSignInButton, txt = "Confirmer", isDisabled = False }
                     ]
                 ]
 
@@ -436,6 +601,12 @@ type Msg
     | PlaysoundInJS String
     | UserClickedLink Browser.UrlRequest
     | BrowserChangedUrl Url
+    | UserClickedSignInButton
+    | UserUpdatedEmailField String
+    | ServerRespondedWithNewUser (Result.Result Http.Error String)
+    | GotCurrentTime ( Time.Zone, Time.Posix )
+    | UserClickedChoseNewDate Date.Date
+    | UserConfirmedPreferedDates ( String, String, String )
     | NoOp
       --
       --                                                          ##  ##  ### ### ###  ## ###
@@ -478,7 +649,6 @@ type Msg
       --                                                          ##  ### ##  ##  ###  #  # #     ###
     | CU3 CU3.Msg
     | Spelling3 Spelling3.Msg
-    | YN YN.Msg
     | Synonym Synonym.Msg
     | Session3 Session3.Msg
 
@@ -614,23 +784,6 @@ update msg model =
             in
             ( newModel, Cmd.map Spelling3 newCmd )
 
-        YN message ->
-            case message of
-                YN.UserClickedNextTrial ->
-                    ( { model | yn = Logic.next CU1.initState model.yn }, Cmd.none )
-
-                YN.UserClickedToggleFeedback ->
-                    ( { model | yn = Logic.toggle model.yn }, Cmd.none )
-
-                YN.UserClickedStartIntro _ ->
-                    ( model, Cmd.none )
-
-                YN.UserClickedStartMain _ _ ->
-                    ( { model | yn = Logic.startMain model.yn YN.initState }, Cmd.none )
-
-                YN.UserChangedInput new ->
-                    ( { model | yn = Logic.update { uid = "", userAnswer = new } model.yn }, Cmd.none )
-
         Presentation message ->
             let
                 ( subModel, subCmd ) =
@@ -666,6 +819,58 @@ update msg model =
             in
             ( subModel, Cmd.map YesNo subCmd )
 
+        UserClickedSignInButton ->
+            ( model
+            , Nav.load "https://airtable.com/shrXTWi9PfYOkpS6Y"
+            )
+
+        UserUpdatedEmailField email ->
+            ( { model | email = email }, Cmd.none )
+
+        ServerRespondedWithNewUser (Result.Ok id) ->
+            ( { model | user = Just id }, Nav.pushUrl model.key "../yes-no" )
+
+        ServerRespondedWithNewUser (Result.Err reason) ->
+            ( model, Cmd.none )
+
+        GotCurrentTime ( zone, time ) ->
+            ( { model | currentDate = Just ( zone, time ) }, Cmd.none )
+
+        UserClickedChoseNewDate newDate ->
+            ( { model | preferedStartDate = Just newDate }, Cmd.none )
+
+        UserConfirmedPreferedDates ( s1, s2, s3 ) ->
+            ( model
+            , Http.request
+                { url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "all" }
+                , method = "PATCH"
+                , headers = []
+                , timeout = Nothing
+                , tracker = Nothing
+                , body =
+                    Encode.list
+                        (\id ->
+                            Encode.object
+                                [ ( "id", Encode.string id )
+                                , ( "fields"
+                                  , Encode.object
+                                        [ ( "dateFirstEmail", Encode.string s1 )
+                                        , ( "dateSecondEmail", Encode.string s2 )
+                                        , ( "dateThirdEmail", Encode.string s3 )
+                                        ]
+                                  )
+                                ]
+                        )
+                        [ model.user |> Maybe.withDefault "recd18l2IBRQNI05y" ]
+                        |> Http.jsonBody
+                , expect = Http.expectJson ServerRespondedWithNewUser decodeNewUser
+                }
+            )
+
+
+decodeNewUser =
+    Decode.field "id" Decode.string
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -675,59 +880,6 @@ subscriptions model =
         , Sub.map Acceptability (Acceptability.subscriptions model)
         , Sub.map YesNo (YesNo.subscriptions model)
         ]
-
-
-
---toAcceptabilityMessage : Json.Decode.Decoder InboundAudioInfos -> Json.Decode.Decoder Msg
-
-
-toAcceptabilityMessage { eventType, name, timestamp } =
-    case eventType of
-        "SoundStarted" ->
-            Acceptability (Acceptability.AudioStarted ( name, Time.millisToPosix timestamp ))
-
-        "SoundEnded" ->
-            Acceptability (Acceptability.AudioEnded ( name, Time.millisToPosix timestamp ))
-
-        _ ->
-            NoOp
-
-
-keyDecoder : Json.Decode.Decoder Msg
-keyDecoder =
-    Json.Decode.map toEvaluation (Json.Decode.field "key" Json.Decode.string)
-
-
-decodeSpace : Json.Decode.Decoder Msg
-decodeSpace =
-    Json.Decode.map
-        (\k ->
-            case k of
-                " " ->
-                    Acceptability (Acceptability.NextStepCinematic Acceptability.Start)
-
-                _ ->
-                    NoOp
-        )
-        (Json.Decode.field "key" Json.Decode.string)
-
-
-
---toEvaluation : String -> Msg
---toEvaluation : String -> Msg
-
-
-toEvaluation : String -> Msg
-toEvaluation x =
-    case x of
-        "j" ->
-            Acceptability (Acceptability.UserPressedButton (Just True))
-
-        "f" ->
-            Acceptability (Acceptability.UserPressedButton (Just False))
-
-        _ ->
-            Acceptability (Acceptability.UserPressedButton Nothing)
 
 
 project : { description : String, title : String, url : String }

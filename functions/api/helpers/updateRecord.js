@@ -18,6 +18,7 @@ module.exports = async (event) => {
             id: datum.id,
             ...datum.fields,
         }));
+        console.log(createdRecord);
         return formattedReturn(200, formattedRecord.shift());
     } catch (err) {
         console.error(err);

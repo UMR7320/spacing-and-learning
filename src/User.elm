@@ -18,7 +18,59 @@ type User
 
 
 type alias AnoInfo =
-    { firstName : String, email : String }
+    { firstName : String
+    , email : String
+    , isStudent : Bool
+    , degree : Maybe String
+    , languages : List String
+    , handedness : Handedness
+    , age : Int
+    , gender : Gender
+    , ageFirstExposureToEnglish : Int
+    , englishClassesNumber : Int
+    , profeciency : Profeciency
+    , englisheUse : List ( Activity, Frequency )
+    , englishExposure : List ( String, String, String )
+    , otherLanguages : List ( String, Int, Profeciency )
+    }
+
+
+type Activity
+    = Films
+    | Music
+    | Read
+    | Speak
+    | LearningActivities
+
+
+type Frequency
+    = Everyday
+    | SeveralTimesAWeek
+    | OnceAWeek
+    | OnceTwiceAMonth
+    | Rarely
+
+
+type Profeciency
+    = A1
+    | A2
+    | B1
+    | B2
+    | C1
+    | C2
+
+
+type Gender
+    = Male
+    | Female
+    | Other
+    | NoAnswer
+
+
+type Handedness
+    = Right
+    | Left
+    | Both
 
 
 type alias AuthenticatedInfo =

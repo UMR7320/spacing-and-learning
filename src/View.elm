@@ -21,6 +21,7 @@ module View exposing
     , sentenceInSynonym
     , shuffledOptions
     , textAreaWithReadonlyAmorce
+    , textField
     , tooltip
     , trainingWheelsGeneric
     , unclickableButton
@@ -40,6 +41,7 @@ import Html.Styled.Attributes
         , href
         , id
         , name
+        , placeholder
         , readonly
         , spellcheck
         , target
@@ -615,3 +617,15 @@ textAreaWithReadonlyAmorce { id_, amorce, isFeedback, userAnswer, onInputMsg } =
         ]
         [ text amorce ]
 
+
+textField { labelText, placeholderText, msg } =
+    div [ class "flex flex-col" ]
+        [ label [] [ text labelText ]
+        , Html.Styled.input
+            [ type_ "text"
+            , class "border-2"
+            , Html.Styled.Events.onInput msg
+            , placeholder placeholderText
+            ]
+            []
+        ]
