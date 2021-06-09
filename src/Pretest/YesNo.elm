@@ -207,8 +207,8 @@ view task =
                                 [ Progressbar.progressBarWhenNoTraining data.history data.mainTrials
                                 , text trial.word
                                 , div [ class "flex flex-row m-2" ]
-                                    [ unclickableButton "bg-green-500" "F = Exists"
-                                    , unclickableButton "bg-red-500" "J = Does not exist"
+                                    [ unclickableButton "bg-gray-300" "F = I don't know or I'm not sure"
+                                    , unclickableButton "bg-green-500" "J = I know this word"
                                     ]
                                 ]
                             ]

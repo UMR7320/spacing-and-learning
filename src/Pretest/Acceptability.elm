@@ -67,7 +67,7 @@ saveAcceptabilityData responseHandler maybeUserId task =
                                 , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
                                 , ( "beepEndedAt", Encode.int (Time.posixToMillis (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
                                 , ( "userAnsweredAt", Encode.int (Time.posixToMillis (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
-                                , ( "evaluation", Encode.string (evalToString s.evaluation) )
+                                , ( "acceptabilityEval", Encode.string (evalToString s.evaluation) )
                                 ]
                           )
                         ]

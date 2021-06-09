@@ -15356,7 +15356,7 @@ var $author$project$Pretest$Acceptability$saveAcceptabilityData = F3(
 											$elm$time$Time$posixToMillis(
 												A2($elm$core$Maybe$withDefault, whenNothing, s.userAnsweredAt)))),
 										_Utils_Tuple2(
-										'evaluation',
+										'acceptabilityEval',
 										$elm$json$Json$Encode$string(
 											$author$project$Pretest$Acceptability$evalToString(s.evaluation)))
 									])))
@@ -23928,7 +23928,7 @@ var $author$project$Pretest$SPR$view = function (task) {
 									[
 										$author$project$View$fromMarkdown(data.infos.end),
 										$author$project$View$button(
-										{isDisabled: false, message: $author$project$Pretest$SPR$UserClickedSaveData, txt: 'Click here to save your data'})
+										{isDisabled: false, message: $author$project$Pretest$SPR$UserClickedSaveData, txt: 'Click here when you are ready!'})
 									]))
 							]);
 					}
@@ -24077,7 +24077,7 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 										_List_fromArray(
 											[
 												$rtfeldman$elm_css$Html$Styled$Attributes$id('firstProd'),
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 rounded-lg p-2'),
 												$rtfeldman$elm_css$Html$Styled$Attributes$value(
 												A2($author$project$Pretest$SentenceCompletion$readOnlyAmorce, trial.firstAmorce, data.state.firstProduction)),
 												$rtfeldman$elm_css$Html$Styled$Events$onInput(
@@ -24090,13 +24090,22 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 											[
 												$rtfeldman$elm_css$Html$Styled$text(trial.firstAmorce)
 											])),
-										data.feedback ? $author$project$View$fromMarkdown(trial.firstFeedback) : $rtfeldman$elm_css$Html$Styled$text(''),
+										data.feedback ? A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pb-8 pt-2 p-2 bg-gray-200 rounded-lg m-4')
+											]),
+										_List_fromArray(
+											[
+												$author$project$View$fromMarkdown(trial.firstFeedback)
+											])) : $rtfeldman$elm_css$Html$Styled$text(''),
 										A2(
 										$rtfeldman$elm_css$Html$Styled$textarea,
 										_List_fromArray(
 											[
 												$rtfeldman$elm_css$Html$Styled$Attributes$id('secondProd'),
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2'),
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 rounded-lg p-2'),
 												$rtfeldman$elm_css$Html$Styled$Events$onInput(
 												$author$project$Pretest$SentenceCompletion$UserUpdatedField($author$project$Pretest$SentenceCompletion$SecondProduction)),
 												$rtfeldman$elm_css$Html$Styled$Attributes$spellcheck(false),
@@ -24108,7 +24117,26 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 											[
 												$rtfeldman$elm_css$Html$Styled$text(trial.secondAmorce)
 											])),
-										data.feedback ? $author$project$View$fromMarkdown(trial.secondFeedback) : $rtfeldman$elm_css$Html$Styled$text('')
+										data.feedback ? A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('pt-2 bg-gray-200 p-2 m-4 rounded-lg')
+											]),
+										_List_fromArray(
+											[
+												$author$project$View$fromMarkdown(trial.secondFeedback)
+											])) : $rtfeldman$elm_css$Html$Styled$text(''),
+										data.feedback ? A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg text-green-500')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('These are of course only suggestions, there are many other possibilities!')
+											])) : A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil)
 									])),
 								A4($author$project$View$navigationButton, $author$project$Pretest$SentenceCompletion$UserClickedToggleFeedback, $author$project$Pretest$SentenceCompletion$UserClickedNextTrial, data.feedback, data.state.firstProduction)
 							]);
@@ -24236,6 +24264,17 @@ var $author$project$Pretest$VKS$UserUpdatedField = F2(
 		return {$: 'UserUpdatedField', a: a, b: b};
 	});
 var $rtfeldman$elm_css$Html$Styled$fieldset = $rtfeldman$elm_css$Html$Styled$node('fieldset');
+var $author$project$Progressbar$progressBarWhenNoTraining = F2(
+	function (history, remainingTrials) {
+		var trialNumber = $elm$core$List$length(history) + 1;
+		var pct_ = A2(
+			$author$project$View$pct,
+			trialNumber,
+			_Utils_ap(
+				remainingTrials,
+				A2($elm$core$List$map, $elm$core$Tuple$first, history)));
+		return $author$project$Progressbar$viewProgressBar(pct_);
+	});
 var $author$project$Pretest$VKS$view = function (task) {
 	switch (task.$) {
 		case 'Err':
@@ -24290,6 +24329,7 @@ var $author$project$Pretest$VKS$view = function (task) {
 						var trial = _v4.a;
 						return _List_fromArray(
 							[
+								A2($author$project$Progressbar$progressBarWhenNoTraining, data.history, data.mainTrials),
 								A2(
 								$rtfeldman$elm_css$Html$Styled$span,
 								_List_fromArray(
@@ -24442,7 +24482,7 @@ var $author$project$Pretest$VKS$view = function (task) {
 								$author$project$View$button(
 								{
 									isDisabled: (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) && A2(
-										$elm$core$List$all,
+										$elm$core$List$any,
 										$elm$core$String$isEmpty,
 										_List_fromArray(
 											[data.state.usage, data.state.definition]))) ? true : (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$NoAnswer) ? true : false),
@@ -24475,17 +24515,6 @@ var $author$project$View$loading = A2(
 		[
 			$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data will be lost')
 		]));
-var $author$project$Progressbar$progressBarWhenNoTraining = F2(
-	function (history, remainingTrials) {
-		var trialNumber = $elm$core$List$length(history) + 1;
-		var pct_ = A2(
-			$author$project$View$pct,
-			trialNumber,
-			_Utils_ap(
-				remainingTrials,
-				A2($elm$core$List$map, $elm$core$Tuple$first, history)));
-		return $author$project$Progressbar$viewProgressBar(pct_);
-	});
 var $author$project$Pretest$YesNo$view = function (task) {
 	switch (task.$) {
 		case 'NotStarted':
@@ -24531,8 +24560,8 @@ var $author$project$Pretest$YesNo$view = function (task) {
 											]),
 										_List_fromArray(
 											[
-												A2($author$project$View$unclickableButton, 'bg-green-500', 'F = Exists'),
-												A2($author$project$View$unclickableButton, 'bg-red-500', 'J = Does not exist')
+												A2($author$project$View$unclickableButton, 'bg-gray-300', 'F = I don\'t know or I\'m not sure'),
+												A2($author$project$View$unclickableButton, 'bg-green-500', 'J = I know this word')
 											]))
 									]))
 							]);
@@ -33474,7 +33503,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57465" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60990" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

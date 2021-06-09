@@ -53,7 +53,7 @@ view task =
                         [ p [ A.class "text-lg  m-4 p-2" ] [ text trial.context ]
                         , Html.Styled.textarea
                             [ A.id "firstProd"
-                            , A.class "border-2 p-2"
+                            , A.class "border-2 rounded-lg p-2"
                             , A.value <|
                                 readOnlyAmorce
                                     trial.firstAmorce
@@ -65,13 +65,13 @@ view task =
                             ]
                             [ text trial.firstAmorce ]
                         , if data.feedback then
-                            View.fromMarkdown trial.firstFeedback
+                            div [ A.class "pb-8 pt-2 p-2 bg-gray-200 rounded-lg m-4" ] [ View.fromMarkdown trial.firstFeedback ]
 
                           else
                             text ""
                         , Html.Styled.textarea
                             [ A.id "secondProd"
-                            , A.class "border-2 p-2"
+                            , A.class "border-2 rounded-lg p-2"
                             , E.onInput (UserUpdatedField SecondProduction)
                             , A.spellcheck False
                             , readOnlyOnFeedback data
@@ -82,10 +82,15 @@ view task =
                             ]
                             [ text trial.secondAmorce ]
                         , if data.feedback then
-                            View.fromMarkdown trial.secondFeedback
+                            div [ A.class "pt-2 bg-gray-200 p-2 m-4 rounded-lg" ] [ View.fromMarkdown trial.secondFeedback ]
 
                           else
                             text ""
+                        , if data.feedback then
+                            div [ A.class "text-lg text-green-500" ] [ text "These are of course only suggestions, there are many other possibilities!" ]
+
+                          else
+                            div [] []
                         ]
                     , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.firstProduction
                     ]

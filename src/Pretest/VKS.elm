@@ -13,6 +13,7 @@ import Json.Encode as Encode
 import Logic
 import Pretest.Acceptability exposing (ErrorBlock(..))
 import Pretest.SPR exposing (Msg(..))
+import Progressbar exposing (progressBarWhenNoTraining)
 import Random
 import Task
 import View
@@ -49,7 +50,8 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ span [ class "text-lg font-bold" ] [ text <| "to " ++ trial.verb ]
+                    [ progressBarWhenNoTraining data.history data.mainTrials
+                    , span [ class "text-lg font-bold" ] [ text <| "to " ++ trial.verb ]
                     , Html.Styled.fieldset [ class "flex flex-col m-2" ]
                         [ Html.Styled.label []
                             [ Html.Styled.input
@@ -106,7 +108,7 @@ view task =
                         { txt = "Next Item"
                         , message = UserClickedNextTrial
                         , isDisabled =
-                            if data.state.knowledge == Known && List.all String.isEmpty [ data.state.usage, data.state.definition ] then
+                            if data.state.knowledge == Known && List.any String.isEmpty [ data.state.usage, data.state.definition ] then
                                 True
 
                             else if data.state.knowledge == NoAnswer then
