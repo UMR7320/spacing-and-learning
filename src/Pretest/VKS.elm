@@ -50,73 +50,76 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ progressBarWhenNoTraining data.history data.mainTrials
-                    , span [ class "text-lg font-bold" ] [ text <| "to " ++ trial.verb ]
-                    , Html.Styled.fieldset [ class "flex flex-col m-2" ]
-                        [ Html.Styled.label []
-                            [ Html.Styled.input
-                                [ type_ "radio"
-                                , A.id "ns"
-                                , A.value "NeverSeen"
-                                , A.checked (data.state.knowledge == NeverSeen)
-                                , E.onInput UserClickedNewKnowledge
-                                ]
-                                []
-                            , span [ class "p-2" ] [ text "I don’t remember having seen this verb before" ]
-                            ]
-                        , Html.Styled.label []
-                            [ Html.Styled.input
-                                [ type_ "radio"
-                                , A.value "PreviouslySeen"
-                                , A.checked (data.state.knowledge == PreviouslySeen)
-                                , E.onInput UserClickedNewKnowledge
-                                ]
-                                []
-                            , span [ class "p-2" ] [ text "I have seen this verb before, but I don’t know what it means" ]
-                            ]
-                        , Html.Styled.label []
-                            [ Html.Styled.input
-                                [ type_ "radio"
-                                , A.value "Known"
-                                , A.checked (data.state.knowledge == Known)
-                                , E.onInput UserClickedNewKnowledge
-                                ]
-                                []
-                            , span [ class "p-2" ] [ text "I have seen this verb before, and I think I know what it means" ]
-                            ]
-                        ]
-                    , if data.state.knowledge == Known then
-                        Html.Styled.fieldset [ class "flex flex-col p-2" ]
-                            [ label [ class "flex flex-col" ]
-                                [ text "What do you think this verb means? (please provide a translation, synonym or definition or all meanings of this verb that you know):"
-                                , input
-                                    [ type_ "text"
-                                    , class "border-2"
-                                    , E.onInput (UserUpdatedField FirstProduction)
+                    [ div [ A.class "flex flex-col items-center" ]
+                        [ View.tooltip data.infos.instructions_short
+                        , progressBarWhenNoTraining data.history data.mainTrials
+                        , span [ class "text-lg font-bold" ] [ text <| "to " ++ trial.verb ]
+                        , Html.Styled.fieldset [ class "flex flex-col m-2" ]
+                            [ Html.Styled.label []
+                                [ Html.Styled.input
+                                    [ type_ "radio"
+                                    , A.id "ns"
+                                    , A.value "NeverSeen"
+                                    , A.checked (data.state.knowledge == NeverSeen)
+                                    , E.onInput UserClickedNewKnowledge
                                     ]
                                     []
+                                , span [ class "p-2" ] [ text "I don’t remember having seen this verb before" ]
                                 ]
-                            , label [ class "flex flex-col p-2" ]
-                                [ text "Please use this verb in a sentence. The sentence should show that you know what the word means."
-                                , textarea [ class "border-2", E.onInput (UserUpdatedField SecondProduction) ] []
+                            , Html.Styled.label []
+                                [ Html.Styled.input
+                                    [ type_ "radio"
+                                    , A.value "PreviouslySeen"
+                                    , A.checked (data.state.knowledge == PreviouslySeen)
+                                    , E.onInput UserClickedNewKnowledge
+                                    ]
+                                    []
+                                , span [ class "p-2" ] [ text "I have seen this verb before, but I don’t know what it means" ]
+                                ]
+                            , Html.Styled.label []
+                                [ Html.Styled.input
+                                    [ type_ "radio"
+                                    , A.value "Known"
+                                    , A.checked (data.state.knowledge == Known)
+                                    , E.onInput UserClickedNewKnowledge
+                                    ]
+                                    []
+                                , span [ class "p-2" ] [ text "I have seen this verb before, and I think I know what it means" ]
                                 ]
                             ]
+                        , if data.state.knowledge == Known then
+                            Html.Styled.fieldset [ class "flex flex-col p-2" ]
+                                [ label [ class "flex flex-col" ]
+                                    [ text "What do you think this verb means? (please provide a translation, synonym or definition for all meanings of this verb that you know):"
+                                    , input
+                                        [ type_ "text"
+                                        , class "border-2"
+                                        , E.onInput (UserUpdatedField FirstProduction)
+                                        ]
+                                        []
+                                    ]
+                                , label [ class "flex flex-col p-2" ]
+                                    [ text "Please use this verb in a sentence. The sentence should show that you know what the word means."
+                                    , textarea [ class "border-2", E.onInput (UserUpdatedField SecondProduction) ] []
+                                    ]
+                                ]
 
-                      else
-                        text ""
-                    , View.button
-                        { txt = "Next Item"
-                        , message = UserClickedNextTrial
-                        , isDisabled =
-                            if data.state.knowledge == Known && List.any String.isEmpty [ data.state.usage, data.state.definition ] then
-                                True
+                          else
+                            text ""
+                        , View.button
+                            { txt = "Next Item"
+                            , message = UserClickedNextTrial
+                            , isDisabled =
+                                if data.state.knowledge == Known && List.any String.isEmpty [ data.state.usage, data.state.definition ] then
+                                    True
 
-                            else if data.state.knowledge == NoAnswer then
-                                True
+                                else if data.state.knowledge == NoAnswer then
+                                    True
 
-                            else
-                                False
-                        }
+                                else
+                                    False
+                            }
+                        ]
                     ]
 
                 Nothing ->

@@ -105,7 +105,7 @@ loading =
 
 
 instructions content msgToTraining =
-    div [ class "flex text-lg flex-col items-center" ]
+    div [ class "flex text-lg flex-col text-center items-center" ]
         [ h1 [] [ text "Instructions" ]
         , fromMarkdown content
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }

@@ -69,7 +69,7 @@ trainingBox =
 
 
 viewTask data currentTrial ordoredOptions =
-    [ View.audioButton UserClickedPlayAudio currentTrial.audio.url "word"
+    [ View.audioButton UserClickedPlayAudio currentTrial.audio.url "Listen"
     , div
         [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
         [ fieldset
@@ -183,7 +183,7 @@ view exp optionsOrder =
                                 |> List.sortBy Tuple.first
                                 |> List.map Tuple.second
                     in
-                    div [] <|
+                    div [ class "container w-full flex flex-col justify-center items-center" ] <|
                         View.trainingWheelsGeneric
                             (List.length history)
                             data.infos.trainingWheel
@@ -217,14 +217,14 @@ view exp optionsOrder =
                                 |> List.sortBy Tuple.first
                                 |> List.map Tuple.second
                     in
-                    div [ class "container w-full flex flex-col justify-center items-center" ]
-                        [ div [ class "mr-8 w-full max-w-xl" ] <|
-                            Progressbar.progressBar history mainTrials
-                                :: viewTask
-                                    data
-                                    trial
-                                    ordoredOptions
-                        ]
+                    div [ class "flex flex-col justify-center items-center" ] <|
+                        View.tooltip
+                            data.infos.instructions_short
+                            :: Progressbar.progressBar history mainTrials
+                            :: viewTask
+                                data
+                                trial
+                                ordoredOptions
 
                 Nothing ->
                     View.end infos.end UserClickedSavedData "context-understanding"

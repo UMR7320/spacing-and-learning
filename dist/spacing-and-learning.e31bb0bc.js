@@ -23482,7 +23482,7 @@ var $author$project$View$instructions = F2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex text-lg flex-col items-center')
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('flex text-lg flex-col text-center items-center')
 				]),
 			_List_fromArray(
 				[
@@ -24131,7 +24131,7 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 										$rtfeldman$elm_css$Html$Styled$div,
 										_List_fromArray(
 											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg text-green-500')
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('items-center text-lg font-bold text-green-500')
 											]),
 										_List_fromArray(
 											[
@@ -24275,674 +24275,6 @@ var $author$project$Progressbar$progressBarWhenNoTraining = F2(
 				A2($elm$core$List$map, $elm$core$Tuple$first, history)));
 		return $author$project$Progressbar$viewProgressBar(pct_);
 	});
-var $author$project$Pretest$VKS$view = function (task) {
-	switch (task.$) {
-		case 'Err':
-			var reason = task.a;
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text(reason)
-				]);
-		case 'Loading':
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data may be lost')
-				]);
-		case 'NotStarted':
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('C\'est tout bon!')
-				]);
-		default:
-			switch (task.a.$) {
-				case 'Training':
-					var _v1 = task.a;
-					var data = task.b;
-					var _v2 = data.current;
-					if (_v2.$ === 'Just') {
-						return _List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('vks')
-							]);
-					} else {
-						return _List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
-									]),
-								_List_fromArray(
-									[
-										$author$project$View$fromMarkdown(data.infos.introToMain),
-										$author$project$View$button(
-										{isDisabled: false, message: $author$project$Pretest$VKS$UserClickedStartMain, txt: 'Start'})
-									]))
-							]);
-					}
-				case 'Main':
-					var _v3 = task.a;
-					var data = task.b;
-					var _v4 = data.current;
-					if (_v4.$ === 'Just') {
-						var trial = _v4.a;
-						return _List_fromArray(
-							[
-								A2($author$project$Progressbar$progressBarWhenNoTraining, data.history, data.mainTrials),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$span,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg font-bold')
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('to ' + trial.verb)
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$fieldset,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col m-2')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$label,
-										_List_Nil,
-										_List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$input,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$id('ns'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$value('NeverSeen'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-														_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$NeverSeen)),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
-													]),
-												_List_Nil),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$span,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('I don’t remember having seen this verb before')
-													]))
-											])),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$label,
-										_List_Nil,
-										_List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$input,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$value('PreviouslySeen'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-														_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$PreviouslySeen)),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
-													]),
-												_List_Nil),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$span,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('I have seen this verb before, but I don’t know what it means')
-													]))
-											])),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$label,
-										_List_Nil,
-										_List_fromArray(
-											[
-												A2(
-												$rtfeldman$elm_css$Html$Styled$input,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$value('Known'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$checked(
-														_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known)),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
-													]),
-												_List_Nil),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$span,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
-													]),
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$text('I have seen this verb before, and I think I know what it means')
-													]))
-											]))
-									])),
-								_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) ? A2(
-								$rtfeldman$elm_css$Html$Styled$fieldset,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col p-2')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$label,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('What do you think this verb means? (please provide a translation, synonym or definition or all meanings of this verb that you know):'),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$input,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$type_('text'),
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2'),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput(
-														$author$project$Pretest$VKS$UserUpdatedField($author$project$Pretest$VKS$FirstProduction))
-													]),
-												_List_Nil)
-											])),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$label,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col p-2')
-											]),
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$text('Please use this verb in a sentence. The sentence should show that you know what the word means.'),
-												A2(
-												$rtfeldman$elm_css$Html$Styled$textarea,
-												_List_fromArray(
-													[
-														$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2'),
-														$rtfeldman$elm_css$Html$Styled$Events$onInput(
-														$author$project$Pretest$VKS$UserUpdatedField($author$project$Pretest$VKS$SecondProduction))
-													]),
-												_List_Nil)
-											]))
-									])) : $rtfeldman$elm_css$Html$Styled$text(''),
-								$author$project$View$button(
-								{
-									isDisabled: (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) && A2(
-										$elm$core$List$any,
-										$elm$core$String$isEmpty,
-										_List_fromArray(
-											[data.state.usage, data.state.definition]))) ? true : (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$NoAnswer) ? true : false),
-									message: $author$project$Pretest$VKS$UserClickedNextTrial,
-									txt: 'Next Item'
-								})
-							]);
-					} else {
-						return _List_fromArray(
-							[
-								A3($author$project$View$end, data.infos.end, $author$project$Pretest$VKS$UserClickedSaveData, '')
-							]);
-					}
-				default:
-					var _v5 = task.a;
-					var data = task.b;
-					return _List_fromArray(
-						[
-							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$VKS$UserClickedStartMain)
-						]);
-			}
-	}
-};
-var $author$project$Pretest$YesNo$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Pretest$YesNo$UserClickedStartTask = {$: 'UserClickedStartTask'};
-var $author$project$View$loading = A2(
-	$rtfeldman$elm_css$Html$Styled$div,
-	_List_Nil,
-	_List_fromArray(
-		[
-			$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data will be lost')
-		]));
-var $author$project$Pretest$YesNo$view = function (task) {
-	switch (task.$) {
-		case 'NotStarted':
-			return _List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text('C\'est Bon !')
-				]);
-		case 'Loading':
-			return _List_fromArray(
-				[$author$project$View$loading]);
-		case 'Running':
-			var step = task.a;
-			var data = task.b;
-			switch (step.$) {
-				case 'Instructions':
-					return _List_fromArray(
-						[
-							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$YesNo$UserClickedStartTask)
-						]);
-				case 'Training':
-					return _List_Nil;
-				default:
-					var _v2 = data.current;
-					if (_v2.$ === 'Just') {
-						var trial = _v2.a;
-						return _List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center text-xl font-bold')
-									]),
-								_List_fromArray(
-									[
-										A2($author$project$Progressbar$progressBarWhenNoTraining, data.history, data.mainTrials),
-										$rtfeldman$elm_css$Html$Styled$text(trial.word),
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row m-2')
-											]),
-										_List_fromArray(
-											[
-												A2($author$project$View$unclickableButton, 'bg-gray-300', 'F = I don\'t know or I\'m not sure'),
-												A2($author$project$View$unclickableButton, 'bg-green-500', 'J = I know this word')
-											]))
-									]))
-							]);
-					} else {
-						return _List_fromArray(
-							[
-								A3($author$project$View$end, data.infos.end, $author$project$Pretest$YesNo$UserClickedSaveData, '')
-							]);
-					}
-			}
-		default:
-			var reason = task.a;
-			return _List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(reason)
-						]))
-				]);
-	}
-};
-var $author$project$Session1$ContextUnderstanding$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
-var $author$project$Session1$ContextUnderstanding$UserClickedRadioButton = function (a) {
-	return {$: 'UserClickedRadioButton', a: a};
-};
-var $author$project$Session1$ContextUnderstanding$UserClickedSaveData = {$: 'UserClickedSaveData'};
-var $author$project$Session1$ContextUnderstanding$UserClickedStartMain = F2(
-	function (a, b) {
-		return {$: 'UserClickedStartMain', a: a, b: b};
-	});
-var $author$project$Session1$ContextUnderstanding$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
-var $author$project$Session1$ContextUnderstanding$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
-var $author$project$View$bold = function (string) {
-	return '**' + (string + '**');
-};
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
-var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
-var $elm$svg$Svg$polyline = $elm$svg$Svg$trustedNode('polyline');
-var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
-var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
-var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $author$project$Icons$svgFeatherIcon = function (className) {
-	return $elm$svg$Svg$svg(
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$class('feather feather-' + className),
-				$elm$svg$Svg$Attributes$fill('none'),
-				$elm$svg$Svg$Attributes$stroke('currentColor'),
-				$elm$svg$Svg$Attributes$strokeLinecap('round'),
-				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
-				$elm$svg$Svg$Attributes$strokeWidth('2'),
-				$elm$svg$Svg$Attributes$viewBox('0 0 24 24'),
-				$elm$svg$Svg$Attributes$width('100%')
-			]));
-};
-var $author$project$Icons$checkCircle = A2(
-	$author$project$Icons$svgFeatherIcon,
-	'check-circle',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$path,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$d('M22 11.08V12a10 10 0 1 1-5.93-9.14')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$polyline,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$points('22 4 12 14.01 9 11.01')
-				]),
-			_List_Nil)
-		]));
-var $elm$core$String$dropRight = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3($elm$core$String$slice, 0, -n, string);
-	});
-var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(
-	function (replacements, _v0) {
-		var match = _v0.match;
-		var ordinalString = A2(
-			$elm$core$Basics$composeL,
-			$elm$core$String$dropLeft(1),
-			$elm$core$String$dropRight(1))(match);
-		return A2(
-			$elm$core$Maybe$withDefault,
-			'',
-			A2(
-				$elm$core$Maybe$andThen,
-				function (value) {
-					return A2($elm$core$Array$get, value, replacements);
-				},
-				$elm$core$String$toInt(ordinalString)));
-	});
-var $elm$regex$Regex$Match = F4(
-	function (match, index, number, submatches) {
-		return {index: index, match: match, number: number, submatches: submatches};
-	});
-var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-var $elm$regex$Regex$fromString = function (string) {
-	return A2(
-		$elm$regex$Regex$fromStringWith,
-		{caseInsensitive: false, multiline: false},
-		string);
-};
-var $elm$regex$Regex$never = _Regex_never;
-var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2(
-	$elm$core$Maybe$withDefault,
-	$elm$regex$Regex$never,
-	$elm$regex$Regex$fromString('\\{\\d+\\}'));
-var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
-var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(
-	function (string, args) {
-		var asArray = $elm$core$Array$fromList(args);
-		return A3(
-			$elm$regex$Regex$replace,
-			$lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex,
-			$lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray),
-			string);
-	});
-var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
-var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
-var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var $author$project$Icons$xCircle = A2(
-	$author$project$Icons$svgFeatherIcon,
-	'x-circle',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx('12'),
-					$elm$svg$Svg$Attributes$cy('12'),
-					$elm$svg$Svg$Attributes$r('10')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1('15'),
-					$elm$svg$Svg$Attributes$y1('9'),
-					$elm$svg$Svg$Attributes$x2('9'),
-					$elm$svg$Svg$Attributes$y2('15')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1('9'),
-					$elm$svg$Svg$Attributes$y1('9'),
-					$elm$svg$Svg$Attributes$x2('15'),
-					$elm$svg$Svg$Attributes$y2('15')
-				]),
-			_List_Nil)
-		]));
-var $author$project$View$genericSingleChoiceFeedback = function (data) {
-	var feedback_Correct = data.feedback_Correct;
-	var feedback_Incorrect = data.feedback_Incorrect;
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$div,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(
-				' w-full max-w-2xl rounded-md text-center object-center ' + ((data.isVisible && _Utils_eq(data.userAnswer, data.target)) ? 'bg-green-700' : ((data.isVisible && (!_Utils_eq(data.userAnswer, data.target))) ? 'bg-gray-700' : ((!data.isVisible) ? '' : ''))))
-			]),
-		_List_fromArray(
-			[
-				data.isVisible ? A2(
-				$rtfeldman$elm_css$Html$Styled$p,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2')
-					]),
-				_Utils_eq(data.userAnswer, data.target) ? _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('w-12 h-12')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$checkCircle)
-							])),
-						$author$project$View$fromMarkdown(
-						A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, feedback_Correct.a, feedback_Correct.b))
-					]) : _List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$class('w-12 h-12')
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$xCircle)
-							])),
-						$author$project$View$fromMarkdown(
-						A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, feedback_Incorrect.a, feedback_Incorrect.b))
-					])) : A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil),
-				A2(
-				$rtfeldman$elm_css$Html$Styled$div,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('p-4')
-					]),
-				_List_fromArray(
-					[data.button]))
-			]));
-};
-var $author$project$View$introToMain = function (msg) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$div,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col text-lg w-full items-center justify-center')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$rtfeldman$elm_css$Html$Styled$h3,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$text('Now you understand the activity, let\'s try our target words.')
-					])),
-				$author$project$View$button(
-				{isDisabled: false, message: msg, txt: 'Start'})
-			]));
-};
-var $author$project$Session1$ContextUnderstanding$paragraphWithInput = F3(
-	function (pre, userAnswer, post) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$p,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-3xl text-lg p-4')
-				]),
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text(pre),
-					A2(
-					$rtfeldman$elm_css$Html$Styled$span,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('border-4 w-24 h-2 pl-4 pr-4 font-bold')
-						]),
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$text(userAnswer)
-						])),
-					$rtfeldman$elm_css$Html$Styled$text(post)
-				]));
-	});
-var $rtfeldman$elm_css$Html$Styled$Attributes$name = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('name');
-var $author$project$View$radio = F5(
-	function (value, isChecked, isCorrect, feedbackMode, msg) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$label,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('group block text-gray-70 font-medium '),
-					$rtfeldman$elm_css$Html$Styled$Attributes$id(value)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$rtfeldman$elm_css$Html$Styled$div,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class(
-							'border-solid border-2 px-4 py-4 mb-1 ' + function () {
-								var _v0 = _Utils_Tuple3(feedbackMode, isChecked, isCorrect);
-								if (!_v0.a) {
-									if (_v0.b) {
-										return 'border-indigo-600';
-									} else {
-										return 'border-grey-500';
-									}
-								} else {
-									if (_v0.b) {
-										if (!_v0.c) {
-											return 'border-red-500';
-										} else {
-											return 'border-green-500';
-										}
-									} else {
-										return 'border-grey-500';
-									}
-								}
-							}()),
-							(!feedbackMode) ? $rtfeldman$elm_css$Html$Styled$Attributes$class('group-hover:border-indigo-600 hover:underline cursor-pointer') : $rtfeldman$elm_css$Html$Styled$Attributes$class(''),
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('active:border-indigo-400')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$input,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
-									$rtfeldman$elm_css$Html$Styled$Attributes$checked(isChecked),
-									$rtfeldman$elm_css$Html$Styled$Attributes$name('definition-choice'),
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('form-radio text-indigo-500'),
-									$rtfeldman$elm_css$Html$Styled$Events$onClick(msg),
-									$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedbackMode)
-								]),
-							_List_Nil),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$span,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 ')
-								]),
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text(value)
-								]))
-						]))
-				]));
-	});
-var $elm$core$List$sortBy = _List_sortBy;
-var $author$project$View$shuffledOptions = F5(
-	function (state, fb, radioMsg, trial, optionsOrder) {
-		var isCorrect = function (optionN) {
-			return _Utils_eq(optionN, trial.target);
-		};
-		var option = function (id) {
-			return A5(
-				$author$project$View$radio,
-				id,
-				_Utils_eq(state.userAnswer, id),
-				isCorrect(id),
-				fb,
-				radioMsg(id));
-		};
-		var options = _List_fromArray(
-			[
-				option(trial.distractor1),
-				option(trial.distractor2),
-				option(trial.distractor3),
-				option(trial.target)
-			]);
-		var ordoredOptions = A2(
-			$elm$core$List$map,
-			$elm$core$Tuple$second,
-			A2(
-				$elm$core$List$sortBy,
-				$elm$core$Tuple$first,
-				A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
-		return _Utils_ap(
-			ordoredOptions,
-			_List_fromArray(
-				[
-					option('I don\'t know')
-				]));
-	});
 var $rtfeldman$elm_css$Css$absolute = {position: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
 var $rtfeldman$elm_css$Css$Structure$PseudoElement = function (a) {
 	return {$: 'PseudoElement', a: a};
@@ -24984,6 +24316,41 @@ var $rtfeldman$elm_css$Css$Preprocess$NestSnippet = F2(
 		return {$: 'NestSnippet', a: a, b: b};
 	});
 var $rtfeldman$elm_css$Css$Global$descendants = $rtfeldman$elm_css$Css$Preprocess$NestSnippet($rtfeldman$elm_css$Css$Structure$Descendant);
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
+var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
+var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $author$project$Icons$svgFeatherIcon = function (className) {
+	return $elm$svg$Svg$svg(
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$class('feather feather-' + className),
+				$elm$svg$Svg$Attributes$fill('none'),
+				$elm$svg$Svg$Attributes$stroke('currentColor'),
+				$elm$svg$Svg$Attributes$strokeLinecap('round'),
+				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
+				$elm$svg$Svg$Attributes$strokeWidth('2'),
+				$elm$svg$Svg$Attributes$viewBox('0 0 24 24'),
+				$elm$svg$Svg$Attributes$width('100%')
+			]));
+};
+var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var $author$project$Icons$helpCircle = A2(
 	$author$project$Icons$svgFeatherIcon,
 	'help-circle',
@@ -25795,6 +25162,649 @@ var $author$project$View$tooltip = function (text_) {
 					]))
 			]));
 };
+var $author$project$Pretest$VKS$view = function (task) {
+	switch (task.$) {
+		case 'Err':
+			var reason = task.a;
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(reason)
+				]);
+		case 'Loading':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data may be lost')
+				]);
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('C\'est tout bon!')
+				]);
+		default:
+			switch (task.a.$) {
+				case 'Training':
+					var _v1 = task.a;
+					var data = task.b;
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						return _List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('vks')
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$fromMarkdown(data.infos.introToMain),
+										$author$project$View$button(
+										{isDisabled: false, message: $author$project$Pretest$VKS$UserClickedStartMain, txt: 'Start'})
+									]))
+							]);
+					}
+				case 'Main':
+					var _v3 = task.a;
+					var data = task.b;
+					var _v4 = data.current;
+					if (_v4.$ === 'Just') {
+						var trial = _v4.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+									]),
+								_List_fromArray(
+									[
+										$author$project$View$tooltip(data.infos.instructions_short),
+										A2($author$project$Progressbar$progressBarWhenNoTraining, data.history, data.mainTrials),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$span,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg font-bold')
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('to ' + trial.verb)
+											])),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$fieldset,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col m-2')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$label,
+												_List_Nil,
+												_List_fromArray(
+													[
+														A2(
+														$rtfeldman$elm_css$Html$Styled$input,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$id('ns'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$value('NeverSeen'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$checked(
+																_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$NeverSeen)),
+																$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
+															]),
+														_List_Nil),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$span,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text('I don’t remember having seen this verb before')
+															]))
+													])),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$label,
+												_List_Nil,
+												_List_fromArray(
+													[
+														A2(
+														$rtfeldman$elm_css$Html$Styled$input,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$value('PreviouslySeen'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$checked(
+																_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$PreviouslySeen)),
+																$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
+															]),
+														_List_Nil),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$span,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text('I have seen this verb before, but I don’t know what it means')
+															]))
+													])),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$label,
+												_List_Nil,
+												_List_fromArray(
+													[
+														A2(
+														$rtfeldman$elm_css$Html$Styled$input,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$value('Known'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$checked(
+																_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known)),
+																$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$Pretest$VKS$UserClickedNewKnowledge)
+															]),
+														_List_Nil),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$span,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('p-2')
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text('I have seen this verb before, and I think I know what it means')
+															]))
+													]))
+											])),
+										_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) ? A2(
+										$rtfeldman$elm_css$Html$Styled$fieldset,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col p-2')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$rtfeldman$elm_css$Html$Styled$label,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text('What do you think this verb means? (please provide a translation, synonym or definition for all meanings of this verb that you know):'),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$input,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$type_('text'),
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2'),
+																$rtfeldman$elm_css$Html$Styled$Events$onInput(
+																$author$project$Pretest$VKS$UserUpdatedField($author$project$Pretest$VKS$FirstProduction))
+															]),
+														_List_Nil)
+													])),
+												A2(
+												$rtfeldman$elm_css$Html$Styled$label,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col p-2')
+													]),
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text('Please use this verb in a sentence. The sentence should show that you know what the word means.'),
+														A2(
+														$rtfeldman$elm_css$Html$Styled$textarea,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2'),
+																$rtfeldman$elm_css$Html$Styled$Events$onInput(
+																$author$project$Pretest$VKS$UserUpdatedField($author$project$Pretest$VKS$SecondProduction))
+															]),
+														_List_Nil)
+													]))
+											])) : $rtfeldman$elm_css$Html$Styled$text(''),
+										$author$project$View$button(
+										{
+											isDisabled: (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$Known) && A2(
+												$elm$core$List$any,
+												$elm$core$String$isEmpty,
+												_List_fromArray(
+													[data.state.usage, data.state.definition]))) ? true : (_Utils_eq(data.state.knowledge, $author$project$Pretest$VKS$NoAnswer) ? true : false),
+											message: $author$project$Pretest$VKS$UserClickedNextTrial,
+											txt: 'Next Item'
+										})
+									]))
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$VKS$UserClickedSaveData, '')
+							]);
+					}
+				default:
+					var _v5 = task.a;
+					var data = task.b;
+					return _List_fromArray(
+						[
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$VKS$UserClickedStartMain)
+						]);
+			}
+	}
+};
+var $author$project$Pretest$YesNo$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Pretest$YesNo$UserClickedStartTask = {$: 'UserClickedStartTask'};
+var $author$project$View$loading = A2(
+	$rtfeldman$elm_css$Html$Styled$div,
+	_List_Nil,
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$text('Loading... Please don\'t quit or data will be lost')
+		]));
+var $author$project$Pretest$YesNo$view = function (task) {
+	switch (task.$) {
+		case 'NotStarted':
+			return _List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('C\'est Bon !')
+				]);
+		case 'Loading':
+			return _List_fromArray(
+				[$author$project$View$loading]);
+		case 'Running':
+			var step = task.a;
+			var data = task.b;
+			switch (step.$) {
+				case 'Instructions':
+					return _List_fromArray(
+						[
+							A2($author$project$View$instructions, data.infos.instructions, $author$project$Pretest$YesNo$UserClickedStartTask)
+						]);
+				case 'Training':
+					return _List_Nil;
+				default:
+					var _v2 = data.current;
+					if (_v2.$ === 'Just') {
+						var trial = _v2.a;
+						return _List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center text-xl font-bold')
+									]),
+								_List_fromArray(
+									[
+										A2($author$project$Progressbar$progressBarWhenNoTraining, data.history, data.mainTrials),
+										$rtfeldman$elm_css$Html$Styled$text(trial.word),
+										A2(
+										$rtfeldman$elm_css$Html$Styled$div,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-row m-2')
+											]),
+										_List_fromArray(
+											[
+												A2($author$project$View$unclickableButton, 'bg-gray-300', 'F = I don\'t know or I\'m not sure'),
+												A2($author$project$View$unclickableButton, 'bg-green-500', 'J = I know this word')
+											]))
+									]))
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$YesNo$UserClickedSaveData, '')
+							]);
+					}
+			}
+		default:
+			var reason = task.a;
+			return _List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(reason)
+						]))
+				]);
+	}
+};
+var $author$project$Session1$ContextUnderstanding$UserClickedNextTrial = {$: 'UserClickedNextTrial'};
+var $author$project$Session1$ContextUnderstanding$UserClickedRadioButton = function (a) {
+	return {$: 'UserClickedRadioButton', a: a};
+};
+var $author$project$Session1$ContextUnderstanding$UserClickedSaveData = {$: 'UserClickedSaveData'};
+var $author$project$Session1$ContextUnderstanding$UserClickedStartMain = F2(
+	function (a, b) {
+		return {$: 'UserClickedStartMain', a: a, b: b};
+	});
+var $author$project$Session1$ContextUnderstanding$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
+var $author$project$Session1$ContextUnderstanding$UserClickedToggleFeedback = {$: 'UserClickedToggleFeedback'};
+var $author$project$View$bold = function (string) {
+	return '**' + (string + '**');
+};
+var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var $elm$svg$Svg$polyline = $elm$svg$Svg$trustedNode('polyline');
+var $author$project$Icons$checkCircle = A2(
+	$author$project$Icons$svgFeatherIcon,
+	'check-circle',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M22 11.08V12a10 10 0 1 1-5.93-9.14')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('22 4 12 14.01 9 11.01')
+				]),
+			_List_Nil)
+		]));
+var $elm$core$String$dropRight = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3($elm$core$String$slice, 0, -n, string);
+	});
+var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(
+	function (replacements, _v0) {
+		var match = _v0.match;
+		var ordinalString = A2(
+			$elm$core$Basics$composeL,
+			$elm$core$String$dropLeft(1),
+			$elm$core$String$dropRight(1))(match);
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$andThen,
+				function (value) {
+					return A2($elm$core$Array$get, value, replacements);
+				},
+				$elm$core$String$toInt(ordinalString)));
+	});
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2(
+	$elm$core$Maybe$withDefault,
+	$elm$regex$Regex$never,
+	$elm$regex$Regex$fromString('\\{\\d+\\}'));
+var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(
+	function (string, args) {
+		var asArray = $elm$core$Array$fromList(args);
+		return A3(
+			$elm$regex$Regex$replace,
+			$lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex,
+			$lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray),
+			string);
+	});
+var $author$project$Icons$xCircle = A2(
+	$author$project$Icons$svgFeatherIcon,
+	'x-circle',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('12'),
+					$elm$svg$Svg$Attributes$cy('12'),
+					$elm$svg$Svg$Attributes$r('10')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('15'),
+					$elm$svg$Svg$Attributes$y1('9'),
+					$elm$svg$Svg$Attributes$x2('9'),
+					$elm$svg$Svg$Attributes$y2('15')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('9'),
+					$elm$svg$Svg$Attributes$y1('9'),
+					$elm$svg$Svg$Attributes$x2('15'),
+					$elm$svg$Svg$Attributes$y2('15')
+				]),
+			_List_Nil)
+		]));
+var $author$project$View$genericSingleChoiceFeedback = function (data) {
+	var feedback_Correct = data.feedback_Correct;
+	var feedback_Incorrect = data.feedback_Incorrect;
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(
+				' w-full max-w-2xl rounded-md text-center object-center ' + ((data.isVisible && _Utils_eq(data.userAnswer, data.target)) ? 'bg-green-700' : ((data.isVisible && (!_Utils_eq(data.userAnswer, data.target))) ? 'bg-gray-700' : ((!data.isVisible) ? '' : ''))))
+			]),
+		_List_fromArray(
+			[
+				data.isVisible ? A2(
+				$rtfeldman$elm_css$Html$Styled$p,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2')
+					]),
+				_Utils_eq(data.userAnswer, data.target) ? _List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('w-12 h-12')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$checkCircle)
+							])),
+						$author$project$View$fromMarkdown(
+						A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, feedback_Correct.a, feedback_Correct.b))
+					]) : _List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('w-12 h-12')
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$fromUnstyled($author$project$Icons$xCircle)
+							])),
+						$author$project$View$fromMarkdown(
+						A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, feedback_Incorrect.a, feedback_Incorrect.b))
+					])) : A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('p-4')
+					]),
+				_List_fromArray(
+					[data.button]))
+			]));
+};
+var $author$project$View$introToMain = function (msg) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('container flex flex-col text-lg w-full items-center justify-center')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$h3,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Now you understand the activity, let\'s try our target words.')
+					])),
+				$author$project$View$button(
+				{isDisabled: false, message: msg, txt: 'Start'})
+			]));
+};
+var $author$project$Session1$ContextUnderstanding$paragraphWithInput = F3(
+	function (pre, userAnswer, post) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$p,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('max-w-3xl text-lg p-4')
+				]),
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(pre),
+					A2(
+					$rtfeldman$elm_css$Html$Styled$span,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('border-4 w-24 h-2 pl-4 pr-4 font-bold')
+						]),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text(userAnswer)
+						])),
+					$rtfeldman$elm_css$Html$Styled$text(post)
+				]));
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$name = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('name');
+var $author$project$View$radio = F5(
+	function (value, isChecked, isCorrect, feedbackMode, msg) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$label,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('group block text-gray-70 font-medium '),
+					$rtfeldman$elm_css$Html$Styled$Attributes$id(value)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$class(
+							'border-solid border-2 px-4 py-4 mb-1 ' + function () {
+								var _v0 = _Utils_Tuple3(feedbackMode, isChecked, isCorrect);
+								if (!_v0.a) {
+									if (_v0.b) {
+										return 'border-indigo-600';
+									} else {
+										return 'border-grey-500';
+									}
+								} else {
+									if (_v0.b) {
+										if (!_v0.c) {
+											return 'border-red-500';
+										} else {
+											return 'border-green-500';
+										}
+									} else {
+										return 'border-grey-500';
+									}
+								}
+							}()),
+							(!feedbackMode) ? $rtfeldman$elm_css$Html$Styled$Attributes$class('group-hover:border-indigo-600 hover:underline cursor-pointer') : $rtfeldman$elm_css$Html$Styled$Attributes$class(''),
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('active:border-indigo-400')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$rtfeldman$elm_css$Html$Styled$input,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$type_('radio'),
+									$rtfeldman$elm_css$Html$Styled$Attributes$checked(isChecked),
+									$rtfeldman$elm_css$Html$Styled$Attributes$name('definition-choice'),
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('form-radio text-indigo-500'),
+									$rtfeldman$elm_css$Html$Styled$Events$onClick(msg),
+									$rtfeldman$elm_css$Html$Styled$Attributes$disabled(feedbackMode)
+								]),
+							_List_Nil),
+							A2(
+							$rtfeldman$elm_css$Html$Styled$span,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4 ')
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(value)
+								]))
+						]))
+				]));
+	});
+var $elm$core$List$sortBy = _List_sortBy;
+var $author$project$View$shuffledOptions = F5(
+	function (state, fb, radioMsg, trial, optionsOrder) {
+		var isCorrect = function (optionN) {
+			return _Utils_eq(optionN, trial.target);
+		};
+		var option = function (id) {
+			return A5(
+				$author$project$View$radio,
+				id,
+				_Utils_eq(state.userAnswer, id),
+				isCorrect(id),
+				fb,
+				radioMsg(id));
+		};
+		var options = _List_fromArray(
+			[
+				option(trial.distractor1),
+				option(trial.distractor2),
+				option(trial.distractor3),
+				option(trial.target)
+			]);
+		var ordoredOptions = A2(
+			$elm$core$List$map,
+			$elm$core$Tuple$second,
+			A2(
+				$elm$core$List$sortBy,
+				$elm$core$Tuple$first,
+				A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
+		return _Utils_ap(
+			ordoredOptions,
+			_List_fromArray(
+				[
+					option('I don\'t know')
+				]));
+	});
 var $author$project$View$trainingWheelsGeneric = F3(
 	function (trialn, pattern_, variables) {
 		return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
@@ -26205,13 +26215,13 @@ var $author$project$Session1$Meaning$view = function (task) {
 								]),
 							_List_fromArray(
 								[
-									A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
 									$author$project$View$tooltip(
 									A2(
 										$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
 										data.infos.instructions_short,
 										_List_fromArray(
 											[trial.writtenWord]))),
+									A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
 									A2(
 									$rtfeldman$elm_css$Html$Styled$div,
 									_List_fromArray(
@@ -26249,28 +26259,7 @@ var $author$project$Session1$Meaning$view = function (task) {
 				default:
 					var _v5 = _v0.a;
 					var data = _v0.b;
-					return A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$rtfeldman$elm_css$Html$Styled$h1,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text('Instructions')
-									])),
-								A2(
-								$rtfeldman$elm_css$Html$Styled$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$author$project$View$fromMarkdown(data.infos.instructions)
-									])),
-								$author$project$View$button(
-								{isDisabled: false, message: $author$project$Session1$Meaning$UserClickedStartTraining, txt: 'Start training'})
-							]));
+					return A2($author$project$View$instructions, data.infos.instructions, $author$project$Session1$Meaning$UserClickedStartTraining);
 			}
 	}
 };
@@ -26658,7 +26647,7 @@ var $author$project$Session1$Spelling$viewTask = F3(
 	function (data, currentTrial, ordoredOptions) {
 		return _List_fromArray(
 			[
-				A3($author$project$View$audioButton, $author$project$Session1$Spelling$UserClickedPlayAudio, currentTrial.audio.url, 'word'),
+				A3($author$project$View$audioButton, $author$project$Session1$Spelling$UserClickedPlayAudio, currentTrial.audio.url, 'Listen'),
 				A2(
 				$rtfeldman$elm_css$Html$Styled$div,
 				_List_fromArray(
@@ -26756,7 +26745,10 @@ var $author$project$Session1$Spelling$view = F2(
 									A3($elm$core$List$map2, $elm$core$Tuple$pair, optionsOrder, options)));
 							return A2(
 								$rtfeldman$elm_css$Html$Styled$div,
-								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full flex flex-col justify-center items-center')
+									]),
 								A2(
 									$elm$core$List$cons,
 									A3(
@@ -26812,21 +26804,15 @@ var $author$project$Session1$Spelling$view = F2(
 								$rtfeldman$elm_css$Html$Styled$div,
 								_List_fromArray(
 									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$class('container w-full flex flex-col justify-center items-center')
+										$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col justify-center items-center')
 									]),
-								_List_fromArray(
-									[
-										A2(
-										$rtfeldman$elm_css$Html$Styled$div,
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Html$Styled$Attributes$class('mr-8 w-full max-w-xl')
-											]),
-										A2(
-											$elm$core$List$cons,
-											A2($author$project$Progressbar$progressBar, history, mainTrials),
-											A3($author$project$Session1$Spelling$viewTask, data, trial, ordoredOptions)))
-									]));
+								A2(
+									$elm$core$List$cons,
+									$author$project$View$tooltip(data.infos.instructions_short),
+									A2(
+										$elm$core$List$cons,
+										A2($author$project$Progressbar$progressBar, history, mainTrials),
+										A3($author$project$Session1$Spelling$viewTask, data, trial, ordoredOptions))));
 						} else {
 							return A3($author$project$View$end, infos.end, $author$project$Session1$Spelling$UserClickedSavedData, 'context-understanding');
 						}
@@ -27899,6 +27885,7 @@ var $author$project$Session3$Spelling3$view = function (exp) {
 									]),
 								_List_fromArray(
 									[
+										$author$project$View$tooltip(data.infos.instructions_short),
 										A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
 										A2($author$project$Session3$Spelling3$viewLimitedTimesAudioButton, nTimes, trial),
 										A4($author$project$View$floatingLabel, 'Type here', state.userAnswer, $author$project$Session3$Spelling3$UserChangedInput, feedback),
@@ -28180,6 +28167,7 @@ var $author$project$Session2$Spelling$viewScrabbleTask = function (model) {
 								]),
 							_List_fromArray(
 								[
+									$author$project$View$tooltip(data.infos.instructions_short),
 									A2($author$project$Progressbar$progressBar, data.history, data.mainTrials),
 									A3($author$project$View$audioButton, $author$project$Session2$Spelling$UserClickedStartAudio, currentTrial.audioWord.url, 'word'),
 									(!data.feedback) ? A2(
@@ -28228,21 +28216,15 @@ var $author$project$Session2$Spelling$viewScrabbleTask = function (model) {
 					if (_v5.$ === 'Just') {
 						var currentTrial = _v5.a;
 						return A2(
-							$author$project$View$viewTraining,
-							data.infos.instructions,
+							$rtfeldman$elm_css$Html$Styled$div,
 							_List_fromArray(
 								[
-									audioButton(currentTrial.audioWord.url),
-									A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('col-start-2 col-span-4')
-										]),
-									_List_fromArray(
-										[
-											viewLetters(data.state.scrambledLetter)
-										])),
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('flex flex-col items-center')
+								]),
+							_List_fromArray(
+								[
+									A3($author$project$View$audioButton, $author$project$Session2$Spelling$UserClickedStartAudio, currentTrial.audioWord.url, 'word'),
+									viewLetters(data.state.scrambledLetter),
 									A2($author$project$Session2$Spelling$ghostView, model.dnd, data.state.scrambledLetter),
 									$author$project$View$genericSingleChoiceFeedback(
 									{

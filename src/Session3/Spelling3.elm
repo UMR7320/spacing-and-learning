@@ -55,7 +55,8 @@ view exp =
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center " ]
-                        [ progressBar data.history data.mainTrials
+                        [ View.tooltip data.infos.instructions_short
+                        , progressBar data.history data.mainTrials
                         , viewLimitedTimesAudioButton nTimes trial
                         , View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
                         , View.genericSingleChoiceFeedback

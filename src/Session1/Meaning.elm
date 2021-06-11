@@ -161,8 +161,8 @@ view task =
             case data.current of
                 Just trial ->
                     div [ class "container flex flex-col items-center justify-center" ]
-                        [ Progressbar.progressBar data.history data.mainTrials
-                        , View.tooltip (interpolate data.infos.instructions_short [ trial.writtenWord ])
+                        [ View.tooltip (interpolate data.infos.instructions_short [ trial.writtenWord ])
+                        , Progressbar.progressBar data.history data.mainTrials
                         , div [ class "mr-8 w-full max-w-xl" ]
                             [ viewQuestion trial.writtenWord (List.length data.history)
                             , div
@@ -192,15 +192,7 @@ view task =
             div [] [ text "I did not start yet." ]
 
         Logic.Running Logic.Instructions data ->
-            div []
-                [ h1 [] [ text "Instructions" ]
-                , p [] [ View.fromMarkdown data.infos.instructions ]
-                , View.button
-                    { isDisabled = False
-                    , message = UserClickedStartTraining
-                    , txt = "Start training"
-                    }
-                ]
+            View.instructions data.infos.instructions UserClickedStartTraining
 
 
 getRecords =

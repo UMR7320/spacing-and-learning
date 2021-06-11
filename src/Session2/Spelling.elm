@@ -276,7 +276,8 @@ viewScrabbleTask model =
             case data.current of
                 Just currentTrial ->
                     div [ class "flex flex-col items-center justify-center" ]
-                        [ Progressbar.progressBar data.history data.mainTrials
+                        [ View.tooltip data.infos.instructions_short
+                        , Progressbar.progressBar data.history data.mainTrials
                         , View.audioButton UserClickedStartAudio currentTrial.audioWord.url "word"
                         , if not data.feedback then
                             div [ class "flex flex-col items-center w-full" ]
@@ -306,9 +307,9 @@ viewScrabbleTask model =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just currentTrial ->
-                    View.viewTraining data.infos.instructions
-                        [ audioButton currentTrial.audioWord.url
-                        , div [ class "col-start-2 col-span-4" ] [ viewLetters data.state.scrambledLetter ]
+                    div [ class "flex flex-col items-center" ]
+                        [ View.audioButton UserClickedStartAudio currentTrial.audioWord.url "word"
+                        , viewLetters data.state.scrambledLetter
                         , ghostView model.dnd data.state.scrambledLetter
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
