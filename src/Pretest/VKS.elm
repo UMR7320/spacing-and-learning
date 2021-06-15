@@ -3,6 +3,7 @@ module Pretest.VKS exposing (..)
 import Data
 import Dict
 import ExperimentInfo
+import Html.Attributes exposing (placeholder)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A exposing (class, type_)
 import Html.Styled.Events as E
@@ -91,16 +92,27 @@ view task =
                             Html.Styled.fieldset [ class "flex flex-col p-2" ]
                                 [ label [ class "flex flex-col" ]
                                     [ text "What do you think this verb means? (please provide a translation, synonym or definition for all meanings of this verb that you know):"
-                                    , input
-                                        [ type_ "text"
-                                        , class "border-2"
-                                        , E.onInput (UserUpdatedField FirstProduction)
-                                        ]
-                                        []
                                     ]
+                                , Dict.map
+                                    (\k v ->
+                                        div [ class "flex flex-row items-center" ]
+                                            [ input
+                                                [ type_ "text"
+                                                , class "border-2 w-full"
+                                                , E.onInput (UserUpdatedField FirstProduction k)
+                                                , A.placeholder "Translation OR Synonym OR definition"
+                                                ]
+                                                []
+                                            , div [ E.onClick (UserClickedRemoveAnswer k), class "cursor-pointer" ] [ text "❌" ]
+                                            ]
+                                    )
+                                    data.state.definition
+                                    |> Dict.values
+                                    |> div []
+                                , View.button { message = UserClickedAddAnswer, txt = "New answer", isDisabled = False }
                                 , label [ class "flex flex-col p-2" ]
                                     [ text "Please use this verb in a sentence. The sentence should show that you know what the word means."
-                                    , textarea [ class "border-2", E.onInput (UserUpdatedField SecondProduction) ] []
+                                    , textarea [ class "border-2", E.onInput (UserUpdatedField SecondProduction 1) ] []
                                     ]
                                 ]
 
@@ -110,7 +122,7 @@ view task =
                             { txt = "Next Item"
                             , message = UserClickedNextTrial
                             , isDisabled =
-                                if data.state.knowledge == Known && List.any String.isEmpty [ data.state.usage, data.state.definition ] then
+                                if data.state.knowledge == Known && List.any String.isEmpty ([ data.state.usage ] ++ (data.state.definition |> Dict.values)) then
                                     True
 
                                 else if data.state.knowledge == NoAnswer then
@@ -182,7 +194,7 @@ type Familiarity
 
 type alias State =
     { knowledge : Familiarity
-    , definition : String
+    , definition : Dict.Dict Int String
     , usage : String
     }
 
@@ -192,9 +204,11 @@ type Msg
     | UserClickedStartMain
     | UserClickedSaveData
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
-    | UserUpdatedField Field String
+    | UserUpdatedField Field Int String
     | RuntimeReordedAmorces Field
     | UserClickedNewKnowledge String
+    | UserClickedAddAnswer
+    | UserClickedRemoveAnswer Int
 
 
 type Field
@@ -222,10 +236,10 @@ update msg model =
         UserClickedStartMain ->
             ( { model | vks = Logic.startMain model.vks initState }, Cmd.none )
 
-        UserUpdatedField fieldId new ->
+        UserUpdatedField fieldId subKey new ->
             case fieldId of
                 FirstProduction ->
-                    ( { model | vks = model.vks |> Logic.update { prevState | definition = new } }, Cmd.none )
+                    ( { model | vks = model.vks |> Logic.update { prevState | definition = Dict.insert subKey new prevState.definition } }, Cmd.none )
 
                 SecondProduction ->
                     ( { model | vks = model.vks |> Logic.update { prevState | usage = new } }, Cmd.none )
@@ -246,6 +260,16 @@ update msg model =
         UserClickedNewKnowledge str ->
             ( { model | vks = model.vks |> Logic.update { prevState | knowledge = familiarityFromString str } }, Cmd.none )
 
+        UserClickedAddAnswer ->
+            let
+                lastIndex =
+                    Dict.size prevState.definition
+            in
+            ( { model | vks = model.vks |> Logic.update { prevState | definition = Dict.insert (lastIndex + 1) "" prevState.definition } }, Cmd.none )
+
+        UserClickedRemoveAnswer answerid ->
+            ( { model | vks = model.vks |> Logic.update { prevState | definition = Dict.remove answerid prevState.definition } }, Cmd.none )
+
 
 init : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 init infos trials =
@@ -258,7 +282,7 @@ init infos trials =
 
 initState : State
 initState =
-    { knowledge = NoAnswer, definition = "", usage = "" }
+    { knowledge = NoAnswer, definition = Dict.empty |> Dict.insert 0 "", usage = "" }
 
 
 familiarityToString : Familiarity -> String
@@ -304,12 +328,16 @@ saveData responseHandler maybeUserId task =
         summarizedTrialEncoder =
             Encode.list
                 (\( { id }, { knowledge, definition, usage } ) ->
+                    let
+                        lsToString =
+                            definition |> Dict.toList |> List.map Tuple.second |> List.intersperse "," |> String.concat
+                    in
                     Encode.object
                         [ ( "fields"
                           , Encode.object
                                 [ ( "id", Encode.list Encode.string [ id ] )
                                 , ( "knowledge", Encode.string (familiarityToString knowledge) )
-                                , ( "definition", Encode.string definition )
+                                , ( "definition", Encode.string lsToString )
                                 , ( "usage", Encode.string usage )
                                 ]
                           )
