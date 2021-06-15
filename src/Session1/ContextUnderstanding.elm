@@ -28,9 +28,16 @@ taskId =
 
 
 paragraphWithInput pre userAnswer post =
-    p [ class "max-w-3xl text-lg p-4" ]
+    p [ class "max-w-2xl text-lg p-4" ]
         [ text pre
-        , span [ class "border-4 w-24 h-2 pl-4 pr-4 font-bold" ] [ text userAnswer ]
+        , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
+            [ text <|
+                if userAnswer == "I don't know" then
+                    "???"
+
+                else
+                    userAnswer
+            ]
         , text post
         ]
 
@@ -63,21 +70,18 @@ view task =
                                 [] ->
                                     ( "defautpre", "defaultpOst" )
                     in
-                    div []
-                        [ View.viewTraining data.infos.instructions
-                            [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.target ]
-                            , paragraphWithInput pre data.state.userAnswer post
-                            , div [ class "w-full max-w-2xl" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
-                            , div [ class "col-start-2 col-span-4" ] <|
-                                [ View.genericSingleChoiceFeedback
-                                    { isVisible = data.feedback
-                                    , userAnswer = data.state.userAnswer
-                                    , target = trial.target
-                                    , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
-                                    , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
-                                    , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
-                                    }
-                                ]
+                    div [ class "flex flex-col items-center" ]
+                        [ paragraphWithInput pre data.state.userAnswer post
+                        , div [ class "w-full max-w-2xl" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
+                        , div [ class "col-start-2 col-span-4" ] <|
+                            [ View.genericSingleChoiceFeedback
+                                { isVisible = data.feedback
+                                , userAnswer = data.state.userAnswer
+                                , target = trial.target
+                                , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
+                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
+                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
+                                }
                             ]
                         ]
 
@@ -100,8 +104,8 @@ view task =
                                     ( "defautpre", "defaultpOst" )
                     in
                     div [ class "container flex flex-col w-full w-max-3xl items-center justify-center " ]
-                        [ Progressbar.progressBar data.history data.mainTrials
-                        , View.tooltip data.infos.instructions_short
+                        [ View.tooltip data.infos.instructions_short
+                        , Progressbar.progressBar data.history data.mainTrials
                         , paragraphWithInput pre data.state.userAnswer post
                         , div [ class "w-full max-w-xl" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
                         , View.genericSingleChoiceFeedback

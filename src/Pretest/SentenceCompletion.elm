@@ -87,7 +87,7 @@ view task =
                           else
                             text ""
                         , if data.feedback then
-                            div [ A.class "items-center text-lg font-bold text-green-500" ] [ text "These are of course only suggestions, there are many other possibilities!" ]
+                            div [ A.class "items-center @text-lg font-bold text-green-500" ] [ text "These are of course only suggestions, there are many other possibilities!" ]
 
                           else
                             div [] []

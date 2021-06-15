@@ -38,23 +38,25 @@ view exp optionsOrder =
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col text-lg items-center" ]
                         [ Html.p [ class "p-4" ] [ View.fromMarkdown trial.context ]
-                        , if nTimes == 3 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
+                        , div []
+                            [ if nTimes == 3 then
+                                View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
 
-                          else if nTimes == 2 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
+                              else if nTimes == 2 then
+                                View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
 
-                          else if nTimes == 1 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+                              else if nTimes == 1 then
+                                View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
 
-                          else
-                            View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
-                        , View.button
-                            { isDisabled =
-                                nTimes == 3
-                            , message = UserClickedStartAnswering
-                            , txt = "Now choose the best description"
-                            }
+                              else
+                                div [] []
+                            , View.button
+                                { isDisabled =
+                                    nTimes == 3
+                                , message = UserClickedStartAnswering
+                                , txt = "Now choose the best description"
+                                }
+                            ]
                         ]
 
                 ( Just trial, Answering ) ->
@@ -90,7 +92,7 @@ view exp optionsOrder =
                             View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
 
                           else
-                            View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
+                            View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "Now choose the best description" }
                         , View.button
                             { isDisabled =
                                 nTimes == 3

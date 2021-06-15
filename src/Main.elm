@@ -422,7 +422,7 @@ body model =
                                                 Date.fromPosix zone date_
 
                                             possibleDates =
-                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Weeks 1 date)
+                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Days 8 date)
                                                     |> List.map
                                                         (\time ->
                                                             label []
@@ -502,7 +502,7 @@ body model =
                                                 Date.fromPosix zone date_
 
                                             possibleDates =
-                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Weeks 1 date)
+                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Days 8 date)
                                                     |> List.map
                                                         (\time ->
                                                             label []

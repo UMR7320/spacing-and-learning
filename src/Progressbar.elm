@@ -36,7 +36,7 @@ progressBarWhenNoTraining history remainingTrials =
 
 viewProgressBar pct_ =
     Html.div
-        [ class "shadow max-w-xl w-full bg-gray-300 mt-2 mb-12 transition duration-500"
+        [ class "shadow max-w-xl w-full bg-gray-300 mt-2 mb-2 transition duration-500"
         ]
         [ Html.div
             [ class "bg-indigo-600 text-sm font-bold w-full leading-none py-1 text-center text-white "

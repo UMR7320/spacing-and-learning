@@ -46,7 +46,7 @@ type Msg
 updateWhenNextTrial model shuffleOptionsMsg =
     ( { model
         | spellingLvl1 =
-            Logic.next initState model.spellingLvl1
+            Logic.next iniState model.spellingLvl1
 
         -- ICI GROS BUG À VENIR, il faut reset uniquement la réponse du volontaire
       }
@@ -68,13 +68,15 @@ trainingBox =
     div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col" ]
 
 
-viewTask data currentTrial ordoredOptions =
-    [ View.audioButton UserClickedPlayAudio currentTrial.audio.url "Listen"
+viewTask data currentTrial optionsOrder =
+    [ viewAudioButton data.state.remainingListenings currentTrial.audio.url
     , div
         [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
-        [ fieldset
-            []
-            ordoredOptions
+        [ if data.state.remainingListenings < 3 then
+            div [] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton currentTrial optionsOrder
+
+          else
+            div [] []
         , View.genericSingleChoiceFeedback
             { isVisible = data.feedback
             , userAnswer = data.state.userAnswer
@@ -93,7 +95,7 @@ update msg model =
             "recJOpE5pMTCHJOSV"
 
         currentSpellingState =
-            Logic.getState model.spellingLvl1
+            Logic.getState model.spellingLvl1 |> Maybe.withDefault iniState
     in
     case msg of
         UserClickedFeedback ->
@@ -106,20 +108,15 @@ update msg model =
             )
 
         UserClickedRadioButton newChoice ->
-            case currentSpellingState of
-                Just prevState ->
-                    ( { model
-                        | spellingLvl1 =
-                            Logic.update { prevState | userAnswer = newChoice } model.spellingLvl1
-                      }
-                    , Cmd.none
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
+            ( { model
+                | spellingLvl1 =
+                    Logic.update { currentSpellingState | userAnswer = newChoice } model.spellingLvl1
+              }
+            , Cmd.none
+            )
 
         UserClickedNextTrial ->
-            ( { model | spellingLvl1 = Logic.next initState model.spellingLvl1 }, Cmd.none )
+            ( { model | spellingLvl1 = Logic.next iniState model.spellingLvl1 }, Cmd.none )
 
         UserClickedStartMainloop ->
             ( { model | spellingLvl1 = Logic.startMain model.spellingLvl1 iniState }, Cmd.none )
@@ -135,7 +132,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedPlayAudio url ->
-            ( model, Ports.playAudio url )
+            ( { model | spellingLvl1 = Logic.update { currentSpellingState | remainingListenings = currentSpellingState.remainingListenings - 1 } model.spellingLvl1 }, Ports.playAudio url )
 
         UserClickedStartTraining ->
             ( { model | spellingLvl1 = Logic.startTraining model.spellingLvl1 }, Cmd.none )
@@ -162,33 +159,12 @@ view exp optionsOrder =
         Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just x ->
-                    let
-                        option id =
-                            View.radio
-                                id
-                                (state.userAnswer == id)
-                                (isCorrect id)
-                                feedback
-                                (UserClickedRadioButton id)
-
-                        isCorrect optionN =
-                            optionN == x.target
-
-                        options =
-                            [ option x.distractor1, option x.distractor2, option x.distractor3, option x.target ]
-
-                        ordoredOptions =
-                            options
-                                |> List.map2 Tuple.pair optionsOrder
-                                |> List.sortBy Tuple.first
-                                |> List.map Tuple.second
-                    in
                     div [ class "container w-full flex flex-col justify-center items-center" ] <|
                         View.trainingWheelsGeneric
                             (List.length history)
                             data.infos.trainingWheel
                             [ View.bold x.target ]
-                            :: viewTask data x ordoredOptions
+                            :: viewTask data x optionsOrder
 
                 Nothing ->
                     View.introToMain UserClickedStartMainloop
@@ -196,51 +172,37 @@ view exp optionsOrder =
         Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just trial ->
-                    let
-                        option id =
-                            View.radio
-                                id
-                                (state.userAnswer == id)
-                                (isCorrect id)
-                                feedback
-                                (UserClickedRadioButton id)
-
-                        isCorrect optionN =
-                            optionN == trial.target
-
-                        options =
-                            [ option trial.distractor1, option trial.distractor2, option trial.distractor3, option trial.target ]
-
-                        ordoredOptions =
-                            options
-                                |> List.map2 Tuple.pair optionsOrder
-                                |> List.sortBy Tuple.first
-                                |> List.map Tuple.second
-                    in
                     div [ class "flex flex-col justify-center items-center" ] <|
-                        View.tooltip
-                            data.infos.instructions_short
+                        View.tooltip data.infos.instructions_short
                             :: Progressbar.progressBar history mainTrials
                             :: viewTask
                                 data
                                 trial
-                                ordoredOptions
+                                optionsOrder
 
                 Nothing ->
                     View.end infos.end UserClickedSavedData "context-understanding"
 
 
+viewAudioButton nTimes url =
+    case nTimes of
+        3 ->
+            View.audioButton UserClickedPlayAudio url "Listen"
+
+        2 ->
+            View.audioButton UserClickedPlayAudio url "Listen again?"
+
+        1 ->
+            View.audioButton UserClickedPlayAudio url "Listen for the last time?"
+
+        _ ->
+            div [] []
+
+
 type alias State =
     { inputUid : String
-    , userUID : String
     , userAnswer : String
-    }
-
-
-iniState =
-    { inputUid = ""
-    , userUID = ""
-    , userAnswer = ""
+    , remainingListenings : Int
     }
 
 
@@ -296,7 +258,7 @@ start info trials =
     Logic.startIntro relatedInfos
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
-        initState
+        iniState
 
 
 getTrialsFromServer : (Result Http.Error (List Trial) -> msg) -> Cmd msg
@@ -304,6 +266,6 @@ getTrialsFromServer callbackMsg =
     Data.getTrialsFromServer_ "input" "Meaning" callbackMsg decodeTrials
 
 
-initState : State
-initState =
-    State "DefaultTrialUID" "DefaultUserUID" ""
+iniState : State
+iniState =
+    State "DefaultTrialUID" "" 3

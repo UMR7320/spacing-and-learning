@@ -38,7 +38,7 @@ view exp =
                 ( Just trial, Listening nTimes ) ->
                     let
                         ( context, dialog ) =
-                            case String.split "." trial.context of
+                            case String.split "/" trial.context of
                                 x :: xs ->
                                     ( x, String.concat xs )
 
@@ -48,35 +48,18 @@ view exp =
                     div [ class "flex flex-col items-center" ]
                         [ Html.h3 [] [ View.fromMarkdown context ]
                         , viewLimitedTimesAudioButton nTimes trial
-                        , Html.pre [ class "text-lg m-4" ]
+                        , Html.pre [ class "text-lg m-4 font-bold text-center" ]
                             [ View.fromMarkdown dialog
                             ]
-                        , View.button
-                            { isDisabled =
-                                nTimes == 3
-                            , message = UserClickedStartAnswering
-                            , txt = "What happened?"
-                            }
-                        ]
-
-                ( Just trial, Answering ) ->
-                    let
-                        ( context, dialog ) =
-                            case String.split "." trial.context of
-                                x :: xs ->
-                                    ( x, String.concat xs )
-
-                                _ ->
-                                    ( "Missing context", "Missing dialog" )
-                    in
-                    div [ class "flex flex-col items-center" ]
-                        [ View.textAreaWithReadonlyAmorce
-                            { id_ = "production"
-                            , amorce = trial.amorce
-                            , isFeedback = feedback
-                            , userAnswer = state.userAnswer
-                            , onInputMsg = UserChangedInput
-                            }
+                        , div []
+                            [ View.textAreaWithReadonlyAmorce
+                                { id_ = "production"
+                                , amorce = trial.amorce
+                                , isFeedback = feedback
+                                , userAnswer = state.userAnswer
+                                , onInputMsg = UserChangedInput
+                                }
+                            ]
                         , View.genericNeutralFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( trial.feedback, [] )
@@ -92,7 +75,7 @@ view exp =
                 ( Just trial, Listening nTimes ) ->
                     let
                         ( context, dialog ) =
-                            case String.split "." trial.context of
+                            case String.split "/" trial.context of
                                 x :: xs ->
                                     ( x, String.concat xs )
 
@@ -100,32 +83,14 @@ view exp =
                                     ( "Missing context", "Missing dialog" )
                     in
                     div [ class "flex flex-col items-center" ]
-                        [ Html.h3 [] [ View.fromMarkdown context ]
+                        [ View.tooltip
+                            data.infos.instructions_short
+                        , progressBar history mainTrials
+                        , Html.h3 [ class "text-center" ] [ View.fromMarkdown context ]
                         , viewLimitedTimesAudioButton nTimes trial
-                        , Html.pre [ class "text-lg m-4" ]
+                        , Html.pre [ class "text-center font-bold" ]
                             [ View.fromMarkdown dialog
                             ]
-                        , View.button
-                            { isDisabled =
-                                nTimes == 3
-                            , message = UserClickedStartAnswering
-                            , txt = "What happened?"
-                            }
-                        ]
-
-                ( Just trial, Answering ) ->
-                    let
-                        ( context, dialog ) =
-                            case String.split "." trial.context of
-                                x :: xs ->
-                                    ( x, String.concat xs )
-
-                                _ ->
-                                    ( "Missing context", "Missing dialog" )
-                    in
-                    div [ class "flex flex-col items-center" ]
-                        [ View.tooltip data.infos.instructions_short
-                        , progressBar history mainTrials
                         , View.textAreaWithReadonlyAmorce
                             { id_ = "production"
                             , amorce = trial.amorce
@@ -201,7 +166,11 @@ update msg model =
             )
 
         UserClickedStartAnswering ->
-            ( { model | cu3 = Logic.update { prevState | step = Answering } model.cu3 }, Cmd.none )
+            ( model, Cmd.none )
+
+
+
+--( { model | cu3 = Logic.update { prevState | step = Answering } model.cu3 }, Cmd.none )
 
 
 viewLimitedTimesAudioButton nTimes trial =
@@ -288,7 +257,6 @@ type alias State =
 
 type Step
     = Listening Int
-    | Answering
 
 
 decrement : Step -> Step
@@ -296,9 +264,6 @@ decrement step =
     case step of
         Listening nTimes ->
             Listening (nTimes - 1)
-
-        _ ->
-            Answering
 
 
 taskId =

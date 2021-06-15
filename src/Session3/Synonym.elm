@@ -9,6 +9,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Logic
+import Progressbar
 import Session1.ContextUnderstanding exposing (Msg(..))
 import View
 
@@ -109,78 +110,38 @@ viewTask experiment =
             [ View.instructions data.infos.instructions UserCLickedStartTraining ]
 
         Logic.Running Logic.Training task ->
-            let
-                toggleFeedback =
-                    View.button
-                        { message = UserClickedFeedback
-                        , txt = "Check my answer"
-                        , isDisabled = False
-                        }
-
-                trainingBox =
-                    div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed text-center object-center " ]
-            in
-            case ( task.current, task.feedback ) of
-                ( Just x, False ) ->
-                    [ trainingBox
+            case task.current of
+                Just x ->
+                    [ styledDiv
                         [ trainingWheels (List.length task.history) x.radical x.target
                         , div [ class "p-8" ] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
-                        , div [ class "m-8" ] [ toggleFeedback ]
-                        ]
-                    ]
-
-                ( Just x, True ) ->
-                    [ trainingBox
-                        [ trainingWheels (List.length task.history) x.stimulus x.target
-                        , div [ class "m-8" ] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
-                        , div [ class " rounded-md text-center object-center bg-green-300 m-8" ]
-                            [ p [ class "p-6 text-xl text-white" ]
-                                [ text "The correct synonym for "
-                                , text x.radical
-                                , text " is "
-                                , span [ class "font-bold" ] [ text x.target ]
-                                ]
-                            , div [ class "pb-4" ]
-                                [ View.button
-                                    { message = UserClickedNextTrial
-                                    , txt = "Next"
-                                    , isDisabled = False
-                                    }
-                                ]
-                            ]
-                        ]
-                    ]
-
-                ( Nothing, _ ) ->
-                    [ View.introToMain <| UserClickedStartMainloop ]
-
-        Logic.Running Logic.Main task ->
-            case ( task.current, task.feedback ) of
-                ( Just t, False ) ->
-                    [ View.tooltip "Type the synonym of the word in the box"
-                    , View.sentenceInSynonym t task.state UserChangedInput task.feedback
-                    , View.button
-                        { message = UserClickedFeedback
-                        , txt = "Check my answer"
-                        , isDisabled = False
-                        }
-                    ]
-
-                -- TODO: Abstraire le feedback pour le partager entre la phase d'entrainement et la phase principale
-                ( Just t, True ) ->
-                    [ View.sentenceInSynonym t task.state UserChangedInput task.feedback
-                    , div [ class "p-4" ] []
-                    , div [ class "flex flex-col w-full rounded-lg h-48 bg-green-300 items-center text-center" ]
-                        [ p [ class "pt-8 text-lg text-white" ] [ text <| "The best synonym for " ++ t.radical ++ " is ", span [ class "font-bold" ] [ text t.target ] ]
-                        , View.button
-                            { message = UserClickedNextTrial
-                            , txt = "Next"
-                            , isDisabled = False
+                        , View.genericNeutralFeedback
+                            { isVisible = task.feedback
+                            , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
+                            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial task.feedback task.state.userAnswer
                             }
                         ]
                     ]
 
-                ( Nothing, _ ) ->
+                Nothing ->
+                    [ View.introToMain <| UserClickedStartMainloop ]
+
+        Logic.Running Logic.Main task ->
+            case task.current of
+                Just x ->
+                    [ styledDiv
+                        [ View.tooltip "Type the synonym of the word in the box"
+                        , Progressbar.progressBar task.history task.mainTrials
+                        , div [] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
+                        , View.genericNeutralFeedback
+                            { isVisible = task.feedback
+                            , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
+                            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial task.feedback task.state.userAnswer
+                            }
+                        ]
+                    ]
+
+                Nothing ->
                     [ View.end task.infos.end SaveDataMsg "spelling" ]
 
 
@@ -194,6 +155,10 @@ start info trials =
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
+
+
+styledDiv =
+    div [ class "flex flex-col items-center w-full h-full items-center  text-center object-center " ]
 
 
 decodeSynonymTrials : Decode.Decoder (List Trial)

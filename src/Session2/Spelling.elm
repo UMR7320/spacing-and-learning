@@ -39,7 +39,7 @@ decodeTranslationInput =
 
 initState : State
 initState =
-    State "DefaultUid" "" []
+    State "DefaultUid" "" [] 3
 
 
 defaultTrial : Trial
@@ -60,6 +60,7 @@ type alias State =
     { uid : String
     , userAnswer : String
     , scrambledLetter : List KeyedItem
+    , remainingListenings : Int
     }
 
 
@@ -213,6 +214,7 @@ update msg model =
                         { currentScrabbleState
                             | userAnswer = nextTrial.writtenWord
                             , scrambledLetter = toItems nextTrial.writtenWord
+                            , remainingListenings = 3
                         }
                         model.scrabbleTask
               }
@@ -243,13 +245,13 @@ update msg model =
                     ( { model | scrabbleTask = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
 
                 x :: _ ->
-                    ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord } }, Cmd.none )
+                    ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3 } }, Cmd.none )
 
         UserClickedStartTraining ->
             ( { model | scrabbleTask = Logic.startTraining model.scrabbleTask }, Cmd.none )
 
         UserClickedStartAudio url ->
-            ( model, Ports.playAudio url )
+            ( { model | scrabbleTask = Logic.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.scrabbleTask }, Ports.playAudio url )
 
 
 viewScrabbleTask : { a | scrabbleTask : Logic.Task Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
@@ -278,7 +280,7 @@ viewScrabbleTask model =
                     div [ class "flex flex-col items-center justify-center" ]
                         [ View.tooltip data.infos.instructions_short
                         , Progressbar.progressBar data.history data.mainTrials
-                        , View.audioButton UserClickedStartAudio currentTrial.audioWord.url "word"
+                        , viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
                         , if not data.feedback then
                             div [ class "flex flex-col items-center w-full" ]
                                 [ viewLetters data.state.scrambledLetter
@@ -308,7 +310,7 @@ viewScrabbleTask model =
             case data.current of
                 Just currentTrial ->
                     div [ class "flex flex-col items-center" ]
-                        [ View.audioButton UserClickedStartAudio currentTrial.audioWord.url "word"
+                        [ viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
                         , viewLetters data.state.scrambledLetter
                         , ghostView model.dnd data.state.scrambledLetter
                         , View.genericSingleChoiceFeedback
@@ -334,6 +336,21 @@ viewScrabbleTask model =
             text reason
 
 
+viewAudioButton nTimes url =
+    case nTimes of
+        3 ->
+            View.audioButton UserClickedStartAudio url "Listen"
+
+        2 ->
+            View.audioButton UserClickedStartAudio url "Listen again?"
+
+        1 ->
+            View.audioButton UserClickedStartAudio url "Listen for the last time?"
+
+        _ ->
+            div [] []
+
+
 itemView : DnDList.Model -> Int -> KeyedItem -> ( String, Html.Styled.Html Msg )
 itemView dnd index ( key, item ) =
     let
@@ -347,7 +364,7 @@ itemView dnd index ( key, item ) =
                 ( key
                 , div
                     (Html.Styled.Attributes.id itemId
-                        :: itemStyles green
+                        :: itemStyles yellow
                         ++ List.map Html.Styled.Attributes.fromUnstyled (system.dropEvents index itemId)
                     )
                     [ text (String.toUpper item) ]
@@ -364,7 +381,7 @@ itemView dnd index ( key, item ) =
             ( key
             , div
                 (Html.Styled.Attributes.id itemId
-                    :: itemStyles green
+                    :: itemStyles yellow
                     ++ List.map Html.Styled.Attributes.fromUnstyled (system.dragEvents index itemId)
                 )
                 [ text (String.toUpper item) ]
@@ -386,7 +403,7 @@ ghostView dnd items =
     in
     case maybeDragItem of
         Just ( _, item ) ->
-            div (itemStyles ghostGreen ++ List.map Html.Styled.Attributes.fromUnstyled (system.ghostStyles dnd)) [ text (String.toUpper item) ]
+            div (itemStyles ghostYellow ++ List.map Html.Styled.Attributes.fromUnstyled (system.ghostStyles dnd)) [ text (String.toUpper item) ]
 
         Nothing ->
             text ""
@@ -420,14 +437,14 @@ system =
 -- STYLES
 
 
-green : String
-green =
-    "#3da565"
+yellow : String
+yellow =
+    "#ffef33"
 
 
-ghostGreen : String
-ghostGreen =
-    "#2f804e"
+ghostYellow : String
+ghostYellow =
+    "#fcf279"
 
 
 containerStyles : List (Html.Styled.Attribute msg)
@@ -438,7 +455,7 @@ containerStyles =
 
     --, Html.Styled.Attributes.style "justify-content" "center"
     , Html.Styled.Attributes.style "padding-top" "2em"
-    , class "font-bold text-lg"
+    , class "font-bold text-xl"
     ]
 
 
@@ -448,7 +465,7 @@ itemStyles color =
     , Html.Styled.Attributes.style "height" "5rem"
     , Html.Styled.Attributes.style "background-color" color
     , Html.Styled.Attributes.style "border-radius" "8px"
-    , Html.Styled.Attributes.style "color" "white"
+    , Html.Styled.Attributes.style "color" "black"
     , Html.Styled.Attributes.style "cursor" "pointer"
     , Html.Styled.Attributes.style "margin" "0 2em 2em 0"
     , Html.Styled.Attributes.style "display" "flex"

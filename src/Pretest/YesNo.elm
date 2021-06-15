@@ -68,8 +68,18 @@ update msg model =
                 userId =
                     model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-                history =
+                totalScore =
                     Logic.getHistory model.yesno
+                        |> Data.splitIn 10
+                        |> List.map
+                            (\block ->
+                                let
+                                    ( falseAlarms, hits ) =
+                                        calculateScoreForEachBlock block
+                                in
+                                scoreVoc hits falseAlarms
+                            )
+                        |> List.sum
 
                 encode =
                     Encode.list
@@ -83,13 +93,13 @@ update msg model =
                                   )
                                 ]
                         )
-                        [ round scoreVoc ]
+                        [ totalScore ]
 
-                correctionFactor =
-                    1 - (weighted (clamp 0 10 falseAlarms) / weighted (clamp 0 10 hits))
+                correctionFactor falseAlarms hits =
+                    1 - (weighted falseAlarms / weighted hits)
 
-                scoreVoc =
-                    hits * 100 * correctionFactor
+                scoreVoc hits falseAlamrs =
+                    hits * 100 * round (correctionFactor falseAlamrs hits)
 
                 weighted x =
                     case x of
@@ -126,7 +136,7 @@ update msg model =
                         _ ->
                             30
 
-                ( hits, falseAlarms ) =
+                calculateScoreForEachBlock =
                     List.foldl
                         (\( t, s ) ( h, f ) ->
                             if t.exists == (s.evaluation |> Maybe.withDefault False) then
@@ -136,7 +146,6 @@ update msg model =
                                 ( h, f + 1 )
                         )
                         ( 0, 0 )
-                        history
 
                 responseDecoder =
                     Decode.field "id" Decode.string

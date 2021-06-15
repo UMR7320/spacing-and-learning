@@ -132,7 +132,7 @@ view task =
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
                         [ p [] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.writtenWord, View.bold trial.target ] ]
-                        , p [] [ viewQuestion trial.writtenWord (List.length data.history) ]
+                        , p [] [ viewQuestion ("to " ++ trial.writtenWord) (List.length data.history) ]
                         , div
                             [ class "pt-6 max-w-xl ", disabled data.feedback ]
                           <|
@@ -160,29 +160,27 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    div [ class "container flex flex-col items-center justify-center" ]
+                    div [ class "flex flex-col items-center " ]
                         [ View.tooltip (interpolate data.infos.instructions_short [ trial.writtenWord ])
                         , Progressbar.progressBar data.history data.mainTrials
-                        , div [ class "mr-8 w-full max-w-xl" ]
-                            [ viewQuestion trial.writtenWord (List.length data.history)
-                            , div
-                                [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
-                              <|
-                                View.shuffledOptions
-                                    data.state
-                                    data.feedback
-                                    UserClickedRadioButton
-                                    trial
-                                    task.optionsOrder
-                            , View.genericSingleChoiceFeedback
-                                { isVisible = data.feedback
-                                , userAnswer = data.state.userAnswer
-                                , target = trial.target
-                                , feedback_Correct = ( trial.feedbackIncorrect, [] )
-                                , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
-                                }
-                            ]
+                        , viewQuestion ("to " ++ trial.writtenWord) (List.length data.history)
+                        , div
+                            [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
+                          <|
+                            View.shuffledOptions
+                                data.state
+                                data.feedback
+                                UserClickedRadioButton
+                                trial
+                                task.optionsOrder
+                        , View.genericSingleChoiceFeedback
+                            { isVisible = data.feedback
+                            , userAnswer = data.state.userAnswer
+                            , target = trial.target
+                            , feedback_Correct = ( trial.feedbackIncorrect, [] )
+                            , feedback_Incorrect = ( trial.feedbackCorrect, [] )
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
+                            }
                         ]
 
                 Nothing ->

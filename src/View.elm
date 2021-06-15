@@ -31,6 +31,7 @@ module View exposing
 import Css
 import Css.Global
 import Css.Transitions
+import Html.Attributes
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
     exposing
@@ -105,9 +106,9 @@ loading =
 
 
 instructions content msgToTraining =
-    div [ class "flex text-lg flex-col text-center items-center" ]
+    div [ class "flex text-lg flex-col w-full items-center" ]
         [ h1 [] [ text "Instructions" ]
-        , fromMarkdown content
+        , div [ class "max-w-2xl pb-8 m-4" ] [ fromMarkdown content ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
         ]
 
@@ -138,6 +139,7 @@ navigationButton toggleFeedbackMsg nextTrialMsg feedback userAnswer =
             , txt = "Continue"
             , isDisabled = False
             }
+
 
 
 bold string =
@@ -187,7 +189,7 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
 
           else
             div [] []
-        , div [ class "p-4" ] [ data.button ]
+        , data.button
         ]
 
 
@@ -195,7 +197,7 @@ genericNeutralFeedback : { isVisible : Bool, feedback_Correct : ( String, List S
 genericNeutralFeedback ({ feedback_Correct } as data) =
     div
         [ class
-            ("max-w-xl w-full rounded-md text-center object-center  mb-8 "
+            ("flex flex-col max-w-xl w-full rounded-md text-center object-center "
                 ++ (if data.isVisible then
                         "bg-indigo-800"
 
@@ -207,19 +209,15 @@ genericNeutralFeedback ({ feedback_Correct } as data) =
                    )
             )
         ]
-        [ p
-            [ class
-                ("font-medium py-4 w-full text-white"
-                    ++ " "
-                    ++ (if data.isVisible then
-                            "visible"
+        [ if data.isVisible then
+            p
+                [ class
+                    "font-medium py-4 w-full text-white"
+                ]
+                [ fromMarkdown (String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct)) ]
 
-                        else
-                            "invisible"
-                       )
-                )
-            ]
-            [ fromMarkdown (String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct)) ]
+          else
+            div [] []
         , div [ class "p-4" ] [ data.button ]
         ]
 
@@ -281,32 +279,6 @@ theme =
 
 
 
-{--
-feedback_ : { attempt : String, stimulus : String, target : String } -> String -> Html msg
-feedback_ { attempt, stimulus, target } str =
-    let
-        feedback_ =
-            String.words str
-
-        injectVariable word =
-            case word of
-                "attempt" ->
-                    text attempt
-
-                "stimulus" ->
-                    text stimulus
-
-                "target" ->
-                    text target
-
-                _ ->
-                    text word
-    in
-    feedback_
-        |> List.map injectVariable
-        |> div []
-
---}
 -- HEADER
 
 
@@ -360,7 +332,7 @@ container : List (Html msg) -> Html msg
 container content =
     div
         [ attribute "data-test" "content"
-        , class "container mx-auto py-10 px-4"
+        , class "container mx-auto py-4 px-4"
         , css [ Css.marginTop theme.headerHeight ]
         ]
         content
@@ -393,10 +365,10 @@ notFound =
 radio : String -> Bool -> Bool -> Bool -> msg -> Html msg
 radio value isChecked isCorrect feedbackMode msg =
     label
-        [ class "group block text-gray-70 font-medium ", id value ]
+        [ class "group block text-gray-70 font-medium text-base ", id value ]
         [ div
             [ class
-                ("border-solid border-2 px-4 py-4 mb-1 "
+                ("border-solid border-2 px-4 py-3 mb-1 "
                     ++ (case ( feedbackMode, isChecked, isCorrect ) of
                             ( True, True, False ) ->
                                 "border-red-500"
@@ -477,7 +449,7 @@ floatingLabel stim val msg givenIsFeedback =
             , Html.Styled.Attributes.css
                 [ Css.padding <| Css.px 8
                 , Css.borderRadius <| Css.px 4
-                , Css.border3 (Css.px 1) Css.solid (Css.hex "efefef")
+                , Css.border3 (Css.px 1) Css.solid (Css.hex "#8a8d91")
                 ]
             , Html.Styled.Events.onInput msg
             ]
@@ -566,7 +538,7 @@ sentenceInSynonym t state msg feedback_ =
 button : { message : msg, txt : String, isDisabled : Bool } -> Html msg
 button { message, txt, isDisabled } =
     Html.Styled.button
-        [ class "max-w-xl w-full mt-6 mb-4"
+        [ class "max-w-xl w-full mt-2 mb-4 text-lg"
         , onClick message
         , Html.Styled.Attributes.disabled isDisabled
         , class <|
