@@ -49,11 +49,11 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    [ div [ A.class "flex flex-col" ]
-                        [ p [ A.class "text-lg  m-4 p-2" ] [ text trial.context ]
+                    [ div [ A.class "flex flex-col items-center" ]
+                        [ p [ A.class "text-lg w-full max-w-2xl  m-4 p-2" ] [ text trial.context ]
                         , Html.Styled.textarea
                             [ A.id "firstProd"
-                            , A.class "border-2 rounded-lg p-2"
+                            , A.class "border-2 w-full max-w-2xl  rounded-lg p-2"
                             , A.value <|
                                 readOnlyAmorce
                                     trial.firstAmorce
@@ -65,13 +65,13 @@ view task =
                             ]
                             [ text trial.firstAmorce ]
                         , if data.feedback then
-                            div [ A.class "pb-8 pt-2 p-2 bg-gray-200 rounded-lg m-4" ] [ View.fromMarkdown trial.firstFeedback ]
+                            div [ A.class "pb-8 pt-2 w-full max-w-2xl p-2 bg-gray-200 rounded-lg m-4" ] [ View.fromMarkdown trial.firstFeedback ]
 
                           else
                             text ""
                         , Html.Styled.textarea
                             [ A.id "secondProd"
-                            , A.class "border-2 rounded-lg p-2"
+                            , A.class "border-2 w-full max-w-2xl rounded-lg p-2"
                             , E.onInput (UserUpdatedField SecondProduction)
                             , A.spellcheck False
                             , readOnlyOnFeedback data
@@ -82,17 +82,17 @@ view task =
                             ]
                             [ text trial.secondAmorce ]
                         , if data.feedback then
-                            div [ A.class "pt-2 bg-gray-200 p-2 m-4 rounded-lg" ] [ View.fromMarkdown trial.secondFeedback ]
+                            div [ A.class "pt-2 w-full max-w-2xl bg-gray-200 p-2 m-4 rounded-lg" ] [ View.fromMarkdown trial.secondFeedback ]
 
                           else
                             text ""
                         , if data.feedback then
-                            div [ A.class "items-center @text-lg font-bold text-green-500" ] [ text "These are of course only suggestions, there are many other possibilities!" ]
+                            div [ A.class "items-center text-lg font-bold text-green-500" ] [ text "These are of course only suggestions, there are many other possibilities!" ]
 
                           else
                             div [] []
+                        , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.firstProduction
                         ]
-                    , View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.firstProduction
                     ]
 
                 Nothing ->
@@ -111,16 +111,16 @@ view task =
                 Just trial ->
                     [ div [ A.class "flex flex-col w-full items-center" ]
                         [ progressBar data.history data.mainTrials
-                        , p [ A.class "text-lg  m-4 p-2" ] [ text trial.context ]
+                        , p [ A.class "text-lg max-w-2xl m-4 p-2" ] [ text trial.context ]
                         , Html.Styled.textarea
                             [ A.id "firstProd"
-                            , A.class "border-2 p-2 w-full"
+                            , A.class "border-2 w-full max-w-2xl p-2"
                             , A.class <|
                                 if data.state.order == FirstProduction then
-                                    "order-2"
+                                    " order-2"
 
                                 else
-                                    "order-3"
+                                    " order-3"
                             , E.onInput (UserUpdatedField FirstProduction)
                             , A.spellcheck False
                             , A.value <|
@@ -131,7 +131,7 @@ view task =
                             [ text trial.firstAmorce ]
                         , Html.Styled.textarea
                             [ A.id "secondProd"
-                            , A.class "border-2 mt-4 p-2 w-full"
+                            , A.class "border-2 mt-4 w-full max-w-2xl p-2 w-1/3"
                             , E.onInput (UserUpdatedField SecondProduction)
                             , A.spellcheck False
                             , A.class <|
