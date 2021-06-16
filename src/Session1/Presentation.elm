@@ -7,7 +7,7 @@ import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
-import Json.Decode as Decode exposing (Decoder, string)
+import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Ports
@@ -15,7 +15,6 @@ import Progressbar exposing (progressBar)
 import Session3.Synonym exposing (Msg(..))
 import Task
 import View
-import Json.Decode exposing (bool)
 
 
 type Entry
@@ -82,24 +81,23 @@ view task =
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
         Logic.Loading ->
-            div [] [ text "Loading..." ]
+            View.loading
 
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
                         [ div [ class <| "pb-4 pt-4 text-3xl font-bold flex flex-row" ]
-                            [ text trial.text
+                            [ text
+                                ("to " ++ trial.text)
                             ]
-                        , div [] [ View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation" ]
+                        , div [] [ View.audioButton UserClickedStartAudio trial.audio.url "Listen to the pronunciation" ]
                         , div [ class "w-56 pt-8" ] <| entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
-                        , div [ class "pb-8" ]
-                            [ View.button
-                                { message = UserClickedNextTrial
-                                , isDisabled = False
-                                , txt = "Next Item"
-                                }
-                            ]
+                        , View.button
+                            { message = UserClickedNextTrial
+                            , isDisabled = False
+                            , txt = "Continue"
+                            }
                         ]
 
                 Nothing ->
@@ -111,7 +109,7 @@ view task =
                     div [ class "flex flex-col items-center" ]
                         [ progressBar data.history data.mainTrials
                         , div [ class "pb-4 text-3xl font-bold flex flex-row" ]
-                            [ text trial.text
+                            [ text ("to " ++ trial.text)
                             ]
                         , div [ class "w-1/3" ] <|
                             View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
@@ -120,7 +118,7 @@ view task =
                             [ View.button
                                 { message = UserClickedNextTrial
                                 , isDisabled = False
-                                , txt = "Next Item"
+                                , txt = "Continue"
                                 }
                             ]
                         ]
@@ -205,10 +203,31 @@ update msg model =
             let
                 prevState =
                     Logic.getState model.presentation
+
+                updateEntry state =
+                    Dict.map
+                        (\k v ->
+                            if k == id then
+                                not v
+
+                            else
+                                False
+                        )
+                        state.toggledEntries
             in
             case prevState of
                 Just state ->
-                    ( { model | presentation = Logic.update { state | toggledEntries = Dict.update id (Maybe.map not) state.toggledEntries } model.presentation }, Cmd.none )
+                    ( { model
+                        | presentation =
+                            Logic.update
+                                { state
+                                    | toggledEntries =
+                                        updateEntry state
+                                }
+                                model.presentation
+                      }
+                    , Cmd.none
+                    )
 
                 Nothing ->
                     ( model, Cmd.none )
