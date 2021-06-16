@@ -82,7 +82,7 @@ sendInBatch historyEncoder taskId userId history =
                     |> Task.andThen
                         (\_ -> postRecordsBatch (Http.jsonBody <| historyEncoder sublist))
             )
-        |> (::)
+        {--|> (::)
             (updateUserCompletedTasks
                 (Http.jsonBody <|
                     Encode.object
@@ -90,7 +90,7 @@ sendInBatch historyEncoder taskId userId history =
                         , ( "fields", fieldsToUpdate )
                         ]
                 )
-            )
+            )--}
         |> Task.sequence
 
 
