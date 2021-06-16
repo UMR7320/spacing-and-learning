@@ -91,25 +91,25 @@ view task =
                         , if data.state.knowledge == Known then
                             Html.Styled.fieldset [ class "flex flex-col p-2" ]
                                 [ label [ class "flex flex-col" ]
-                                    [ text "What do you think this verb means? (please provide a translation, synonym or definition for all meanings of this verb that you know):"
+                                    [ text "What do you think this verb means?"
                                     ]
                                 , Dict.map
                                     (\k v ->
                                         div [ class "flex flex-row items-center" ]
                                             [ input
                                                 [ type_ "text"
-                                                , class "border-2 w-full"
+                                                , class "border-2 mt-2 w-full"
                                                 , E.onInput (UserUpdatedField FirstProduction k)
                                                 , A.placeholder "Translation OR Synonym OR definition"
                                                 ]
                                                 []
-                                            , div [ E.onClick (UserClickedRemoveAnswer k), class "cursor-pointer" ] [ text "❌" ]
+                                            , div [ E.onClick (UserClickedRemoveAnswer k), class "cursor-pointer mt-2 pl-2" ] [ text "❌" ]
                                             ]
                                     )
                                     data.state.definition
                                     |> Dict.values
                                     |> div []
-                                , View.button { message = UserClickedAddAnswer, txt = "New answer", isDisabled = False }
+                                , div [ E.onClick UserClickedAddAnswer, class "cursor-pointer font-bold hover:underline pt-2" ] [ text "➕ New answer" ]
                                 , label [ class "flex flex-col p-2" ]
                                     [ text "Please use this verb in a sentence. The sentence should show that you know what the word means."
                                     , textarea [ class "border-2", E.onInput (UserUpdatedField SecondProduction 1) ] []
