@@ -31,7 +31,7 @@ module View exposing
 import Css
 import Css.Global
 import Css.Transitions
-import Html.Attributes
+import Html.Attributes as A
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
     exposing
@@ -139,7 +139,6 @@ navigationButton toggleFeedbackMsg nextTrialMsg feedback userAnswer =
             , txt = "Continue"
             , isDisabled = False
             }
-
 
 
 bold string =
@@ -424,7 +423,7 @@ def =
 
 
 fromMarkdown =
-    fromUnstyled << Markdown.toHtmlWith { def | sanitize = False } []
+    fromUnstyled << Markdown.toHtmlWith { def | sanitize = False } [ A.class "space-y-4" ]
 
 
 floatingLabel : String -> String -> (String -> msg) -> Bool -> Html msg
