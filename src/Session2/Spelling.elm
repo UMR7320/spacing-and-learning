@@ -15,6 +15,7 @@ import Json.Decode.Pipeline exposing (..)
 import Logic
 import Ports
 import Progressbar
+import Session1.Spelling exposing (Step(..))
 import View
 
 
@@ -39,7 +40,7 @@ decodeTranslationInput =
 
 initState : State
 initState =
-    State "DefaultUid" "" [] 3
+    State "DefaultUid" "" [] 3 ListeningFirstTime
 
 
 defaultTrial : Trial
@@ -61,7 +62,13 @@ type alias State =
     , userAnswer : String
     , scrambledLetter : List KeyedItem
     , remainingListenings : Int
+    , step : Step
     }
+
+
+type Step
+    = ListeningFirstTime
+    | Answering
 
 
 type alias Item =
@@ -176,6 +183,7 @@ type Msg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedStartTraining
     | UserClickedStartAudio String
+    | AudioEnded { eventType : String, name : String, timestamp : Int }
 
 
 update msg model =
@@ -215,6 +223,7 @@ update msg model =
                             | userAnswer = nextTrial.writtenWord
                             , scrambledLetter = toItems nextTrial.writtenWord
                             , remainingListenings = 3
+                            , step = ListeningFirstTime
                         }
                         model.scrabbleTask
               }
@@ -245,13 +254,21 @@ update msg model =
                     ( { model | scrabbleTask = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
 
                 x :: _ ->
-                    ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3 } }, Cmd.none )
+                    ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
 
         UserClickedStartTraining ->
             ( { model | scrabbleTask = Logic.startTraining model.scrabbleTask }, Cmd.none )
 
         UserClickedStartAudio url ->
             ( { model | scrabbleTask = Logic.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.scrabbleTask }, Ports.playAudio url )
+
+        AudioEnded { eventType } ->
+            case eventType of
+                "SoundEnded" ->
+                    ( { model | scrabbleTask = Logic.update { currentScrabbleState | step = Answering } model.scrabbleTask }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 viewScrabbleTask : { a | scrabbleTask : Logic.Task Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
@@ -281,7 +298,10 @@ viewScrabbleTask model =
                         [ View.tooltip data.infos.instructions_short
                         , Progressbar.progressBar data.history data.mainTrials
                         , viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
-                        , if not data.feedback then
+                        , if data.state.step == ListeningFirstTime then
+                            div [] []
+
+                          else if not data.feedback && data.state.step == Answering then
                             div [ class "flex flex-col items-center w-full" ]
                                 [ viewLetters data.state.scrambledLetter
                                 , ghostView model.dnd
@@ -289,7 +309,7 @@ viewScrabbleTask model =
                                 ]
 
                           else
-                            div [] []
+                            data.state.userAnswer |> String.toList |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ]) |> div containerStyles
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
@@ -299,7 +319,16 @@ viewScrabbleTask model =
                                 , [ View.bold currentTrial.target ]
                                 )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-                            , button = View.navigationButton UserClickedFeedbackButton (UserClickedNextTrial data.next) data.feedback data.state.userAnswer
+                            , button =
+                                View.navigationButton UserClickedFeedbackButton
+                                    (UserClickedNextTrial data.next)
+                                    data.feedback
+                                    (if data.state.step == ListeningFirstTime then
+                                        ""
+
+                                     else
+                                        data.state.userAnswer
+                                    )
                             }
                         ]
 
@@ -311,8 +340,18 @@ viewScrabbleTask model =
                 Just currentTrial ->
                     div [ class "flex flex-col items-center" ]
                         [ viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
-                        , viewLetters data.state.scrambledLetter
-                        , ghostView model.dnd data.state.scrambledLetter
+                        , if data.state.step == ListeningFirstTime then
+                            div [] []
+
+                          else if not data.feedback && data.state.step == Answering then
+                            div [ class "flex flex-col items-center w-full" ]
+                                [ viewLetters data.state.scrambledLetter
+                                , ghostView model.dnd
+                                    data.state.scrambledLetter
+                                ]
+
+                          else
+                            data.state.userAnswer |> String.toList |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ]) |> div containerStyles
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
@@ -322,7 +361,16 @@ viewScrabbleTask model =
                                 , [ View.bold currentTrial.target ]
                                 )
                             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-                            , button = View.navigationButton UserClickedFeedbackButton (UserClickedNextTrial data.next) data.feedback data.state.userAnswer
+                            , button =
+                                View.navigationButton UserClickedFeedbackButton
+                                    (UserClickedNextTrial data.next)
+                                    data.feedback
+                                    (if data.state.step == ListeningFirstTime then
+                                        ""
+
+                                     else
+                                        data.state.userAnswer
+                                    )
                             }
                         ]
 
@@ -330,7 +378,7 @@ viewScrabbleTask model =
                     View.introToMain (UserClickedStartMainloop data.mainTrials)
 
         Logic.Loading ->
-            text "Loading..."
+            View.loading
 
         Logic.Err reason ->
             text reason
@@ -410,7 +458,17 @@ ghostView dnd items =
 
 
 subscriptions model =
-    system.subscriptions model.dnd
+    case model.scrabbleTask of
+        Logic.Running _ { state } ->
+            case state.step of
+                ListeningFirstTime ->
+                    Sub.batch [ Ports.audioEnded AudioEnded ]
+
+                _ ->
+                    system.subscriptions model.dnd
+
+        _ ->
+            Sub.none
 
 
 
@@ -455,7 +513,7 @@ containerStyles =
 
     --, Html.Styled.Attributes.style "justify-content" "center"
     , Html.Styled.Attributes.style "padding-top" "2em"
-    , class "font-bold text-xl"
+    , class "font-bold text-2xl"
     ]
 
 

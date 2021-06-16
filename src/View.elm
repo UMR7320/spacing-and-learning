@@ -102,7 +102,7 @@ unclickableButton color txt =
 
 
 loading =
-    div [] [ text "Loading... Please don't quit or data will be lost" ]
+    div [] [ text "Loading... Please don't exit or data will be lost" ]
 
 
 instructions content msgToTraining =
@@ -444,6 +444,7 @@ floatingLabel stim val msg givenIsFeedback =
             [ Html.Styled.Attributes.class "floating-label__input"
             , Html.Styled.Attributes.placeholder stim
             , Html.Styled.Attributes.readonly givenIsFeedback
+            , Html.Styled.Attributes.class "placeholder-gray-600"
             , Html.Styled.Attributes.value val
             , Html.Styled.Attributes.css
                 [ Css.padding <| Css.px 8
@@ -455,6 +456,7 @@ floatingLabel stim val msg givenIsFeedback =
             []
         , Html.Styled.label
             [ Html.Styled.Attributes.class "floating-label__label"
+            , Html.Styled.Attributes.class "placeholder-gray-600"
             , Html.Styled.Attributes.css
                 [ Css.position Css.absolute
                 , Css.left <| Css.px 8
@@ -577,7 +579,7 @@ readOnlyOnFeedback fb =
 textAreaWithReadonlyAmorce { id_, amorce, isFeedback, userAnswer, onInputMsg } =
     Html.Styled.textarea
         [ id id_
-        , class "border-2 p-2 w-full text-lg"
+        , class "border-2 p-2 w-full max-w-3xl text-lg"
         , value <|
             readOnlyAmorce
                 amorce

@@ -265,7 +265,7 @@ view task =
                             [ prompt ]
 
         Logic.Loading ->
-            [ text "Loading... Please don't exit this page, data may be lost." ]
+            [ View.loading ]
 
         Logic.NotStarted ->
             [ text "not started" ]

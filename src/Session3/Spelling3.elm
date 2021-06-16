@@ -79,7 +79,7 @@ view exp =
             div [] [ text <| "I stumbled into an error : " ++ reason ]
 
         Logic.Loading ->
-            div [] [ text "Loading..." ]
+            View.loading
 
 
 type Msg

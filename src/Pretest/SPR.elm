@@ -444,7 +444,7 @@ view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
 view task =
     case task of
         Logic.Loading ->
-            [ text "Loading... Please don't exit or data may be lost" ]
+            [ View.loading ]
 
         Logic.Running Logic.Training data ->
             case data.current of

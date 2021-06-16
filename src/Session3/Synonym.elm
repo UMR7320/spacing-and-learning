@@ -104,7 +104,7 @@ viewTask experiment =
             [ text "I'm not started yet." ]
 
         Logic.Loading ->
-            [ text "Loading..." ]
+            [ View.loading ]
 
         Logic.Running Logic.Instructions data ->
             [ View.instructions data.infos.instructions UserCLickedStartTraining ]
@@ -113,8 +113,7 @@ viewTask experiment =
             case task.current of
                 Just x ->
                     [ styledDiv
-                        [ trainingWheels (List.length task.history) x.radical x.target
-                        , div [ class "p-8" ] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
+                        [ div [ class "p-8" ] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
                         , View.genericNeutralFeedback
                             { isVisible = task.feedback
                             , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )

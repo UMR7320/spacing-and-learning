@@ -25,7 +25,7 @@ view exp optionsOrder =
             div [] [ text "experiment did not start yet" ]
 
         Logic.Loading ->
-            div [] [ text "Loading..." ]
+            View.loading
 
         Logic.Err reason ->
             div [] [ text reason ]

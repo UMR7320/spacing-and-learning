@@ -107,11 +107,7 @@ type alias State =
 
 
 viewQuestion word trialn =
-    h3 []
-        [ p []
-            [ span [ class "italic" ] [ text word ]
-            ]
-        ]
+    h3 [ class "italic" ] [ text word ]
 
 
 view :
@@ -122,7 +118,7 @@ view :
 view task =
     case task.task of
         Logic.Loading ->
-            div [] [ text "Loading... " ]
+            View.loading
 
         Logic.Err reason ->
             div [] [ text reason ]
@@ -134,7 +130,7 @@ view task =
                         [ p [] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.writtenWord, View.bold trial.target ] ]
                         , p [] [ viewQuestion ("to " ++ trial.writtenWord) (List.length data.history) ]
                         , div
-                            [ class "pt-6 max-w-xl ", disabled data.feedback ]
+                            [ class "smax-w-xl ", disabled data.feedback ]
                           <|
                             View.shuffledOptions
                                 data.state
@@ -165,7 +161,7 @@ view task =
                         , Progressbar.progressBar data.history data.mainTrials
                         , viewQuestion ("to " ++ trial.writtenWord) (List.length data.history)
                         , div
-                            [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
+                            [ class " center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
                           <|
                             View.shuffledOptions
                                 data.state

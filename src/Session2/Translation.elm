@@ -155,8 +155,12 @@ payload history =
 
 
 renderTask task trial data history allTrials =
-    div [ class "text-2xl w-1/2 p-2" ]
-        [ Progressbar.progressBar history allTrials
+    div [ class "text-xl w-1/2 p-2" ]
+        [ if List.length data.trainingTrials > 0 then
+            div [] []
+
+          else
+            Progressbar.progressBar history allTrials
         , View.fromMarkdown trial.question
         , div
             [ class "w-full max-w-1/3 pt-8", disabled data.feedback ]
@@ -207,7 +211,7 @@ view task =
                     View.end data.infos.end UserClickedSaveData "spelling"
 
         Logic.Loading ->
-            div [] [ text "Loading" ]
+            View.loading
 
         Logic.NotStarted ->
             div [] [ text "The experiment is not started yet" ]

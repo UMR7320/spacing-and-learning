@@ -28,7 +28,7 @@ taskId =
 
 
 paragraphWithInput pre userAnswer post =
-    p [ class "max-w-2xl text-lg p-4" ]
+    p [ class "max-w-2xl bg-gray-200 mb-8 rounded-lg text-lg p-4" ]
         [ text pre
         , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
             [ text <|
@@ -122,7 +122,7 @@ view task =
                     View.end data.infos.end UserClickedSaveData "./"
 
         Logic.Loading ->
-            text "Loading..."
+            View.loading
 
         Logic.Running Logic.Instructions data ->
             div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]

@@ -13,7 +13,6 @@ module.exports = async (event) => {
         const createdRecord = await base(event.queryStringParameters.base).update(
             fields
         );
-        console.log(fields);
         const formattedRecord = createdRecord.map((datum) => ({
             id: datum.id,
             ...datum.fields,

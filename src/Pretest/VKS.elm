@@ -141,7 +141,7 @@ view task =
             [ text reason ]
 
         Logic.Loading ->
-            [ text "Loading... Please don't quit or data may be lost" ]
+            [ View.loading ]
 
         Logic.NotStarted ->
             [ text "C'est tout bon!" ]

@@ -25,7 +25,7 @@ view exp =
             div [] [ text "Task is not started yet." ]
 
         Logic.Loading ->
-            div [] [ text "Loading..." ]
+            View.loading
 
         Logic.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
@@ -46,20 +46,18 @@ view exp =
                                     ( "Missing context", "Missing dialog" )
                     in
                     div [ class "flex flex-col items-center" ]
-                        [ Html.h3 [] [ View.fromMarkdown context ]
+                        [ div [ class "text-xl" ] [ View.fromMarkdown context ]
                         , viewLimitedTimesAudioButton nTimes trial
-                        , Html.pre [ class "text-lg m-4 font-bold text-center" ]
+                        , Html.pre [ class "text-lg m-4 text-center" ]
                             [ View.fromMarkdown dialog
                             ]
-                        , div []
-                            [ View.textAreaWithReadonlyAmorce
-                                { id_ = "production"
-                                , amorce = trial.amorce
-                                , isFeedback = feedback
-                                , userAnswer = state.userAnswer
-                                , onInputMsg = UserChangedInput
-                                }
-                            ]
+                        , View.textAreaWithReadonlyAmorce
+                            { id_ = "production"
+                            , amorce = trial.amorce
+                            , isFeedback = feedback
+                            , userAnswer = state.userAnswer
+                            , onInputMsg = UserChangedInput
+                            }
                         , View.genericNeutralFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( trial.feedback, [] )
@@ -86,7 +84,7 @@ view exp =
                         [ View.tooltip
                             data.infos.instructions_short
                         , progressBar history mainTrials
-                        , Html.h3 [ class "text-center" ] [ View.fromMarkdown context ]
+                        , div [ class "text-xl text-center" ] [ View.fromMarkdown context ]
                         , viewLimitedTimesAudioButton nTimes trial
                         , Html.pre [ class "text-center font-bold" ]
                             [ View.fromMarkdown dialog

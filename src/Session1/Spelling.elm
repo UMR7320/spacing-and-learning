@@ -13,6 +13,7 @@ import Ports
 import Progressbar
 import Random
 import Random.List
+import Session2.CU2 exposing (Step(..))
 import Session3.Synonym exposing (Msg(..))
 import View
 
@@ -41,6 +42,7 @@ type Msg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedPlayAudio String
     | UserClickedStartTraining
+    | AudioEnded { eventType : String, name : String, timestamp : Int }
 
 
 updateWhenNextTrial model shuffleOptionsMsg =
@@ -72,7 +74,7 @@ viewTask data currentTrial optionsOrder =
     [ viewAudioButton data.state.remainingListenings currentTrial.audio.url
     , div
         [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
-        [ if data.state.remainingListenings < 3 then
+        [ if data.state.step == Answering then
             div [] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton currentTrial optionsOrder
 
           else
@@ -137,6 +139,14 @@ update msg model =
         UserClickedStartTraining ->
             ( { model | spellingLvl1 = Logic.startTraining model.spellingLvl1 }, Cmd.none )
 
+        AudioEnded { eventType } ->
+            case eventType of
+                "SoundEnded" ->
+                    ( { model | spellingLvl1 = Logic.update { currentSpellingState | step = Answering } model.spellingLvl1 }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 view :
     Logic.Task Trial State
@@ -145,7 +155,7 @@ view :
 view exp optionsOrder =
     case exp of
         Logic.Loading ->
-            text "Loading..."
+            View.loading
 
         Logic.NotStarted ->
             text "I'm not started yet"
@@ -184,6 +194,20 @@ view exp optionsOrder =
                     View.end infos.end UserClickedSavedData "context-understanding"
 
 
+subscriptions model =
+    case model.spellingLvl1 of
+        Logic.Running _ { state } ->
+            case state.step of
+                ListeningFirstTime ->
+                    Sub.batch [ Ports.audioEnded AudioEnded ]
+
+                _ ->
+                    Sub.none
+
+        _ ->
+            Sub.none
+
+
 viewAudioButton nTimes url =
     case nTimes of
         3 ->
@@ -203,7 +227,13 @@ type alias State =
     { inputUid : String
     , userAnswer : String
     , remainingListenings : Int
+    , step : Step
     }
+
+
+type Step
+    = ListeningFirstTime
+    | Answering
 
 
 decodeTrials : Decode.Decoder (List Trial)
@@ -268,4 +298,4 @@ getTrialsFromServer callbackMsg =
 
 iniState : State
 iniState =
-    State "DefaultTrialUID" "" 3
+    State "DefaultTrialUID" "" 3 ListeningFirstTime

@@ -879,6 +879,7 @@ subscriptions model =
         , Sub.map SPR (SPR.subscriptions model.spr)
         , Sub.map Acceptability (Acceptability.subscriptions model)
         , Sub.map YesNo (YesNo.subscriptions model)
+        , Sub.map Spelling1 (SpellingLvl1.subscriptions model)
         ]
 
 
