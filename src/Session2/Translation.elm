@@ -163,7 +163,7 @@ renderTask task trial data history allTrials =
             Progressbar.progressBar history allTrials
         , View.fromMarkdown trial.question
         , div
-            [ class "w-full max-w-1/3 pt-8", disabled data.feedback ]
+            [ class "w-full max-w-3xl pt-8", disabled data.feedback ]
           <|
             View.shuffledOptions
                 data.state

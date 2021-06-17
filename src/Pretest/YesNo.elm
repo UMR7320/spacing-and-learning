@@ -223,7 +223,7 @@ view task =
                             ]
 
                         Nothing ->
-                            [ View.end data.infos.end UserClickedSaveData "" ]
+                            [ View.end data.infos.end UserClickedSaveData "vks" ]
 
         Logic.Err reason ->
             [ p [] [ text reason ] ]

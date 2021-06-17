@@ -135,7 +135,7 @@ view task =
                     ]
 
                 Nothing ->
-                    [ View.end data.infos.end UserClickedSaveData "" ]
+                    [ View.end data.infos.end UserClickedSaveData "spr" ]
 
         Logic.Err reason ->
             [ text reason ]

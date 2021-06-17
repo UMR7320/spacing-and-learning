@@ -24376,7 +24376,7 @@ var $author$project$Pretest$SentenceCompletion$view = function (task) {
 					} else {
 						return _List_fromArray(
 							[
-								A3($author$project$View$end, data.infos.end, $author$project$Pretest$SentenceCompletion$UserClickedSaveData, '')
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$SentenceCompletion$UserClickedSaveData, 'acceptability/instructions')
 							]);
 					}
 				default:
@@ -25573,7 +25573,7 @@ var $author$project$Pretest$VKS$view = function (task) {
 					} else {
 						return _List_fromArray(
 							[
-								A3($author$project$View$end, data.infos.end, $author$project$Pretest$VKS$UserClickedSaveData, '')
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$VKS$UserClickedSaveData, 'spr')
 							]);
 					}
 				default:
@@ -25641,7 +25641,7 @@ var $author$project$Pretest$YesNo$view = function (task) {
 					} else {
 						return _List_fromArray(
 							[
-								A3($author$project$View$end, data.infos.end, $author$project$Pretest$YesNo$UserClickedSaveData, '')
+								A3($author$project$View$end, data.infos.end, $author$project$Pretest$YesNo$UserClickedSaveData, 'vks')
 							]);
 					}
 			}
@@ -27236,7 +27236,7 @@ var $author$project$Session2$Translation$renderTask = F5(
 					$rtfeldman$elm_css$Html$Styled$div,
 					_List_fromArray(
 						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full max-w-1/3 pt-8'),
+							$rtfeldman$elm_css$Html$Styled$Attributes$class('w-full max-w-3xl pt-8'),
 							$rtfeldman$elm_css$Html$Styled$Attributes$disabled(data.feedback)
 						]),
 					A5($author$project$View$shuffledOptions, data.state, data.feedback, $author$project$Session2$Translation$UserClickedRadioButton, trial, task.optionsOrder)),

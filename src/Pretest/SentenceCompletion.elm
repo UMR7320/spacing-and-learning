@@ -157,7 +157,7 @@ view task =
                     ]
 
                 Nothing ->
-                    [ View.end data.infos.end UserClickedSaveData "" ]
+                    [ View.end data.infos.end UserClickedSaveData "acceptability/instructions" ]
 
         Logic.Err reason ->
             [ text reason ]
