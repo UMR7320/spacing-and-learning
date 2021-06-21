@@ -49,17 +49,17 @@ entries d e t msg toggledEntries =
                 span [ class "text-lg font-bold" ] [ text "›" ]
     in
     [ ( "definition"
-      , { txt = "Definition: "
+      , { txt = "Definition "
         , elements = d
         }
       )
-    , ( "example", { txt = "Example: ", elements = e } )
-    , ( "translation", { txt = "Translation: ", elements = List.filter ((/=) "missing") t } )
+    , ( "example", { txt = "Example ", elements = e } )
+    , ( "translation", { txt = "Translation ", elements = List.filter ((/=) "missing") t } )
     ]
         |> List.map
             (\( key, { txt } as val ) ->
                 p [ class "flex flex-col", Html.Styled.Events.onClick (msg key) ]
-                    [ div [ class "text-lg hover:underline cursor-pointer bg-gray-400 p-4 rounded-lg" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
+                    [ div [ class "text-lg hover:underline cursor-pointer bg-green-500 font-bold text-white p-4 rounded-lg" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
                     , span [ class "p-2" ] [ viewEntry key val toggledEntries ]
                     ]
             )
@@ -92,7 +92,7 @@ view task =
                             [ text
                                 ("to " ++ trial.text)
                             ]
-                        , div [] [ View.audioButton UserClickedStartAudio trial.audio.url "Listen to the pronunciation" ]
+                        , div [] [ View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation" ]
                         , entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
                         , View.button
                             { message = UserClickedNextTrial

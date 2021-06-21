@@ -26592,7 +26592,7 @@ var $author$project$Session1$Presentation$entries = F5(
 									$rtfeldman$elm_css$Html$Styled$div,
 									_List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg hover:underline cursor-pointer bg-gray-400 p-4 rounded-lg')
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('text-lg hover:underline cursor-pointer bg-green-500 font-bold text-white p-4 rounded-lg')
 										]),
 									_List_fromArray(
 										[
@@ -26624,10 +26624,10 @@ var $author$project$Session1$Presentation$entries = F5(
 						[
 							_Utils_Tuple2(
 							'definition',
-							{elements: d, txt: 'Definition: '}),
+							{elements: d, txt: 'Definition '}),
 							_Utils_Tuple2(
 							'example',
-							{elements: e, txt: 'Example: '}),
+							{elements: e, txt: 'Example '}),
 							_Utils_Tuple2(
 							'translation',
 							{
@@ -26635,7 +26635,7 @@ var $author$project$Session1$Presentation$entries = F5(
 									$elm$core$List$filter,
 									$elm$core$Basics$neq('missing'),
 									t),
-								txt: 'Translation: '
+								txt: 'Translation '
 							})
 						]))));
 	});
@@ -26701,7 +26701,7 @@ var $author$project$Session1$Presentation$view = function (task) {
 									_List_Nil,
 									_List_fromArray(
 										[
-											A3($author$project$View$audioButton, $author$project$Session1$Presentation$UserClickedStartAudio, trial.audio.url, 'Listen to the pronunciation')
+											A3($author$project$View$audioButton, $author$project$Session1$Presentation$UserClickedStartAudio, trial.audio.url, 'Pronunciation')
 										])),
 									A5(
 									$author$project$Session1$Presentation$entries,
