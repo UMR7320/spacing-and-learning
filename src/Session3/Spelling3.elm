@@ -34,7 +34,11 @@ view exp =
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center" ]
                         [ viewLimitedTimesAudioButton nTimes trial
-                        , View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
+                        , if nTimes < 3 then
+                            View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
+
+                          else
+                            div [] []
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
@@ -58,7 +62,11 @@ view exp =
                         [ View.tooltip data.infos.instructions_short
                         , progressBar data.history data.mainTrials
                         , viewLimitedTimesAudioButton nTimes trial
-                        , View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
+                        , if nTimes < 3 then
+                            View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
+
+                          else
+                            div [] []
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )

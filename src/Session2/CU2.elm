@@ -38,8 +38,15 @@ view exp optionsOrder =
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col text-lg items-center" ]
                         [ Html.p [ class "p-4" ] [ View.fromMarkdown trial.context ]
-                        , div []
-                            [ if nTimes == 3 then
+                        , div [ class "flex flex-col items-center" ]
+                            [ text (String.toUpper trial.speakerName ++ " ")
+                            , text <|
+                                if trial.responseType == Speech then
+                                    "says: "
+
+                                else
+                                    "thinks: "
+                            , if nTimes == 3 then
                                 View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
 
                               else if nTimes == 2 then
@@ -50,13 +57,13 @@ view exp optionsOrder =
 
                               else
                                 div [] []
-                            , View.button
-                                { isDisabled =
-                                    nTimes == 3
-                                , message = UserClickedStartAnswering
-                                , txt = "Now choose the best description"
-                                }
                             ]
+                        , View.button
+                            { isDisabled =
+                                nTimes == 3
+                            , message = UserClickedStartAnswering
+                            , txt = "Now choose the best description"
+                            }
                         ]
 
                 ( Just trial, Answering ) ->
@@ -82,17 +89,28 @@ view exp optionsOrder =
                         [ View.tooltip data.infos.instructions_short
                         , progressBar history mainTrials
                         , Html.p [ class "p-8 text-lg" ] [ View.fromMarkdown trial.context ]
-                        , if nTimes == 3 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
+                        , div [ class "flex flex-col items-center" ]
+                            [ text (String.toUpper trial.speakerName ++ " ")
+                            , text <|
+                                if trial.responseType == Speech then
+                                    "says: "
 
-                          else if nTimes == 2 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
+                                else
+                                    "thinks: "
+                            , if nTimes == 3 then
+                                View.audioButton UserClickedAudio
+                                    trial.audioSentence.url
+                                    "Listen"
 
-                          else if nTimes == 1 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+                              else if nTimes == 2 then
+                                View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
 
-                          else
-                            View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "Now choose the best description" }
+                              else if nTimes == 1 then
+                                View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+
+                              else
+                                div [] []
+                            ]
                         , View.button
                             { isDisabled =
                                 nTimes == 3
@@ -118,6 +136,26 @@ view exp optionsOrder =
 
                 ( Nothing, _ ) ->
                     View.end data.infos.end UserClickedSaveData "/"
+
+
+audioButton trial nTimes =
+    div [ class "" ]
+        [ if nTimes == 3 then
+            View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
+
+          else if nTimes == 2 then
+            View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
+
+          else if nTimes == 1 then
+            View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+
+          else
+            div [] []
+        ]
+
+
+smallAudio txt =
+    div [] [ text txt ]
 
 
 update msg model =
@@ -218,6 +256,18 @@ decodeTranslationInput =
                 |> required "CU_Lvl2_Distractor_2" string
                 |> required "CU_Lvl2_Distractor_3" string
                 |> required "Feedback_CU_Lvl2" string
+                |> required "SpeakerName" string
+                |> custom
+                    (Decode.field "ResponseType" string
+                        |> Decode.andThen
+                            (\response ->
+                                if response == "Speech" then
+                                    Decode.succeed Speech
+
+                                else
+                                    Decode.succeed Thought
+                            )
+                    )
                 |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
@@ -230,7 +280,7 @@ initState =
 
 defaultTrial : Trial
 defaultTrial =
-    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" False
+    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
 
 
 type alias Trial =
@@ -243,8 +293,15 @@ type alias Trial =
     , distractor2 : String
     , distractor3 : String
     , feedback : String
+    , speakerName : String
+    , responseType : ResponseType
     , isTraining : Bool
     }
+
+
+type ResponseType
+    = Speech
+    | Thought
 
 
 type alias State =

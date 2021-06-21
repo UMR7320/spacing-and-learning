@@ -49,6 +49,7 @@ type Session2Task
     = Translation
     | Spelling
     | CU
+    | TopSession2
 
 
 type Pretest
@@ -85,6 +86,7 @@ type Session3Task
     = CU3
     | Spelling3
     | Synonym
+    | TopSession3
 
 
 parser : Parser (Route -> a) a
@@ -133,6 +135,7 @@ parser =
                         [ map Spelling (s "spelling")
                         , map Translation (s "translation")
                         , map CU (s "context-understanding")
+                        , map TopSession2 top
                         ]
             )
         , map AuthenticatedSession3
@@ -143,6 +146,7 @@ parser =
                         [ map CU3 (s "context-understanding")
                         , map Spelling3 (s "spelling")
                         , map Synonym (s "synonym")
+                        , map TopSession3 top
                         ]
             )
 

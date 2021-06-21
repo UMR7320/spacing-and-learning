@@ -34,9 +34,7 @@
     "build-img": "parcel build img/*",
     "build": "npm run build-img && parcel build index.html --no-cache",
     "test": "elm-test",
-    "test:watch": "elm-test --watch",
-    "cypress": "cypress run",
-    "cypress:open": "cypress open"
+    "test:watch": "elm-test --watch"
   },
   "repository": {
     "type": "git",

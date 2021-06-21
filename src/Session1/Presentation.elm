@@ -38,7 +38,7 @@ viewEntry key { txt, elements } toggledEntries =
 --entries : List String -> List String -> List String -> List ( String, { txt : String, elements : List String } )
 
 
-entries : List String -> List String -> List String -> (String -> msg) -> Dict String Bool -> List (Html msg)
+entries : List String -> List String -> List String -> (String -> msg) -> Dict String Bool -> Html msg
 entries d e t msg toggledEntries =
     let
         arrow key =
@@ -59,11 +59,12 @@ entries d e t msg toggledEntries =
         |> List.map
             (\( key, { txt } as val ) ->
                 p [ class "flex flex-col", Html.Styled.Events.onClick (msg key) ]
-                    [ div [ class "text-lg hover:underline cursor-pointer" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
+                    [ div [ class "text-lg hover:underline cursor-pointer bg-gray-400 p-4 rounded-lg" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
                     , span [ class "p-2" ] [ viewEntry key val toggledEntries ]
                     ]
             )
         |> List.intersperse sep
+        |> div [ class "w-1/3" ]
 
 
 view :
@@ -92,7 +93,7 @@ view task =
                                 ("to " ++ trial.text)
                             ]
                         , div [] [ View.audioButton UserClickedStartAudio trial.audio.url "Listen to the pronunciation" ]
-                        , div [ class "w-56 pt-8" ] <| entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
+                        , entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
                         , View.button
                             { message = UserClickedNextTrial
                             , isDisabled = False
@@ -111,9 +112,8 @@ view task =
                         , div [ class "pb-4 text-3xl font-bold flex flex-row" ]
                             [ text ("to " ++ trial.text)
                             ]
-                        , div [ class "w-1/3" ] <|
-                            View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
-                                :: entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
+                        , View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
+                        , entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
                         , div [ class "" ]
                             [ View.button
                                 { message = UserClickedNextTrial
@@ -138,7 +138,7 @@ type Msg
 
 sep : Html msg
 sep =
-    div [ class "w-32 h-1 mt-4 mb-4" ] []
+    div [ class "w-32 h-1" ] []
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg

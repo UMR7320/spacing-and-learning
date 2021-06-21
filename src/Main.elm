@@ -45,6 +45,7 @@ import Session3.CU3 as CU3
 import Session3.Session as Session3
 import Session3.Spelling3 as Spelling3
 import Session3.Synonym as Synonym
+import Svg.Attributes exposing (xlinkHref)
 import Task
 import Task.Parallel as Para
 import Time
@@ -141,6 +142,7 @@ type alias Model =
     , errorTracking : List Http.Error
     , currentDate : Maybe ( Time.Zone, Time.Posix )
     , preferedStartDate : Maybe Date.Date
+    , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
     }
 
 
@@ -209,6 +211,7 @@ init _ url key =
             , email = ""
             , currentDate = Nothing
             , preferedStartDate = Nothing
+            , sessions = RemoteData.Loading
             }
     in
     case route of
@@ -222,7 +225,7 @@ init _ url key =
                 , user = Just userId
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.map Session1 fetchSession1
+            , Cmd.batch [ Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
         Route.Home ->
@@ -247,7 +250,7 @@ init _ url key =
                 , user = Just userid
                 , session2 = Loading loadingStateSession2
               }
-            , Cmd.map Session2 fetchSession2
+            , Cmd.batch [ Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
         Route.AuthenticatedSession3 userid _ ->
@@ -259,7 +262,7 @@ init _ url key =
                 , user = Just userid
                 , session3 = Loading loadingStateSession3
               }
-            , Cmd.map Session3 fetchSession3
+            , Cmd.batch [ Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
         Route.Pretest userid _ ->
@@ -320,7 +323,7 @@ body model =
             Route.Session1 _ task ->
                 case task of
                     Route.TopSession1 ->
-                        Session1.Top.view infos
+                        viewSessionInstructions model.sessions "session1" "presentation"
 
                     Route.Meaning ->
                         [ Html.Styled.map Meaning <|
@@ -371,6 +374,9 @@ body model =
                     Route.Spelling ->
                         [ Html.Styled.map Spelling2 (Scrabble.viewScrabbleTask model) ]
 
+                    Route.TopSession2 ->
+                        viewSessionInstructions model.sessions "session2" "translation"
+
             Route.AuthenticatedSession3 _ task ->
                 case task of
                     Route.CU3 ->
@@ -383,6 +389,9 @@ body model =
                     Route.Spelling3 ->
                         [ Html.Styled.map Spelling3 <| Spelling3.view model.spelling3
                         ]
+
+                    Route.TopSession3 ->
+                        viewSessionInstructions model.sessions "session2" "synonym"
 
             Route.Posttest task ->
                 case task of
@@ -590,6 +599,35 @@ body model =
     ]
 
 
+viewSessionInstructions : RemoteData Http.Error (Dict.Dict String Session.Info) -> String -> String -> List (Html Msg)
+viewSessionInstructions remoteData sessionName url =
+    case remoteData of
+        RemoteData.NotAsked ->
+            []
+
+        RemoteData.Loading ->
+            [ View.loading ]
+
+        RemoteData.Success data ->
+            let
+                instructions =
+                    Dict.get sessionName data
+            in
+            case instructions of
+                Nothing ->
+                    [ text ("I can't find instructions related to session named: " ++ sessionName) ]
+
+                Just v ->
+                    [ div [ class "flex flex-col items-center" ]
+                        [ View.fromMarkdown v.instructions
+                        , a [ href url ] [ View.button { isDisabled = False, message = NoOp, txt = "Click here to start the first activity" } ]
+                        ]
+                    ]
+
+        RemoteData.Failure reason ->
+            [ text (Data.buildErrorMessage reason) ]
+
+
 type Msg
     = UserToggledInCloudWords String
       --
@@ -607,6 +645,7 @@ type Msg
     | GotCurrentTime ( Time.Zone, Time.Posix )
     | UserClickedChoseNewDate Date.Date
     | UserConfirmedPreferedDates ( String, String, String )
+    | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
     | NoOp
       --
       --                                                          ##  ##  ### ### ###  ## ###
@@ -866,6 +905,9 @@ update msg model =
                 , expect = Http.expectJson ServerRespondedWithNewUser decodeNewUser
                 }
             )
+
+        ServerRespondedWithSessionsInfos result ->
+            ( { model | sessions = result }, Cmd.none )
 
 
 decodeNewUser =
