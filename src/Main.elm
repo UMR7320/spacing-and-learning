@@ -277,7 +277,7 @@ init _ url key =
             , Cmd.batch [ Cmd.map Pretest (Tuple.second Pretest.attempt), Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now) ]
             )
 
-        Route.Posttest _ ->
+        Route.Posttest _ _ ->
             pure defaultInit
 
         NotFound ->
@@ -393,10 +393,10 @@ body model =
                     Route.TopSession3 ->
                         viewSessionInstructions model.sessions "session2" "synonym"
 
-            Route.Posttest task ->
+            Route.Posttest _ task ->
                 case task of
                     Route.CloudWords ->
-                        [ viewCloud model ]
+                        [ Html.Styled.map WordCloud <| CloudWords.view model ]
 
             Route.Pretest userId task ->
                 case task of
@@ -629,14 +629,13 @@ viewSessionInstructions remoteData sessionName url =
 
 
 type Msg
-    = UserToggledInCloudWords String
-      --
+    = --
       --                                                           # # ### ### #    ##
       --                                                           # #  #   #  #   #
       --                                                           # #  #   #  #    #
       --                                                           # #  #   #  #     #
       --                                                           ###  #  ### ### ##
-    | PlaysoundInJS String
+      PlaysoundInJS String
     | UserClickedLink Browser.UrlRequest
     | BrowserChangedUrl Url
     | UserClickedSignInButton
@@ -690,6 +689,10 @@ type Msg
     | Spelling3 Spelling3.Msg
     | Synonym Synonym.Msg
     | Session3 Session3.Msg
+      --
+      --
+      --
+    | WordCloud CloudWords.Msg
 
 
 pure model =
@@ -775,9 +778,6 @@ update msg model =
             in
             ( newModel, Cmd.map Acceptability newCmd )
 
-        UserToggledInCloudWords word ->
-            ( { model | cloudWords = CloudWords.toggle word model.cloudWords }, Cmd.none )
-
         PlaysoundInJS url ->
             ( model, Ports.playAudio url )
 
@@ -857,6 +857,13 @@ update msg model =
                     YesNo.update submsg model
             in
             ( subModel, Cmd.map YesNo subCmd )
+
+        WordCloud submsg ->
+            let
+                ( subModel, subCmd ) =
+                    CloudWords.update submsg model
+            in
+            ( subModel, Cmd.map WordCloud subCmd )
 
         UserClickedSignInButton ->
             ( model
@@ -942,25 +949,6 @@ project =
 --                                                                   #  ##  ##  #   #    #  # # # # ###
 --                                                                    # #   #   #   #    #  # # # # #
 --                                                                  ##  #   ### ### ### ### # #  ## ###
-
-
-viewCloud : Model -> Html Msg
-viewCloud model =
-    div [ class "grid grid-flow-col grid-rows-4 auto-cols-max gap-4 " ]
-        (List.map
-            (\word ->
-                label [ class "border-2 p-2 text-black align-baseline flex flex-row" ]
-                    [ input
-                        [ type_ "checkbox"
-                        , Html.Styled.Events.onClick <|
-                            UserToggledInCloudWords word
-                        ]
-                        []
-                    , span [ class "pl-4" ] [ text word ]
-                    ]
-            )
-            (Dict.keys model.cloudWords)
-        )
 
 
 beep =

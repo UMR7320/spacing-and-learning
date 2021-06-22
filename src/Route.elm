@@ -30,7 +30,7 @@ type Route
     | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
-    | Posttest PosttestTask
+    | Posttest UserId PosttestTask
 
 
 type alias UserId =
@@ -149,6 +149,7 @@ parser =
                         , map TopSession3 top
                         ]
             )
+        , map Posttest (s "user" </> string </> s "post-tests" </> oneOf [ map CloudWords (s "cw") ])
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)

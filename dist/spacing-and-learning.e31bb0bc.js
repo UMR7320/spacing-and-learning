@@ -12354,12 +12354,17 @@ var $author$project$Route$CU3 = {$: 'CU3'};
 var $author$project$Route$Calendar = function (a) {
 	return {$: 'Calendar', a: a};
 };
+var $author$project$Route$CloudWords = {$: 'CloudWords'};
 var $author$project$Route$Distributed = {$: 'Distributed'};
 var $author$project$Route$EmailSent = {$: 'EmailSent'};
 var $author$project$Route$GeneralInfos = {$: 'GeneralInfos'};
 var $author$project$Route$Home = {$: 'Home'};
 var $author$project$Route$Massed = {$: 'Massed'};
 var $author$project$Route$Meaning = {$: 'Meaning'};
+var $author$project$Route$Posttest = F2(
+	function (a, b) {
+		return {$: 'Posttest', a: a, b: b};
+	});
 var $author$project$Route$Presentation = {$: 'Presentation'};
 var $author$project$Route$Pretest = F2(
 	function (a, b) {
@@ -12679,6 +12684,26 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 									$author$project$Route$Synonym,
 									$elm$url$Url$Parser$s('synonym')),
 									A2($elm$url$Url$Parser$map, $author$project$Route$TopSession3, $elm$url$Url$Parser$top)
+								])))))),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Posttest,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('user'),
+				A2(
+					$elm$url$Url$Parser$slash,
+					$elm$url$Url$Parser$string,
+					A2(
+						$elm$url$Url$Parser$slash,
+						$elm$url$Url$Parser$s('post-tests'),
+						$elm$url$Url$Parser$oneOf(
+							_List_fromArray(
+								[
+									A2(
+									$elm$url$Url$Parser$map,
+									$author$project$Route$CloudWords,
+									$elm$url$Url$Parser$s('cw'))
 								]))))))
 		]));
 var $author$project$Route$fromUrl = function (url) {
@@ -14414,7 +14439,34 @@ var $author$project$Session2$Spelling$system = A2($annaghi$dnd_list$DnDList$crea
 var $author$project$Postest$CloudWords$NotKnown = {$: 'NotKnown'};
 var $author$project$Postest$CloudWords$words = _List_fromArray(
 	[
-		_Utils_Tuple2('crave', $author$project$Postest$CloudWords$NotKnown)
+		_Utils_Tuple2('crave', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('crave', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('curb', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('dazzle', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('divert', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('dread', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('equate', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('hail', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('hinder', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('hum', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('incur', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('intrude', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('juggle', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('loathe', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('mingle', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('moan', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('pinpoint', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('ponder', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('refrain', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('relish', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('saddle', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('seduce', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('sprinkle', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('strive', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('uphold', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('vow', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('wield', $author$project$Postest$CloudWords$NotKnown),
+		_Utils_Tuple2('withstand', $author$project$Postest$CloudWords$NotKnown)
 	]);
 var $author$project$Main$init = F3(
 	function (_v0, url, key) {
@@ -14961,6 +15013,9 @@ var $author$project$Main$Translation = function (a) {
 var $author$project$Main$VKS = function (a) {
 	return {$: 'VKS', a: a};
 };
+var $author$project$Main$WordCloud = function (a) {
+	return {$: 'WordCloud', a: a};
+};
 var $author$project$Main$decodeNewUser = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
 var $elm$http$Http$jsonBody = function (value) {
 	return A2(
@@ -15037,6 +15092,17 @@ var $author$project$Postest$CloudWords$toggle = function (key) {
 			}
 		});
 };
+var $author$project$Postest$CloudWords$update = F2(
+	function (msg, model) {
+		var word = msg.a;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					cloudWords: A2($author$project$Postest$CloudWords$toggle, word, model.cloudWords)
+				}),
+			$elm$core$Platform$Cmd$none);
+	});
 var $author$project$Pretest$Acceptability$End = {$: 'End'};
 var $author$project$Logic$Err = function (a) {
 	return {$: 'Err', a: a};
@@ -20007,15 +20073,6 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					newModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$Acceptability, newCmd));
-			case 'UserToggledInCloudWords':
-				var word = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							cloudWords: A2($author$project$Postest$CloudWords$toggle, word, model.cloudWords)
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'PlaysoundInJS':
 				var url = msg.a;
 				return _Utils_Tuple2(
@@ -20109,6 +20166,14 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					subModel,
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$YesNo, subCmd));
+			case 'WordCloud':
+				var submsg = msg.a;
+				var _v21 = A2($author$project$Postest$CloudWords$update, submsg, model);
+				var subModel = _v21.a;
+				var subCmd = _v21.b;
+				return _Utils_Tuple2(
+					subModel,
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$WordCloud, subCmd));
 			case 'UserClickedSignInButton':
 				return _Utils_Tuple2(
 					model,
@@ -20135,9 +20200,9 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			case 'GotCurrentTime':
-				var _v21 = msg.a;
-				var zone = _v21.a;
-				var time = _v21.b;
+				var _v22 = msg.a;
+				var zone = _v22.a;
+				var time = _v22.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -20156,10 +20221,10 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'UserConfirmedPreferedDates':
-				var _v22 = msg.a;
-				var s1 = _v22.a;
-				var s2 = _v22.b;
-				var s3 = _v22.c;
+				var _v23 = msg.a;
+				var s1 = _v23.a;
+				var s2 = _v23.b;
+				var s3 = _v23.c;
 				return _Utils_Tuple2(
 					model,
 					$elm$http$Http$request(
@@ -23698,6 +23763,50 @@ var $justinmimbs$date$Date$range = F4(
 	});
 var $justinmimbs$date$Date$toIsoString = $justinmimbs$date$Date$format('yyyy-MM-dd');
 var $rtfeldman$elm_css$Html$Styled$Attributes$type_ = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('type');
+var $author$project$Postest$CloudWords$UserToggledInCloudWords = function (a) {
+	return {$: 'UserToggledInCloudWords', a: a};
+};
+var $rtfeldman$elm_css$Html$Styled$span = $rtfeldman$elm_css$Html$Styled$node('span');
+var $author$project$Postest$CloudWords$view = function (model) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('grid grid-flow-col content-center grid-rows-4 auto-cols-max gap-4 ')
+			]),
+		$elm$core$Dict$values(
+			A2(
+				$elm$core$Dict$map,
+				F2(
+					function (word, k) {
+						return A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$class('transition duration-300 ease-in-out rounded-lg cursor-pointer p-2 align-baseline flex flex-row'),
+									$rtfeldman$elm_css$Html$Styled$Attributes$class(
+									_Utils_eq(k, $author$project$Postest$CloudWords$NotKnown) ? 'bg-red-500' : (_Utils_eq(k, $author$project$Postest$CloudWords$MaybeKnown) ? '' : 'bg-green-500')),
+									$rtfeldman$elm_css$Html$Styled$Events$onClick(
+									$author$project$Postest$CloudWords$UserToggledInCloudWords(word))
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text(
+									_Utils_eq(k, $author$project$Postest$CloudWords$NotKnown) ? '👎' : (_Utils_eq(k, $author$project$Postest$CloudWords$MaybeKnown) ? '🤔' : '👍')),
+									A2(
+									$rtfeldman$elm_css$Html$Styled$span,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-2 text-lg')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(word)
+										]))
+								]));
+					}),
+				model.cloudWords)));
+};
 var $author$project$Pretest$Acceptability$StartMain = {$: 'StartMain'};
 var $author$project$Pretest$Acceptability$UserClickedSaveMsg = {$: 'UserClickedSaveMsg'};
 var $author$project$Pretest$Acceptability$UserClickedStartTraining = {$: 'UserClickedStartTraining'};
@@ -23979,7 +24088,6 @@ var $author$project$Progressbar$progressBar = F2(
 				A2($elm$core$List$map, $elm$core$Tuple$first, filteredHistory)));
 		return $author$project$Progressbar$viewProgressBar(pct_);
 	});
-var $rtfeldman$elm_css$Html$Styled$span = $rtfeldman$elm_css$Html$Styled$node('span');
 var $author$project$View$unclickableButton = F2(
 	function (color, txt) {
 		return A2(
@@ -27798,50 +27906,6 @@ var $author$project$Session3$Spelling3$view = function (exp) {
 			return $author$project$View$loading;
 	}
 };
-var $author$project$Main$UserToggledInCloudWords = function (a) {
-	return {$: 'UserToggledInCloudWords', a: a};
-};
-var $author$project$Main$viewCloud = function (model) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$div,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$class('grid grid-flow-col grid-rows-4 auto-cols-max gap-4 ')
-			]),
-		A2(
-			$elm$core$List$map,
-			function (word) {
-				return A2(
-					$rtfeldman$elm_css$Html$Styled$label,
-					_List_fromArray(
-						[
-							$rtfeldman$elm_css$Html$Styled$Attributes$class('border-2 p-2 text-black align-baseline flex flex-row')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$rtfeldman$elm_css$Html$Styled$input,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$type_('checkbox'),
-									$rtfeldman$elm_css$Html$Styled$Events$onClick(
-									$author$project$Main$UserToggledInCloudWords(word))
-								]),
-							_List_Nil),
-							A2(
-							$rtfeldman$elm_css$Html$Styled$span,
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$Attributes$class('pl-4')
-								]),
-							_List_fromArray(
-								[
-									$rtfeldman$elm_css$Html$Styled$text(word)
-								]))
-						]));
-			},
-			$elm$core$Dict$keys(model.cloudWords)));
-};
 var $author$project$Session2$Spelling$PlayAudio = function (a) {
 	return {$: 'PlayAudio', a: a};
 };
@@ -28509,10 +28573,13 @@ var $author$project$Main$body = function (model) {
 								return A3($author$project$Main$viewSessionInstructions, model.sessions, 'session2', 'synonym');
 						}
 					case 'Posttest':
-						var task = _v0.a;
+						var task = _v0.b;
 						return _List_fromArray(
 							[
-								$author$project$Main$viewCloud(model)
+								A2(
+								$rtfeldman$elm_css$Html$Styled$map,
+								$author$project$Main$WordCloud,
+								$author$project$Postest$CloudWords$view(model))
 							]);
 					case 'Pretest':
 						var userId = _v0.a;
@@ -29382,7 +29449,7 @@ var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$BrowserChangedUrl, onUrlRequest: $author$project$Main$UserClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(
-		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Session.Info":{"args":[],"type":"{ name : String.String, instructions : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"},"Session1.Session.LoadingMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.Spelling.Trial) (List.List Session1.ContextUnderstanding.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"},"Pretest.Pretest.ParaMsg":{"args":[],"type":"Task.Parallel.Msg6 (List.List Pretest.SPR.Trial) (List.List Pretest.SentenceCompletion.Trial) (List.List ExperimentInfo.Task) (List.List Pretest.VKS.Trial) (List.List Pretest.Acceptability.Trial) (List.List Pretest.YesNo.Trial)"},"Date.RataDie":{"args":[],"type":"Basics.Int"},"Pretest.Pretest.ShuffledPretest":{"args":[],"type":"{ spr : List.List Pretest.SPR.Trial, sc : List.List Pretest.SentenceCompletion.Trial, infos : List.List ExperimentInfo.Task, vks : List.List Pretest.VKS.Trial, acceptability : Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial)), yn : List.List Pretest.YesNo.Trial }"},"Session1.Session.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.Spelling.Trial, cu1 : List.List Session1.ContextUnderstanding.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Session2.Session.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Spelling.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Session3.Session.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String, introToMain : String.String }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String, timeout : Basics.Int }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"},"Pretest.SentenceCompletion.Trial":{"args":[],"type":"{ id : String.String, context : String.String, firstAmorce : String.String, secondAmorce : String.String, isTraining : Basics.Bool, firstFeedback : String.String, secondFeedback : String.String }"},"Pretest.VKS.Trial":{"args":[],"type":"{ id : String.String, verb : String.String, isTraining : Basics.Bool }"},"Pretest.YesNo.Trial":{"args":[],"type":"{ id : String.String, word : String.String, exists : Basics.Bool }"},"Session1.ContextUnderstanding.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.Spelling.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, speakerName : String.String, responseType : Session2.CU2.ResponseType, isTraining : Basics.Bool }"},"Session2.Spelling.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UserToggledInCloudWords":["String.String"],"PlaysoundInJS":["String.String"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"UserClickedSignInButton":[],"UserUpdatedEmailField":["String.String"],"ServerRespondedWithNewUser":["Result.Result Http.Error String.String"],"GotCurrentTime":["( Time.Zone, Time.Posix )"],"UserClickedChoseNewDate":["Date.Date"],"UserConfirmedPreferedDates":["( String.String, String.String, String.String )"],"ServerRespondedWithSessionsInfos":["RemoteData.RemoteData Http.Error (Dict.Dict String.String Session.Info)"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"Pretest":["Pretest.Pretest.Msg"],"SentenceCompletion":["Pretest.SentenceCompletion.Msg"],"SPR":["Pretest.SPR.Msg"],"VKS":["Pretest.VKS.Msg"],"YesNo":["Pretest.YesNo.Msg"],"CU1":["Session1.ContextUnderstanding.Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.Spelling.Msg"],"Session1":["Session1.Session.Msg"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Session2.Spelling.Msg"],"Translation":["Session2.Translation.Msg"],"Session2":["Session2.Session.Msg"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"Synonym":["Session3.Synonym.Msg"],"Session3":["Session3.Session.Msg"]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedAudio":["String.String"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedStartTraining":[],"UserClickedStartAnswering":[]}},"Date.Date":{"args":[],"tags":{"RD":["Date.RataDie"]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":[],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Pretest.Pretest.Msg":{"args":[],"tags":{"ServerRespondedWithSomePretestData":["Pretest.Pretest.ParaMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List Pretest.SentenceCompletion.Trial","List.List ExperimentInfo.Task","List.List Pretest.VKS.Trial","List.List Pretest.Acceptability.Trial","List.List Pretest.YesNo.Trial"],"StartPretest":["Pretest.Pretest.ShuffledPretest"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"NoOp":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"UserClickedNextTrial":["Pretest.SPR.Answer"],"UserClickedSaveData":[],"UserConfirmedChoice":["Pretest.SPR.Answer"],"UserClickedStartTraining":[]}},"Pretest.SentenceCompletion.Msg":{"args":[],"tags":{"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":["ExperimentInfo.Task","List.List Pretest.SentenceCompletion.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.SentenceCompletion.Field","String.String"],"RuntimeReordedAmorces":["Pretest.SentenceCompletion.Field"],"UserClickedStartTraining":[]}},"Pretest.VKS.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.VKS.Field","Basics.Int","String.String"],"RuntimeReordedAmorces":["Pretest.VKS.Field"],"UserClickedNewKnowledge":["String.String"],"UserClickedAddAnswer":[],"UserClickedRemoveAnswer":["Basics.Int"]}},"Pretest.YesNo.Msg":{"args":[],"tags":{"NoOp":[],"UserClickedStartTask":[],"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserClickedSaveData":[],"ServerRespondedWithUpdatedUser":["Result.Result Http.Error String.String"]}},"Session1.ContextUnderstanding.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.ContextUnderstanding.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"],"UserClickedStartAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Session1.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Session1.Session.LoadingMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllData":["List.List Session1.Meaning.Trial","List.List Session1.Spelling.Trial","List.List Session1.ContextUnderstanding.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession":["Session1.Session.ShuffledSession1"]}},"Session1.Spelling.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":[],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[],"AudioEnded":["{ eventType : String.String, name : String.String, timestamp : Basics.Int }"]}},"Session2.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Spelling.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllData":["List.List Session2.CU2.Trial","List.List Session2.Spelling.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session2.Session.ShuffledSession2"]}},"Session2.Spelling.Msg":{"args":[],"tags":{"UserDragsLetter":["DnDList.Msg"],"PlayAudio":["String.String"],"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Spelling.Trial"],"UserClickedStartMainloop":["List.List Session2.Spelling.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"UserClickedStartAudio":["String.String"],"AudioEnded":["{ eventType : String.String, name : String.String, timestamp : Basics.Int }"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartTraining":[],"UserClickedStartMain":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedAudio":["String.String"],"UserClickedStartAnswering":[]}},"Session3.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session3.Session.ShuffledSession3"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartTraining":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartAnswering":[]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserCLickedStartTraining":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Pretest.SentenceCompletion.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"Pretest.VKS.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"List.List":{"args":["a"],"tags":{}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Task.Parallel.Msg6":{"args":["a","b","c","d","e","f"],"tags":{"LoadedA6":["a"],"LoadedB6":["b"],"LoadedC6":["c"],"LoadedD6":["d"],"LoadedE6":["e"],"LoadedF6":["f"]}},"Dict.NColor":{"args":[],"tags":{"Red":[],"Black":[]}},"Session2.CU2.ResponseType":{"args":[],"tags":{"Speech":[],"Thought":[]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
+		{}))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Session.Info":{"args":[],"type":"{ name : String.String, instructions : String.String }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Data.AudioFile":{"args":[],"type":"{ url : String.String, type_ : String.String }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"},"Session1.Session.LoadingMsg":{"args":[],"type":"Task.Parallel.Msg5 (List.List Session1.Meaning.Trial) (List.List Session1.Spelling.Trial) (List.List Session1.ContextUnderstanding.Trial) (List.List Session1.Presentation.Trial) (List.List ExperimentInfo.Task)"},"Pretest.Pretest.ParaMsg":{"args":[],"type":"Task.Parallel.Msg6 (List.List Pretest.SPR.Trial) (List.List Pretest.SentenceCompletion.Trial) (List.List ExperimentInfo.Task) (List.List Pretest.VKS.Trial) (List.List Pretest.Acceptability.Trial) (List.List Pretest.YesNo.Trial)"},"Date.RataDie":{"args":[],"type":"Basics.Int"},"Pretest.Pretest.ShuffledPretest":{"args":[],"type":"{ spr : List.List Pretest.SPR.Trial, sc : List.List Pretest.SentenceCompletion.Trial, infos : List.List ExperimentInfo.Task, vks : List.List Pretest.VKS.Trial, acceptability : Result.Result ( Pretest.Acceptability.ErrorBlock, List.List Pretest.Acceptability.Trial ) (List.List (List.List Pretest.Acceptability.Trial)), yn : List.List Pretest.YesNo.Trial }"},"Session1.Session.ShuffledSession1":{"args":[],"type":"{ meaning : List.List Session1.Meaning.Trial, spelling : List.List Session1.Spelling.Trial, cu1 : List.List Session1.ContextUnderstanding.Trial, presentation : List.List Session1.Presentation.Trial, infos_ : List.List ExperimentInfo.Task }"},"Session2.Session.ShuffledSession2":{"args":[],"type":"{ cu : List.List Session2.CU2.Trial, spelling : List.List Session2.Spelling.Trial, translation : List.List Session2.Translation.Trial, infos : List.List ExperimentInfo.Task }"},"Session3.Session.ShuffledSession3":{"args":[],"type":"{ cu : List.List Session3.CU3.Trial, spelling : List.List Session3.Spelling3.Trial, synonym : List.List Session3.Synonym.Trial, infos : List.List ExperimentInfo.Task }"},"Pretest.SPR.TaggedSegment":{"args":[],"type":"( Pretest.SPR.Tag, String.String )"},"ExperimentInfo.Task":{"args":[],"type":"{ uid : String.String, session : ExperimentInfo.Session, type_ : ExperimentInfo.Type_, name : String.String, url : String.String, description : String.String, instructions : String.String, instructions_short : String.String, feedback_correct : String.String, feedback_incorrect : String.String, end : String.String, trainingWheel : String.String, introToMain : String.String }"},"Pretest.Acceptability.Trial":{"args":[],"type":"{ uid : String.String, sentence : String.String, sentenceType : Pretest.Acceptability.SentenceType, trialType : Pretest.Acceptability.TrialType, isGrammatical : Basics.Bool, audio : Data.AudioFile, feedback : String.String, timeout : Basics.Int }"},"Pretest.SPR.Trial":{"args":[],"type":"{ id : String.String, taggedSegments : List.List Pretest.SPR.TaggedSegment, question : String.String, isGrammatical : Basics.Bool, isTraining : Basics.Bool, feedback : String.String }"},"Pretest.SentenceCompletion.Trial":{"args":[],"type":"{ id : String.String, context : String.String, firstAmorce : String.String, secondAmorce : String.String, isTraining : Basics.Bool, firstFeedback : String.String, secondFeedback : String.String }"},"Pretest.VKS.Trial":{"args":[],"type":"{ id : String.String, verb : String.String, isTraining : Basics.Bool }"},"Pretest.YesNo.Trial":{"args":[],"type":"{ id : String.String, word : String.String, exists : Basics.Bool }"},"Session1.ContextUnderstanding.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, definition : String.String, isTraining : Basics.Bool }"},"Session1.Meaning.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedbackCorrect : String.String, feedbackIncorrect : String.String, isTraining : Basics.Bool }"},"Session1.Presentation.Trial":{"args":[],"type":"{ uid : String.String, text : String.String, definition : String.String, example : String.String, translation1 : String.String, translation2 : String.String, audio : Data.AudioFile, isTraining : Basics.Bool }"},"Session1.Spelling.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, isTraining : Basics.Bool, audio : Data.AudioFile }"},"Session2.CU2.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, target : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, feedback : String.String, speakerName : String.String, responseType : Session2.CU2.ResponseType, isTraining : Basics.Bool }"},"Session2.Spelling.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioWord : Data.AudioFile, isTraining : Basics.Bool, target : String.String }"},"Session2.Translation.Trial":{"args":[],"type":"{ uid : String.String, question : String.String, target : String.String, translation2 : String.String, distractor1 : String.String, distractor2 : String.String, distractor3 : String.String, word : String.String, isTraining : Basics.Bool }"},"Session3.CU3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, context : String.String, amorce : String.String, feedback : String.String, isTraining : Basics.Bool }"},"Session3.Spelling3.Trial":{"args":[],"type":"{ uid : String.String, writtenWord : String.String, audioSentence : Data.AudioFile, isTraining : Basics.Bool }"},"Session3.Synonym.Trial":{"args":[],"type":"{ uid : String.String, target : String.String, pre : String.String, stimulus : String.String, post : String.String, isTraining : Basics.Bool, radical : String.String }"},"DnDList.DragElementId":{"args":[],"type":"String.String"},"DnDList.DragIndex":{"args":[],"type":"Basics.Int"},"DnDList.DropElementId":{"args":[],"type":"String.String"},"DnDList.DropIndex":{"args":[],"type":"Basics.Int"},"Browser.Dom.Element":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float }, element : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"DnDList.Position":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"PlaysoundInJS":["String.String"],"UserClickedLink":["Browser.UrlRequest"],"BrowserChangedUrl":["Url.Url"],"UserClickedSignInButton":[],"UserUpdatedEmailField":["String.String"],"ServerRespondedWithNewUser":["Result.Result Http.Error String.String"],"GotCurrentTime":["( Time.Zone, Time.Posix )"],"UserClickedChoseNewDate":["Date.Date"],"UserConfirmedPreferedDates":["( String.String, String.String, String.String )"],"ServerRespondedWithSessionsInfos":["RemoteData.RemoteData Http.Error (Dict.Dict String.String Session.Info)"],"NoOp":[],"Acceptability":["Pretest.Acceptability.Msg"],"Pretest":["Pretest.Pretest.Msg"],"SentenceCompletion":["Pretest.SentenceCompletion.Msg"],"SPR":["Pretest.SPR.Msg"],"VKS":["Pretest.VKS.Msg"],"YesNo":["Pretest.YesNo.Msg"],"CU1":["Session1.ContextUnderstanding.Msg"],"Presentation":["Session1.Presentation.Msg"],"Meaning":["Session1.Meaning.Msg"],"Spelling1":["Session1.Spelling.Msg"],"Session1":["Session1.Session.Msg"],"CU2":["Session2.CU2.CU2Msg"],"Spelling2":["Session2.Spelling.Msg"],"Translation":["Session2.Translation.Msg"],"Session2":["Session2.Session.Msg"],"CU3":["Session3.CU3.Msg"],"Spelling3":["Session3.Spelling3.Msg"],"Synonym":["Session3.Synonym.Msg"],"Session3":["Session3.Session.Msg"],"WordCloud":["Postest.CloudWords.Msg"]}},"Session2.CU2.CU2Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session2.CU2.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedAudio":["String.String"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedStartTraining":[],"UserClickedStartAnswering":[]}},"Date.Date":{"args":[],"tags":{"RD":["Date.RataDie"]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Postest.CloudWords.Msg":{"args":[],"tags":{"UserToggledInCloudWords":["String.String"]}},"Pretest.Acceptability.Msg":{"args":[],"tags":{"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserPressedButtonWithTimestamp":["Maybe.Maybe Basics.Bool","Time.Posix"],"NextStepCinematic":["Pretest.Acceptability.Step"],"AudioEnded":["( String.String, Time.Posix )"],"AudioStarted":["( String.String, Time.Posix )"],"StartTraining":[],"UserClickedSaveMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":[],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Pretest.Pretest.Msg":{"args":[],"tags":{"ServerRespondedWithSomePretestData":["Pretest.Pretest.ParaMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllPretestData":["List.List Pretest.SPR.Trial","List.List Pretest.SentenceCompletion.Trial","List.List ExperimentInfo.Task","List.List Pretest.VKS.Trial","List.List Pretest.Acceptability.Trial","List.List Pretest.YesNo.Trial"],"StartPretest":["Pretest.Pretest.ShuffledPretest"]}},"Pretest.SPR.Msg":{"args":[],"tags":{"NoOp":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"StartMain":["ExperimentInfo.Task","List.List Pretest.SPR.Trial"],"TimestampedMsg":["Pretest.SPR.TimedMsg","Maybe.Maybe Time.Posix"],"UserClickedNextTrial":["Pretest.SPR.Answer"],"UserClickedSaveData":[],"UserConfirmedChoice":["Pretest.SPR.Answer"],"UserClickedStartTraining":[]}},"Pretest.SentenceCompletion.Msg":{"args":[],"tags":{"UserClickedToggleFeedback":[],"UserClickedNextTrial":[],"UserClickedStartMain":["ExperimentInfo.Task","List.List Pretest.SentenceCompletion.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.SentenceCompletion.Field","String.String"],"RuntimeReordedAmorces":["Pretest.SentenceCompletion.Field"],"UserClickedStartTraining":[]}},"Pretest.VKS.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":[],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserUpdatedField":["Pretest.VKS.Field","Basics.Int","String.String"],"RuntimeReordedAmorces":["Pretest.VKS.Field"],"UserClickedNewKnowledge":["String.String"],"UserClickedAddAnswer":[],"UserClickedRemoveAnswer":["Basics.Int"]}},"Pretest.YesNo.Msg":{"args":[],"tags":{"NoOp":[],"UserClickedStartTask":[],"UserPressedButton":["Maybe.Maybe Basics.Bool"],"UserClickedSaveData":[],"ServerRespondedWithUpdatedUser":["Result.Result Http.Error String.String"]}},"Session1.ContextUnderstanding.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":["List.List Session1.ContextUnderstanding.Trial","ExperimentInfo.Task"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Meaning.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMain":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session1.Presentation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedStartMain":["List.List Session1.Presentation.Trial","ExperimentInfo.Task"],"UserToggleElementOfEntry":["String.String"],"UserClickedStartAudio":["String.String"],"UserClickedStartTraining":[],"NoOp":[]}},"Session1.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Session1.Session.LoadingMsg"],"ServerRespondedWithSomeError":["Http.Error"],"ServerRespondedWithAllData":["List.List Session1.Meaning.Trial","List.List Session1.Spelling.Trial","List.List Session1.ContextUnderstanding.Trial","List.List Session1.Presentation.Trial","List.List ExperimentInfo.Task"],"StartSession":["Session1.Session.ShuffledSession1"]}},"Session1.Spelling.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedFeedback":[],"UserClickedRadioButton":["String.String"],"UserClickedStartMainloop":[],"UserClickedSavedData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartTraining":[],"AudioEnded":["{ eventType : String.String, name : String.String, timestamp : Basics.Int }"]}},"Session2.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeData":["Task.Parallel.Msg4 (List.List Session2.CU2.Trial) (List.List Session2.Spelling.Trial) (List.List Session2.Translation.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllData":["List.List Session2.CU2.Trial","List.List Session2.Spelling.Trial","List.List Session2.Translation.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session2.Session.ShuffledSession2"]}},"Session2.Spelling.Msg":{"args":[],"tags":{"UserDragsLetter":["DnDList.Msg"],"PlayAudio":["String.String"],"UserClickedFeedbackButton":[],"UserClickedNextTrial":["Maybe.Maybe Session2.Spelling.Trial"],"UserClickedStartMainloop":["List.List Session2.Spelling.Trial"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"UserClickedStartAudio":["String.String"],"AudioEnded":["{ eventType : String.String, name : String.String, timestamp : Basics.Int }"]}},"Session2.Translation.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedSaveData":[],"UserClickedRadioButton":["String.String"],"UserClickedStartTraining":[],"UserClickedStartMain":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"]}},"Session3.CU3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedStartTraining":[],"RuntimeShuffledOptionsOrder":["List.List Basics.Int"],"UserClickedAudio":["String.String"],"UserClickedStartAnswering":[]}},"Session3.Session.Msg":{"args":[],"tags":{"ServerRespondedWithSomeSession3Data":["Task.Parallel.Msg4 (List.List Session3.CU3.Trial) (List.List Session3.Spelling3.Trial) (List.List Session3.Synonym.Trial) (List.List ExperimentInfo.Task)"],"ServerRespondedWithAllSession3Data":["List.List Session3.CU3.Trial","List.List Session3.Spelling3.Trial","List.List Session3.Synonym.Trial","List.List ExperimentInfo.Task"],"ServerRespondedWithSomeError":["Http.Error"],"StartSession":["Session3.Session.ShuffledSession3"]}},"Session3.Spelling3.Msg":{"args":[],"tags":{"UserClickedNextTrial":[],"UserClickedToggleFeedback":[],"UserClickedStartTraining":[],"UserClickedStartMain":[],"UserChangedInput":["String.String"],"UserClickedSaveData":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserClickedPlayAudio":["String.String"],"UserClickedStartAnswering":[]}},"Session3.Synonym.Msg":{"args":[],"tags":{"UserClickedFeedback":[],"UserChangedInput":["String.String"],"UserClickedNextTrial":[],"UserClickedStartMainloop":[],"SaveDataMsg":[],"ServerRespondedWithLastRecords":["Result.Result Http.Error (List.List ())"],"UserCLickedStartTraining":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"RemoteData.RemoteData":{"args":["e","a"],"tags":{"NotAsked":[],"Loading":[],"Failure":["e"],"Success":["a"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"Pretest.SPR.Answer":{"args":[],"tags":{"Yes":[],"No":[],"Unsure":[],"NoAnswerYet":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Pretest.Acceptability.ErrorBlock":{"args":[],"tags":{"FirstDistractorMissing":["Basics.Bool"],"SecondDistractorMissing":["Basics.Bool"],"ThirdDistractorMissing":["Basics.Bool"]}},"Pretest.SentenceCompletion.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"Pretest.VKS.Field":{"args":[],"tags":{"FirstProduction":[],"SecondProduction":[]}},"List.List":{"args":["a"],"tags":{}},"DnDList.Msg":{"args":[],"tags":{"DragStart":["DnDList.DragIndex","DnDList.DragElementId","DnDList.Position"],"Drag":["DnDList.Position"],"DragOver":["DnDList.DropIndex","DnDList.DropElementId"],"DragEnter":["DnDList.DropIndex"],"DragLeave":[],"DragEnd":[],"GotDragElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"],"GotDropElement":["Result.Result Browser.Dom.Error Browser.Dom.Element"]}},"Task.Parallel.Msg4":{"args":["a","b","c","d"],"tags":{"LoadedA4":["a"],"LoadedB4":["b"],"LoadedC4":["c"],"LoadedD4":["d"]}},"Task.Parallel.Msg5":{"args":["a","b","c","d","e"],"tags":{"LoadedA5":["a"],"LoadedB5":["b"],"LoadedC5":["c"],"LoadedD5":["d"],"LoadedE5":["e"]}},"Task.Parallel.Msg6":{"args":["a","b","c","d","e","f"],"tags":{"LoadedA6":["a"],"LoadedB6":["b"],"LoadedC6":["c"],"LoadedD6":["d"],"LoadedE6":["e"],"LoadedF6":["f"]}},"Dict.NColor":{"args":[],"tags":{"Red":[],"Black":[]}},"Session2.CU2.ResponseType":{"args":[],"tags":{"Speech":[],"Thought":[]}},"Pretest.Acceptability.SentenceType":{"args":[],"tags":{"EmbeddedQuestion":[],"ZeroArticle":[],"AdjectiveAgreement":[],"PresentPerfectOrSimplePast":[],"Conditional":[],"Question":[],"RelativeClause":[]}},"ExperimentInfo.Session":{"args":[],"tags":{"Session1":[],"Session2":[],"Session3":[],"Pretest":[],"Posttest":[],"OtherSession":[]}},"Pretest.Acceptability.Step":{"args":[],"tags":{"Start":[],"Listening":[],"Answering":[],"End":[],"Init":[]}},"Pretest.SPR.Tag":{"args":[],"tags":{"NoUnit":[],"Critic":[],"SpillOver":[]}},"Pretest.SPR.TimedMsg":{"args":[],"tags":{"UserPressedSpaceToStartParagraph":[],"UserPressedSpaceToReadNextSegment":[]}},"Pretest.Acceptability.TrialType":{"args":[],"tags":{"Target":[],"Training":[],"Distractor":[]}},"ExperimentInfo.Type_":{"args":[],"tags":{"Sens":[],"Forme":[],"Context":[],"Other":[]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
@@ -33327,7 +33394,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57901" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61305" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
