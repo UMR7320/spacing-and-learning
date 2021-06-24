@@ -70,12 +70,12 @@ update msg model =
 
                 totalScore =
                     Logic.getHistory model.yesno
-                        |> Data.splitIn 10
+                        |> Data.splitIn 20
                         |> List.map
                             (\block ->
                                 let
                                     ( falseAlarms, hits ) =
-                                        calculateScoreForEachBlock block
+                                        countHitsAndFalseAlarms block
                                 in
                                 scoreVoc hits falseAlarms
                             )
@@ -95,58 +95,6 @@ update msg model =
                         )
                         [ totalScore ]
 
-                correctionFactor falseAlarms hits =
-                    1 - (weighted falseAlarms / weighted hits)
-
-                scoreVoc hits falseAlamrs =
-                    hits * 100 * round (correctionFactor falseAlamrs hits)
-
-                weighted x =
-                    case x of
-                        0 ->
-                            0
-
-                        1 ->
-                            1
-
-                        2 ->
-                            3
-
-                        4 ->
-                            10
-
-                        5 ->
-                            15
-
-                        6 ->
-                            20
-
-                        7 ->
-                            24
-
-                        8 ->
-                            27
-
-                        9 ->
-                            29
-
-                        10 ->
-                            30
-
-                        _ ->
-                            30
-
-                calculateScoreForEachBlock =
-                    List.foldl
-                        (\( t, s ) ( h, f ) ->
-                            if t.exists == (s.evaluation |> Maybe.withDefault False) then
-                                ( h + 1, f )
-
-                            else
-                                ( h, f + 1 )
-                        )
-                        ( 0, 0 )
-
                 responseDecoder =
                     Decode.field "id" Decode.string
             in
@@ -160,6 +108,70 @@ update msg model =
 
         _ ->
             ( model, Cmd.none )
+
+
+correctionFactor : Int -> Int -> Float
+correctionFactor falseAlarms hits =
+    1 - (weighted falseAlarms / weighted hits)
+
+
+scoreVoc : Int -> Int -> Int
+scoreVoc hits falseAlamrs =
+    (toFloat hits * 100.0 * correctionFactor falseAlamrs hits) |> round
+
+
+weighted x =
+    case x of
+        0 ->
+            0
+
+        1 ->
+            1
+
+        2 ->
+            3
+
+        4 ->
+            10
+
+        5 ->
+            15
+
+        6 ->
+            20
+
+        7 ->
+            24
+
+        8 ->
+            27
+
+        9 ->
+            29
+
+        10 ->
+            30
+
+        _ ->
+            30
+
+
+countHitsAndFalseAlarms =
+    List.foldl
+        (\( t, s ) ( h, f ) ->
+            if t.exists == True && s.evaluation == Just True then
+                ( h + 1, f )
+
+            else if t.exists == False && s.evaluation == Just True then
+                ( h, f + 1 )
+
+            else if t.exists == True && s.evaluation == Just False then
+                ( h, f + 1 )
+
+            else
+                ( h, f )
+        )
+        ( 0, 0 )
 
 
 type Msg

@@ -17960,6 +17960,58 @@ var $author$project$Pretest$VKS$update = F2(
 var $author$project$Pretest$YesNo$ServerRespondedWithUpdatedUser = function (a) {
 	return {$: 'ServerRespondedWithUpdatedUser', a: a};
 };
+var $author$project$Pretest$YesNo$countHitsAndFalseAlarms = A2(
+	$elm$core$List$foldl,
+	F2(
+		function (_v0, _v1) {
+			var t = _v0.a;
+			var s = _v0.b;
+			var h = _v1.a;
+			var f = _v1.b;
+			return (t.exists && _Utils_eq(
+				s.evaluation,
+				$elm$core$Maybe$Just(true))) ? _Utils_Tuple2(h + 1, f) : (((!t.exists) && _Utils_eq(
+				s.evaluation,
+				$elm$core$Maybe$Just(true))) ? _Utils_Tuple2(h, f + 1) : ((t.exists && _Utils_eq(
+				s.evaluation,
+				$elm$core$Maybe$Just(false))) ? _Utils_Tuple2(h, f + 1) : _Utils_Tuple2(h, f)));
+		}),
+	_Utils_Tuple2(0, 0));
+var $author$project$Pretest$YesNo$weighted = function (x) {
+	switch (x) {
+		case 0:
+			return 0;
+		case 1:
+			return 1;
+		case 2:
+			return 3;
+		case 4:
+			return 10;
+		case 5:
+			return 15;
+		case 6:
+			return 20;
+		case 7:
+			return 24;
+		case 8:
+			return 27;
+		case 9:
+			return 29;
+		case 10:
+			return 30;
+		default:
+			return 30;
+	}
+};
+var $author$project$Pretest$YesNo$correctionFactor = F2(
+	function (falseAlarms, hits) {
+		return 1 - ($author$project$Pretest$YesNo$weighted(falseAlarms) / $author$project$Pretest$YesNo$weighted(hits));
+	});
+var $author$project$Pretest$YesNo$scoreVoc = F2(
+	function (hits, falseAlamrs) {
+		return $elm$core$Basics$round(
+			(hits * 100.0) * A2($author$project$Pretest$YesNo$correctionFactor, falseAlamrs, hits));
+	});
 var $author$project$Pretest$YesNo$updateVocabularyScore = F3(
 	function (payload, callbackMsg, decoder) {
 		return $elm$http$Http$request(
@@ -18001,69 +18053,21 @@ var $author$project$Pretest$YesNo$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'UserClickedSaveData':
-				var weighted = function (x) {
-					switch (x) {
-						case 0:
-							return 0;
-						case 1:
-							return 1;
-						case 2:
-							return 3;
-						case 4:
-							return 10;
-						case 5:
-							return 15;
-						case 6:
-							return 20;
-						case 7:
-							return 24;
-						case 8:
-							return 27;
-						case 9:
-							return 29;
-						case 10:
-							return 30;
-						default:
-							return 30;
-					}
-				};
 				var userId = A2($elm$core$Maybe$withDefault, 'recd18l2IBRQNI05y', model.user);
-				var responseDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
-				var correctionFactor = F2(
-					function (falseAlarms, hits) {
-						return 1 - (weighted(falseAlarms) / weighted(hits));
-					});
-				var scoreVoc = F2(
-					function (hits, falseAlamrs) {
-						return (hits * 100) * $elm$core$Basics$round(
-							A2(correctionFactor, falseAlamrs, hits));
-					});
-				var calculateScoreForEachBlock = A2(
-					$elm$core$List$foldl,
-					F2(
-						function (_v2, _v3) {
-							var t = _v2.a;
-							var s = _v2.b;
-							var h = _v3.a;
-							var f = _v3.b;
-							return _Utils_eq(
-								t.exists,
-								A2($elm$core$Maybe$withDefault, false, s.evaluation)) ? _Utils_Tuple2(h + 1, f) : _Utils_Tuple2(h, f + 1);
-						}),
-					_Utils_Tuple2(0, 0));
 				var totalScore = $elm$core$List$sum(
 					A2(
 						$elm$core$List$map,
 						function (block) {
-							var _v1 = calculateScoreForEachBlock(block);
+							var _v1 = $author$project$Pretest$YesNo$countHitsAndFalseAlarms(block);
 							var falseAlarms = _v1.a;
 							var hits = _v1.b;
-							return A2(scoreVoc, hits, falseAlarms);
+							return A2($author$project$Pretest$YesNo$scoreVoc, hits, falseAlarms);
 						},
 						A2(
 							$author$project$Data$splitIn,
-							10,
+							20,
 							$author$project$Logic$getHistory(model.yesno))));
+				var responseDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
 				var encode = A2(
 					$elm$json$Json$Encode$list,
 					function (score) {
@@ -33394,7 +33398,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61305" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59446" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
