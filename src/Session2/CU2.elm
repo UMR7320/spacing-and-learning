@@ -135,7 +135,7 @@ view exp optionsOrder =
                         ]
 
                 ( Nothing, _ ) ->
-                    View.end data.infos.end UserClickedSaveData "/"
+                    View.end data.infos.end UserClickedSaveData "../post-tests/cw"
 
 
 audioButton trial nTimes =

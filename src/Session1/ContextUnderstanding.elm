@@ -119,7 +119,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end UserClickedSaveData "./"
+                    View.end data.infos.end UserClickedSaveData "../post-tests/cw"
 
         Logic.Loading ->
             View.loading

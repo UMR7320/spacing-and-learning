@@ -104,7 +104,7 @@ view exp =
                         ]
 
                 ( Nothing, _ ) ->
-                    View.end data.infos.end UserClickedSaveData "/"
+                    View.end data.infos.end UserClickedSaveData "../post-tests/cw"
 
 
 type Msg

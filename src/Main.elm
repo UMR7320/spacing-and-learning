@@ -19,8 +19,9 @@ import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
 import Ports
+import Postest.Acceptability as PostAcceptability
 import Postest.CloudWords as CloudWords
-import Postest.YN as YN
+import Postest.SPR as PostSpr
 import Pretest.Acceptability as Acceptability
 import Pretest.GeneralInfos exposing (Msg(..))
 import Pretest.Pretest as Pretest
@@ -82,7 +83,6 @@ type alias Model =
     --                                                                  88__dP 88__dP 88__     88   88__   `Ybo."   88
     --                                                                  88"""  88"Yb  88""     88   88""   o.`Y8b   88
     --                                                                  88     88  Yb 888888   88   888888 8bodP'   88
-    , yn : Logic.Task YN.Trial YN.State
     , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
     , packetsSended : Int
     , informations : Pretest.GeneralInfos.Model
@@ -130,7 +130,9 @@ type alias Model =
     --                                                              88__dP dP   Yb `Ybo."   88   88__   `Ybo."   88
     --                                                              88"""  Yb   dP o.`Y8b   88   88""   o.`Y8b   88
     --                                                              88      YbodP  8bodP'   88   888888 8bodP'   88
-    , cloudWords : Dict.Dict String CloudWords.WordKnowledge
+    , cloudWords : CloudWords.CloudWords
+    , postspr : Logic.Task PostSpr.Trial PostSpr.State
+    , postacceptability : Logic.Task PostAcceptability.Trial PostAcceptability.State
 
     --                                                             .dP"Y8 88  88    db    88""Yb 888888 8888b.
     --                                                             `Ybo." 88  88   dPYb   88__dP 88__    8I  Yb
@@ -192,7 +194,6 @@ init _ url key =
             , pilote = NotAsked
 
             -- PRETEST
-            , yn = Logic.Loading
             , informations = ""
             , spr = Logic.NotStarted
             , pretest = Tuple.first Pretest.attempt
@@ -201,7 +202,9 @@ init _ url key =
             , yesno = Logic.NotStarted
 
             -- POSTEST
-            , cloudWords = Dict.fromList CloudWords.words
+            , cloudWords = CloudWords.Running (Dict.fromList CloudWords.words)
+            , postspr = Logic.NotStarted
+            , postacceptability = Logic.NotStarted
 
             -- SHARED
             , user = url.query
@@ -396,7 +399,13 @@ body model =
             Route.Posttest _ task ->
                 case task of
                     Route.CloudWords ->
-                        [ Html.Styled.map WordCloud <| CloudWords.view model ]
+                        List.map (Html.Styled.map WordCloud) (CloudWords.view model)
+
+                    Route.PostSPR ->
+                        List.map (Html.Styled.map PostSpr) (PostSpr.view model.postspr)
+
+                    Route.PostAcceptability sub ->
+                        List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
 
             Route.Pretest userId task ->
                 case task of
@@ -693,6 +702,8 @@ type Msg
       --
       --
     | WordCloud CloudWords.Msg
+    | PostSpr PostSpr.Msg
+    | PostAcceptability PostAcceptability.Msg
 
 
 pure model =
@@ -777,6 +788,13 @@ update msg model =
                     Acceptability.update submsg model
             in
             ( newModel, Cmd.map Acceptability newCmd )
+
+        PostAcceptability submsg ->
+            let
+                ( newModel, newCmd ) =
+                    PostAcceptability.update submsg model
+            in
+            ( newModel, Cmd.map PostAcceptability newCmd )
 
         PlaysoundInJS url ->
             ( model, Ports.playAudio url )
@@ -864,6 +882,13 @@ update msg model =
                     CloudWords.update submsg model
             in
             ( subModel, Cmd.map WordCloud subCmd )
+
+        PostSpr submsg ->
+            let
+                ( subModel, subCmd ) =
+                    PostSpr.update submsg model
+            in
+            ( subModel, Cmd.map PostSpr subCmd )
 
         UserClickedSignInButton ->
             ( model

@@ -116,8 +116,8 @@ correctionFactor falseAlarms hits =
 
 
 scoreVoc : Int -> Int -> Int
-scoreVoc hits falseAlamrs =
-    (toFloat hits * 100.0 * correctionFactor falseAlamrs hits) |> round
+scoreVoc hits falseAlarms =
+    (toFloat hits * 100.0 * correctionFactor falseAlarms hits) |> round
 
 
 weighted x =
