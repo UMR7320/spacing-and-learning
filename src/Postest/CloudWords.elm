@@ -77,8 +77,9 @@ words =
     , ( "recK58CFOied5QbWY", { word = "vow", knowledge = NotKnown } )
     , ( "reci13I4WD6BL2aYe", { word = "wield", knowledge = NotKnown } )
     , ( "recMzEWiaVwdBxAsS", { word = "withstand", knowledge = NotKnown } )
-    , ( "recwMm0FnWOye0WIp", { word = "spell", knowledge = NotKnown } )
-    , ( "recXMPUEcjlZ4mN8x", { word = "focus", knowledge = NotKnown } )
+
+    --, ( "recwMm0FnWOye0WIp", { word = "spell", knowledge = NotKnown } )
+    --, ( "recXMPUEcjlZ4mN8x", { word = "focus", knowledge = NotKnown } )
     ]
 
 

@@ -318,8 +318,8 @@ update msg model =
         ServerRespondedWithLastRecords (Result.Ok _) ->
             ( { model | postspr = Logic.NotStarted }, Cmd.none )
 
-        ServerRespondedWithLastRecords (Result.Err _) ->
-            ( model, Cmd.none )
+        ServerRespondedWithLastRecords (Result.Err reason) ->
+            ( { model | postspr = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
         StartMain _ _ ->
             ( { model | postspr = Logic.startMain model.postspr initState }, Cmd.none )

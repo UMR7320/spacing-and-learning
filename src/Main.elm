@@ -394,7 +394,7 @@ body model =
                         ]
 
                     Route.TopSession3 ->
-                        viewSessionInstructions model.sessions "session2" "synonym"
+                        viewSessionInstructions model.sessions "session3" "synonym"
 
             Route.Posttest _ task ->
                 case task of

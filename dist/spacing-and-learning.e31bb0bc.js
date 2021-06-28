@@ -14552,13 +14552,7 @@ var $author$project$Postest$CloudWords$words = _List_fromArray(
 		{knowledge: $author$project$Postest$CloudWords$NotKnown, word: 'wield'}),
 		_Utils_Tuple2(
 		'recMzEWiaVwdBxAsS',
-		{knowledge: $author$project$Postest$CloudWords$NotKnown, word: 'withstand'}),
-		_Utils_Tuple2(
-		'recwMm0FnWOye0WIp',
-		{knowledge: $author$project$Postest$CloudWords$NotKnown, word: 'spell'}),
-		_Utils_Tuple2(
-		'recXMPUEcjlZ4mN8x',
-		{knowledge: $author$project$Postest$CloudWords$NotKnown, word: 'focus'})
+		{knowledge: $author$project$Postest$CloudWords$NotKnown, word: 'withstand'})
 	]);
 var $author$project$Main$init = F3(
 	function (_v0, url, key) {
@@ -16274,7 +16268,15 @@ var $author$project$Postest$SPR$update = F2(
 							{postspr: $author$project$Logic$NotStarted}),
 						$elm$core$Platform$Cmd$none);
 				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					var reason = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								postspr: $author$project$Logic$Err(
+									$author$project$Data$buildErrorMessage(reason))
+							}),
+						$elm$core$Platform$Cmd$none);
 				}
 			case 'StartMain':
 				return _Utils_Tuple2(
@@ -28474,6 +28476,7 @@ var $author$project$Session2$Translation$renderTask = F5(
 				]),
 			_List_fromArray(
 				[
+					$author$project$View$tooltip(data.infos.instructions_short),
 					($elm$core$List$length(data.trainingTrials) > 0) ? A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil) : A2($author$project$Progressbar$progressBar, history, allTrials),
 					$author$project$View$fromMarkdown(trial.question),
 					A2(
@@ -29778,7 +29781,7 @@ var $author$project$Main$body = function (model) {
 										$author$project$Session3$Spelling3$view(model.spelling3))
 									]);
 							default:
-								return A3($author$project$Main$viewSessionInstructions, model.sessions, 'session2', 'synonym');
+								return A3($author$project$Main$viewSessionInstructions, model.sessions, 'session3', 'synonym');
 						}
 					case 'Posttest':
 						var task = _v0.b;
@@ -34613,7 +34616,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64096" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55086" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

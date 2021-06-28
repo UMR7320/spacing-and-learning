@@ -156,7 +156,8 @@ payload history =
 
 renderTask task trial data history allTrials =
     div [ class "text-xl w-1/2 p-2" ]
-        [ if List.length data.trainingTrials > 0 then
+        [ View.tooltip data.infos.instructions_short
+        , if List.length data.trainingTrials > 0 then
             div [] []
 
           else
