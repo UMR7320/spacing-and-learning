@@ -182,7 +182,7 @@ viewLimitedTimesAudioButton nTimes trial =
         View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
 
     else
-        View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened ?" }
+        View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened?" }
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg

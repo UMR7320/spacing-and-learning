@@ -116,11 +116,11 @@ instructions content msgToTraining =
 end endInfo saveDataMsg linkToNextTask =
     div [ class "flex flex-col text-lg w-full items-center" ]
         [ fromMarkdown endInfo
-        , a [ href linkToNextTask ]
+        , a [ class "pt-", href linkToNextTask ]
             [ button
                 { message = saveDataMsg
                 , isDisabled = False
-                , txt = "Click here when you are ready !"
+                , txt = "Click here when you are ready!"
                 }
             ]
         ]
@@ -237,7 +237,7 @@ viewInstructions instructions_ =
         , p [ class "pt-8 pb-8 font-medium" ]
             [ pre [] [ fromMarkdown instructions_ ]
             ]
-        , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here !" ] ]
+        , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here!" ] ]
         ]
 
 
@@ -539,7 +539,7 @@ sentenceInSynonym t state msg feedback_ =
 button : { message : msg, txt : String, isDisabled : Bool } -> Html msg
 button { message, txt, isDisabled } =
     Html.Styled.button
-        [ class "max-w-xl w-full mt-2 mb-4 text-lg"
+        [ class "max-w-lg w-full mt-2 mb-4 text-lg"
         , onClick message
         , Html.Styled.Attributes.disabled isDisabled
         , class <|
@@ -553,8 +553,8 @@ button { message, txt, isDisabled } =
 
 
 audioButton msg url audioName =
-    div
-        [ class "px-4 py-4 mt-4 mb-4 hover:opacity-75 cursor-pointer border-2 flex flex-row items-center justify-center bg-green-500 rounded-md shadow-sm"
+    Html.Styled.button
+        [ class "mt-2 mb-4 max-w-lg w-full flex flex-row items-center justify-center bg-green-500 hover:bg-green-600 rounded-md"
         , Html.Styled.Events.onClick (msg url)
         ]
         [ div [ class "h-6 w-6 text-white" ] [ fromUnstyled <| Icons.music ], span [ class "pl-4 text-lg font-bold text-white" ] [ text <| audioName ] ]

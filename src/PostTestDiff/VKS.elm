@@ -1,4 +1,4 @@
-module Pretest.VKS exposing (..)
+module PostTestDiff.VKS exposing (..)
 
 import Data
 import Dict

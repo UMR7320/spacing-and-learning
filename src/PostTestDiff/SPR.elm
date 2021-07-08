@@ -1,4 +1,4 @@
-module Postest.SPR exposing (..)
+module PostTestDiff.SPR exposing (..)
 
 import Browser.Events exposing (onKeyDown)
 import Data exposing (decodeRecords)
@@ -19,7 +19,7 @@ import View exposing (unclickableButton)
 
 
 taskId =
-    "recltSZGE9YbTWN6a"
+    "rec7oxQBDY7rBTRDn"
 
 
 type alias Pretest =
@@ -32,7 +32,7 @@ type alias SPR =
 
 type alias Spr model =
     { model
-        | postspr : Logic.Task Trial State
+        | spr : Logic.Task Trial State
 
         --, pretest : Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
         , user : Maybe String
@@ -296,47 +296,47 @@ update : Msg -> Spr model -> ( Spr model, Cmd Msg )
 update msg model =
     let
         prevState =
-            Logic.getState model.postspr |> Maybe.withDefault initState
+            Logic.getState model.spr |> Maybe.withDefault initState
 
         currentTrial =
-            Logic.getTrial model.postspr
+            Logic.getTrial model.spr
     in
     case msg of
         UserConfirmedChoice answer ->
-            ( { model | postspr = model.postspr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
+            ( { model | spr = model.spr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
 
         UserClickedNextTrial newanswer ->
-            ( { model | postspr = model.postspr |> Logic.update { prevState | answer = newanswer } |> Logic.next initState }, Cmd.none )
+            ( { model | spr = model.spr |> Logic.update { prevState | answer = newanswer } |> Logic.next initState }, Cmd.none )
 
         UserClickedSaveData ->
             let
                 responseHandler =
                     ServerRespondedWithLastRecords
             in
-            ( { model | postspr = Logic.Loading }, saveSprData responseHandler model.user model.postspr )
+            ( { model | spr = Logic.Loading }, saveSprData responseHandler model.user model.spr )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( { model | postspr = Logic.NotStarted }, Cmd.none )
+            ( { model | spr = Logic.NotStarted }, Cmd.none )
 
-        ServerRespondedWithLastRecords (Result.Err reason) ->
-            ( { model | postspr = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
+        ServerRespondedWithLastRecords (Result.Err _) ->
+            ( model, Cmd.none )
 
         StartMain _ _ ->
-            ( { model | postspr = Logic.startMain model.postspr initState }, Cmd.none )
+            ( { model | spr = Logic.startMain model.spr initState }, Cmd.none )
 
         TimestampedMsg subMsg timestamp ->
             case subMsg of
                 UserPressedSpaceToStartParagraph ->
                     { model
-                        | postspr =
+                        | spr =
                             case currentTrial of
                                 Nothing ->
-                                    model.postspr
+                                    model.spr
 
                                 Just tr ->
                                     case tr.taggedSegments of
                                         [] ->
-                                            model.postspr
+                                            model.spr
 
                                         x :: xs ->
                                             Logic.update
@@ -345,13 +345,13 @@ update msg model =
                                                     , currentSegment = Just (TaggedSegmentStarted x (Maybe.withDefault (Time.millisToPosix 0) timestamp))
                                                     , remainingSegments = xs
                                                 }
-                                                model.postspr
+                                                model.spr
                     }
                         |> updateWithTime subMsg timestamp model
 
                 UserPressedSpaceToReadNextSegment ->
                     { model
-                        | postspr =
+                        | spr =
                             case prevState.remainingSegments of
                                 [] ->
                                     Logic.update
@@ -369,7 +369,7 @@ update msg model =
                                                     Nothing ->
                                                         prevState.seenSegments
                                         }
-                                        model.postspr
+                                        model.spr
 
                                 x :: _ ->
                                     Logic.update
@@ -389,7 +389,7 @@ update msg model =
                                                     Nothing ->
                                                         prevState.seenSegments
                                         }
-                                        model.postspr
+                                        model.spr
                     }
                         |> updateWithTime subMsg timestamp model
 
@@ -397,7 +397,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | postspr = Logic.startTraining model.postspr }, Cmd.none )
+            ( { model | spr = Logic.startTraining model.spr }, Cmd.none )
 
 
 updateWithTime : TimedMsg -> Maybe Time.Posix -> model -> model -> ( model, Cmd Msg )
@@ -466,7 +466,7 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ progressBar data.history data.mainTrials
+                    [ div [ Attr.class "flex flex-col items-center" ] [ progressBar data.history data.mainTrials ]
                     , viewTask data trial UserClickedNextTrial
                     ]
 
@@ -477,7 +477,7 @@ view task =
             [ text ("I encountered the following error: " ++ reason) ]
 
         Logic.NotStarted ->
-            [ p [] [ text "Thanks for your participation !" ] ]
+            [ p [] [ text "Thanks for your participation!" ] ]
 
         Logic.Running Logic.Instructions data ->
             [ View.instructions data.infos.instructions UserClickedStartTraining ]
@@ -514,7 +514,8 @@ getRecords =
             Data.buildQuery
                 { app = Data.apps.spacing
                 , base = "SPR"
-                , view_ = "Post-test"
+                , view_ =
+                    "Post-test 2"
                 }
         , body = Http.emptyBody
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials

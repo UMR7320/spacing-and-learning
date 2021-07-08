@@ -1,4 +1,4 @@
-module Postest.Acceptability exposing (..)
+module PostTestDiff.Acceptability exposing (..)
 
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (Key, pushUrl)
@@ -17,6 +17,7 @@ import Logic exposing (Task)
 import Ports
 import Task
 import Time
+import User exposing (User)
 import View
 
 
@@ -500,7 +501,7 @@ evalToString eval =
 
 type alias Model supraModel =
     { supraModel
-        | postacceptability : Logic.Task Trial State
+        | acceptabilityTask : Logic.Task Trial State
         , endAcceptabilityDuration : Int
         , key : Key
         , user : Maybe String
@@ -511,32 +512,32 @@ update : Msg -> Model supraModel -> ( Model supraModel, Cmd Msg )
 update msg model =
     let
         pState =
-            Logic.getState model.postacceptability |> Maybe.withDefault initState
+            Logic.getState model.acceptabilityTask |> Maybe.withDefault initState
 
         toNextStep int step =
             Delay.after int (NextStepCinematic step)
 
         trial =
-            Logic.getTrial model.postacceptability |> Maybe.withDefault dumbTrial
+            Logic.getTrial model.acceptabilityTask |> Maybe.withDefault dumbTrial
     in
     case msg of
         NextStepCinematic step ->
             case step of
                 Listening ->
-                    ( { model | postacceptability = Logic.update { pState | step = Listening } model.postacceptability }
+                    ( { model | acceptabilityTask = Logic.update { pState | step = Listening } model.acceptabilityTask }
                     , Delay.after 500 (UserClickedPlayAudio trial.audio.url)
                     )
 
                 Answering ->
-                    ( { model | postacceptability = Logic.update { pState | step = Answering } model.postacceptability }, Delay.after trial.timeout (UserPressedButton Nothing) )
+                    ( { model | acceptabilityTask = Logic.update { pState | step = Answering } model.acceptabilityTask }, Delay.after trial.timeout (UserPressedButton Nothing) )
 
                 End ->
-                    ( { model | postacceptability = Logic.update { pState | step = End } model.postacceptability |> Logic.next pState }
+                    ( { model | acceptabilityTask = Logic.update { pState | step = End } model.acceptabilityTask |> Logic.next pState }
                     , toNextStep 0 Start
                     )
 
                 Start ->
-                    ( { model | postacceptability = Logic.update newLoop model.postacceptability }, Delay.after 0 (UserClickedPlayAudio beep) )
+                    ( { model | acceptabilityTask = Logic.update newLoop model.acceptabilityTask }, Delay.after 0 (UserClickedPlayAudio beep) )
 
                 _ ->
                     ( model, Cmd.none )
@@ -554,33 +555,33 @@ update msg model =
 
         UserPressedButtonWithTimestamp maybeBool timestamp ->
             ( { model
-                | postacceptability =
+                | acceptabilityTask =
                     Logic.update
                         { pState
                             | step = End
                             , evaluation = maybeBoolToEvaluation maybeBool
                             , userAnsweredAt = Just timestamp
                         }
-                        model.postacceptability
+                        model.acceptabilityTask
               }
             , toNextStep model.endAcceptabilityDuration End
             )
 
         AudioEnded ( name, timestamp ) ->
             if name == beep then
-                ( { model | postacceptability = Logic.update { pState | beepEndedAt = Just timestamp } model.postacceptability }, Cmd.none )
+                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask }, Cmd.none )
 
             else
-                ( { model | postacceptability = Logic.update { pState | audioEndedAt = Just timestamp } model.postacceptability }
+                ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask }
                 , toNextStep 0 Answering
                 )
 
         AudioStarted ( name, timestamp ) ->
             if name == beep then
-                ( { model | postacceptability = Logic.update { pState | beepStartedAt = Just timestamp } model.postacceptability }, toNextStep 0 Listening )
+                ( { model | acceptabilityTask = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptabilityTask }, toNextStep 0 Listening )
 
             else
-                ( { model | postacceptability = Logic.update { pState | audioStartedAt = Just timestamp } model.postacceptability }
+                ( { model | acceptabilityTask = Logic.update { pState | audioStartedAt = Just timestamp } model.acceptabilityTask }
                 , Cmd.none
                 )
 
@@ -588,17 +589,17 @@ update msg model =
             ( model, Cmd.batch [ pushUrl model.key "start" ] )
 
         StartMain ->
-            ( { model | postacceptability = Logic.startMain model.postacceptability initState, endAcceptabilityDuration = 500 }, toNextStep 0 Init )
+            ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask initState, endAcceptabilityDuration = 500 }, toNextStep 0 Init )
 
         UserClickedSaveMsg ->
             let
                 responseHandler =
                     ServerRespondedWithLastRecords
             in
-            ( { model | postacceptability = Logic.Loading }, saveAcceptabilityData responseHandler model.user model.postacceptability )
+            ( { model | acceptabilityTask = Logic.Loading }, saveAcceptabilityData responseHandler model.user model.acceptabilityTask )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( { model | postacceptability = Logic.Loading }
+            ( { model | acceptabilityTask = Logic.Loading }
             , pushUrl model.key "end"
             )
 
@@ -606,10 +607,10 @@ update msg model =
             ( model, Ports.playAudio url )
 
         ServerRespondedWithLastRecords (Result.Err reason) ->
-            ( { model | postacceptability = Logic.Err <| Data.buildErrorMessage reason ++ "Please report this error message to yacourt@unice.fr with a nice screenshot!" }, Cmd.none )
+            ( { model | acceptabilityTask = Logic.Err <| Data.buildErrorMessage reason ++ "Please report this error message to yacourt@unice.fr with a nice screenshot!" }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | postacceptability = Logic.startTraining model.postacceptability }, Cmd.none )
+            ( { model | acceptabilityTask = Logic.startTraining model.acceptabilityTask }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )

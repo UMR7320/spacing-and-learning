@@ -14,6 +14,7 @@ import Url
 import Url.Parser as Parser
     exposing
         ( (</>)
+        , (<?>)
         , Parser
         , map
         , oneOf
@@ -21,12 +22,13 @@ import Url.Parser as Parser
         , string
         , top
         )
+import Url.Parser.Query
 
 
 type Route
     = Home
     | NotFound
-    | Pretest UserId Pretest
+    | Pretest UserId Pretest (Maybe String)
     | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
@@ -116,6 +118,7 @@ parser =
                                         ]
                             )
                         ]
+                <?> Url.Parser.Query.string "version"
             )
         , map Session1
             (s "user"

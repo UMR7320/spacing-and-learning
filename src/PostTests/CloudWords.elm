@@ -1,8 +1,9 @@
-module Postest.CloudWords exposing (CloudWords(..), Msg(..), Word, WordKnowledge, toggle, update, view, words)
+module PostTests.CloudWords exposing (CloudWords(..), Msg(..), Word, WordKnowledge, toggle, update, view, words)
 
+import Browser.Navigation exposing (pushUrl)
 import Data
 import Dict
-import Html.Styled exposing (div, h1, input, label, span, text)
+import Html.Styled exposing (div, h1, input, label, p, span, text)
 import Html.Styled.Attributes exposing (class, type_)
 import Html.Styled.Events
 import Http
@@ -48,38 +49,23 @@ type alias Word =
     }
 
 
-words : List ( String, { word : String, knowledge : WordKnowledge } )
 words =
     [ ( "recCWc45cPRRz6k4k", { word = "crave", knowledge = NotKnown } )
     , ( "recJxzByUxGCTz7bC", { word = "curb", knowledge = NotKnown } )
     , ( "reclQIspVCkKaQ93J", { word = "dazzle", knowledge = NotKnown } )
-    , ( "recnrmevKdqgEiRX5", { word = "divert", knowledge = NotKnown } )
     , ( "recJbufDTI1F4ps0i", { word = "dread", knowledge = NotKnown } )
     , ( "recvjrjv0o2uwTXDt", { word = "equate", knowledge = NotKnown } )
-    , ( "recIYnug7zkWW2sKj", { word = "hail", knowledge = NotKnown } )
     , ( "recDHT4TX9gtv9Jnn", { word = "hinder", knowledge = NotKnown } )
-    , ( "recXOzqJwXk5la1eu", { word = "hum", knowledge = NotKnown } )
     , ( "recpqxWfX5CGMrFkx", { word = "incur", knowledge = NotKnown } )
-    , ( "recfFOa9cCagckZ5Z", { word = "intrude", knowledge = NotKnown } )
-    , ( "rec7hosYCJdQ23AdG", { word = "juggle", knowledge = NotKnown } )
     , ( "recPdvyZoRGIZcA57", { word = "loathe", knowledge = NotKnown } )
-    , ( "recvUCQzxkhAffUKo", { word = "mingle", knowledge = NotKnown } )
     , ( "recI5YFzd7aMRs1Gg", { word = "moan", knowledge = NotKnown } )
     , ( "recl26ebnJ5zOfvxO", { word = "pinpoint", knowledge = NotKnown } )
     , ( "recmjaHTHFXrBGQSP", { word = "ponder", knowledge = NotKnown } )
-    , ( "recAwJcgy9898scfb", { word = "refrain", knowledge = NotKnown } )
     , ( "reckyzxJrCqcbzg9p", { word = "relish", knowledge = NotKnown } )
-    , ( "reckIHkM3qeSAe8uE", { word = "saddle", knowledge = NotKnown } )
-    , ( "recTQ4T1A7OQEI3hN", { word = "seduce", knowledge = NotKnown } )
-    , ( "recb1amYzKr35RYfW", { word = "sprinkle", knowledge = NotKnown } )
     , ( "recUiB0O0W8Lwyymv", { word = "strive", knowledge = NotKnown } )
     , ( "recXkLmHDF43nt14L", { word = "uphold", knowledge = NotKnown } )
-    , ( "recK58CFOied5QbWY", { word = "vow", knowledge = NotKnown } )
     , ( "reci13I4WD6BL2aYe", { word = "wield", knowledge = NotKnown } )
     , ( "recMzEWiaVwdBxAsS", { word = "withstand", knowledge = NotKnown } )
-
-    --, ( "recwMm0FnWOye0WIp", { word = "spell", knowledge = NotKnown } )
-    --, ( "recXMPUEcjlZ4mN8x", { word = "focus", knowledge = NotKnown } )
     ]
 
 
@@ -137,7 +123,19 @@ update msg model =
             ( model, updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder )
 
         ServerRespondedWithUpdatedUser response ->
-            ( { model | cloudWords = End }, Cmd.none )
+            let
+                isSession3Started =
+                    model.session3 /= Session.NotAsked
+            in
+            ( { model | cloudWords = End }
+            , pushUrl model.key
+                (if isSession3Started then
+                    "vks"
+
+                 else
+                    "cw"
+                )
+            )
 
 
 updateVocabularyScore : Http.Body -> (Result Http.Error a -> msg) -> Decode.Decoder a -> Cmd msg
@@ -163,7 +161,14 @@ type alias Payload =
 
 
 type alias Model superModel =
-    { superModel | cloudWords : CloudWords, user : Maybe String, session1 : Session1.Session1, session2 : Session2.Session2, session3 : Session3.Session3 }
+    { superModel
+        | cloudWords : CloudWords
+        , user : Maybe String
+        , session1 : Session1.Session1
+        , session2 : Session2.Session2
+        , session3 : Session3.Session3
+        , key : Browser.Navigation.Key
+    }
 
 
 type CloudWords
@@ -175,49 +180,52 @@ view : Model superModel -> List (Html.Styled.Html Msg)
 view model =
     case model.cloudWords of
         Running w ->
-            [ div [ class "grid grid-flow-col content-center grid-rows-4 auto-cols-max gap-4 " ] <|
-                (Dict.map
-                    (\id value ->
-                        div
-                            [ class "transition duration-300 ease-in-out rounded-lg cursor-pointer p-2 align-baseline flex flex-row"
-                            , class
-                                (if value.knowledge == NotKnown then
-                                    "bg-red-500"
+            [ div [ class "flex flex-col items-center" ]
+                [ p [ class "pb-8 text-center" ] [ View.fromMarkdown "Let's recap!\n\nHow well do you think you know our verbs now?\n\nClick on each verb to change its color:\n\n- grey: I don't know it yet\n\n- white: I know it a little\n\n- green: I know it well" ]
+                , div [ class "grid grid-flow-col content-center grid-rows-4 grid-cols-4 gap-4 pb-8 " ] <|
+                    (Dict.map
+                        (\id value ->
+                            div
+                                [ class "transition duration-300 ease-in-out rounded-lg cursor-pointer p-2 align-baseline flex flex-row"
+                                , class
+                                    (if value.knowledge == NotKnown then
+                                        "bg-gray-500"
 
-                                 else if value.knowledge == MaybeKnown then
-                                    ""
+                                     else if value.knowledge == MaybeKnown then
+                                        ""
 
-                                 else
-                                    "bg-green-500"
-                                )
-                            , Html.Styled.Events.onClick <|
-                                UserToggledInCloudWords id
-                            ]
-                            [ text <|
-                                if value.knowledge == NotKnown then
-                                    "👎"
+                                     else
+                                        "bg-green-500"
+                                    )
+                                , Html.Styled.Events.onClick <|
+                                    UserToggledInCloudWords id
+                                ]
+                                [ text <|
+                                    if value.knowledge == NotKnown then
+                                        "🤷\u{200D}♀️"
 
-                                else if value.knowledge == MaybeKnown then
-                                    "🤔"
+                                    else if value.knowledge == MaybeKnown then
+                                        "🤔"
 
-                                else
-                                    "👍"
-                            , span [ class "pl-2 text-lg" ] [ text value.word ]
-                            ]
+                                    else
+                                        "👍"
+                                , span [ class "pl-2 text-lg" ] [ text value.word ]
+                                ]
+                        )
+                        w
+                        |> Dict.values
                     )
-                    w
-                    |> Dict.values
-                )
-            , View.button
-                { message =
-                    UserClickedSaveData
-                        { knownWords = filterWords w Known
-                        , maybeKnownWords = filterWords w MaybeKnown
-                        , unknownWords = filterWords w NotKnown
-                        }
-                , txt = "Click here to save data"
-                , isDisabled = False
-                }
+                , View.button
+                    { message =
+                        UserClickedSaveData
+                            { knownWords = filterWords w Known
+                            , maybeKnownWords = filterWords w MaybeKnown
+                            , unknownWords = filterWords w NotKnown
+                            }
+                    , txt = "Click here to save data"
+                    , isDisabled = False
+                    }
+                ]
             ]
 
         End ->

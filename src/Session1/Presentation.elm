@@ -13,6 +13,7 @@ import Logic
 import Ports
 import Progressbar exposing (progressBar)
 import Session3.Synonym exposing (Msg(..))
+import Set
 import Task
 import View
 
@@ -96,7 +97,12 @@ view task =
                         , entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
                         , View.button
                             { message = UserClickedNextTrial
-                            , isDisabled = False
+                            , isDisabled =
+                                if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation" ] then
+                                    True
+
+                                else
+                                    False
                             , txt = "Continue"
                             }
                         ]
@@ -117,7 +123,12 @@ view task =
                         , div [ class "" ]
                             [ View.button
                                 { message = UserClickedNextTrial
-                                , isDisabled = False
+                                , isDisabled =
+                                    if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation" ] then
+                                        True
+
+                                    else
+                                        False
                                 , txt = "Continue"
                                 }
                             ]
@@ -189,8 +200,14 @@ initState =
             , ( "translation", False )
             ]
         )
+        Set.empty
 
 
+type alias Model superModel =
+    { superModel | presentation : Logic.Task Trial State }
+
+
+update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     case msg of
         UserClickedNextTrial ->
@@ -223,6 +240,7 @@ update msg model =
                                 { state
                                     | toggledEntries =
                                         updateEntry state
+                                    , clickedEntries = Set.insert id state.clickedEntries
                                 }
                                 model.presentation
                       }
@@ -270,6 +288,7 @@ type alias Trial =
 type alias State =
     { uid : String
     , toggledEntries : Dict String Bool
+    , clickedEntries : Set.Set String
     }
 
 

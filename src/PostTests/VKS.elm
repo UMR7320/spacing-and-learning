@@ -1,4 +1,4 @@
-module Pretest.VKS exposing (..)
+module PostTests.VKS exposing (..)
 
 import Data
 import Dict
@@ -12,8 +12,8 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
-import PostTestDiff.Acceptability exposing (ErrorBlock(..))
-import PostTestDiff.SPR exposing (Msg(..))
+import PostTests.Acceptability exposing (ErrorBlock(..))
+import PostTests.SPR exposing (Msg(..))
 import Progressbar exposing (progressBarWhenNoTraining)
 import Random
 import Task

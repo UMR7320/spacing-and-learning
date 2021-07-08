@@ -4,8 +4,8 @@ import Data
 import Expect
 import List.Extra
 import Main
-import Pretest.Acceptability as A
-import Pretest.YesNo as YN
+importPost-test-diff.Acceptabilitybility as A
+importPost-test-diff.YesNo.YesNo as YN
 import Session2.Spelling exposing (dedupe)
 import Test exposing (..)
 

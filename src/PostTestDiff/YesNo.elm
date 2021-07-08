@@ -1,4 +1,4 @@
-module Pretest.YesNo exposing (..)
+module PostTestDiff.YesNo exposing (..)
 
 import Browser.Events exposing (onKeyDown)
 import Data

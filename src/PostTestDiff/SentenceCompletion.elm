@@ -1,4 +1,4 @@
-module Pretest.SentenceCompletion exposing (..)
+module PostTestDiff.SentenceCompletion exposing (..)
 
 import Data
 import Dict

@@ -1,6 +1,7 @@
-module Pretest.SPR exposing (..)
+module PostTests.SPR exposing (..)
 
 import Browser.Events exposing (onKeyDown)
+import Browser.Navigation exposing (pushUrl)
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
@@ -19,7 +20,7 @@ import View exposing (unclickableButton)
 
 
 taskId =
-    "rec7oxQBDY7rBTRDn"
+    "recltSZGE9YbTWN6a"
 
 
 type alias Pretest =
@@ -32,10 +33,11 @@ type alias SPR =
 
 type alias Spr model =
     { model
-        | spr : Logic.Task Trial State
+        | postspr : Logic.Task Trial State
 
         --, pretest : Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
         , user : Maybe String
+        , key : Browser.Navigation.Key
     }
 
 
@@ -296,47 +298,47 @@ update : Msg -> Spr model -> ( Spr model, Cmd Msg )
 update msg model =
     let
         prevState =
-            Logic.getState model.spr |> Maybe.withDefault initState
+            Logic.getState model.postspr |> Maybe.withDefault initState
 
         currentTrial =
-            Logic.getTrial model.spr
+            Logic.getTrial model.postspr
     in
     case msg of
         UserConfirmedChoice answer ->
-            ( { model | spr = model.spr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
+            ( { model | postspr = model.postspr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
 
         UserClickedNextTrial newanswer ->
-            ( { model | spr = model.spr |> Logic.update { prevState | answer = newanswer } |> Logic.next initState }, Cmd.none )
+            ( { model | postspr = model.postspr |> Logic.update { prevState | answer = newanswer } |> Logic.next initState }, Cmd.none )
 
         UserClickedSaveData ->
             let
                 responseHandler =
                     ServerRespondedWithLastRecords
             in
-            ( { model | spr = Logic.Loading }, saveSprData responseHandler model.user model.spr )
+            ( { model | postspr = Logic.Loading }, saveSprData responseHandler model.user model.postspr )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( { model | spr = Logic.NotStarted }, Cmd.none )
+            ( { model | postspr = Logic.NotStarted }, pushUrl model.key "sentence-completion" )
 
-        ServerRespondedWithLastRecords (Result.Err _) ->
-            ( model, Cmd.none )
+        ServerRespondedWithLastRecords (Result.Err reason) ->
+            ( { model | postspr = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
         StartMain _ _ ->
-            ( { model | spr = Logic.startMain model.spr initState }, Cmd.none )
+            ( { model | postspr = Logic.startMain model.postspr initState }, Cmd.none )
 
         TimestampedMsg subMsg timestamp ->
             case subMsg of
                 UserPressedSpaceToStartParagraph ->
                     { model
-                        | spr =
+                        | postspr =
                             case currentTrial of
                                 Nothing ->
-                                    model.spr
+                                    model.postspr
 
                                 Just tr ->
                                     case tr.taggedSegments of
                                         [] ->
-                                            model.spr
+                                            model.postspr
 
                                         x :: xs ->
                                             Logic.update
@@ -345,13 +347,13 @@ update msg model =
                                                     , currentSegment = Just (TaggedSegmentStarted x (Maybe.withDefault (Time.millisToPosix 0) timestamp))
                                                     , remainingSegments = xs
                                                 }
-                                                model.spr
+                                                model.postspr
                     }
                         |> updateWithTime subMsg timestamp model
 
                 UserPressedSpaceToReadNextSegment ->
                     { model
-                        | spr =
+                        | postspr =
                             case prevState.remainingSegments of
                                 [] ->
                                     Logic.update
@@ -369,7 +371,7 @@ update msg model =
                                                     Nothing ->
                                                         prevState.seenSegments
                                         }
-                                        model.spr
+                                        model.postspr
 
                                 x :: _ ->
                                     Logic.update
@@ -389,7 +391,7 @@ update msg model =
                                                     Nothing ->
                                                         prevState.seenSegments
                                         }
-                                        model.spr
+                                        model.postspr
                     }
                         |> updateWithTime subMsg timestamp model
 
@@ -397,7 +399,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | spr = Logic.startTraining model.spr }, Cmd.none )
+            ( { model | postspr = Logic.startTraining model.postspr }, Cmd.none )
 
 
 updateWithTime : TimedMsg -> Maybe Time.Posix -> model -> model -> ( model, Cmd Msg )
@@ -466,7 +468,7 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ div [ Attr.class "flex flex-col items-center" ] [ progressBar data.history data.mainTrials ]
+                    [ progressBar data.history data.mainTrials
                     , viewTask data trial UserClickedNextTrial
                     ]
 
@@ -514,8 +516,7 @@ getRecords =
             Data.buildQuery
                 { app = Data.apps.spacing
                 , base = "SPR"
-                , view_ =
-                    "Pretest"
+                , view_ = "Post-test 2"
                 }
         , body = Http.emptyBody
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials

@@ -19,16 +19,16 @@ import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
 import Ports
-import Postest.Acceptability as PostAcceptability
-import Postest.CloudWords as CloudWords
-import Postest.SPR as PostSpr
-import Pretest.Acceptability as Acceptability
-import Pretest.GeneralInfos exposing (Msg(..))
-import Pretest.Pretest as Pretest
-import Pretest.SPR as SPR
-import Pretest.SentenceCompletion as SentenceCompletion
-import Pretest.VKS as VKS
-import Pretest.YesNo as YesNo
+import PostTestDiff.Acceptability as Acceptability
+import PostTestDiff.Pretest as Pretest
+import PostTestDiff.SPR as SPR
+import PostTestDiff.SentenceCompletion as SentenceCompletion
+import PostTestDiff.VKS as VKS
+import PostTestDiff.YesNo as YesNo
+import PostTests.Acceptability as PostAcceptability
+import PostTests.CloudWords as CloudWords
+import PostTests.SPR as PostSpr
+import Pretest.GeneralInfos
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
 import Session exposing (Session(..))
@@ -145,6 +145,7 @@ type alias Model =
     , currentDate : Maybe ( Time.Zone, Time.Posix )
     , preferedStartDate : Maybe Date.Date
     , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
+    , version : Maybe String
     }
 
 
@@ -162,6 +163,9 @@ init _ url key =
 
         ( loadingStateSession3, fetchSession3 ) =
             Session3.attempt
+
+        ( loadingStatePretest, fetchSessionPretest ) =
+            Pretest.attempt
 
         defaultInit =
             { key = key
@@ -207,7 +211,7 @@ init _ url key =
             , postacceptability = Logic.NotStarted
 
             -- SHARED
-            , user = url.query
+            , user = Just ""
             , optionsOrder = [ 0, 1, 2, 3 ]
             , infos = RemoteData.Loading
             , errorTracking = []
@@ -215,6 +219,7 @@ init _ url key =
             , currentDate = Nothing
             , preferedStartDate = Nothing
             , sessions = RemoteData.Loading
+            , version = Nothing
             }
     in
     case route of
@@ -268,7 +273,7 @@ init _ url key =
             , Cmd.batch [ Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
-        Route.Pretest userid _ ->
+        Route.Pretest userid _ version ->
             ( { defaultInit
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
@@ -276,8 +281,10 @@ init _ url key =
                 , acceptabilityTask = Logic.Loading
                 , yesno = Logic.Loading
                 , user = Just userid
+                , version = version
+                , pretest = loadingStatePretest
               }
-            , Cmd.batch [ Cmd.map Pretest (Tuple.second Pretest.attempt), Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now) ]
+            , Cmd.batch [ Cmd.map Pretest fetchSessionPretest, Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now) ]
             )
 
         Route.Posttest _ _ ->
@@ -308,15 +315,6 @@ view model =
 
 body : Model -> List (Html Msg)
 body model =
-    let
-        infos =
-            case model.infos of
-                RemoteData.Success infos_ ->
-                    infos_
-
-                _ ->
-                    Dict.empty
-    in
     [ View.header
         [ navOut "BCL" "https://bcl.cnrs.fr/"
         , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
@@ -407,7 +405,7 @@ body model =
                     Route.PostAcceptability sub ->
                         List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
 
-            Route.Pretest userId task ->
+            Route.Pretest userId task version ->
                 case task of
                     Route.EmailSent ->
                         [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]

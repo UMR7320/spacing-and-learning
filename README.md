@@ -6,6 +6,11 @@ Lexlearn (aka spacing-and-learning dans ce repo) est une expérience visant à m
 
 ```bash
 git clone https://gitlab.com/YoelisA/spacing-and-learning.git
+#Add Netlify_AUTH_TOKEN to PATH
+echo 'export NETLFIY_AUTH_TOKEN=TokenDonnéParYoelisOuLaurent' > .zprofile
+source .zprofile
+#Vérifier que l'environnement variable est bien ajoutée au PATH
+printenv NETLIFY_AUTH_TOKEN
 cd spacing-and-learning
 npm install
 npm run dev
