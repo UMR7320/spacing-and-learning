@@ -98,7 +98,7 @@ view task =
                         , View.button
                             { message = UserClickedNextTrial
                             , isDisabled =
-                                if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation" ] then
+                                if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation", "audio" ] then
                                     True
 
                                 else
@@ -124,7 +124,7 @@ view task =
                             [ View.button
                                 { message = UserClickedNextTrial
                                 , isDisabled =
-                                    if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation" ] then
+                                    if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation", "audio" ] then
                                         True
 
                                     else
@@ -251,7 +251,16 @@ update msg model =
                     ( model, Cmd.none )
 
         UserClickedStartAudio url ->
-            ( model, Ports.playAudio url )
+            let
+                prevState =
+                    Logic.getState model.presentation
+            in
+            case prevState of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just state ->
+                    ( { model | presentation = Logic.update { state | clickedEntries = Set.insert "audio" state.clickedEntries } model.presentation }, Ports.playAudio url )
 
         UserClickedStartTraining ->
             ( { model | presentation = Logic.startTraining model.presentation }, Cmd.none )

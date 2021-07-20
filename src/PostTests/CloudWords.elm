@@ -128,13 +128,11 @@ update msg model =
                     model.session3 /= Session.NotAsked
             in
             ( { model | cloudWords = End }
-            , pushUrl model.key
-                (if isSession3Started then
-                    "vks"
+            , if isSession3Started then
+                Browser.Navigation.load "../pretest/vks?version=post"
 
-                 else
-                    "cw"
-                )
+              else
+                pushUrl model.key "cw"
             )
 
 
@@ -233,4 +231,4 @@ view model =
 
 
 filterWords w wordknowledge =
-    Dict.filter (\k v -> v.knowledge == wordknowledge) w |> Dict.keys
+    Dict.filter (\_ v -> v.knowledge == wordknowledge) w |> Dict.keys

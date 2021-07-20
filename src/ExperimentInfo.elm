@@ -18,6 +18,7 @@ type Session
     | Session3
     | Pretest
     | Posttest
+    | PosttestDiff
     | OtherSession
 
 
@@ -37,6 +38,9 @@ sessionToString str =
 
         Posttest ->
             "Post-test"
+
+        PosttestDiff ->
+            "Post-test-diff"
 
         OtherSession ->
             "Other"
@@ -137,7 +141,7 @@ decode =
 
         decoder =
             Decode.succeed Task
-                |> required "UID" Decode.string
+                |> required "id" Decode.string
                 |> custom (Decode.field "Session" Decode.string |> Decode.andThen mapToSession)
                 |> custom (Decode.field "Type" Decode.string |> Decode.andThen mapToType_)
                 |> optional "Name" Decode.string "Missing Name"

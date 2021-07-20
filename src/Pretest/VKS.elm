@@ -12,16 +12,30 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
-import PostTestDiff.Acceptability exposing (ErrorBlock(..))
-import PostTestDiff.SPR exposing (Msg(..))
 import Progressbar exposing (progressBarWhenNoTraining)
 import Random
 import Task
 import View
 
 
-taskId =
-    "recR6grI83e1so6Zl"
+taskId model =
+    case model.version of
+        Nothing ->
+            "recR6grI83e1so6Zl"
+
+        Just specifiedVersion ->
+            case specifiedVersion of
+                "pre" ->
+                    "recR6grI83e1so6Zl"
+
+                "post" ->
+                    "recAlZreFoiVGfSbN"
+
+                "post-diff" ->
+                    "rec4WlQXhH06yutJ5"
+
+                _ ->
+                    "recR6grI83e1so6Zl"
 
 
 type alias SC =
@@ -216,7 +230,7 @@ type Field
 
 
 type alias Model superModel =
-    { superModel | vks : Logic.Task Trial State, user : Maybe String }
+    { superModel | vks : Logic.Task Trial State, user : Maybe String, version : Maybe String }
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -254,7 +268,7 @@ update msg model =
                 responseHandler =
                     ServerRespondedWithLastRecords
             in
-            ( { model | vks = Logic.Loading }, saveData responseHandler model.user model.vks )
+            ( { model | vks = Logic.Loading }, saveData responseHandler model )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
             ( { model | vks = Logic.NotStarted }, Cmd.none )
@@ -266,11 +280,11 @@ update msg model =
             ( { model | vks = model.vks |> Logic.update { prevState | knowledge = familiarityFromString str } }, Cmd.none )
 
 
-init : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
-init infos trials =
+init : List ExperimentInfo.Task -> List Trial -> Model superModel -> Logic.Task Trial State
+init infos trials model =
     let
         info =
-            ExperimentInfo.toDict infos |> Dict.get taskId |> Result.fromMaybe "I couldn't find Task infos"
+            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find Task infos"
     in
     Logic.startIntro info [] trials initState
 
@@ -312,13 +326,13 @@ familiarityFromString str =
             NoAnswer
 
 
-saveData responseHandler maybeUserId task =
+saveData responseHandler model =
     let
         history =
-            Logic.getHistory task
+            Logic.getHistory model.vks
 
         userId =
-            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
         summarizedTrialEncoder =
             Encode.list
@@ -332,13 +346,14 @@ saveData responseHandler maybeUserId task =
                                 , ( "vks_synonym", Encode.string synonym )
                                 , ( "vks_translation", Encode.string translation )
                                 , ( "vks_usage", Encode.string usage )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
+                                , ( "Task_UID", Encode.list Encode.string [ taskId model ] )
+                                , ( "userUid", Encode.list Encode.string [ userId ] )
                                 ]
                           )
                         ]
                 )
 
         sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder taskId userId history
+            Data.sendInBatch summarizedTrialEncoder (taskId model) userId history
     in
     Task.attempt responseHandler sendInBatch_

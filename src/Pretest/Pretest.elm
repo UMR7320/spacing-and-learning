@@ -7,29 +7,33 @@ import Html.Attributes exposing (accept)
 import Http
 import List.Extra
 import Logic
-import PostTestDiff.Acceptability as Acceptability exposing (ErrorBlock)
-import PostTestDiff.SPR as SPR
-import PostTestDiff.SentenceCompletion as SentenceCompletion
-import PostTestDiff.VKS as VKS
-import PostTestDiff.YesNo as YesNo
+import Pretest.Acceptability as Acceptability exposing (ErrorBlock)
+import Pretest.SPR as SPR
+import Pretest.SentenceCompletion as SentenceCompletion
+import Pretest.VKS as VKS
+import Pretest.YesNo as YesNo
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
+import Session
 import Task.Parallel as Para
 
 
 type alias Pretest =
-    Para.State6 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
+    Session.Session (Para.State6 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial))
 
 
 type alias ParaMsg =
     Para.Msg6 (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
 
 
-attempt : ( Pretest, Cmd Msg )
-attempt =
+
+--attempt : Maybe String -> ( Pretest, Cmd Msg )
+
+
+attempt version =
     Para.attempt6
-        { task1 = SPR.getRecords
+        { task1 = SPR.getRecords version
         , task2 = SentenceCompletion.getRecords
         , task3 = ExperimentInfo.getRecords
         , task4 = VKS.getRecords
@@ -70,6 +74,7 @@ type alias Model superModel =
         , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
         , yesno : YesNo.YN
         , version : Maybe String
+        , user : Maybe String
     }
 
 
@@ -78,10 +83,15 @@ update msg model =
     case msg of
         ServerRespondedWithSomePretestData downloaded ->
             let
-                ( nextState, nextCmd ) =
-                    Para.update6 model.pretest downloaded
+                ( updte, cmd ) =
+                    case model.pretest of
+                        Session.Loading downloadState ->
+                            Para.update6 downloadState downloaded |> Tuple.mapFirst Session.Loading
+
+                        _ ->
+                            ( model.pretest, Cmd.none )
             in
-            ( { model | pretest = nextState }, nextCmd )
+            ( { model | pretest = updte }, cmd )
 
         ServerRespondedWithSomeError err ->
             ( { model
@@ -151,9 +161,9 @@ update msg model =
                     if List.filter (\block -> List.length block < 4) shuffledTrials == [ [] ] then
                         ( { model
                             | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials)
-                            , spr = SPR.init infos spr
-                            , sentenceCompletion = SentenceCompletion.init infos sc
-                            , vks = VKS.init infos (List.filter (not << .isTraining) vks)
+                            , spr = SPR.init infos spr model.version
+                            , sentenceCompletion = SentenceCompletion.init infos sc model
+                            , vks = VKS.init infos (List.filter (not << .isTraining) vks) model
                             , yesno = YesNo.init infos yn
                           }
                         , Cmd.none

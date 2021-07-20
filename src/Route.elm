@@ -82,8 +82,6 @@ type AcceptabilityRoute
 
 type PosttestTask
     = CloudWords
-    | PostAcceptability AcceptabilityRoute
-    | PostSPR
 
 
 type Session3Task
@@ -160,15 +158,6 @@ parser =
                 </> s "post-tests"
                 </> oneOf
                         [ map CloudWords (s "cw")
-                        , map PostAcceptability
-                            (s "acceptability"
-                                </> oneOf
-                                        [ map AcceptabilityInstructions (s "instructions")
-                                        , map AcceptabilityStart (s "start")
-                                        , map AcceptabilityEnd (s "end")
-                                        ]
-                            )
-                        , map PostSPR (s "spr")
                         ]
             )
 

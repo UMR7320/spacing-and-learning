@@ -1,6 +1,7 @@
 module Pretest.SPR exposing (..)
 
 import Browser.Events exposing (onKeyDown)
+import Browser.Navigation exposing (Key)
 import Data exposing (decodeRecords)
 import Dict
 import ExperimentInfo
@@ -18,8 +19,26 @@ import Time
 import View exposing (unclickableButton)
 
 
-taskId =
-    "rec7oxQBDY7rBTRDn"
+taskId : Maybe String -> String
+taskId version =
+    case version of
+        Nothing ->
+            versions.pre
+
+        Just specifiedVersion ->
+            case specifiedVersion of
+                "post" ->
+                    versions.post
+
+                "post-diff" ->
+                    versions.postDiff
+
+                _ ->
+                    versions.pre
+
+
+versions =
+    { pre = "rec7oxQBDY7rBTRDn", post = "recPo6XGa58q3wfRw", postDiff = "rec1g3y3VAgQwj2sy" }
 
 
 type alias Pretest =
@@ -33,9 +52,9 @@ type alias SPR =
 type alias Spr model =
     { model
         | spr : Logic.Task Trial State
-
-        --, pretest : Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
         , user : Maybe String
+        , version : Maybe String
+        , key : Key
     }
 
 
@@ -233,19 +252,19 @@ subscriptions task =
             Sub.none
 
 
-saveSprData responseHandler maybeUserId task =
+saveSprData responseHandler model =
     let
         history =
-            Logic.getHistory task
+            Logic.getHistory model.spr
 
         taskId_ =
-            taskId
+            taskId model.version
 
         callbackHandler =
             responseHandler
 
         userId =
-            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
         formattedData : List { tag : String, segment : String, startedAt : Int, endedAt : Int, id : String, answer : String }
         formattedData =
@@ -273,14 +292,14 @@ saveSprData responseHandler maybeUserId task =
                     Encode.object
                         [ ( "fields"
                           , Encode.object
-                                [ ( "sprTrialId", Encode.list Encode.string [ id ] )
+                                [ ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
+                                , ( "userUid", Encode.list Encode.string [ userId ] )
+                                , ( "sprTrialId", Encode.list Encode.string [ id ] )
                                 , ( "answer", Encode.string answer )
                                 , ( "sprStartedAt", Encode.int startedAt )
                                 , ( "sprEndedAt", Encode.int endedAt )
                                 , ( "tag", Encode.string tag )
                                 , ( "segment", Encode.string segment )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
                                 ]
                           )
                         ]
@@ -313,13 +332,25 @@ update msg model =
                 responseHandler =
                     ServerRespondedWithLastRecords
             in
-            ( { model | spr = Logic.Loading }, saveSprData responseHandler model.user model.spr )
+            ( { model | spr = Logic.Loading }
+            , Cmd.batch
+                [ saveSprData responseHandler model
+                , if model.version == Just "post" then
+                    Browser.Navigation.pushUrl model.key "acceptability/instructions"
+
+                  else if model.version == Just "post-diff" then
+                    Browser.Navigation.pushUrl model.key "sentence-completion"
+
+                  else
+                    Cmd.none
+                ]
+            )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
             ( { model | spr = Logic.NotStarted }, Cmd.none )
 
-        ServerRespondedWithLastRecords (Result.Err _) ->
-            ( model, Cmd.none )
+        ServerRespondedWithLastRecords (Result.Err reason) ->
+            ( { model | spr = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
         StartMain _ _ ->
             ( { model | spr = Logic.startMain model.spr initState }, Cmd.none )
@@ -483,10 +514,10 @@ view task =
             [ View.instructions data.infos.instructions UserClickedStartTraining ]
 
 
-init infos trials =
+init infos trials model =
     let
         info =
-            ExperimentInfo.toDict infos |> Dict.get taskId |> Result.fromMaybe "I couldn't find SPR infos"
+            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find SPR infos"
     in
     Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
@@ -506,7 +537,7 @@ decodeAcceptabilityTrials =
     decodeRecords decoder
 
 
-getRecords =
+getRecords version =
     Http.task
         { method = "GET"
         , headers = []
@@ -515,7 +546,25 @@ getRecords =
                 { app = Data.apps.spacing
                 , base = "SPR"
                 , view_ =
-                    "Pretest"
+                    case version of
+                        Nothing ->
+                            "Pretest"
+
+                        Just specifiedVersion ->
+                            case specifiedVersion of
+                                "pre" ->
+                                    "Pretest"
+
+                                "post" ->
+                                    "Post-test"
+
+                                "post-diff" ->
+                                    "Post-test 2"
+
+                                _ ->
+                                    "Pretest"
+
+                --}
                 }
         , body = Http.emptyBody
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials

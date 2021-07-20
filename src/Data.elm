@@ -3,7 +3,7 @@ module Data exposing (..)
 import Dict
 import Http exposing (Error(..), Response(..))
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (custom)
+import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Process
 import Task
@@ -209,6 +209,43 @@ getTrialsFromServer_ baseName viewName callbackMsg decoder =
                 callbackMsg
                 decoder
         }
+
+
+getGeneralParemeters responseHandler =
+    Http.get
+        { url =
+            buildQuery
+                { app = apps.spacing
+                , base = "parameters"
+                , view_ = "all"
+                }
+        , expect =
+            Http.expectJson
+                responseHandler
+                decodeGeneralParameters
+        }
+
+
+decodeGeneralParameters =
+    let
+        decoder =
+            Decode.succeed GeneralParameters
+                |> required "d_spacing (DAYS)" int
+                |> required "m_spacing (DAYS)" int
+                |> required "RI (DAYS)" int
+                |> required "RI Surprise (DAYS)" int
+                |> optional "Consentement" string "MISSING CONSENTEMENT"
+    in
+    decodeRecords decoder
+
+
+type alias GeneralParameters =
+    { distributedSpacing : Int
+    , massedSpacing : Int
+    , retentionInterval : Int
+    , retentionIntervalSuprise : Int
+    , consent : String
+    }
 
 
 decodeBool : String -> Decoder (Bool -> b) -> Decoder b

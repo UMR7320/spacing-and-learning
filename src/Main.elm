@@ -19,16 +19,13 @@ import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
 import Ports
-import PostTestDiff.Acceptability as Acceptability
-import PostTestDiff.Pretest as Pretest
-import PostTestDiff.SPR as SPR
-import PostTestDiff.SentenceCompletion as SentenceCompletion
-import PostTestDiff.VKS as VKS
-import PostTestDiff.YesNo as YesNo
-import PostTests.Acceptability as PostAcceptability
 import PostTests.CloudWords as CloudWords
-import PostTests.SPR as PostSpr
-import Pretest.GeneralInfos
+import Pretest.Acceptability as Acceptability
+import Pretest.Pretest as Pretest
+import Pretest.SPR as SPR
+import Pretest.SentenceCompletion as SentenceCompletion
+import Pretest.VKS as VKS
+import Pretest.YesNo as YesNo
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
 import Session exposing (Session(..))
@@ -52,6 +49,7 @@ import Task.Parallel as Para
 import Time
 import Url exposing (Url)
 import Url.Builder
+import Url.Parser.Query
 import View exposing (navOut)
 
 
@@ -85,7 +83,6 @@ type alias Model =
     --                                                                  88     88  Yb 888888   88   888888 8bodP'   88
     , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
     , packetsSended : Int
-    , informations : Pretest.GeneralInfos.Model
     , pilote : Pilote
     , spr : SPR.SPR
     , pretest : Pretest.Pretest
@@ -131,8 +128,6 @@ type alias Model =
     --                                                              88"""  Yb   dP o.`Y8b   88   88""   o.`Y8b   88
     --                                                              88      YbodP  8bodP'   88   888888 8bodP'   88
     , cloudWords : CloudWords.CloudWords
-    , postspr : Logic.Task PostSpr.Trial PostSpr.State
-    , postacceptability : Logic.Task PostAcceptability.Trial PostAcceptability.State
 
     --                                                             .dP"Y8 88  88    db    88""Yb 888888 8888b.
     --                                                             `Ybo." 88  88   dPYb   88__dP 88__    8I  Yb
@@ -144,6 +139,11 @@ type alias Model =
     , errorTracking : List Http.Error
     , currentDate : Maybe ( Time.Zone, Time.Posix )
     , preferedStartDate : Maybe Date.Date
+    , distributedSpacing : Int
+    , massedSpacing : Int
+    , retentionInterval : Int
+    , retentionIntervalSurprise : Int
+    , consent : String
     , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
     , version : Maybe String
     }
@@ -155,6 +155,9 @@ init _ url key =
         route =
             Route.fromUrl url
 
+        version =
+            Url.Parser.Query.string "version"
+
         ( loadingStateSession1, fetchSession1 ) =
             Session1.getAll
 
@@ -163,9 +166,6 @@ init _ url key =
 
         ( loadingStateSession3, fetchSession3 ) =
             Session3.attempt
-
-        ( loadingStatePretest, fetchSessionPretest ) =
-            Pretest.attempt
 
         defaultInit =
             { key = key
@@ -198,17 +198,14 @@ init _ url key =
             , pilote = NotAsked
 
             -- PRETEST
-            , informations = ""
             , spr = Logic.NotStarted
-            , pretest = Tuple.first Pretest.attempt
+            , pretest = NotAsked
             , sentenceCompletion = Logic.NotStarted
             , vks = Logic.NotStarted
             , yesno = Logic.NotStarted
 
             -- POSTEST
             , cloudWords = CloudWords.Running (Dict.fromList CloudWords.words)
-            , postspr = Logic.NotStarted
-            , postacceptability = Logic.NotStarted
 
             -- SHARED
             , user = Just ""
@@ -220,6 +217,11 @@ init _ url key =
             , preferedStartDate = Nothing
             , sessions = RemoteData.Loading
             , version = Nothing
+            , distributedSpacing = 7
+            , massedSpacing = 2
+            , retentionInterval = 15
+            , retentionIntervalSurprise = 60
+            , consent = ""
             }
     in
     case route of
@@ -246,7 +248,7 @@ init _ url key =
                 , user = Nothing
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.map Session1 fetchSession1
+            , Cmd.batch [ Cmd.map Session1 fetchSession1, Data.getGeneralParemeters GotGeneralParameters ]
             )
 
         Route.AuthenticatedSession2 userid _ ->
@@ -273,7 +275,11 @@ init _ url key =
             , Cmd.batch [ Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
-        Route.Pretest userid _ version ->
+        Route.Pretest userid _ v ->
+            let
+                ( loadingStatePretest, fetchSessionPretest ) =
+                    Pretest.attempt v
+            in
             ( { defaultInit
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
@@ -281,10 +287,10 @@ init _ url key =
                 , acceptabilityTask = Logic.Loading
                 , yesno = Logic.Loading
                 , user = Just userid
-                , version = version
-                , pretest = loadingStatePretest
+                , version = v
+                , pretest = Loading loadingStatePretest
               }
-            , Cmd.batch [ Cmd.map Pretest fetchSessionPretest, Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now) ]
+            , Cmd.batch [ Cmd.map Pretest fetchSessionPretest, Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now), Data.getGeneralParemeters GotGeneralParameters ]
             )
 
         Route.Posttest _ _ ->
@@ -399,12 +405,6 @@ body model =
                     Route.CloudWords ->
                         List.map (Html.Styled.map WordCloud) (CloudWords.view model)
 
-                    Route.PostSPR ->
-                        List.map (Html.Styled.map PostSpr) (PostSpr.view model.postspr)
-
-                    Route.PostAcceptability sub ->
-                        List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
-
             Route.Pretest userId task version ->
                 case task of
                     Route.EmailSent ->
@@ -471,16 +471,19 @@ body model =
                                                     (sessionsDates d)
 
                                             sessionsDates d =
-                                                [ s2 d, s3 d, s4 d ]
+                                                [ s2 d, s3 d, s4 d, s5 d ]
 
                                             s2 d =
                                                 Date.add Date.Days 0 d
 
                                             s3 d =
-                                                Date.add Date.Days 2 (s2 d)
+                                                Date.add Date.Days model.massedSpacing (s2 d)
 
                                             s4 d =
-                                                Date.add Date.Days 2 (s3 d)
+                                                Date.add Date.Days model.massedSpacing (s3 d)
+
+                                            s5 d =
+                                                Date.add Date.Days model.retentionInterval (s4 d)
                                         in
                                         [ p [] [ text "For your conveniance, you can choose the day you wish to start the next session" ]
                                         , div [ class "flex flex-col" ] <|
@@ -496,10 +499,11 @@ body model =
                                                         ++ [ View.button
                                                                 { message =
                                                                     UserConfirmedPreferedDates
-                                                                        ( Date.toIsoString (s2 d)
-                                                                        , Date.toIsoString (s3 d)
-                                                                        , Date.toIsoString (s4 d)
-                                                                        )
+                                                                        { s1 = Date.toIsoString (s2 d)
+                                                                        , s2 = Date.toIsoString (s3 d)
+                                                                        , s3 = Date.toIsoString (s4 d)
+                                                                        , s4 = Date.toIsoString (s5 d)
+                                                                        }
                                                                 , txt = "I confirm I'll be available at least 1 hour each of those days"
                                                                 , isDisabled = False
                                                                 }
@@ -551,16 +555,19 @@ body model =
                                                     (sessionsDates d)
 
                                             sessionsDates d =
-                                                [ s2 d, s3 d, s4 d ]
+                                                [ s2 d, s3 d, s4 d, s5 d ]
 
                                             s2 d =
                                                 Date.add Date.Days 0 d
 
                                             s3 d =
-                                                Date.add Date.Days 7 (s2 d)
+                                                Date.add Date.Days model.distributedSpacing (s2 d)
 
                                             s4 d =
-                                                Date.add Date.Days 7 (s3 d)
+                                                Date.add Date.Days model.distributedSpacing (s3 d)
+
+                                            s5 d =
+                                                Date.add Date.Days model.retentionInterval (s3 d)
                                         in
                                         [ p [] [ text "For your conveniance, you can choose the day you wish to start the next session" ]
                                         , div [ class "flex flex-col" ] <|
@@ -576,10 +583,11 @@ body model =
                                                         ++ [ View.button
                                                                 { message =
                                                                     UserConfirmedPreferedDates
-                                                                        ( Date.toIsoString (s2 d)
-                                                                        , Date.toIsoString (s3 d)
-                                                                        , Date.toIsoString (s4 d)
-                                                                        )
+                                                                        { s1 = Date.toIsoString (s2 d)
+                                                                        , s2 = Date.toIsoString (s3 d)
+                                                                        , s3 = Date.toIsoString (s4 d)
+                                                                        , s4 = Date.toIsoString (s5 d)
+                                                                        }
                                                                 , txt = "I confirm I'll be available at least 1 hour each of those days"
                                                                 , isDisabled = False
                                                                 }
@@ -595,7 +603,7 @@ body model =
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
                     , p
                         [ class "max-w-2xl text-xl text-center mb-8" ]
-                        [ View.fromMarkdown Consent.consent
+                        [ View.fromMarkdown model.consent
                         ]
                     , View.button { message = UserClickedSignInButton, txt = "Confirmer", isDisabled = False }
                     ]
@@ -650,8 +658,9 @@ type Msg
     | ServerRespondedWithNewUser (Result.Result Http.Error String)
     | GotCurrentTime ( Time.Zone, Time.Posix )
     | UserClickedChoseNewDate Date.Date
-    | UserConfirmedPreferedDates ( String, String, String )
+    | UserConfirmedPreferedDates { s1 : String, s2 : String, s3 : String, s4 : String }
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
+    | GotGeneralParameters (Result.Result Http.Error (List Data.GeneralParameters))
     | NoOp
       --
       --                                                          ##  ##  ### ### ###  ## ###
@@ -700,8 +709,6 @@ type Msg
       --
       --
     | WordCloud CloudWords.Msg
-    | PostSpr PostSpr.Msg
-    | PostAcceptability PostAcceptability.Msg
 
 
 pure model =
@@ -786,13 +793,6 @@ update msg model =
                     Acceptability.update submsg model
             in
             ( newModel, Cmd.map Acceptability newCmd )
-
-        PostAcceptability submsg ->
-            let
-                ( newModel, newCmd ) =
-                    PostAcceptability.update submsg model
-            in
-            ( newModel, Cmd.map PostAcceptability newCmd )
 
         PlaysoundInJS url ->
             ( model, Ports.playAudio url )
@@ -881,13 +881,6 @@ update msg model =
             in
             ( subModel, Cmd.map WordCloud subCmd )
 
-        PostSpr submsg ->
-            let
-                ( subModel, subCmd ) =
-                    PostSpr.update submsg model
-            in
-            ( subModel, Cmd.map PostSpr subCmd )
-
         UserClickedSignInButton ->
             ( model
             , Nav.load "https://airtable.com/shrXTWi9PfYOkpS6Y"
@@ -908,7 +901,7 @@ update msg model =
         UserClickedChoseNewDate newDate ->
             ( { model | preferedStartDate = Just newDate }, Cmd.none )
 
-        UserConfirmedPreferedDates ( s1, s2, s3 ) ->
+        UserConfirmedPreferedDates { s1, s2, s3, s4 } ->
             ( model
             , Http.request
                 { url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "all" }
@@ -926,6 +919,7 @@ update msg model =
                                         [ ( "dateFirstEmail", Encode.string s1 )
                                         , ( "dateSecondEmail", Encode.string s2 )
                                         , ( "dateThirdEmail", Encode.string s3 )
+                                        , ( "dateFourthEmail", Encode.string s4 )
                                         ]
                                   )
                                 ]
@@ -938,6 +932,31 @@ update msg model =
 
         ServerRespondedWithSessionsInfos result ->
             ( { model | sessions = result }, Cmd.none )
+
+        GotGeneralParameters parameters ->
+            case parameters of
+                Result.Err reason ->
+                    ( model, Cmd.none )
+
+                Result.Ok params ->
+                    let
+                        maybeGeneralParameters =
+                            List.head params
+                    in
+                    case maybeGeneralParameters of
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                        Just p ->
+                            ( { model
+                                | distributedSpacing = p.distributedSpacing
+                                , massedSpacing = p.distributedSpacing
+                                , retentionInterval = p.retentionInterval
+                                , retentionIntervalSurprise = p.retentionIntervalSuprise
+                                , consent = p.consent
+                              }
+                            , Cmd.none
+                            )
 
 
 decodeNewUser =
