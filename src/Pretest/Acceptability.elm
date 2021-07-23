@@ -33,20 +33,20 @@ type alias State =
     }
 
 
-saveAcceptabilityData : (Result.Result Http.Error (List ()) -> msg) -> Maybe String -> Task Trial State -> Cmd msg
-saveAcceptabilityData responseHandler maybeUserId task =
+saveAcceptabilityData : (Result.Result Http.Error (List ()) -> msg) -> Model superModel -> Cmd msg
+saveAcceptabilityData responseHandler model =
     let
         history =
-            Logic.getHistory task
+            Logic.getHistory model.acceptabilityTask
 
         taskId_ =
-            taskId
+            taskId model.version
 
         callbackHandler =
             responseHandler
 
         userId =
-            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
         whenNothing =
             Time.millisToPosix 1000000000
@@ -62,7 +62,7 @@ saveAcceptabilityData responseHandler maybeUserId task =
                           , Encode.object
                                 [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
                                 , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
+                                , ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
                                 , ( "audioStartedAt", intFromMillis s.audioStartedAt )
                                 , ( "beepStartedAt", intFromMillis s.beepStartedAt )
                                 , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
@@ -357,11 +357,11 @@ getRecords =
         }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
-start info trials =
+start : List ExperimentInfo.Task -> List Trial -> Maybe String -> Logic.Task Trial State
+start info trials version =
     let
         relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+            Dict.get (taskId version) (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId version)
     in
     Logic.startIntro relatedInfos
         (List.filter (\datum -> datum.trialType == Training) trials)
@@ -369,8 +369,33 @@ start info trials =
         initState
 
 
-taskId =
-    "recR8areYkKRvQ6lU"
+taskId : Maybe String -> String
+taskId version =
+    case version of
+        Nothing ->
+            versions.pre
+
+        Just specifiedVersion ->
+            case specifiedVersion of
+                "post" ->
+                    versions.post
+
+                "post-diff" ->
+                    versions.postDiff
+
+                "surprise" ->
+                    versions.surprise
+
+                _ ->
+                    versions.pre
+
+
+versions =
+    { pre = "recR8areYkKRvQ6lU"
+    , post = "recOrxH3ebc5Jhmm4"
+    , postDiff = "recN5DtKXo2MEDdvc"
+    , surprise = "recTlSt6RDbluzbne"
+    }
 
 
 type TrialType
@@ -505,6 +530,7 @@ type alias Model supraModel =
         , endAcceptabilityDuration : Int
         , key : Key
         , user : Maybe String
+        , version : Maybe String
     }
 
 
@@ -596,7 +622,7 @@ update msg model =
                 responseHandler =
                     ServerRespondedWithLastRecords
             in
-            ( { model | acceptabilityTask = Logic.Loading }, saveAcceptabilityData responseHandler model.user model.acceptabilityTask )
+            ( { model | acceptabilityTask = Logic.Loading }, saveAcceptabilityData responseHandler model )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
             ( { model | acceptabilityTask = Logic.Loading }

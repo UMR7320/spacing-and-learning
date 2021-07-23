@@ -34,6 +34,9 @@ taskId model =
                 "post-diff" ->
                     "rec4WlQXhH06yutJ5"
 
+                "surprise" ->
+                    "recYe82wpkoFoW39K"
+
                 _ ->
                     "recR6grI83e1so6Zl"
 

@@ -160,7 +160,7 @@ update msg model =
                 Result.Ok shuffledTrials ->
                     if List.filter (\block -> List.length block < 4) shuffledTrials == [ [] ] then
                         ( { model
-                            | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials)
+                            | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials) model.version
                             , spr = SPR.init infos spr model.version
                             , sentenceCompletion = SentenceCompletion.init infos sc model
                             , vks = VKS.init infos (List.filter (not << .isTraining) vks) model

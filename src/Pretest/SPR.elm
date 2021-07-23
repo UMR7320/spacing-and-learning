@@ -33,12 +33,15 @@ taskId version =
                 "post-diff" ->
                     versions.postDiff
 
+                "surprise" ->
+                    versions.surprise
+
                 _ ->
                     versions.pre
 
 
 versions =
-    { pre = "rec7oxQBDY7rBTRDn", post = "recPo6XGa58q3wfRw", postDiff = "rec1g3y3VAgQwj2sy" }
+    { pre = "rec7oxQBDY7rBTRDn", post = "recPo6XGa58q3wfRw", postDiff = "rec1g3y3VAgQwj2sy", surprise = "recfot07G3AMUVK3S" }
 
 
 type alias Pretest =
@@ -553,6 +556,9 @@ getRecords version =
                         Just specifiedVersion ->
                             case specifiedVersion of
                                 "pre" ->
+                                    "Pretest"
+
+                                "surprise" ->
                                     "Pretest"
 
                                 "post" ->

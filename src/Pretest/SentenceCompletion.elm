@@ -30,6 +30,9 @@ taskId model =
                 "pre" ->
                     "reczQs5ZD6g1x5F29"
 
+                "surprise" ->
+                    "recA1dsUaJJsJ5WPY"
+
                 _ ->
                     "reczQs5ZD6g1x5F29"
 
