@@ -539,7 +539,7 @@ sentenceInSynonym t state msg feedback_ =
 button : { message : msg, txt : String, isDisabled : Bool } -> Html msg
 button { message, txt, isDisabled } =
     Html.Styled.button
-        [ class "max-w-lg w-full mt-2 mb-4 text-lg"
+        [ class "mt-2 mb-4 text-lg"
         , onClick message
         , Html.Styled.Attributes.disabled isDisabled
         , class <|
