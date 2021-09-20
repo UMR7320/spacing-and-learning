@@ -157,7 +157,7 @@ genericSingleChoiceFeedback :
 genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
     div
         [ class
-            (" w-full max-w-2xl rounded-md text-center object-center "
+            (" w-full max-w-xl rounded-md text-center object-center "
                 ++ (if data.isVisible && data.userAnswer == data.target then
                         "bg-green-700"
 
@@ -178,11 +178,10 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
                     "text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2"
                 ]
                 (if data.userAnswer == data.target then
-                    [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.checkCircle ], fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
+                    [ fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
 
                  else
-                    [ div [ class "w-12 h-12" ] [ fromUnstyled Icons.xCircle ]
-                    , fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
+                    [ fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
                     ]
                 )
 
