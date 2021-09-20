@@ -423,7 +423,7 @@ def =
 
 
 fromMarkdown =
-    fromUnstyled << Markdown.toHtmlWith { def | sanitize = False } [ A.class "space-y-4" ]
+    fromUnstyled << Markdown.toHtml []
 
 
 floatingLabel : String -> String -> (String -> msg) -> Bool -> Html msg
