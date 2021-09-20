@@ -107,7 +107,7 @@ type alias State =
 
 
 viewQuestion word trialn =
-    h3 [ class "italic" ] [ text word ]
+    div [ class "text-3xl font-bold italic my-6" ] [ text word ]
 
 
 view :
