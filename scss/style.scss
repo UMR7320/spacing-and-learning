@@ -9,6 +9,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body > div > .container {
+  display: grid;
+  place-items: center;
+}
+
 h1 {
   @apply font-bold text-4xl text-gray-800;
   @apply mb-4;
