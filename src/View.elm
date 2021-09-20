@@ -283,8 +283,8 @@ theme =
 
 header : List (Html msg) -> Html msg
 header items =
-    div
-        [ class "fixed z-7 top-0 inset-x-0 bg-white border-b border-gray-300" -- Tailwind utilities: https://tailwindcss.com
+    nav
+        [ class "border-b border-gray-300" -- Tailwind utilities: https://tailwindcss.com
         , css [ Css.height theme.headerHeight ] -- elm-css: https://package.elm-lang.org/packages/rtfeldman/elm-css/latest
         ]
         [ div

@@ -101,6 +101,10 @@ ol li + li {
   margin-top: 1rem;
 }
 
+nav li + li {
+  margin-top: 0;
+}
+
 p + p {
   margin-top: 1rem;
 }
