@@ -118,15 +118,21 @@ ol {
   padding: revert;
 }
 
+.cloudwords ul {
+  list-style: revert;
+  padding: revert;
+}
+
 ul li + li,
 ol li + li {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 nav li + li {
   margin-top: 0;
 }
 
+.flow > * + *,
 p + p {
   margin-top: 1rem;
 }

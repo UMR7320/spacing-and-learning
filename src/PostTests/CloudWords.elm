@@ -178,8 +178,9 @@ view : Model superModel -> List (Html.Styled.Html Msg)
 view model =
     case model.cloudWords of
         Running w ->
-            [ div [ class "flex flex-col items-center" ]
-                [ p [ class "pb-8 text-center" ] [ View.fromMarkdown "Let's recap!\n\nHow well do you think you know our verbs now?\n\nClick on each verb to change its color:\n\n- grey: I don't know it yet\n\n- white: I know it a little\n\n- green: I know it well" ]
+            [ div [ class "cloudwords" ]
+                [ h1 [] [ text "Progress check" ]
+                , div [ class "pb-8 flow" ] [ View.fromMarkdown "How well do you think you know our verbs now?\n\nClick on each verb to change its color:\n\n- grey: I don't know it yet\n\n- white: I know it a little\n\n- green: I know it well" ]
                 , div [ class "grid grid-flow-col content-center grid-rows-4 grid-cols-4 gap-4 pb-8 " ] <|
                     (Dict.map
                         (\id value ->

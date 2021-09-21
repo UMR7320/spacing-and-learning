@@ -409,7 +409,7 @@ def =
 
 
 fromMarkdown =
-    fromUnstyled << Markdown.toHtml []
+    fromUnstyled << Markdown.toHtml [ A.class "flow" ]
 
 
 floatingLabel : String -> String -> (String -> msg) -> Bool -> Html msg
