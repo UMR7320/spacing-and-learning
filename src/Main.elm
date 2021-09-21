@@ -602,7 +602,7 @@ body model =
                 [ div [ class "flex flex-col items-center" ]
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
                     , div
-                        [ class "max-w-2xl text-xl mb-8" ]
+                        [ class "mb-8" ]
                         [ View.fromMarkdown model.consent
                         ]
                     , View.button { message = UserClickedSignInButton, txt = "Confirmer", isDisabled = False }
