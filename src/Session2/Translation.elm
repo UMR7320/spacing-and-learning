@@ -155,7 +155,7 @@ payload history =
 
 
 renderTask task trial data history allTrials =
-    div [ class "flex flex-col items-center text-xl w-1/2 p-2" ]
+    div [ class "w-full" ]
         [ if List.isEmpty data.trainingTrials then
             View.tooltip data.infos.instructions_short
 
@@ -168,7 +168,7 @@ renderTask task trial data history allTrials =
             Progressbar.progressBar history allTrials
         , View.fromMarkdown trial.question
         , div
-            [ class "w-full max-w-3xl pt-8", disabled data.feedback ]
+            [ class "w-full pt-8", disabled data.feedback ]
           <|
             View.shuffledOptions
                 data.state

@@ -95,7 +95,7 @@ shuffledOptions state fb radioMsg trial optionsOrder =
                 |> List.sortBy Tuple.first
                 |> List.map Tuple.second
     in
-    ordoredOptions ++ [ option "I don't know" ]
+    [ div [ class "shuffled-options" ] (ordoredOptions ++ [ option "I don't know" ]) ]
 
 
 unclickableButton color txt =
@@ -350,45 +350,43 @@ notFound =
 radio : String -> Bool -> Bool -> Bool -> msg -> Html msg
 radio value isChecked isCorrect feedbackMode msg =
     label
-        [ class "group block text-gray-70 font-medium text-base ", id value ]
-        [ div
-            [ class
-                ("border-solid border-2 px-4 py-3 mb-1 "
-                    ++ (case ( feedbackMode, isChecked, isCorrect ) of
-                            ( True, True, False ) ->
-                                "border-red-500"
+        [ class
+            ("text-gray-70 font-medium "
+                ++ "border-solid border-2 px-4 py-3 mb-1 "
+                ++ (case ( feedbackMode, isChecked, isCorrect ) of
+                        ( True, True, False ) ->
+                            "border-red-500"
 
-                            ( True, True, True ) ->
-                                "border-green-500"
+                        ( True, True, True ) ->
+                            "border-green-500"
 
-                            ( False, True, _ ) ->
-                                "border-indigo-600"
+                        ( False, True, _ ) ->
+                            "border-indigo-600"
 
-                            ( False, False, _ ) ->
-                                "border-grey-500"
+                        ( False, False, _ ) ->
+                            "border-grey-500"
 
-                            ( True, False, _ ) ->
-                                "border-grey-500"
-                       )
-                )
-            , if feedbackMode == False then
-                class "group-hover:border-indigo-600 hover:underline cursor-pointer"
+                        ( True, False, _ ) ->
+                            "border-grey-500"
+                   )
+            )
+        , if feedbackMode == False then
+            class "group-hover:border-indigo-600 hover:underline cursor-pointer"
 
-              else
-                class ""
-            , class "active:border-indigo-400"
+          else
+            class ""
+        , class "active:border-indigo-400"
+        ]
+        [ input
+            [ type_ "radio"
+            , checked isChecked
+            , name "definition-choice"
+            , class "form-radio text-indigo-500"
+            , onClick msg
+            , Html.Styled.Attributes.disabled feedbackMode
             ]
-            [ input
-                [ type_ "radio"
-                , checked isChecked
-                , name "definition-choice"
-                , class "form-radio text-indigo-500"
-                , onClick msg
-                , Html.Styled.Attributes.disabled feedbackMode
-                ]
-                []
-            , span [ class "pl-4 " ] [ text value ]
-            ]
+            []
+        , span [ class "pl-4 " ] [ text value ]
         ]
 
 
