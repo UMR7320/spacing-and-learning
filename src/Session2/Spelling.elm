@@ -507,13 +507,11 @@ ghostYellow =
 
 containerStyles : List (Html.Styled.Attribute msg)
 containerStyles =
-    [ Html.Styled.Attributes.style "display" "flex"
-    , Html.Styled.Attributes.style "flex-wrap" "wrap"
-    , Html.Styled.Attributes.style "align-items" "center"
-
-    --, Html.Styled.Attributes.style "justify-content" "center"
-    , Html.Styled.Attributes.style "padding-top" "2em"
-    , class "font-bold text-2xl"
+    [ Html.Styled.Attributes.style "display" "grid"
+    , Html.Styled.Attributes.style "grid-template-columns" "repeat(auto-fill, 5rem)"
+    , Html.Styled.Attributes.style "grid-gap" "3rem"
+    , Html.Styled.Attributes.style "justify-content" "center"
+    , class "font-bold text-2xl w-full mt-12 mb-8"
     ]
 
 
@@ -525,7 +523,6 @@ itemStyles color =
     , Html.Styled.Attributes.style "border-radius" "8px"
     , Html.Styled.Attributes.style "color" "black"
     , Html.Styled.Attributes.style "cursor" "pointer"
-    , Html.Styled.Attributes.style "margin" "0 2em 2em 0"
     , Html.Styled.Attributes.style "display" "flex"
     , Html.Styled.Attributes.style "align-items" "center"
     , Html.Styled.Attributes.style "justify-content" "center"
