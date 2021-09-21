@@ -156,7 +156,7 @@ view task =
             [ text "C'est tout bon!" ]
 
         Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos.instructions UserClickedStartMain ]
+            [ View.instructions data.infos UserClickedStartMain ]
 
 
 getRecords =

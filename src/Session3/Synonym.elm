@@ -107,7 +107,7 @@ viewTask experiment =
             [ View.loading ]
 
         Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos.instructions UserCLickedStartTraining ]
+            [ View.instructions data.infos UserCLickedStartTraining ]
 
         Logic.Running Logic.Training task ->
             case task.current of

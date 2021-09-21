@@ -184,7 +184,7 @@ view task =
             div [] [ text "I did not start yet." ]
 
         Logic.Running Logic.Instructions data ->
-            View.instructions data.infos.instructions UserClickedStartTraining
+            View.instructions data.infos UserClickedStartTraining
 
 
 getRecords =

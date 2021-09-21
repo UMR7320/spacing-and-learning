@@ -31,7 +31,7 @@ view exp =
             div [] [ text <| "I stumbled into an error : " ++ reason ]
 
         Logic.Running Logic.Instructions data ->
-            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            div [] [ View.instructions data.infos UserClickedStartTraining ]
 
         Logic.Running Logic.Training { current, state, feedback } ->
             case ( current, state.step ) of

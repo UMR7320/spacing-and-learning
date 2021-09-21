@@ -514,7 +514,7 @@ view task =
             [ p [] [ text "Thanks for your participation!" ] ]
 
         Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            [ View.instructions data.infos UserClickedStartTraining ]
 
 
 init infos trials model =

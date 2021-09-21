@@ -31,6 +31,7 @@ module View exposing
 import Css
 import Css.Global
 import Css.Transitions
+import ExperimentInfo
 import Html.Attributes as A
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
@@ -105,10 +106,10 @@ loading =
     div [] [ text "Loading... Please don't exit or data will be lost" ]
 
 
-instructions content msgToTraining =
+instructions infos msgToTraining =
     div [ class "text-lg" ]
-        [ h1 [] [ text "Instructions" ]
-        , div [ class "max-w-2xl pb-8" ] [ fromMarkdown content ]
+        [ h1 [] [ text infos.name ]
+        , div [ class "pb-8" ] [ fromMarkdown infos.instructions ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
         ]
 

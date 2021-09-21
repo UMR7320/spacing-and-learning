@@ -161,7 +161,7 @@ view exp optionsOrder =
             text "I'm not started yet"
 
         Logic.Running Logic.Instructions data ->
-            div [ class "flex flex-col items-center" ] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            div [ class "flex flex-col items-center" ] [ View.instructions data.infos UserClickedStartTraining ]
 
         Logic.Err reason ->
             text <| "Error: " ++ reason

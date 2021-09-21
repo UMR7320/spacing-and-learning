@@ -289,7 +289,7 @@ viewScrabbleTask model =
             text "Not Asked"
 
         Logic.Running Logic.Instructions data ->
-            View.instructions data.infos.instructions UserClickedStartTraining
+            View.instructions data.infos UserClickedStartTraining
 
         Logic.Running Logic.Main data ->
             case data.current of

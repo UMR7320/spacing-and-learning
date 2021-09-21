@@ -80,7 +80,7 @@ view task =
             div [] [ text reason ]
 
         Logic.Running Logic.Instructions data ->
-            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            div [] [ View.instructions data.infos UserClickedStartTraining ]
 
         Logic.Loading ->
             View.loading

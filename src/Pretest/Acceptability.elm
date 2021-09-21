@@ -276,7 +276,7 @@ view task =
             ]
 
         Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            [ View.instructions data.infos UserClickedStartTraining ]
 
 
 decodeAcceptabilityTrials : Decode.Decoder (List Trial)

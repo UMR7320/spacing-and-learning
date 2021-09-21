@@ -216,7 +216,7 @@ view task =
         Logic.Running step data ->
             case step of
                 Logic.Instructions ->
-                    [ View.instructions data.infos.instructions UserClickedStartTask ]
+                    [ View.instructions data.infos UserClickedStartTask ]
 
                 Logic.Training ->
                     []

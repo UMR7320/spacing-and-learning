@@ -31,7 +31,7 @@ view exp optionsOrder =
             div [] [ text reason ]
 
         Logic.Running Logic.Instructions data ->
-            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            div [] [ View.instructions data.infos UserClickedStartTraining ]
 
         Logic.Running Logic.Training ({ mainTrials, current, state, feedback } as data) ->
             case ( current, data.state.step ) of

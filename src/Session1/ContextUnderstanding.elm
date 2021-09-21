@@ -125,7 +125,7 @@ view task =
             View.loading
 
         Logic.Running Logic.Instructions data ->
-            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            div [] [ View.instructions data.infos UserClickedStartTraining ]
 
 
 type Msg

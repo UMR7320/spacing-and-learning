@@ -27,7 +27,7 @@ view exp =
             div [] [ text "experiment did not start yet" ]
 
         Logic.Running Logic.Instructions data ->
-            div [] [ View.instructions data.infos.instructions UserClickedStartTraining ]
+            div [] [ View.instructions data.infos UserClickedStartTraining ]
 
         Logic.Running Logic.Training ({ current, state, feedback, history } as data) ->
             case ( current, state.step ) of
