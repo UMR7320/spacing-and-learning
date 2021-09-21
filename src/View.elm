@@ -107,7 +107,7 @@ loading =
 
 
 instructions infos msgToTraining =
-    div [ class "text-lg" ]
+    div [ class "text-lg instructions" ]
         [ h1 [] [ text infos.name ]
         , div [ class "pb-8" ] [ fromMarkdown infos.instructions ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
@@ -522,18 +522,20 @@ sentenceInSynonym t state msg feedback_ =
 
 button : { message : msg, txt : String, isDisabled : Bool } -> Html msg
 button { message, txt, isDisabled } =
-    Html.Styled.button
-        [ class "mt-2 mb-4 text-lg"
-        , onClick message
-        , Html.Styled.Attributes.disabled isDisabled
-        , class <|
-            if isDisabled then
-                "invisible"
+    div [ class "flex justify-center" ]
+        [ Html.Styled.button
+            [ class "mt-2 mb-4 text-lg"
+            , onClick message
+            , Html.Styled.Attributes.disabled isDisabled
+            , class <|
+                if isDisabled then
+                    "invisible"
 
-            else
-                "visible"
+                else
+                    "visible"
+            ]
+            [ text txt ]
         ]
-        [ text txt ]
 
 
 audioButton msg url audioName =
