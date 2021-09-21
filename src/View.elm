@@ -2,7 +2,6 @@ module View exposing
     ( audioButton
     , bold
     , button
-    , container
     , end
     , floatingLabel
     , fromMarkdown
@@ -12,6 +11,7 @@ module View exposing
     , instructions
     , introToMain
     , loading
+    , mainEl
     , navOut
     , navigationButton
     , notFound
@@ -226,7 +226,7 @@ genericNeutralFeedback ({ feedback_Correct } as data) =
 
 trainingBox : List (Html msg) -> Html msg
 trainingBox =
-    div [ class "container flex flex-col items-center justify-center w-full h-full border-4 border-green-500 border-rounded-lg border-dashed " ]
+    div [ class "flex flex-col items-center justify-center w-full h-full border-4 border-green-500 border-rounded-lg border-dashed " ]
 
 
 viewInstructions : String -> Html msg
@@ -271,11 +271,6 @@ pct trialn trials =
     (toFloat trialn / toFloat (List.length trials)) * 100
 
 
-theme : { headerHeight : Css.Rem }
-theme =
-    { headerHeight = Css.rem 4 }
-
-
 
 -- HEADER
 
@@ -283,13 +278,9 @@ theme =
 header : List (Html msg) -> Html msg
 header items =
     nav
-        [ class "border-b border-gray-300" -- Tailwind utilities: https://tailwindcss.com
-        , css [ Css.height theme.headerHeight ] -- elm-css: https://package.elm-lang.org/packages/rtfeldman/elm-css/latest
-        ]
+        [ class "border-b border-gray-300" ]
         [ div
-            [ class "container mx-auto h-full"
-            , class "flex items-center px-6"
-            ]
+            [ class "flex items-center px-6" ]
             [ a
                 [ attribute "data-test" "logo"
                 , class "flex items-center"
@@ -326,14 +317,9 @@ navOut name url =
 -- CONTAINER
 
 
-container : List (Html msg) -> Html msg
-container content =
-    div
-        [ attribute "data-test" "content"
-        , class "container mx-auto py-4 px-4"
-        , css [ Css.marginTop theme.headerHeight ]
-        ]
-        content
+mainEl : List (Html msg) -> Html msg
+mainEl content =
+    main_ [ attribute "data-test" "content" ] content
 
 
 
@@ -407,7 +393,7 @@ radio value isChecked isCorrect feedbackMode msg =
 
 introToMain : msg -> Html msg
 introToMain msg =
-    div [ class "container flex flex-col text-lg w-full items-center justify-center" ]
+    div [ class "flex flex-col text-lg w-full items-center justify-center" ]
         [ h3 [] [ text "Now you understand the activity, let's try our target words." ]
         , button
             { message = msg

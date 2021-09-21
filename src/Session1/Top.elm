@@ -34,7 +34,7 @@ view infos =
                 |> List.map toCard
                 |> div [ class "flex flex-wrap -mx-1 px-4 md:px-12" ]
     in
-    [ div [ class "container flex flex-col items-center justify-center w-full max-w-2-xl" ]
+    [ div [ class "flex flex-col items-center justify-center w-full max-w-2-xl" ]
         [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
         , p
             [ class "max-w-2xl text-xl text-center mb-8" ]

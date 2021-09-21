@@ -67,7 +67,7 @@ viewInstructions txt =
 
 
 trainingBox =
-    div [ class "container w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col" ]
+    div [ class "w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col" ]
 
 
 viewTask data currentTrial optionsOrder =
@@ -169,7 +169,7 @@ view exp optionsOrder =
         Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just x ->
-                    div [ class "container w-full flex flex-col justify-center items-center" ] <|
+                    div [ class "w-full flex flex-col justify-center items-center" ] <|
                         View.trainingWheelsGeneric
                             (List.length history)
                             data.infos.trainingWheel

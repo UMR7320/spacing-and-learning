@@ -325,7 +325,7 @@ body model =
         [ navOut "BCL" "https://bcl.cnrs.fr/"
         , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
         ]
-    , View.container <|
+    , View.mainEl <|
         case model.route of
             Route.Session1 _ task ->
                 case task of
@@ -599,7 +599,7 @@ body model =
                                         []
 
             Home ->
-                [ div [ class "container flex flex-col items-center" ]
+                [ div [ class "flex flex-col items-center" ]
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
                     , div
                         [ class "max-w-2xl text-xl mb-8" ]

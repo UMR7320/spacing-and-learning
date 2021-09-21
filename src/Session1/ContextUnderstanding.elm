@@ -103,7 +103,7 @@ view task =
                                 [] ->
                                     ( "defautpre", "defaultpOst" )
                     in
-                    div [ class "container flex flex-col w-full w-max-3xl items-center justify-center " ]
+                    div [ class "flex flex-col w-full w-max-3xl items-center justify-center " ]
                         [ View.tooltip data.infos.instructions_short
                         , Progressbar.progressBar data.history data.mainTrials
                         , paragraphWithInput pre data.state.userAnswer post
