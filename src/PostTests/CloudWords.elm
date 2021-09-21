@@ -200,10 +200,10 @@ view model =
                                 ]
                                 [ text <|
                                     if value.knowledge == NotKnown then
-                                        "🤷\u{200D}♀️"
+                                        "\u{1F937}\u{200D}♀️"
 
                                     else if value.knowledge == MaybeKnown then
-                                        "🤔"
+                                        "\u{1F914}"
 
                                     else
                                         "👍"
@@ -227,7 +227,11 @@ view model =
             ]
 
         End ->
-            [ h1 [] [ text "This session is over." ] ]
+            [ h1
+                []
+                [ text "This is the end of the session" ]
+            , p [] [ text "Check your calendar for your next learning session. You will receive an email with the link on the correct day." ]
+            ]
 
 
 filterWords w wordknowledge =
