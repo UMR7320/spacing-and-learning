@@ -115,14 +115,16 @@ instructions infos msgToTraining =
 
 
 end endInfo saveDataMsg linkToNextTask =
-    div [ class "flex flex-col text-lg w-full items-center" ]
+    div [ class "text-lg endInfo" ]
         [ fromMarkdown endInfo
-        , a [ class "pt-", href linkToNextTask ]
-            [ button
-                { message = saveDataMsg
-                , isDisabled = False
-                , txt = "Click here when you are ready!"
-                }
+        , div [ class "mt-8" ]
+            [ a [ href linkToNextTask ]
+                [ button
+                    { message = saveDataMsg
+                    , isDisabled = False
+                    , txt = "Click here when you are ready!"
+                    }
+                ]
             ]
         ]
 
