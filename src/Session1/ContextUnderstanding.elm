@@ -28,7 +28,7 @@ taskId =
 
 
 paragraphWithInput pre userAnswer post =
-    p [ class "max-w-2xl bg-gray-200 mb-8 rounded-lg text-lg p-4" ]
+    p [ class "bg-gray-200 mb-8 rounded-lg text-lg p-4" ]
         [ text pre
         , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
             [ text <|
@@ -72,7 +72,7 @@ view task =
                     in
                     div [ class "flex flex-col items-center" ]
                         [ paragraphWithInput pre data.state.userAnswer post
-                        , div [ class "w-full max-w-2xl" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
+                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
                         , div [ class "col-start-2 col-span-4" ] <|
                             [ View.genericSingleChoiceFeedback
                                 { isVisible = data.feedback
@@ -103,11 +103,11 @@ view task =
                                 [] ->
                                     ( "defautpre", "defaultpOst" )
                     in
-                    div [ class "flex flex-col w-full w-max-3xl items-center justify-center " ]
+                    div [ class "flex flex-col w-full items-center justify-center " ]
                         [ View.tooltip data.infos.instructions_short
                         , Progressbar.progressBar data.history data.mainTrials
                         , paragraphWithInput pre data.state.userAnswer post
-                        , div [ class "w-full max-w-xl" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
+                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer

@@ -157,7 +157,7 @@ genericSingleChoiceFeedback :
 genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
     div
         [ class
-            (" w-full max-w-xl rounded-md text-center object-center "
+            ("w-full rounded-md p-4 "
                 ++ (if data.isVisible && data.userAnswer == data.target then
                         "bg-green-700"
 
@@ -175,7 +175,7 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
         [ if data.isVisible then
             p
                 [ class
-                    "text-lg py-4 w-full flex flex-col items-center justify-center  text-white p-2"
+                    "text-lg text-white mb-4"
                 ]
                 (if data.userAnswer == data.target then
                     [ fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
@@ -195,7 +195,7 @@ genericNeutralFeedback : { isVisible : Bool, feedback_Correct : ( String, List S
 genericNeutralFeedback ({ feedback_Correct } as data) =
     div
         [ class
-            ("flex flex-col max-w-xl w-full rounded-md text-center object-center "
+            ("w-full rounded-md "
                 ++ (if data.isVisible then
                         "bg-indigo-800"
 

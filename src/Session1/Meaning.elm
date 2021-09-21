@@ -130,7 +130,7 @@ view task =
                         [ p [] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.writtenWord, View.bold trial.target ] ]
                         , p [] [ viewQuestion ("to " ++ trial.writtenWord) (List.length data.history) ]
                         , div
-                            [ class "smax-w-xl ", disabled data.feedback ]
+                            [ class "w-full ", disabled data.feedback ]
                           <|
                             View.shuffledOptions
                                 data.state
@@ -138,16 +138,14 @@ view task =
                                 UserClickedRadioButton
                                 trial
                                 task.optionsOrder
-                        , div []
-                            [ View.genericSingleChoiceFeedback
-                                { isVisible = data.feedback
-                                , userAnswer = data.state.userAnswer
-                                , target = trial.target
-                                , feedback_Correct = ( trial.feedbackIncorrect, [] )
-                                , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
-                                }
-                            ]
+                        , View.genericSingleChoiceFeedback
+                            { isVisible = data.feedback
+                            , userAnswer = data.state.userAnswer
+                            , target = trial.target
+                            , feedback_Correct = ( trial.feedbackIncorrect, [] )
+                            , feedback_Incorrect = ( trial.feedbackCorrect, [] )
+                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
+                            }
                         ]
 
                 Nothing ->
@@ -161,7 +159,7 @@ view task =
                         , Progressbar.progressBar data.history data.mainTrials
                         , viewQuestion ("to " ++ trial.writtenWord) (List.length data.history)
                         , div
-                            [ class " center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
+                            [ class " center-items justify-center w-full mt-6 ", disabled data.feedback ]
                           <|
                             View.shuffledOptions
                                 data.state
