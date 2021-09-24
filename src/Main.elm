@@ -633,9 +633,10 @@ viewSessionInstructions remoteData sessionName url =
                     [ text ("I can't find instructions related to session named: " ++ sessionName) ]
 
                 Just v ->
-                    [ div [ class "flex flex-col items-center" ]
-                        [ View.fromMarkdown v.instructions
-                        , a [ href url ] [ View.button { isDisabled = False, message = NoOp, txt = "Click here to start the first activity" } ]
+                    [ div [ class "instructions" ]
+                        [ div [ class "pb-8" ]
+                            [ View.fromMarkdown v.instructions ]
+                        , a [ href url ] [ View.button { isDisabled = False, message = NoOp, txt = "Start the first activity" } ]
                         ]
                     ]
 
