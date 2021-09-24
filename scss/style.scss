@@ -123,8 +123,7 @@ ol {
   padding: revert;
 }
 
-ul li + li,
-ol li + li {
+li + li {
   margin-top: 0.75rem;
 }
 
