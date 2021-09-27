@@ -527,7 +527,7 @@ button { message, txt, isDisabled } =
 
 audioButton msg url audioName =
     Html.Styled.button
-        [ class "mt-2 mb-4 max-w-lg w-full flex flex-row items-center justify-center bg-green-500 hover:bg-green-600 rounded-md"
+        [ class "mt-2 mb-4 max-w-lg flex flex-row items-center justify-center bg-green-500 hover:bg-green-600 rounded-md"
         , Html.Styled.Events.onClick (msg url)
         ]
         [ div [ class "h-6 w-6 text-white" ] [ fromUnstyled <| Icons.music ], span [ class "pl-4 font-bold text-white" ] [ text <| audioName ] ]
