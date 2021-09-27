@@ -62,7 +62,7 @@ viewInstructions txt =
         , p [ class "pt-8 pb-8 font-medium" ]
             [ pre [] [ text txt ]
             ]
-        , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here!" ] ]
+        , div [ class "text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here!" ] ]
         ]
 
 

@@ -44,10 +44,10 @@ entries d e t msg toggledEntries =
     let
         arrow key =
             if Dict.get key toggledEntries |> Maybe.withDefault False then
-                span [ class "text-lg font-bold" ] [ text "⌄" ]
+                span [ class "font-bold" ] [ text "⌄" ]
 
             else
-                span [ class "text-lg font-bold" ] [ text "›" ]
+                span [ class "font-bold" ] [ text "›" ]
     in
     [ ( "definition"
       , { txt = "Definition "
@@ -60,7 +60,7 @@ entries d e t msg toggledEntries =
         |> List.map
             (\( key, { txt } as val ) ->
                 p [ class "flex flex-col", Html.Styled.Events.onClick (msg key) ]
-                    [ div [ class "text-lg hover:underline cursor-pointer bg-green-500 font-bold text-white p-4 rounded-lg" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
+                    [ div [ class "hover:underline cursor-pointer bg-green-500 font-bold text-white p-4 rounded-lg" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
                     , span [ class "p-2" ] [ viewEntry key val toggledEntries ]
                     ]
             )

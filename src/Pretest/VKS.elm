@@ -71,7 +71,7 @@ view task =
                     [ div [ A.class "flex flex-col items-center" ]
                         [ View.tooltip data.infos.instructions_short
                         , progressBarWhenNoTraining data.history data.mainTrials
-                        , span [ class "text-lg font-bold" ] [ text <| "to " ++ trial.verb ]
+                        , span [ class "font-bold" ] [ text <| "to " ++ trial.verb ]
                         , Html.Styled.fieldset [ class "flex flex-col m-2" ]
                             [ Html.Styled.label []
                                 [ Html.Styled.input

@@ -208,7 +208,7 @@ view model =
 
                                     else
                                         "👍"
-                                , span [ class "pl-2 text-lg" ] [ text value.word ]
+                                , span [ class "pl-2" ] [ text value.word ]
                                 ]
                         )
                         w

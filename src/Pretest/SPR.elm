@@ -456,11 +456,11 @@ viewTask data trial endTrialMsg =
                     div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2 font-bold text-xl" ] [ p [ Attr.class "items-center" ] [ text (Tuple.second taggedSegment) ] ]
 
         ( SPR _, Nothing ) ->
-            p [ Attr.class "text-lg" ] [ text "Press the space bar to start reading" ]
+            p [] [ text "Press the space bar to start reading" ]
 
         ( Question, _ ) ->
             div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
-                [ span [ Attr.class "text-lg font-bold" ] [ text trial.question ]
+                [ span [ Attr.class "font-bold" ] [ text trial.question ]
                 , div [ Attr.class "flex flex-row m-2" ]
                     [ unclickableButton "bg-green-500" "Y = Yes"
                     , unclickableButton "bg-red-500" "N = No"

@@ -48,7 +48,7 @@ view exp =
                     div [ class "flex flex-col items-center" ]
                         [ div [ class "text-xl" ] [ View.fromMarkdown context ]
                         , viewLimitedTimesAudioButton nTimes trial
-                        , Html.pre [ class "text-lg m-4 text-center" ]
+                        , Html.pre [ class "m-4 text-center" ]
                             [ View.fromMarkdown dialog
                             ]
                         , View.textAreaWithReadonlyAmorce

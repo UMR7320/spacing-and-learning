@@ -36,7 +36,7 @@ view exp optionsOrder =
         Logic.Running Logic.Training ({ mainTrials, current, state, feedback } as data) ->
             case ( current, data.state.step ) of
                 ( Just trial, Listening nTimes ) ->
-                    div [ class "flex flex-col text-lg items-center" ]
+                    div [ class "flex flex-col items-center" ]
                         [ Html.p [ class "p-4 bg-gray-200 rounded-lg" ] [ View.fromMarkdown trial.context ]
                         , div [ class "flex flex-col items-center" ]
                             [ text (String.toUpper trial.speakerName ++ " ")
@@ -88,7 +88,7 @@ view exp optionsOrder =
                     div [ class "flex flex-col w-full items-center" ]
                         [ View.tooltip data.infos.instructions_short
                         , progressBar history mainTrials
-                        , Html.p [ class "p-8 bg-gray-200 rounded-lg text-lg" ] [ View.fromMarkdown trial.context ]
+                        , Html.p [ class "p-8 bg-gray-200 rounded-lg" ] [ View.fromMarkdown trial.context ]
                         , div [ class "flex flex-col items-center" ]
                             [ text (String.toUpper trial.speakerName ++ " ")
                             , text <|

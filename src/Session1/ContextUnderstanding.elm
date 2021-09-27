@@ -28,7 +28,7 @@ taskId =
 
 
 paragraphWithInput pre userAnswer post =
-    p [ class "bg-gray-200 mb-8 rounded-lg text-lg p-4" ]
+    p [ class "bg-gray-200 mb-8 rounded-lg p-4" ]
         [ text pre
         , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
             [ text <|

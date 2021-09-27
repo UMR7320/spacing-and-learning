@@ -107,7 +107,7 @@ loading =
 
 
 instructions infos msgToTraining =
-    div [ class "text-lg instructions" ]
+    div [ class "instructions" ]
         [ h1 [] [ text infos.name ]
         , div [ class "pb-8" ] [ fromMarkdown infos.instructions ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
@@ -115,7 +115,7 @@ instructions infos msgToTraining =
 
 
 end endInfo saveDataMsg linkToNextTask =
-    div [ class "text-lg endInfo" ]
+    div [ class "endInfo" ]
         [ fromMarkdown endInfo
         , div [ class "mt-8" ]
             [ a [ href linkToNextTask ]
@@ -178,7 +178,7 @@ genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
         [ if data.isVisible then
             p
                 [ class
-                    "text-lg text-white mb-4"
+                    "text-white mb-4"
                 ]
                 (if data.userAnswer == data.target then
                     [ fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
@@ -239,28 +239,13 @@ viewInstructions instructions_ =
         , p [ class "pt-8 pb-8 font-medium" ]
             [ pre [] [ fromMarkdown instructions_ ]
             ]
-        , div [ class "text-lg text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here!" ] ]
+        , div [ class "text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here!" ] ]
         ]
 
 
 trainingWheelsGeneric : Int -> String -> List String -> Html msg
 trainingWheelsGeneric trialn pattern_ variables =
     div [] []
-
-
-
-{--
-    let
-        helpSentence =
-            div [ class "flex flex-col pt-4 pb-4 italic text-lg max-w-xl" ] [ p [] [ fromMarkdown <| interpolate pattern_ variables ] ]
-    in
-    case trialn of
-        0 ->
-            helpSentence
-
-        _ ->
-            div [] []
-    --}
 
 
 viewTraining : String -> List (Html msg) -> Html msg
@@ -515,7 +500,7 @@ tooltip text_ =
 
 sentenceInSynonym : { a | pre : String, stimulus : String, post : String } -> { b | userAnswer : String } -> (String -> msg) -> Bool -> Html msg
 sentenceInSynonym t state msg feedback_ =
-    div [ class "flex w-full border-2 p-4  space-x-4 text-lg text-center items-center" ]
+    div [ class "flex w-full border-2 p-4  space-x-4 text-center items-center" ]
         [ span [] [ text t.pre ]
         , floatingLabel t.stimulus state.userAnswer msg feedback_
         , span [] [ text t.post ]
@@ -526,7 +511,7 @@ button : { message : msg, txt : String, isDisabled : Bool } -> Html msg
 button { message, txt, isDisabled } =
     div [ class "flex justify-center" ]
         [ Html.Styled.button
-            [ class "mt-2 mb-4 text-lg"
+            [ class "mt-2 mb-4"
             , onClick message
             , Html.Styled.Attributes.disabled isDisabled
             , class <|
@@ -545,7 +530,7 @@ audioButton msg url audioName =
         [ class "mt-2 mb-4 max-w-lg w-full flex flex-row items-center justify-center bg-green-500 hover:bg-green-600 rounded-md"
         , Html.Styled.Events.onClick (msg url)
         ]
-        [ div [ class "h-6 w-6 text-white" ] [ fromUnstyled <| Icons.music ], span [ class "pl-4 text-lg font-bold text-white" ] [ text <| audioName ] ]
+        [ div [ class "h-6 w-6 text-white" ] [ fromUnstyled <| Icons.music ], span [ class "pl-4font-bold text-white" ] [ text <| audioName ] ]
 
 
 readOnlyAmorce firstAmorce firstProduction =
@@ -567,7 +552,7 @@ readOnlyOnFeedback fb =
 textAreaWithReadonlyAmorce { id_, amorce, isFeedback, userAnswer, onInputMsg } =
     Html.Styled.textarea
         [ id id_
-        , class "border-2 p-2 w-full max-w-3xl text-lg"
+        , class "border-2 p-2 w-full max-w-3xl"
         , value <|
             readOnlyAmorce
                 amorce

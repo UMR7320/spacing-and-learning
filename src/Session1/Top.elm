@@ -15,7 +15,7 @@ view infos =
                     [ Html.Styled.article [ class "overflow-hidden rounded-lg shadow-md hover:shadow-xl" ]
                         [ a [ href info.url ] [ Html.Styled.img [ class "block h-auto w-full", Html.Styled.Attributes.src "https://picsum.photos/600/400/?random" ] [] ]
                         , Html.Styled.header [ class "flex items-center justify-between leading-tight p-2 md:p4" ]
-                            [ h1 [ class "text-lg" ] [ text info.name ]
+                            [ h1 [] [ text info.name ]
                             ]
                         , p [ class "px-2 overflow-ellipsis" ] [ text info.description ]
                         , Html.Styled.footer

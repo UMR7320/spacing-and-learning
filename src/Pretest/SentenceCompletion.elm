@@ -64,7 +64,7 @@ view task =
             case data.current of
                 Just trial ->
                     [ div [ A.class "flex flex-col items-center" ]
-                        [ p [ A.class "text-lg w-full max-w-2xl  m-4 p-2" ] [ text trial.context ]
+                        [ p [ A.class "w-full max-w-2xl  m-4 p-2" ] [ text trial.context ]
                         , Html.Styled.textarea
                             [ A.id "firstProd"
                             , A.class "border-2 w-full max-w-2xl  rounded-lg p-2"
@@ -101,7 +101,7 @@ view task =
                           else
                             text ""
                         , if data.feedback then
-                            div [ A.class "items-center text-lg font-bold text-green-500" ] [ text "These are of course only suggestions, there are many other possibilities!" ]
+                            div [ A.class "items-center font-bold text-green-500" ] [ text "These are of course only suggestions, there are many other possibilities!" ]
 
                           else
                             div [] []
@@ -125,7 +125,7 @@ view task =
                 Just trial ->
                     [ div [ A.class "flex flex-col w-full items-center" ]
                         [ progressBar data.history data.mainTrials
-                        , p [ A.class "text-lg max-w-2xl m-4 p-2" ] [ text trial.context ]
+                        , p [ A.class "max-w-2xl m-4 p-2" ] [ text trial.context ]
                         , Html.Styled.textarea
                             [ A.id "firstProd"
                             , A.class "border-2 w-full max-w-2xl p-2"
