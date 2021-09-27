@@ -337,12 +337,22 @@ p + p {
   border-top: 8px solid white;
 }
 
-.context-understanding-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 2rem 4rem;
-  align-items: center;
-  margin-bottom: 2rem;
+@media (min-width: 40ch) {
+  .context-understanding-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 2rem 4rem;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 39ch) {
+  .context-understanding-2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .context-understanding-2 .context {
