@@ -224,12 +224,11 @@ view task =
                 Logic.Main ->
                     case data.current of
                         Just trial ->
-                            [ div [ class "flex flex-col items-center text-xl font-bold" ]
-                                [ Progressbar.progressBarWhenNoTraining data.history data.mainTrials
-                                , text trial.word
-                                , div [ class "flex flex-row m-2" ]
+                            [ div []
+                                [ div [ class "text-3xl font-bold italic my-6 text-center" ] [ text trial.word ]
+                                , div [ class "yes-no-buttons" ]
                                     [ unclickableButton "bg-gray-300" "F = I don't know or I'm not sure"
-                                    , unclickableButton "bg-green-500" "J = I know this word"
+                                    , unclickableButton "bg-green-500 text-white" "J = I know this word"
                                     ]
                                 ]
                             ]
