@@ -3,7 +3,7 @@ module Session1.Presentation exposing (..)
 import Data
 import Dict exposing (Dict)
 import ExperimentInfo
-import Html.Styled exposing (Html, div, p, span, text)
+import Html.Styled exposing (Html, div, li, p, span, text, ul)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
@@ -29,17 +29,13 @@ type alias Presentation =
 viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
 viewEntry key { txt, elements } toggledEntries =
     if Dict.get key toggledEntries |> Maybe.withDefault False then
-        elements |> List.map (\el -> div [ class "p-4" ] [ text el ]) |> div [ class "flex flex-col" ]
+        elements |> List.map (\el -> li [] [ text el ]) |> ul []
 
     else
         [] |> List.map text |> div []
 
 
-
---entries : List String -> List String -> List String -> List ( String, { txt : String, elements : List String } )
-
-
-entries : List String -> List String -> List String -> (String -> msg) -> Dict String Bool -> Html msg
+entries : List String -> List String -> List String -> (String -> msg) -> Dict String Bool -> List (Html msg)
 entries d e t msg toggledEntries =
     let
         arrow key =
@@ -59,13 +55,11 @@ entries d e t msg toggledEntries =
     ]
         |> List.map
             (\( key, { txt } as val ) ->
-                p [ class "flex flex-col", Html.Styled.Events.onClick (msg key) ]
+                div [ class "summary", Html.Styled.Events.onClick (msg key) ]
                     [ div [ class "hover:underline cursor-pointer bg-green-500 font-bold text-white p-4 rounded-lg" ] [ arrow key, span [ class "pl-2" ] [ text txt ] ]
-                    , span [ class "p-2" ] [ viewEntry key val toggledEntries ]
+                    , div [ class "p-2 details" ] [ viewEntry key val toggledEntries ]
                     ]
             )
-        |> List.intersperse sep
-        |> div [ class "w-1/3" ]
 
 
 view :
@@ -88,21 +82,18 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    div [ class "flex flex-col items-center" ]
-                        [ div [ class <| "pb-4 pt-4 text-3xl font-bold flex flex-row" ]
-                            [ text
-                                ("to " ++ trial.text)
-                            ]
-                        , div [] [ View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation" ]
-                        , entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
+                    div [ class "full-bleed" ]
+                        [ div
+                            [ class "word-presentation" ]
+                            ([ div [ class "text-3xl text-center italic font-bold" ] [ text ("to " ++ trial.text) ]
+                             , View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
+                             ]
+                                ++ entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
+                            )
                         , View.button
                             { message = UserClickedNextTrial
                             , isDisabled =
-                                if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation", "audio" ] then
-                                    True
-
-                                else
-                                    False
+                                data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation", "audio" ]
                             , txt = "Continue"
                             }
                         ]
@@ -111,31 +102,7 @@ view task =
                     View.introToMain (UserClickedStartMain data.mainTrials data.infos)
 
         Logic.Running Logic.Main data ->
-            case data.current of
-                Just trial ->
-                    div [ class "flex flex-col items-center" ]
-                        [ progressBar data.history data.mainTrials
-                        , div [ class "pb-4 text-3xl font-bold flex flex-row" ]
-                            [ text ("to " ++ trial.text)
-                            ]
-                        , View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
-                        , entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
-                        , div [ class "" ]
-                            [ View.button
-                                { message = UserClickedNextTrial
-                                , isDisabled =
-                                    if data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation", "audio" ] then
-                                        True
-
-                                    else
-                                        False
-                                , txt = "Continue"
-                                }
-                            ]
-                        ]
-
-                Nothing ->
-                    View.end data.infos.end NoOp "meaning"
+            view (Logic.Running Logic.Training data)
 
 
 type Msg
@@ -145,11 +112,6 @@ type Msg
     | UserClickedStartAudio String
     | UserClickedStartTraining
     | NoOp
-
-
-sep : Html msg
-sep =
-    div [ class "w-32 h-1" ] []
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
