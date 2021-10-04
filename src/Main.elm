@@ -556,11 +556,7 @@ body model =
 
             TermsAndConditions ->
                 [ div [ class "flex flex-col items-center" ]
-                    [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
-                    , div
-                        [ class "mb-8" ]
-                        [ View.fromMarkdown model.consent
-                        ]
+                    [ div [ class "mb-8" ] [ View.fromMarkdown model.consent ]
                     , View.button { message = UserClickedSignInButton, txt = "Confirmer", isDisabled = False }
                     ]
                 ]
