@@ -219,7 +219,7 @@ init _ url key =
             , version = Nothing
             , distributedSpacing = 7
             , massedSpacing = 2
-            , retentionInterval = 15
+            , retentionInterval = 14
             , retentionIntervalSurprise = 60
             , consent = ""
             }
@@ -497,12 +497,7 @@ body model =
                                                 Date.add Date.Days spacing s2
 
                                             s4 =
-                                                case group of
-                                                    Route.Massed ->
-                                                        Date.add Date.Days model.retentionInterval s3
-
-                                                    Route.Distributed ->
-                                                        Date.add Date.Days model.retentionInterval s2
+                                                Date.add Date.Days model.retentionInterval s3
                                         in
                                         div []
                                             ([ h3 [] [ text "Save those dates" ] ]
