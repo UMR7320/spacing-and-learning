@@ -878,7 +878,7 @@ update msg model =
                         Just p ->
                             ( { model
                                 | distributedSpacing = p.distributedSpacing
-                                , massedSpacing = p.distributedSpacing
+                                , massedSpacing = p.massedSpacing
                                 , retentionInterval = p.retentionInterval
                                 , retentionIntervalSurprise = p.retentionIntervalSuprise
                                 , consent = p.consent
