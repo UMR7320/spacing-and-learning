@@ -429,174 +429,100 @@ body model =
                         List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
                     Route.Calendar group ->
-                        case group of
-                            Route.Massed ->
-                                case model.currentDate of
-                                    Just ( zone, date_ ) ->
-                                        let
-                                            date =
-                                                Date.fromPosix zone date_
+                        case model.currentDate of
+                            Just ( zone, date_ ) ->
+                                let
+                                    date =
+                                        Date.fromPosix zone date_
 
-                                            possibleDates =
-                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Days 8 date)
-                                                    |> List.map
-                                                        (\time ->
-                                                            label []
-                                                                [ input
-                                                                    [ type_ "radio"
-                                                                    , Html.Styled.Events.onClick (UserClickedChoseNewDate time)
-                                                                    , checked
-                                                                        (case model.preferedStartDate of
-                                                                            Just d ->
-                                                                                d == time
+                                    possibleDates =
+                                        Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Days 8 date)
+                                            |> List.map
+                                                (\time ->
+                                                    label []
+                                                        [ input
+                                                            [ type_ "radio"
+                                                            , Html.Styled.Events.onClick (UserClickedChoseNewDate time)
+                                                            , checked
+                                                                (case model.preferedStartDate of
+                                                                    Just d ->
+                                                                        d == time
 
-                                                                            _ ->
-                                                                                False
-                                                                        )
-                                                                    ]
-                                                                    []
-                                                                , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
-                                                                ]
-                                                        )
+                                                                    _ ->
+                                                                        False
+                                                                )
+                                                            ]
+                                                            []
+                                                        , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
+                                                        ]
+                                                )
 
-                                            datesToBook d =
-                                                List.map
-                                                    (\eachDate ->
-                                                        let
-                                                            formattedDate =
-                                                                Date.format "EEEE, d MMMM y" eachDate
-                                                        in
-                                                        div [] [ text formattedDate ]
-                                                    )
-                                                    (sessionsDates d)
+                                    datesToBook d =
+                                        List.map
+                                            (\eachDate ->
+                                                let
+                                                    formattedDate =
+                                                        Date.format "EEEE, d MMMM y" eachDate
+                                                in
+                                                div [] [ text formattedDate ]
+                                            )
+                                            (sessionsDates d)
 
-                                            sessionsDates d =
-                                                [ s2 d, s3 d, s4 d, s5 d ]
+                                    sessionsDates d =
+                                        [ s2 d, s3 d, s4 d, s5 d ]
 
-                                            s2 d =
-                                                Date.add Date.Days 0 d
+                                    spacing =
+                                        case group of
+                                            Route.Massed ->
+                                                model.massedSpacing
 
-                                            s3 d =
-                                                Date.add Date.Days model.massedSpacing (s2 d)
+                                            Route.Distributed ->
+                                                model.distributedSpacing
 
-                                            s4 d =
-                                                Date.add Date.Days model.massedSpacing (s3 d)
+                                    s2 d =
+                                        Date.add Date.Days 0 d
 
-                                            s5 d =
+                                    s3 d =
+                                        Date.add Date.Days spacing (s2 d)
+
+                                    s4 d =
+                                        Date.add Date.Days spacing (s3 d)
+
+                                    s5 d =
+                                        case group of
+                                            Route.Massed ->
                                                 Date.add Date.Days model.retentionInterval (s4 d)
-                                        in
-                                        [ p [] [ text "For your conveniance, you can choose the day you wish to start the next session" ]
-                                        , div [ class "flex flex-col" ] <|
-                                            possibleDates
-                                        , case model.preferedStartDate of
-                                            Nothing ->
-                                                div [] []
 
-                                            Just d ->
-                                                div []
-                                                    ([ h3 [] [ text "Save those dates" ] ]
-                                                        ++ datesToBook d
-                                                        ++ [ View.button
-                                                                { message =
-                                                                    UserConfirmedPreferedDates
-                                                                        { s1 = Date.toIsoString (s2 d)
-                                                                        , s2 = Date.toIsoString (s3 d)
-                                                                        , s3 = Date.toIsoString (s4 d)
-                                                                        , s4 = Date.toIsoString (s5 d)
-                                                                        }
-                                                                , txt = "I confirm I'll be available at least 1 hour each of those days"
-                                                                , isDisabled = False
-                                                                }
-                                                           ]
-                                                    )
-                                        ]
-
-                                    Nothing ->
-                                        []
-
-                            Route.Distributed ->
-                                case model.currentDate of
-                                    Just ( zone, date_ ) ->
-                                        let
-                                            date =
-                                                Date.fromPosix zone date_
-
-                                            possibleDates =
-                                                Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Days 8 date)
-                                                    |> List.map
-                                                        (\time ->
-                                                            label []
-                                                                [ input
-                                                                    [ type_ "radio"
-                                                                    , Html.Styled.Events.onClick (UserClickedChoseNewDate time)
-                                                                    , checked
-                                                                        (case model.preferedStartDate of
-                                                                            Just d ->
-                                                                                d == time
-
-                                                                            _ ->
-                                                                                False
-                                                                        )
-                                                                    ]
-                                                                    []
-                                                                , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
-                                                                ]
-                                                        )
-
-                                            datesToBook d =
-                                                List.map
-                                                    (\eachDate ->
-                                                        let
-                                                            formattedDate =
-                                                                Date.format "EEEE, d MMMM y" eachDate
-                                                        in
-                                                        div [] [ text formattedDate ]
-                                                    )
-                                                    (sessionsDates d)
-
-                                            sessionsDates d =
-                                                [ s2 d, s3 d, s4 d, s5 d ]
-
-                                            s2 d =
-                                                Date.add Date.Days 0 d
-
-                                            s3 d =
-                                                Date.add Date.Days model.distributedSpacing (s2 d)
-
-                                            s4 d =
-                                                Date.add Date.Days model.distributedSpacing (s3 d)
-
-                                            s5 d =
+                                            Route.Distributed ->
                                                 Date.add Date.Days model.retentionInterval (s3 d)
-                                        in
-                                        [ p [] [ text "For your conveniance, you can choose the day you wish to start the next session" ]
-                                        , div [ class "flex flex-col" ] <|
-                                            possibleDates
-                                        , case model.preferedStartDate of
-                                            Nothing ->
-                                                div [] []
-
-                                            Just d ->
-                                                div []
-                                                    ([ h3 [] [ text "Save those dates" ] ]
-                                                        ++ datesToBook d
-                                                        ++ [ View.button
-                                                                { message =
-                                                                    UserConfirmedPreferedDates
-                                                                        { s1 = Date.toIsoString (s2 d)
-                                                                        , s2 = Date.toIsoString (s3 d)
-                                                                        , s3 = Date.toIsoString (s4 d)
-                                                                        , s4 = Date.toIsoString (s5 d)
-                                                                        }
-                                                                , txt = "I confirm I'll be available at least 1 hour each of those days"
-                                                                , isDisabled = False
-                                                                }
-                                                           ]
-                                                    )
-                                        ]
-
+                                in
+                                [ p [] [ text "For your convenience, you can choose the day you wish to start the next session" ]
+                                , div [ class "flex flex-col" ] possibleDates
+                                , case model.preferedStartDate of
                                     Nothing ->
-                                        []
+                                        div [] []
+
+                                    Just d ->
+                                        div []
+                                            ([ h3 [] [ text "Save those dates" ] ]
+                                                ++ datesToBook d
+                                                ++ [ View.button
+                                                        { message =
+                                                            UserConfirmedPreferedDates
+                                                                { s1 = Date.toIsoString (s2 d)
+                                                                , s2 = Date.toIsoString (s3 d)
+                                                                , s3 = Date.toIsoString (s4 d)
+                                                                , s4 = Date.toIsoString (s5 d)
+                                                                }
+                                                        , txt = "I confirm I'll be available at least 1 hour each of those days"
+                                                        , isDisabled = False
+                                                        }
+                                                   ]
+                                            )
+                                ]
+
+                            Nothing ->
+                                []
 
             Home ->
                 [ div [ class "flex flex-col items-center" ]
