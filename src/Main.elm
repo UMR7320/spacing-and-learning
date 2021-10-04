@@ -220,7 +220,7 @@ init _ url key =
             , distributedSpacing = 7
             , massedSpacing = 2
             , retentionInterval = 14
-            , retentionIntervalSurprise = 60
+            , retentionIntervalSurprise = 56
             , consent = ""
             }
     in
@@ -498,6 +498,9 @@ body model =
 
                                             s4 =
                                                 Date.add Date.Days model.retentionInterval s3
+
+                                            s5 =
+                                                Date.add Date.Days model.retentionIntervalSurprise s3
                                         in
                                         div []
                                             ([ h3 [] [ text "Save those dates" ] ]
@@ -509,6 +512,7 @@ body model =
                                                                 , s2 = Date.toIsoString s2
                                                                 , s3 = Date.toIsoString s3
                                                                 , s4 = Date.toIsoString s4
+                                                                , s5 = Date.toIsoString s5
                                                                 }
                                                         , txt = "I confirm I'll be available at least 1 hour each of those days"
                                                         , isDisabled = False
@@ -581,7 +585,7 @@ type Msg
     | ServerRespondedWithNewUser (Result.Result Http.Error String)
     | GotCurrentTime ( Time.Zone, Time.Posix )
     | UserClickedChoseNewDate Date.Date
-    | UserConfirmedPreferedDates { s1 : String, s2 : String, s3 : String, s4 : String }
+    | UserConfirmedPreferedDates { s1 : String, s2 : String, s3 : String, s4 : String, s5 : String }
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
     | GotGeneralParameters (Result.Result Http.Error (List Data.GeneralParameters))
     | NoOp
@@ -824,7 +828,7 @@ update msg model =
         UserClickedChoseNewDate newDate ->
             ( { model | preferedStartDate = Just newDate }, Cmd.none )
 
-        UserConfirmedPreferedDates { s1, s2, s3, s4 } ->
+        UserConfirmedPreferedDates { s1, s2, s3, s4, s5 } ->
             ( model
             , Http.request
                 { url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "all" }
@@ -843,6 +847,7 @@ update msg model =
                                         , ( "dateSecondEmail", Encode.string s2 )
                                         , ( "dateThirdEmail", Encode.string s3 )
                                         , ( "dateFourthEmail", Encode.string s4 )
+                                        , ( "dateFifthEmail", Encode.string s5 )
                                         ]
                                   )
                                 ]
