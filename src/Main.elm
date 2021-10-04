@@ -456,45 +456,6 @@ body model =
                                                         , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
                                                         ]
                                                 )
-
-                                    datesToBook d =
-                                        List.map
-                                            (\eachDate ->
-                                                let
-                                                    formattedDate =
-                                                        Date.format "EEEE, d MMMM y" eachDate
-                                                in
-                                                div [] [ text formattedDate ]
-                                            )
-                                            (sessionsDates d)
-
-                                    sessionsDates d =
-                                        [ s2 d, s3 d, s4 d, s5 d ]
-
-                                    spacing =
-                                        case group of
-                                            Route.Massed ->
-                                                model.massedSpacing
-
-                                            Route.Distributed ->
-                                                model.distributedSpacing
-
-                                    s2 d =
-                                        Date.add Date.Days 0 d
-
-                                    s3 d =
-                                        Date.add Date.Days spacing (s2 d)
-
-                                    s4 d =
-                                        Date.add Date.Days spacing (s3 d)
-
-                                    s5 d =
-                                        case group of
-                                            Route.Massed ->
-                                                Date.add Date.Days model.retentionInterval (s4 d)
-
-                                            Route.Distributed ->
-                                                Date.add Date.Days model.retentionInterval (s3 d)
                                 in
                                 [ p [] [ text "For your convenience, you can choose the day you wish to start the next session" ]
                                 , div [ class "flex flex-col" ] possibleDates
@@ -503,16 +464,56 @@ body model =
                                         div [] []
 
                                     Just d ->
+                                        let
+                                            datesToBook =
+                                                List.map
+                                                    (\eachDate ->
+                                                        let
+                                                            formattedDate =
+                                                                Date.format "EEEE, d MMMM y" eachDate
+                                                        in
+                                                        div [] [ text formattedDate ]
+                                                    )
+                                                    sessionsDates
+
+                                            sessionsDates =
+                                                [ s1, s2, s3, s4 ]
+
+                                            spacing =
+                                                case group of
+                                                    Route.Massed ->
+                                                        model.massedSpacing
+
+                                                    Route.Distributed ->
+                                                        model.distributedSpacing
+
+                                            s1 =
+                                                Date.add Date.Days 0 d
+
+                                            s2 =
+                                                Date.add Date.Days spacing s1
+
+                                            s3 =
+                                                Date.add Date.Days spacing s2
+
+                                            s4 =
+                                                case group of
+                                                    Route.Massed ->
+                                                        Date.add Date.Days model.retentionInterval s3
+
+                                                    Route.Distributed ->
+                                                        Date.add Date.Days model.retentionInterval s2
+                                        in
                                         div []
                                             ([ h3 [] [ text "Save those dates" ] ]
-                                                ++ datesToBook d
+                                                ++ datesToBook
                                                 ++ [ View.button
                                                         { message =
                                                             UserConfirmedPreferedDates
-                                                                { s1 = Date.toIsoString (s2 d)
-                                                                , s2 = Date.toIsoString (s3 d)
-                                                                , s3 = Date.toIsoString (s4 d)
-                                                                , s4 = Date.toIsoString (s5 d)
+                                                                { s1 = Date.toIsoString s1
+                                                                , s2 = Date.toIsoString s2
+                                                                , s3 = Date.toIsoString s3
+                                                                , s4 = Date.toIsoString s4
                                                                 }
                                                         , txt = "I confirm I'll be available at least 1 hour each of those days"
                                                         , isDisabled = False
