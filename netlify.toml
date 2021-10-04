@@ -13,7 +13,7 @@
 
 [dev]
   command = "npm run start" # Command to start your dev server
-  port = 1234 # Port that the dev server will be listening on
+  port = 8888 # Port that the dev server will be listening on
   publish = "dist" # If you use a _redirect file, provide the path to your static content folder
 
 # The following redirect is intended for use with Elm apps that handle routing internally.

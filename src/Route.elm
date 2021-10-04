@@ -33,6 +33,7 @@ type Route
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
     | Posttest UserId PosttestTask
+    | TermsAndConditions
 
 
 type alias UserId =
@@ -95,6 +96,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ map Home top
+        , map TermsAndConditions (s "terms-and-conditions")
         , map Pretest
             (s "user"
                 </> string

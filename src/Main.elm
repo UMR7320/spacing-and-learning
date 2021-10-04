@@ -251,6 +251,19 @@ init _ url key =
             , Cmd.batch [ Cmd.map Session1 fetchSession1, Data.getGeneralParemeters GotGeneralParameters ]
             )
 
+        Route.TermsAndConditions ->
+            ( { defaultInit
+                | -- SESSION 1
+                  meaning = Logic.Loading
+                , spellingLvl1 = Logic.Loading
+                , cu1 = Logic.Loading
+                , presentation = Logic.Loading
+                , user = Nothing
+                , session1 = Loading loadingStateSession1
+              }
+            , Cmd.batch [ Cmd.map Session1 fetchSession1, Data.getGeneralParemeters GotGeneralParameters ]
+            )
+
         Route.AuthenticatedSession2 userid _ ->
             ( { defaultInit
                 | -- SESSION 2
@@ -525,6 +538,23 @@ body model =
                                 []
 
             Home ->
+                [ div [ class "flex flex-col" ]
+                    [ h1 [] [ text "Welcome to the LexLearn project!" ]
+                    , div
+                        [ class "mb-10 flow" ]
+                        [ p [] [ text "You’re invited to participate in an online English vocabulary learning experiment. As a learner of English, you’ll be able to test your knowledge and learn some new words. As researchers, we will use your answers to help us develop online learning resources and understand better how students learn vocabulary." ]
+                        , p [] [ text "To get started, you need to do two things:" ]
+                        , ol
+                            []
+                            [ li [] [ text "Give us permission to collect your responses" ]
+                            , li [] [ text "Provide a little background information" ]
+                            ]
+                        ]
+                    , a [ class "button self-center", href "/terms-and-conditions" ] [ text "Continue" ]
+                    ]
+                ]
+
+            TermsAndConditions ->
                 [ div [ class "flex flex-col items-center" ]
                     [ h1 [] [ text "Lex Learn 👩\u{200D}🎓️" ]
                     , div
