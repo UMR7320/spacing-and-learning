@@ -12,7 +12,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
-import Progressbar exposing (progressBarWhenNoTraining)
 import Random
 import Task
 import View
@@ -51,8 +50,7 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just _ ->
-                    [ text "vks"
-                    ]
+                    [ text "vks" ]
 
                 Nothing ->
                     [ div [ A.class "flex flex-col items-center" ]
@@ -68,11 +66,10 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ div [ A.class "flex flex-col items-center" ]
-                        [ View.tooltip data.infos.instructions_short
-                        , progressBarWhenNoTraining data.history data.mainTrials
-                        , span [ class "font-bold" ] [ text <| "to " ++ trial.verb ]
-                        , Html.Styled.fieldset [ class "flex flex-col m-2" ]
+                    [ div [ A.class "flex flex-col items-center flow" ]
+                        -- [ View.tooltip data.infos.instructions_short
+                        [ div [ class "text-3xl font-bold italic my-6" ] [ text ("to " ++ trial.verb) ]
+                        , Html.Styled.fieldset [ class "flex flex-col m-2 flow" ]
                             [ Html.Styled.label []
                                 [ Html.Styled.input
                                     [ type_ "radio"
