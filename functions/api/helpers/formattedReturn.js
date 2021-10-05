@@ -1,6 +1,6 @@
 module.exports = (statusCode, body) => {
     return {
-        statusCode,
+        statusCode: 500,
         body: JSON.stringify(body),
     };
 };
