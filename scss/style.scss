@@ -145,6 +145,21 @@ p + p {
   margin-top: 1rem;
 }
 
+label,
+input {
+  display: block;
+}
+
+label + input {
+  margin-top: 0.5rem;
+}
+
+input {
+  @apply border-2;
+
+  padding: 0.3rem;
+}
+
 /* https://archive.hankchizljaw.com/wrote/creating-a-full-bleed-css-utility/ */
 .full-bleed {
   width: calc(100vw - 2rem);
@@ -386,5 +401,16 @@ p + p {
   .yes-no-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 40ch) {
+  .spr-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .spr-buttons > :nth-child(3) {
+    grid-column: 1 / 3;
   }
 }

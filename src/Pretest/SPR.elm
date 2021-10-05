@@ -463,11 +463,11 @@ viewTask data trial endTrialMsg =
                 [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
 
         ( Question, _ ) ->
-            div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
+            div [ Attr.class "flex flex-col items-center p-16 border-2 flow" ]
                 [ span [ Attr.class "font-bold" ] [ text trial.question ]
-                , div [ Attr.class "flex flex-row m-2" ]
-                    [ unclickableButton "bg-green-500" "Y = Yes"
-                    , unclickableButton "bg-red-500" "N = No"
+                , div [ Attr.class "spr-buttons" ]
+                    [ unclickableButton "bg-green-500 text-white" "Y = Yes"
+                    , unclickableButton "bg-red-500 text-white" "N = No"
                     , unclickableButton "bg-gray-400" "K = I don't know"
                     ]
                 ]

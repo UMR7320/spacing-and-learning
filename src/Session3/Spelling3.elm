@@ -4,9 +4,9 @@ import Data
 import Delay
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, div, fromUnstyled, text)
-import Html.Styled.Attributes exposing (class)
-import Html.Styled.Events
+import Html.Styled exposing (Html, div, fromUnstyled, input, label, text)
+import Html.Styled.Attributes exposing (class, for, id, value)
+import Html.Styled.Events exposing (onInput)
 import Http exposing (Error)
 import Icons
 import Json.Decode as Decode exposing (Decoder, string)
@@ -32,13 +32,16 @@ view exp =
         Logic.Running Logic.Training ({ current, state, feedback, history } as data) ->
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
-                    div [ class "flex flex-col items-center" ]
+                    div [ class "flex flex-col items-center flow" ]
                         [ viewLimitedTimesAudioButton nTimes trial
                         , if nTimes < 3 then
-                            View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
+                            div []
+                                [ label [ for "answer" ] [ text "Type your answer" ]
+                                , input [ id "answer", class "text-xl", value state.userAnswer, onInput UserChangedInput ] []
+                                ]
 
                           else
-                            div [] []
+                            text ""
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
@@ -59,14 +62,15 @@ view exp =
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center " ]
-                        [ View.tooltip data.infos.instructions_short
-                        , progressBar data.history data.mainTrials
-                        , viewLimitedTimesAudioButton nTimes trial
+                        [ viewLimitedTimesAudioButton nTimes trial
                         , if nTimes < 3 then
-                            View.floatingLabel "Type here" state.userAnswer UserChangedInput feedback
+                            div []
+                                [ label [ for "answer" ] [ text "Type your answer" ]
+                                , input [ id "answer", class "text-xl", value state.userAnswer, onInput UserChangedInput ] []
+                                ]
 
                           else
-                            div [] []
+                            text ""
                         , View.genericSingleChoiceFeedback
                             { isVisible = feedback
                             , feedback_Correct = ( data.infos.feedback_correct, [ trial.writtenWord ] )
