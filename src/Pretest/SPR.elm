@@ -450,16 +450,20 @@ viewTask data trial endTrialMsg =
         ( SPR s, Just { taggedSegment } ) ->
             case s of
                 Start ->
-                    p [ Attr.class "text-bold" ] [ text "Press the space bar to start reading" ]
+                    div
+                        [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
+                        [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
 
                 Reading _ ->
-                    div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2 font-bold text-xl" ] [ p [ Attr.class "items-center" ] [ text (Tuple.second taggedSegment) ] ]
+                    div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2 font-bold text-xl" ] [ p [ Attr.class "items-center" ] [ text (Tuple.second taggedSegment) ] ]
 
         ( SPR _, Nothing ) ->
-            p [] [ text "Press the space bar to start reading" ]
+            div
+                [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
+                [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
 
         ( Question, _ ) ->
-            div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
+            div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
                 [ span [ Attr.class "font-bold" ] [ text trial.question ]
                 , div [ Attr.class "flex flex-row m-2" ]
                     [ unclickableButton "bg-green-500" "Y = Yes"
@@ -469,9 +473,8 @@ viewTask data trial endTrialMsg =
                 ]
 
         ( Feedback, _ ) ->
-            div [ Attr.class "w-max h-max flex flex-col items-center pt-16 pb-16 border-2" ]
-                [ View.fromMarkdown trial.feedback
-                ]
+            div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
+                [ View.fromMarkdown trial.feedback ]
 
 
 view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
@@ -500,12 +503,10 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ div [ Attr.class "flex flex-col items-center" ] [ progressBar data.history data.mainTrials ]
-                    , viewTask data trial UserClickedNextTrial
-                    ]
+                    [ viewTask data trial UserClickedNextTrial ]
 
                 Nothing ->
-                    [ div [ Attr.class "flex flex-col items-center" ] [ View.fromMarkdown data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here when you are ready!", isDisabled = False } ] ]
+                    [ div [ Attr.class "flow flex flex-col items-center" ] [ View.fromMarkdown data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here when you are ready!", isDisabled = False } ] ]
 
         Logic.Err reason ->
             [ text ("I encountered the following error: " ++ reason) ]
