@@ -237,23 +237,23 @@ input {
 
 @media (min-width: 50rem) {
   .word-presentation {
-    max-width: 70rem;
+    max-width: 60rem;
     margin-left: auto;
     margin-right: auto;
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     align-items: center;
+    grid-gap: 6rem 4rem;
   }
 
   .word-presentation > *:nth-child(1) {
     grid-row: 2;
-    grid-column: 4 / 6;
-    padding-top: 6rem;
-    padding-bottom: 6rem;
+    grid-column: 3 / 5;
   }
 
   .word-presentation > *:nth-child(2) {
-    grid-column: 4 / 6;
+    grid-row: 3;
+    grid-column: 3 / 5;
   }
 
   .word-presentation > *:nth-child(3) {
@@ -263,19 +263,19 @@ input {
 
   .word-presentation > *:nth-child(4) {
     grid-row: 2;
-    grid-column: 7 / 9;
+    grid-column: 5 / 7;
   }
 
   .word-presentation > *:nth-child(5) {
-    grid-row: 3;
-    grid-column: 4 / 6;
+    grid-row: 1;
+    grid-column: 3 / 5;
   }
 
   .word-presentation .summary {
     position: relative;
   }
 
-  .word-presentation > *:not(:last-child) .details {
+  .word-presentation > *:not(:nth-child(2)) .details {
     position: absolute;
   }
 

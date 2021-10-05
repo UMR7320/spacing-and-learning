@@ -82,7 +82,7 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    div [ class "full-bleed" ]
+                    div [ class "full-bleed flow" ]
                         [ div
                             [ class "word-presentation" ]
                             ([ div [ class "text-3xl text-center italic font-bold" ] [ text ("to " ++ trial.text) ]
