@@ -235,7 +235,7 @@ init _ url key =
                 , user = Just userId
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos ]
+            , Cmd.batch [ Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
             )
 
         Route.Home ->
@@ -273,7 +273,7 @@ init _ url key =
                 , user = Just userid
                 , session2 = Loading loadingStateSession2
               }
-            , Cmd.batch [ Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos ]
+            , Cmd.batch [ Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
             )
 
         Route.AuthenticatedSession3 userid _ ->
@@ -285,7 +285,7 @@ init _ url key =
                 , user = Just userid
                 , session3 = Loading loadingStateSession3
               }
-            , Cmd.batch [ Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
+            , Cmd.batch [ Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
             )
 
         Route.Pretest userid _ v ->
@@ -303,11 +303,16 @@ init _ url key =
                 , version = v
                 , pretest = Loading loadingStatePretest
               }
-            , Cmd.batch [ Cmd.map Pretest fetchSessionPretest, Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now), Data.getGeneralParemeters GotGeneralParameters ]
+            , Cmd.batch
+                [ Cmd.map Pretest fetchSessionPretest
+                , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
+                , Data.getGeneralParemeters GotGeneralParameters
+                , Ports.enableAlertOnExit ()
+                ]
             )
 
         Route.Posttest _ _ ->
-            pure defaultInit
+            ( defaultInit, Ports.enableAlertOnExit () )
 
         NotFound ->
             pure { defaultInit | route = NotFound }
@@ -673,7 +678,7 @@ update msg model =
     case msg of
         BrowserChangedUrl url ->
             ( { model | route = Route.fromUrl url }
-            , Cmd.none
+            , enableAlertOnExit (Route.fromUrl url)
             )
 
         NoOp ->
@@ -936,6 +941,33 @@ project =
       """
     , url = Url.Builder.absolute [ "start" ] []
     }
+
+
+enableAlertOnExit route =
+    case route of
+        Route.Home ->
+            Cmd.none
+
+        Route.TermsAndConditions ->
+            Cmd.none
+
+        Route.NotFound ->
+            Cmd.none
+
+        Route.Pretest _ _ _ ->
+            Ports.enableAlertOnExit ()
+
+        Route.Session1 _ _ ->
+            Ports.enableAlertOnExit ()
+
+        Route.AuthenticatedSession2 _ _ ->
+            Ports.enableAlertOnExit ()
+
+        Route.AuthenticatedSession3 _ _ ->
+            Ports.enableAlertOnExit ()
+
+        Route.Posttest _ _ ->
+            Ports.enableAlertOnExit ()
 
 
 
