@@ -5,6 +5,7 @@ module View exposing
     , end
     , floatingLabel
     , fromMarkdown
+    , fromUnsafeMarkdown
     , genericNeutralFeedback
     , genericSingleChoiceFeedback
     , header
@@ -25,6 +26,7 @@ module View exposing
     , tooltip
     , trainingWheelsGeneric
     , unclickableButton
+    , unsafeInstructions
     , viewTraining
     )
 
@@ -110,6 +112,16 @@ instructions infos msgToTraining =
     div [ class "instructions" ]
         [ h1 [] [ text infos.name ]
         , div [ class "pb-8" ] [ fromMarkdown infos.instructions ]
+        , button { message = msgToTraining, txt = "Continue", isDisabled = False }
+        ]
+
+
+{-| For instructions containing HTML that should not be escaped
+-}
+unsafeInstructions infos msgToTraining =
+    div [ class "instructions" ]
+        [ h1 [] [ text infos.name ]
+        , div [ class "pb-8" ] [ fromUnsafeMarkdown infos.instructions ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
         ]
 
@@ -395,6 +407,10 @@ def =
 
 fromMarkdown =
     fromUnstyled << Markdown.toHtml [ A.class "flow" ]
+
+
+fromUnsafeMarkdown =
+    fromUnstyled << Markdown.toHtmlWith { def | sanitize = False } [ A.class "flow" ]
 
 
 floatingLabel : String -> String -> (String -> msg) -> Bool -> Html msg

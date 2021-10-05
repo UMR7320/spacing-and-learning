@@ -174,20 +174,9 @@ viewKey label =
         ]
 
 
-viewInstructions data msg =
-    [ h1 [] [ text "Instructions" ]
-    , p [ class "w-full w-max-1/3" ] [ View.fromMarkdown data.infos.instructions ]
-    , View.button
-        { message = msg
-        , txt = "String"
-        , isDisabled = False
-        }
-    ]
-
-
 viewTransition infos msg buttontext =
     div [ class "flex flex-col items-center justify-center" ]
-        [ p [] [ View.fromMarkdown infos ]
+        [ p [] [ View.fromUnsafeMarkdown infos ]
         , View.button
             { isDisabled = False
             , message = msg
@@ -237,11 +226,11 @@ view task =
                 Just trial ->
                     case data.state.step of
                         Init ->
-                            [ p [ class "flex flex-col  text-center " ] [ View.fromMarkdown data.infos.instructions_short ]
+                            [ p [ class "flex flex-col  text-center " ] [ View.fromUnsafeMarkdown data.infos.instructions_short ]
                             ]
 
                         End ->
-                            [ div [ class "flex flex-col items-center justify-center" ] [ View.fromMarkdown trial.feedback ] ]
+                            [ div [ class "flex flex-col items-center justify-center" ] [ View.fromUnsafeMarkdown trial.feedback ] ]
 
                         _ ->
                             [ prompt
@@ -256,7 +245,7 @@ view task =
                 Just _ ->
                     case data.state.step of
                         Init ->
-                            [ p [ class "flex flex-col  text-center " ] [ View.fromMarkdown data.infos.trainingWheel ]
+                            [ p [ class "flex flex-col  text-center " ] [ View.fromUnsafeMarkdown data.infos.trainingWheel ]
                             ]
 
                         End ->
@@ -276,7 +265,7 @@ view task =
             ]
 
         Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos UserClickedStartTraining ]
+            [ View.unsafeInstructions data.infos UserClickedStartTraining ]
 
 
 decodeAcceptabilityTrials : Decode.Decoder (List Trial)

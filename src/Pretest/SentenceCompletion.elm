@@ -110,7 +110,7 @@ view task =
                     ]
 
                 Nothing ->
-                    [ div [ A.class "flex flex-col items-center" ]
+                    [ div [ A.class "flex flex-col items-center flow" ]
                         [ View.fromMarkdown data.infos.introToMain
                         , View.button
                             { message = UserClickedStartMain data.infos data.mainTrials
