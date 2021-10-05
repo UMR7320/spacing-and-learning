@@ -128,14 +128,16 @@ unsafeInstructions infos msgToTraining =
 
 end endInfo saveDataMsg linkToNextTask =
     div [ class "endInfo" ]
-        [ fromMarkdown endInfo
-        , div [ class "mt-8" ]
-            [ a [ href linkToNextTask ]
-                [ button
-                    { message = saveDataMsg
-                    , isDisabled = False
-                    , txt = "Click here when you are ready!"
-                    }
+        [ div []
+            [ fromMarkdown endInfo
+            , div [ class "mt-8" ]
+                [ a [ href linkToNextTask ]
+                    [ button
+                        { message = saveDataMsg
+                        , isDisabled = False
+                        , txt = "Continue"
+                        }
+                    ]
                 ]
             ]
         ]

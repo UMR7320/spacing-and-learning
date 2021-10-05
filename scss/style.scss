@@ -25,10 +25,17 @@ main {
   max-width: 70ch;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 5rem;
-  padding-bottom: 5rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
   padding-right: 1rem;
   padding-left: 1rem;
+}
+
+@media (min-width: 40ch) {
+  main {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
 }
 
 h1 {
@@ -194,9 +201,23 @@ p + p {
   }
 }
 
-.endInfo button,
-.instructions button {
-  margin-right: auto;
+.endInfo {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+}
+
+.endInfo > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 40ch) {
+  .endInfo button,
+  .instructions button {
+    margin-right: auto;
+  }
 }
 
 @media (min-width: 50rem) {
