@@ -227,7 +227,7 @@ genericNeutralFeedback ({ feedback_Correct } as data) =
         [ if data.isVisible then
             p
                 [ class
-                    "font-medium py-4 w-full text-white"
+                    "font-medium p-4 w-full text-white"
                 ]
                 [ fromMarkdown (String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct)) ]
 
@@ -518,7 +518,7 @@ tooltip text_ =
 
 sentenceInSynonym : { a | pre : String, stimulus : String, post : String } -> { b | userAnswer : String } -> (String -> msg) -> Bool -> Html msg
 sentenceInSynonym t state msg feedback_ =
-    div [ class "flex w-full border-2 p-4  space-x-4 text-center items-center" ]
+    p [ class "sentence-in-synonym" ]
         [ span [] [ text t.pre ]
         , floatingLabel t.stimulus state.userAnswer msg feedback_
         , span [] [ text t.post ]

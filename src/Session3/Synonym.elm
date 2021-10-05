@@ -112,8 +112,8 @@ viewTask experiment =
         Logic.Running Logic.Training task ->
             case task.current of
                 Just x ->
-                    [ styledDiv
-                        [ div [ class "p-8" ] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
+                    [ div [ class "flow" ]
+                        [ View.sentenceInSynonym x task.state UserChangedInput task.feedback
                         , View.genericNeutralFeedback
                             { isVisible = task.feedback
                             , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
@@ -128,10 +128,8 @@ viewTask experiment =
         Logic.Running Logic.Main task ->
             case task.current of
                 Just x ->
-                    [ styledDiv
-                        [ View.tooltip "Type the synonym of the word in the box"
-                        , Progressbar.progressBar task.history task.mainTrials
-                        , div [] [ View.sentenceInSynonym x task.state UserChangedInput task.feedback ]
+                    [ div [ class "flow" ]
+                        [ View.sentenceInSynonym x task.state UserChangedInput task.feedback
                         , View.genericNeutralFeedback
                             { isVisible = task.feedback
                             , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
@@ -154,10 +152,6 @@ start info trials =
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
-
-
-styledDiv =
-    div [ class "flex flex-col items-center w-full h-full items-center  text-center object-center " ]
 
 
 decodeSynonymTrials : Decode.Decoder (List Trial)

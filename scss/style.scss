@@ -414,3 +414,25 @@ input {
     grid-column: 1 / 3;
   }
 }
+
+.sentence-in-synonym {
+  @apply border-2 p-12;
+}
+
+.sentence-in-synonym > div,
+.sentence-in-synonym > div > input {
+  display: inline-block;
+  width: 15ch;
+}
+
+.sentence-in-synonym > span:first-child {
+  margin-right: 0.5rem;
+}
+
+.sentence-in-synonym > span:last-child {
+  margin-left: 0.5rem;
+}
+
+.sentence-in-synonym > div {
+  margin-top: 0.5rem;
+}
