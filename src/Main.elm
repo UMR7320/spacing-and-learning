@@ -248,7 +248,7 @@ init _ url key =
                 , user = Nothing
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ Cmd.map Session1 fetchSession1, Data.getGeneralParemeters GotGeneralParameters ]
+            , Data.getGeneralParemeters GotGeneralParameters
             )
 
         Route.TermsAndConditions ->
@@ -261,7 +261,7 @@ init _ url key =
                 , user = Nothing
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ Cmd.map Session1 fetchSession1, Data.getGeneralParemeters GotGeneralParameters ]
+            , Data.getGeneralParemeters GotGeneralParameters
             )
 
         Route.AuthenticatedSession2 userid _ ->
