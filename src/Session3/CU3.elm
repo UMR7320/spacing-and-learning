@@ -4,7 +4,7 @@ import Data
 import Delay
 import Dict
 import ExperimentInfo
-import Html.Styled as Html exposing (div, span, text)
+import Html.Styled as Html exposing (div, label, span, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events exposing (onInput)
 import Http exposing (Error)
@@ -45,25 +45,7 @@ view exp =
                                 _ ->
                                     ( "Missing context", "Missing dialog" )
                     in
-                    div [ class "flex flex-col items-center" ]
-                        [ div [ class "text-xl" ] [ View.fromMarkdown context ]
-                        , viewLimitedTimesAudioButton nTimes trial
-                        , Html.pre [ class "m-4 text-center" ]
-                            [ View.fromMarkdown dialog
-                            ]
-                        , View.textAreaWithReadonlyAmorce
-                            { id_ = "production"
-                            , amorce = trial.amorce
-                            , isFeedback = feedback
-                            , userAnswer = state.userAnswer
-                            , onInputMsg = UserChangedInput
-                            }
-                        , View.genericNeutralFeedback
-                            { isVisible = feedback
-                            , feedback_Correct = ( trial.feedback, [] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
-                            }
-                        ]
+                    viewStep context nTimes trial feedback state
 
                 ( Nothing, _ ) ->
                     View.introToMain UserClickedStartMain
@@ -80,31 +62,50 @@ view exp =
                                 _ ->
                                     ( "Missing context", "Missing dialog" )
                     in
-                    div [ class "flex flex-col items-center" ]
-                        [ View.tooltip
-                            data.infos.instructions_short
-                        , progressBar history mainTrials
-                        , div [ class "text-xl text-center" ] [ View.fromMarkdown context ]
-                        , viewLimitedTimesAudioButton nTimes trial
-                        , Html.pre [ class "text-center font-bold" ]
-                            [ View.fromMarkdown dialog
-                            ]
-                        , View.textAreaWithReadonlyAmorce
-                            { id_ = "production"
-                            , amorce = trial.amorce
-                            , isFeedback = feedback
-                            , userAnswer = state.userAnswer
-                            , onInputMsg = UserChangedInput
-                            }
-                        , View.genericNeutralFeedback
-                            { isVisible = feedback
-                            , feedback_Correct = ( trial.feedback, [] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
-                            }
-                        ]
+                    viewStep context nTimes trial feedback state
 
                 ( Nothing, _ ) ->
                     View.end data.infos.end UserClickedSaveData "../post-tests/cw"
+
+
+viewStep context nTimes trial feedback state =
+    div [ class "flex flex-col items-center context-understanding-3 flow" ]
+        [ div [ class "p-4 bg-gray-200 rounded-lg context" ]
+            [ View.fromMarkdown context ]
+        , div
+            []
+            [ div [ class "context-understanding-3--grid" ]
+                [ div [] [ viewLimitedTimesAudioButton nTimes trial ]
+                , div [ class "with-thought-bubble" ]
+                    [ div [ class "avatar-with-name" ]
+                        [ div [ class "text-4xl" ] [ text trial.speaker1Emoji ]
+                        , text (trial.speaker1Name ++ " ")
+                        ]
+                    , div [ class "speech-bubble" ] [ text trial.speaker1Line ]
+                    ]
+                , div [ class "with-thought-bubble bubble-left" ]
+                    [ div [ class "avatar-with-name" ]
+                        [ div [ class "text-4xl" ] [ text trial.speaker2Emoji ]
+                        , text (trial.speaker2Name ++ " ")
+                        ]
+                    , div [ class "speech-bubble" ] [ text trial.speaker2Line ]
+                    ]
+                ]
+            ]
+        , label [] [ text "Your answer" ]
+        , View.textAreaWithReadonlyAmorce
+            { id_ = "production"
+            , amorce = trial.amorce
+            , isFeedback = feedback
+            , userAnswer = state.userAnswer
+            , onInputMsg = UserChangedInput
+            }
+        , View.genericNeutralFeedback
+            { isVisible = feedback
+            , feedback_Correct = ( trial.feedback, [] )
+            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
+            }
+        ]
 
 
 type Msg
@@ -211,6 +212,12 @@ decodeTranslationInput =
                 |> required "Word_Text" string
                 |> optional "CU_Lv3_Audio" Data.decodeAudioFiles (Data.AudioFile "" "")
                 |> required "CU_Lvl3_Presentation" string
+                |> required "CU_Lvl3_Speaker1Name" string
+                |> required "CU_Lvl3_Speaker1Emoji" string
+                |> required "CU_Lvl3_Speaker1Line" string
+                |> required "CU_Lvl3_Speaker2Name" string
+                |> required "CU_Lvl3_Speaker2Emoji" string
+                |> required "CU_Lvl3_Speaker2Line" string
                 |> required "CU_Lvl3_TextToComplete_amorce" string
                 |> required "CU_Lvl3_Feedback" string
                 |> optional "isTraining" Decode.bool False
@@ -229,6 +236,12 @@ defaultTrial =
     , writtenWord = "String"
     , audioSentence = Data.AudioFile "" ""
     , context = "String"
+    , speaker1Name = "String"
+    , speaker1Emoji = "String"
+    , speaker1Line = "String"
+    , speaker2Name = "String"
+    , speaker2Emoji = "String"
+    , speaker2Line = "String"
     , amorce = "String"
     , feedback = "String"
     , isTraining = False
@@ -240,6 +253,12 @@ type alias Trial =
     , writtenWord : String
     , audioSentence : Data.AudioFile
     , context : String
+    , speaker1Name : String
+    , speaker1Emoji : String
+    , speaker1Line : String
+    , speaker2Name : String
+    , speaker2Emoji : String
+    , speaker2Line : String
     , amorce : String
     , feedback : String
     , isTraining : Bool
