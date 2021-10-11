@@ -145,6 +145,16 @@ p + p {
   margin-top: 1rem;
 }
 
+.dates-to-book > * + *,
+.possible-dates > * + * {
+  margin-top: 0.25rem;
+}
+
+.dates-to-book {
+  list-style: unset;
+  list-style-position: inside;
+}
+
 label,
 input :not([type="radio"]) {
   display: block;
@@ -229,6 +239,7 @@ input {
 }
 
 @media (min-width: 40ch) {
+  .calendar button,
   .endInfo button,
   .instructions button {
     margin-right: auto;

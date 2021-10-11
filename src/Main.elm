@@ -475,68 +475,72 @@ body model =
                                                         ]
                                                 )
                                 in
-                                [ p [] [ text "For your convenience, you can choose the day you wish to start the next session" ]
-                                , div [ class "flex flex-col" ] possibleDates
-                                , case model.preferedStartDate of
-                                    Nothing ->
-                                        div [] []
+                                [ div [ class "flow calendar" ]
+                                    [ h1 [] [ text "Planning" ]
+                                    , p [] [ text "Before starting today, choose your personalised calendar for your LexLearn sessions. Click on a starting date to see which four days you need to be available. If some days don't suit, click on a different starting date." ]
+                                    , div [ class "possible-dates" ] possibleDates
+                                    , case model.preferedStartDate of
+                                        Nothing ->
+                                            text ""
 
-                                    Just d ->
-                                        let
-                                            datesToBook =
-                                                List.map
-                                                    (\eachDate ->
-                                                        let
-                                                            formattedDate =
-                                                                Date.format "EEEE, d MMMM y" eachDate
-                                                        in
-                                                        div [] [ text formattedDate ]
-                                                    )
-                                                    sessionsDates
+                                        Just d ->
+                                            let
+                                                datesToBook =
+                                                    List.map
+                                                        (\eachDate ->
+                                                            let
+                                                                formattedDate =
+                                                                    Date.format "EEEE, d MMMM y" eachDate
+                                                            in
+                                                            li [] [ text formattedDate ]
+                                                        )
+                                                        sessionsDates
+                                                        |> ul [ class "dates-to-book" ]
 
-                                            sessionsDates =
-                                                [ s1, s2, s3, s4 ]
+                                                sessionsDates =
+                                                    [ s1, s2, s3, s4 ]
 
-                                            spacing =
-                                                case group of
-                                                    Route.Massed ->
-                                                        model.massedSpacing
+                                                spacing =
+                                                    case group of
+                                                        Route.Massed ->
+                                                            model.massedSpacing
 
-                                                    Route.Distributed ->
-                                                        model.distributedSpacing
+                                                        Route.Distributed ->
+                                                            model.distributedSpacing
 
-                                            s1 =
-                                                Date.add Date.Days 0 d
+                                                s1 =
+                                                    Date.add Date.Days 0 d
 
-                                            s2 =
-                                                Date.add Date.Days spacing s1
+                                                s2 =
+                                                    Date.add Date.Days spacing s1
 
-                                            s3 =
-                                                Date.add Date.Days spacing s2
+                                                s3 =
+                                                    Date.add Date.Days spacing s2
 
-                                            s4 =
-                                                Date.add Date.Days model.retentionInterval s3
+                                                s4 =
+                                                    Date.add Date.Days model.retentionInterval s3
 
-                                            s5 =
-                                                Date.add Date.Days model.retentionIntervalSurprise s3
-                                        in
-                                        div []
-                                            ([ h3 [] [ text "Save those dates" ] ]
-                                                ++ datesToBook
-                                                ++ [ View.button
-                                                        { message =
-                                                            UserConfirmedPreferedDates
-                                                                { s1 = Date.toIsoString s1
-                                                                , s2 = Date.toIsoString s2
-                                                                , s3 = Date.toIsoString s3
-                                                                , s4 = Date.toIsoString s4
-                                                                , s5 = Date.toIsoString s5
-                                                                }
-                                                        , txt = "I confirm I'll be available at least 1 hour each of those days"
-                                                        , isDisabled = False
-                                                        }
-                                                   ]
-                                            )
+                                                s5 =
+                                                    Date.add Date.Days model.retentionIntervalSurprise s3
+                                            in
+                                            div [ class "flow" ]
+                                                ([ p [] [ text "You need to be available at least one hour on each of these days" ] ]
+                                                    ++ [ datesToBook ]
+                                                    ++ [ View.button
+                                                            { message =
+                                                                UserConfirmedPreferedDates
+                                                                    { s1 = Date.toIsoString s1
+                                                                    , s2 = Date.toIsoString s2
+                                                                    , s3 = Date.toIsoString s3
+                                                                    , s4 = Date.toIsoString s4
+                                                                    , s5 = Date.toIsoString s5
+                                                                    }
+                                                            , txt = "Continue"
+                                                            , isDisabled = False
+                                                            }
+                                                       ]
+                                                )
+                                    ]
                                 ]
 
                             Nothing ->
