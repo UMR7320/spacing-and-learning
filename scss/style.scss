@@ -146,7 +146,7 @@ p + p {
 }
 
 label,
-input {
+input :not([type="radio"]) {
   display: block;
 }
 
