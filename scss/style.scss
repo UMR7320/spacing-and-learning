@@ -411,18 +411,20 @@ input {
   grid-column: 1 / 3;
 }
 
-.context-understanding-3--grid {
-  margin-top: 2rem;
-  display: grid;
-  grid-template-columns: 1fr max-content;
-  grid-gap: 1rem;
-}
+@media (min-width: 40ch) {
+  .context-understanding-3--grid {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    grid-gap: 1rem;
+  }
 
-.context-understanding-3--grid > *:first-child {
-  grid-row: 1 / 3;
-  grid-column: 2 / 3;
-  align-self: center;
-  justify-self: start;
+  .context-understanding-3--grid > *:first-child {
+    grid-row: 1 / 3;
+    grid-column: 2 / 3;
+    align-self: center;
+    justify-self: start;
+  }
 }
 
 .context-understanding-3 .with-thought-bubble:not(.bubble-left) {
