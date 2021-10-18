@@ -1,6 +1,9 @@
 module.exports = (statusCode, body) => {
     return {
-        statusCode: 500,
+        statusCode,
         body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json"
+        },
     };
 };
