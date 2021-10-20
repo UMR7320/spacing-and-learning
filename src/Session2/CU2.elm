@@ -33,67 +33,77 @@ view exp optionsOrder =
         Logic.Running Logic.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Logic.Running Logic.Training ({ mainTrials, current, state, feedback } as data) ->
-            case ( current, data.state.step ) of
-                ( Just trial, Listening nTimes ) ->
-                    div []
-                        [ div [ class "context-understanding-2" ]
-                            [ div [ class "p-4 bg-gray-200 rounded-lg context" ] [ View.fromMarkdown trial.context ]
-                            , div [ class "with-thought-bubble" ]
-                                [ div [ class "avatar-with-name" ]
-                                    [ if trial.responseType == Speech then
-                                        div [ class "text-4xl" ] [ text "😐" ]
+        Logic.Running Logic.Training data ->
+            viewTrialOrEnd optionsOrder data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
-                                      else
-                                        div [ class "text-4xl" ] [ text "\u{1F914}" ]
-                                    , text (trial.speakerName ++ " ")
-                                    ]
-                                , if trial.responseType == Speech then
-                                    div [ class "speech-bubble" ] []
+        Logic.Running Logic.Main data ->
+            viewTrialOrEnd optionsOrder data (View.end data.infos.end UserClickedSaveData "../post-tests/cw")
 
-                                  else
-                                    div [ class "thought-bubble" ] []
-                                ]
-                            , div []
-                                [ if nTimes == 3 then
-                                    View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
 
-                                  else if nTimes == 2 then
-                                    View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
+viewTrialOrEnd optionsOrder data endView =
+    case data.current of
+        Just trial ->
+            viewTrial optionsOrder data trial
 
-                                  else if nTimes == 1 then
-                                    View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+        Nothing ->
+            endView
 
-                                  else
-                                    text ""
-                                ]
+
+viewTrial optionsOrder { mainTrials, current, state, feedback } trial =
+    case state.step of
+        Listening nTimes ->
+            div []
+                [ div [ class "context-understanding-2" ]
+                    [ div [ class "p-4 bg-gray-200 rounded-lg context" ] [ View.fromMarkdown trial.context ]
+                    , div [ class "with-thought-bubble" ]
+                        [ div [ class "avatar-with-name" ]
+                            [ if trial.responseType == Speech then
+                                div [ class "text-4xl" ] [ text "😐" ]
+
+                              else
+                                div [ class "text-4xl" ] [ text "\u{1F914}" ]
+                            , text (trial.speakerName ++ " ")
                             ]
-                        , View.button
-                            { isDisabled =
-                                nTimes == 3
-                            , message = UserClickedStartAnswering
-                            , txt = "Now choose the best description"
-                            }
+                        , if trial.responseType == Speech then
+                            div [ class "speech-bubble" ] []
+
+                          else
+                            div [ class "thought-bubble" ] []
                         ]
+                    , div []
+                        [ if nTimes == 3 then
+                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
 
-                ( Just trial, Answering ) ->
-                    div [ class "flex flex-col items-center" ]
-                        [ div [] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
-                        , View.genericSingleChoiceFeedback
-                            { isVisible = feedback
-                            , userAnswer = state.userAnswer
-                            , target = trial.target
-                            , feedback_Correct = ( trial.feedback, [] )
-                            , feedback_Incorrect = ( trial.feedback, [] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback data.state.userAnswer
-                            }
+                          else if nTimes == 2 then
+                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
+
+                          else if nTimes == 1 then
+                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+
+                          else
+                            text ""
                         ]
+                    ]
+                , View.button
+                    { isDisabled =
+                        nTimes == 3
+                    , message = UserClickedStartAnswering
+                    , txt = "Now choose the best description"
+                    }
+                ]
 
-                ( Nothing, _ ) ->
-                    View.introToMain (UserClickedStartMain mainTrials data.infos)
-
-        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
-            view (Logic.Running Logic.Training data) optionsOrder
+        Answering ->
+            div [ class "flex flex-col items-center" ]
+                [ div [] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
+                , View.genericSingleChoiceFeedback
+                    { isVisible = feedback
+                    , userAnswer = state.userAnswer
+                    , target = trial.target
+                    , feedback_Correct = ( trial.feedback, [] )
+                    , feedback_Incorrect = ( trial.feedback, [] )
+                    , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
+                    }
+                ]
 
 
 audioButton trial nTimes =
