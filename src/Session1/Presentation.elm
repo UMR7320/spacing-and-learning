@@ -62,9 +62,7 @@ entries d e t msg toggledEntries =
             )
 
 
-view :
-    Logic.Task Trial State
-    -> Html Msg
+view : Logic.Task Trial State -> Html Msg
 view task =
     case task of
         Logic.NotStarted ->
@@ -80,29 +78,37 @@ view task =
             View.loading
 
         Logic.Running Logic.Training data ->
-            case data.current of
-                Just trial ->
-                    div [ class "full-bleed flow" ]
-                        [ div
-                            [ class "word-presentation" ]
-                            ([ div [ class "text-3xl text-center italic font-bold" ] [ text ("to " ++ trial.text) ]
-                             , View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
-                             ]
-                                ++ entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
-                            )
-                        , View.button
-                            { message = UserClickedNextTrial
-                            , isDisabled =
-                                data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation", "audio" ]
-                            , txt = "Continue"
-                            }
-                        ]
-
-                Nothing ->
-                    View.introToMain (UserClickedStartMain data.mainTrials data.infos)
+            viewTrialOrEnd data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
         Logic.Running Logic.Main data ->
-            view (Logic.Running Logic.Training data)
+            viewTrialOrEnd data (View.end data.infos.end NoOp "meaning")
+
+
+viewTrialOrEnd data endView =
+    case data.current of
+        Just trial ->
+            viewTrial trial data
+
+        Nothing ->
+            endView
+
+
+viewTrial trial data =
+    div [ class "full-bleed flow" ]
+        [ div
+            [ class "word-presentation" ]
+            ([ div [ class "text-3xl text-center italic font-bold" ] [ text ("to " ++ trial.text) ]
+             , View.audioButton UserClickedStartAudio trial.audio.url "Pronunciation"
+             ]
+                ++ entries [ trial.definition ] [ trial.example ] [ trial.translation1, trial.translation2 ] UserToggleElementOfEntry data.state.toggledEntries
+            )
+        , View.button
+            { message = UserClickedNextTrial
+            , isDisabled =
+                data.state.clickedEntries /= Set.fromList [ "definition", "example", "translation", "audio" ]
+            , txt = "Continue"
+            }
+        ]
 
 
 type Msg
