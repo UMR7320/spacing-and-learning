@@ -14,34 +14,73 @@ import Json.Encode as Encode
 import Logic
 import Random
 import Task
+import Url.Builder
 import View
 
 
-taskId model =
-    case model.version of
-        Nothing ->
-            "recR6grI83e1so6Zl"
 
-        Just specifiedVersion ->
-            case specifiedVersion of
-                "pre" ->
-                    "recR6grI83e1so6Zl"
+-- MODEL
 
-                "post" ->
-                    "recAlZreFoiVGfSbN"
 
-                "post-diff" ->
-                    "rec4WlQXhH06yutJ5"
+type alias Model superModel =
+    { superModel
+        | vks : Logic.Task Trial Answer
+        , vksOutputId : Maybe String
+        , user : Maybe String
+        , version : Maybe String
+    }
 
-                "surprise" ->
-                    "recYe82wpkoFoW39K"
 
-                _ ->
-                    "recR6grI83e1so6Zl"
+type alias Trial =
+    { id : String
+    , verb : String
+    , isTraining : Bool
+    }
+
+
+type Familiarity
+    = NeverSeen
+    | PreviouslySeen
+    | Known
+    | NoAnswer
+
+
+type alias Answer =
+    { knowledge : Familiarity
+    , definition : String
+    , translation : String
+    , synonym : String
+    , usage : String
+    }
 
 
 type alias SC =
-    Logic.Task Trial State
+    Logic.Task Trial Answer
+
+
+toTask : List ExperimentInfo.Task -> List Trial -> Model superModel -> Logic.Task Trial Answer
+toTask infos trials model =
+    let
+        info =
+            ExperimentInfo.toDict infos
+                |> Dict.get (taskId model)
+                |> Result.fromMaybe "I couldn't find Task infos"
+    in
+    Logic.startIntro info [] trials emptyAnswer
+
+
+emptyAnswer : Answer
+emptyAnswer =
+    { knowledge = NoAnswer
+    , definition = ""
+    , synonym = ""
+    , translation = ""
+    , usage = ""
+    }
+
+
+
+-- VIEW
 
 
 view : SC -> List (Html Msg)
@@ -156,6 +195,94 @@ view task =
             [ View.instructions data.infos UserClickedStartMain ]
 
 
+
+-- UPDATE
+
+
+type Msg
+    = UserClickedNextTrial
+    | UserClickedStartMain
+    | UserClickedSaveData
+    | UserUpdatedField Field Int String
+    | RuntimeReordedAmorces Field
+    | UserClickedNewKnowledge String
+    | GotOutputId (Result Http.Error (List String))
+    | OutputRecordWasCreated (Result Http.Error String)
+    | OutputRecordWasUpdated (Result Http.Error String)
+
+
+type Field
+    = Definition
+    | Synonym
+    | Translation
+    | SecondProduction
+
+
+update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
+update msg model =
+    let
+        prevAnswer =
+            Logic.getState model.vks |> Maybe.withDefault emptyAnswer
+    in
+    case msg of
+        GotOutputId (Ok id) ->
+            ( { model | vksOutputId = List.head id }, Cmd.none )
+
+        GotOutputId (Err _) ->
+            ( model, Cmd.none )
+
+        OutputRecordWasCreated (Ok id) ->
+            ( { model | vksOutputId = Just id }, Cmd.none )
+
+        OutputRecordWasCreated (Err _) ->
+            ( model, Cmd.none )
+
+        OutputRecordWasUpdated _ ->
+            ( model, Cmd.none )
+
+        RuntimeReordedAmorces _ ->
+            ( { model | vks = model.vks |> Logic.update prevAnswer }, Cmd.none )
+
+        UserClickedNextTrial ->
+          let
+              newModel =
+                { model | vks = model.vks |> Logic.toggle |> Logic.next emptyAnswer }
+          in
+              ( newModel
+              , Cmd.batch
+                  [ Random.generate RuntimeReordedAmorces (Random.uniform Definition [ SecondProduction ])
+                  , saveData newModel
+                  ]
+              )
+
+        UserClickedStartMain ->
+            ( { model | vks = Logic.startMain model.vks emptyAnswer }, Cmd.none )
+
+        UserUpdatedField fieldId subKey new ->
+            case fieldId of
+                Definition ->
+                    ( { model | vks = model.vks |> Logic.update { prevAnswer | definition = new } }, Cmd.none )
+
+                Synonym ->
+                    ( { model | vks = model.vks |> Logic.update { prevAnswer | synonym = new } }, Cmd.none )
+
+                Translation ->
+                    ( { model | vks = model.vks |> Logic.update { prevAnswer | translation = new } }, Cmd.none )
+
+                SecondProduction ->
+                    ( { model | vks = model.vks |> Logic.update { prevAnswer | usage = new } }, Cmd.none )
+
+        UserClickedNewKnowledge str ->
+            ( { model | vks = model.vks |> Logic.update { prevAnswer | knowledge = familiarityFromString str } }, Cmd.none )
+
+        UserClickedSaveData ->
+            ( { model | vks = Logic.Loading }, Cmd.none )
+
+
+
+-- HTTP
+
+
 getRecords =
     Http.task
         { method = "GET"
@@ -184,114 +311,163 @@ decodeAcceptabilityTrials =
     Data.decodeRecords decoder
 
 
-type alias Trial =
-    { id : String
-    , verb : String
-    , isTraining : Bool
-    }
+{-| Fetches the id of the record that holds the user's answers
+-}
+fetchOutputId : String -> Cmd Msg
+fetchOutputId userId =
+    Http.get
+        { url =
+            Url.Builder.absolute
+                [ ".netlify"
+                , "functions"
+                , "api"
+                ]
+                [ Url.Builder.string "app" Data.apps.spacing
+                , Url.Builder.string "base" "VKS_output"
+                , Url.Builder.string "view" "all"
+                , Url.Builder.string "filterByFormula" ("{LinkToUserUID} = '" ++ userId ++ "'")
+                ]
+        , expect = Http.expectJson GotOutputId outputIdDecoder
+        }
 
 
-type Familiarity
-    = NeverSeen
-    | PreviouslySeen
-    | Known
-    | NoAnswer
+outputIdDecoder =
+    Decode.field "records" (Decode.list (Decode.field "id" Decode.string))
 
 
-type alias State =
-    { knowledge : Familiarity
-    , definition : String
-    , translation : String
-    , synonym : String
-    , usage : String
-    }
-
-
-type Msg
-    = UserClickedNextTrial
-    | UserClickedStartMain
-    | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
-    | UserUpdatedField Field Int String
-    | RuntimeReordedAmorces Field
-    | UserClickedNewKnowledge String
-
-
-
---| UserClickedAddAnswer
---| UserClickedRemoveAnswer Int
-
-
-type Field
-    = Definition
-    | Synonym
-    | Translation
-    | SecondProduction
-
-
-type alias Model superModel =
-    { superModel | vks : Logic.Task Trial State, user : Maybe String, version : Maybe String }
-
-
-update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
-update msg model =
+historyEncoder : String -> String -> List ( Trial, Answer ) -> Encode.Value
+historyEncoder version userId history =
     let
-        prevState =
-            Logic.getState model.vks |> Maybe.withDefault initState
+        answerField =
+            case version of
+                "post" ->
+                    "PostTestAnswers"
+
+                "post-diff" ->
+                    "PostTestDiffAnswers"
+
+                "surprise" ->
+                    "SurprisePostTestAnswers"
+
+                _ ->
+                    "PreTestAnswers"
     in
-    case msg of
-        RuntimeReordedAmorces _ ->
-            ( { model | vks = model.vks |> Logic.update prevState }, Cmd.none )
+    Encode.object
+        -- The Airtable API forces link to other records to be arrays
+        [ ( "LinkToUserUID", Encode.list Encode.string [ userId ] )
 
-        UserClickedNextTrial ->
-            ( { model | vks = model.vks |> Logic.toggle |> Logic.next initState }, Random.generate RuntimeReordedAmorces (Random.uniform Definition [ SecondProduction ]) )
-
-        UserClickedStartMain ->
-            ( { model | vks = Logic.startMain model.vks initState }, Cmd.none )
-
-        UserUpdatedField fieldId subKey new ->
-            case fieldId of
-                Definition ->
-                    ( { model | vks = model.vks |> Logic.update { prevState | definition = new } }, Cmd.none )
-
-                Synonym ->
-                    ( { model | vks = model.vks |> Logic.update { prevState | synonym = new } }, Cmd.none )
-
-                Translation ->
-                    ( { model | vks = model.vks |> Logic.update { prevState | translation = new } }, Cmd.none )
-
-                SecondProduction ->
-                    ( { model | vks = model.vks |> Logic.update { prevState | usage = new } }, Cmd.none )
-
-        UserClickedSaveData ->
-            let
-                responseHandler =
-                    ServerRespondedWithLastRecords
-            in
-            ( { model | vks = Logic.Loading }, saveData responseHandler model )
-
-        ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( { model | vks = Logic.NotStarted }, Cmd.none )
-
-        ServerRespondedWithLastRecords (Result.Err reason) ->
-            ( { model | vks = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
-
-        UserClickedNewKnowledge str ->
-            ( { model | vks = model.vks |> Logic.update { prevState | knowledge = familiarityFromString str } }, Cmd.none )
+        -- airtable does not support JSON columns, so Answers is a giant JSON string
+        , ( answerField, Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
 
 
-init : List ExperimentInfo.Task -> List Trial -> Model superModel -> Logic.Task Trial State
-init infos trials model =
+historyItemEncoder : ( Trial, Answer ) -> Encode.Value
+historyItemEncoder ( { id }, { knowledge, definition, translation, synonym, usage } ) =
+    Encode.object
+        [ ( "trialUID", Encode.string id )
+        , ( "vks_knowledge", Encode.string (familiarityToString knowledge) )
+        , ( "vks_definition", Encode.string definition )
+        , ( "vks_synonym", Encode.string synonym )
+        , ( "vks_translation", Encode.string translation )
+        , ( "vks_usage", Encode.string usage )
+        ]
+
+
+updateHistoryEncoder : String -> String -> String -> List ( Trial, Answer ) -> Encode.Value
+updateHistoryEncoder outputId version userId history =
+    -- The Airtable API forces PATCH requests to send arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string outputId )
+                , ( "fields", historyEncoder version userId history )
+                ]
+        )
+        [ ( version, userId, history ) ]
+
+
+saveData model =
     let
-        info =
-            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find Task infos"
+        history =
+            Logic.getHistory model.vks
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        version = (Maybe.withDefault "pre" model.version)
     in
-    Logic.startIntro info [] trials initState
+    case model.vksOutputId of
+        Nothing ->
+          createOutputRecord version userId history
+
+        Just id ->
+          updateOutputRecord id version userId history
 
 
-initState : State
-initState =
-    { knowledge = NoAnswer, definition = "", synonym = "", translation = "", usage = "" }
+createOutputRecord version userId history  =
+    let
+        payload =
+            historyEncoder version userId history
+
+    in
+    Http.post
+        { url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "VKS_output"
+                , view_ = "all"
+                }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson OutputRecordWasCreated (Decode.field "id" Decode.string)
+        }
+
+
+updateOutputRecord outputId version userId history =
+    let
+        payload =
+            updateHistoryEncoder outputId version userId history
+    in
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "VKS_output"
+                , view_ = "all"
+                }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson OutputRecordWasUpdated (Decode.field "id" Decode.string)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+
+-- INTERNAL
+
+
+taskId model =
+    case model.version of
+        Nothing ->
+            "recR6grI83e1so6Zl"
+
+        Just specifiedVersion ->
+            case specifiedVersion of
+                "pre" ->
+                    "recR6grI83e1so6Zl"
+
+                "post" ->
+                    "recAlZreFoiVGfSbN"
+
+                "post-diff" ->
+                    "rec4WlQXhH06yutJ5"
+
+                "surprise" ->
+                    "recYe82wpkoFoW39K"
+
+                _ ->
+                    "recR6grI83e1so6Zl"
 
 
 familiarityToString : Familiarity -> String
@@ -324,36 +500,3 @@ familiarityFromString str =
 
         _ ->
             NoAnswer
-
-
-saveData responseHandler model =
-    let
-        history =
-            Logic.getHistory model.vks
-
-        userId =
-            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
-
-        summarizedTrialEncoder =
-            Encode.list
-                (\( { id }, { knowledge, definition, translation, synonym, usage } ) ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "trialUid", Encode.list Encode.string [ id ] )
-                                , ( "vks_knowledge", Encode.string (familiarityToString knowledge) )
-                                , ( "vks_definition", Encode.string definition )
-                                , ( "vks_synonym", Encode.string synonym )
-                                , ( "vks_translation", Encode.string translation )
-                                , ( "vks_usage", Encode.string usage )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId model ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                ]
-                          )
-                        ]
-                )
-
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder (taskId model) userId history
-    in
-    Task.attempt responseHandler sendInBatch_

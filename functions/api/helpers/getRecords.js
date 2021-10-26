@@ -19,8 +19,15 @@ const formattedReturn = require("./formattedReturn");
 module.exports = async (event) => {
   try {
     const base = Airtable.base(event.queryStringParameters.app);
+    const options = {
+      maxRecords: 200,
+      view: (event.queryStringParameters.view),
+    };
+    if (event.queryStringParameters.filterByFormula) {
+      options.filterByFormula = event.queryStringParameters.filterByFormula;
+    }
     const learningData = await base(handleTableRequest(event.queryStringParameters.base))
-      .select({ maxRecords: 200, view: (event.queryStringParameters.view) })
+      .select(options)
       .all();
 
     const formattedLearningData = learningData.map((datum) => ({

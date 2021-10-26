@@ -14,12 +14,20 @@ module.exports = async (event) => {
       fields
 
     );
-    const formattedRecord = createdRecord.map((datum) => ({
-      id: datum.id,
-      ...datum.fields,
-    }));
-    console.log(formattedRecord)
-    return formattedReturn(200, createdRecord.shift());
+    let formattedRecord;
+    if (Array.isArray(createdRecord)) {
+      formattedRecord = createdRecord.map((datum) => ({
+        id: datum.id,
+        ...datum.fields,
+      }));
+    } else {
+      formattedRecord = [{
+        id: createdRecord.id,
+        ...createdRecord.fields,
+      }];
+    }
+    console.log(formattedRecord);
+    return formattedReturn(200, formattedRecord.shift());
   } catch (err) {
     console.error(err);
     return formattedReturn(err.statusCode, { "error": err.error, "message": err.message });

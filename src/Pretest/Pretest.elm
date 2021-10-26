@@ -58,9 +58,7 @@ type alias ShuffledPretest =
     , infos : List ExperimentInfo.Task
     , vks : List VKS.Trial
     , acceptability :
-        Result
-            ( ErrorBlock, List Acceptability.Trial )
-            (List (List Acceptability.Trial))
+        Result ( ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
     , yn : List YesNo.Trial
     }
 
@@ -70,7 +68,8 @@ type alias Model superModel =
         | spr : SPR.SPR
         , sentenceCompletion : SentenceCompletion.SentenceCompletion
         , pretest : Pretest
-        , vks : Logic.Task VKS.Trial VKS.State
+        , vks : Logic.Task VKS.Trial VKS.Answer
+        , vksOutputId : Maybe String
         , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
         , yesno : YesNo.YN
         , version : Maybe String
@@ -163,7 +162,7 @@ update msg model =
                             | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials) model.version
                             , spr = SPR.init infos spr model.version
                             , sentenceCompletion = SentenceCompletion.init infos sc model
-                            , vks = VKS.init infos (List.filter (not << .isTraining) vks) model
+                            , vks = VKS.toTask infos (List.filter (not << .isTraining) vks) model
                             , yesno = YesNo.init infos yn
                           }
                         , Cmd.none

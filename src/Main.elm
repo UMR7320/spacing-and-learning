@@ -81,7 +81,8 @@ type alias Model =
     , spr : SPR.SPR
     , pretest : Pretest.Pretest
     , sentenceCompletion : SentenceCompletion.SentenceCompletion
-    , vks : Logic.Task VKS.Trial VKS.State
+    , vks : Logic.Task VKS.Trial VKS.Answer
+    , vksOutputId : Maybe String
     , yesno : Logic.Task YesNo.Trial YesNo.State
 
     -- Session 1
@@ -162,13 +163,14 @@ defaultModel key route =
     , pretest = NotAsked
     , sentenceCompletion = Logic.NotStarted
     , vks = Logic.NotStarted
+    , vksOutputId = Nothing
     , yesno = Logic.NotStarted
 
     -- POSTEST
     , cloudWords = CloudWords.Running (Dict.fromList CloudWords.words)
 
     -- SHARED
-    , user = Just ""
+    , user = Nothing
     , optionsOrder = [ 0, 1, 2, 3 ]
     , infos = RemoteData.Loading
     , errorTracking = []
@@ -203,8 +205,9 @@ init _ url key =
         ( loadingStateSession3, fetchSession3 ) =
             Session3.attempt
 
-        model =
+        ( model, cmd ) =
             defaultModel key route
+                |> changeRouteTo route
     in
     case route of
         Route.Session1 userId _ ->
@@ -217,7 +220,7 @@ init _ url key =
                 , user = Just userId
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
+            , Cmd.batch [ cmd, Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
             )
 
         Route.Home ->
@@ -230,7 +233,7 @@ init _ url key =
                 , user = Nothing
                 , session1 = Loading loadingStateSession1
               }
-            , Data.getGeneralParemeters GotGeneralParameters
+            , Cmd.batch [ cmd, Data.getGeneralParemeters GotGeneralParameters ]
             )
 
         Route.TermsAndConditions ->
@@ -243,7 +246,7 @@ init _ url key =
                 , user = Nothing
                 , session1 = Loading loadingStateSession1
               }
-            , Data.getGeneralParemeters GotGeneralParameters
+            , Cmd.batch [ cmd, Data.getGeneralParemeters GotGeneralParameters ]
             )
 
         Route.AuthenticatedSession2 userid _ ->
@@ -255,7 +258,7 @@ init _ url key =
                 , user = Just userid
                 , session2 = Loading loadingStateSession2
               }
-            , Cmd.batch [ Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
+            , Cmd.batch [ cmd, Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
             )
 
         Route.AuthenticatedSession3 userid _ ->
@@ -267,7 +270,7 @@ init _ url key =
                 , user = Just userid
                 , session3 = Loading loadingStateSession3
               }
-            , Cmd.batch [ Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
+            , Cmd.batch [ cmd, Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
             )
 
         Route.Pretest userid _ v ->
@@ -286,7 +289,8 @@ init _ url key =
                 , pretest = Loading loadingStatePretest
               }
             , Cmd.batch
-                [ Cmd.map Pretest fetchSessionPretest
+                [ cmd
+                , Cmd.map Pretest fetchSessionPretest
                 , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
                 , Data.getGeneralParemeters GotGeneralParameters
                 , Ports.enableAlertOnExit ()
@@ -294,7 +298,7 @@ init _ url key =
             )
 
         Route.Posttest _ _ ->
-            ( model, Ports.enableAlertOnExit () )
+            ( model, Cmd.batch [ cmd, Ports.enableAlertOnExit () ] )
 
         NotFound ->
             ( { model | route = NotFound }, Cmd.none )
@@ -623,6 +627,46 @@ type Msg
     | WordCloud CloudWords.Msg
 
 
+changeRouteTo : Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo route model =
+    let
+        newModel =
+            { model | route = route }
+    in
+    case route of
+        Route.Home ->
+            ( newModel, Cmd.none )
+
+        Route.TermsAndConditions ->
+            ( newModel, Cmd.none )
+
+        Route.NotFound ->
+            ( newModel, Cmd.none )
+
+        Route.Pretest userId Route.VKS _ ->
+            ( newModel
+            , Cmd.batch
+                [ Ports.enableAlertOnExit ()
+                , Cmd.map VKS (VKS.fetchOutputId userId)
+                ]
+            )
+
+        Route.Pretest _ _ _ ->
+            ( newModel, Ports.enableAlertOnExit () )
+
+        Route.Session1 _ _ ->
+            ( newModel, Ports.enableAlertOnExit () )
+
+        Route.AuthenticatedSession2 _ _ ->
+            ( newModel, Ports.enableAlertOnExit () )
+
+        Route.AuthenticatedSession3 _ _ ->
+            ( newModel, Ports.enableAlertOnExit () )
+
+        Route.Posttest _ _ ->
+            ( newModel, Ports.enableAlertOnExit () )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -833,40 +877,6 @@ project =
       """
     , url = Url.Builder.absolute [ "start" ] []
     }
-
-
-changeRouteTo : Route -> Model -> ( Model, Cmd Msg )
-changeRouteTo route model =
-    ( { model | route = route }
-    , enableAlertOnExit route
-    )
-
-
-enableAlertOnExit route =
-    case route of
-        Route.Home ->
-            Cmd.none
-
-        Route.TermsAndConditions ->
-            Cmd.none
-
-        Route.NotFound ->
-            Cmd.none
-
-        Route.Pretest _ _ _ ->
-            Ports.enableAlertOnExit ()
-
-        Route.Session1 _ _ ->
-            Ports.enableAlertOnExit ()
-
-        Route.AuthenticatedSession2 _ _ ->
-            Ports.enableAlertOnExit ()
-
-        Route.AuthenticatedSession3 _ _ ->
-            Ports.enableAlertOnExit ()
-
-        Route.Posttest _ _ ->
-            Ports.enableAlertOnExit ()
 
 
 main : Program Flags Model Msg
