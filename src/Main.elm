@@ -66,10 +66,7 @@ type alias Pilote =
 
 
 type alias Model =
-    { --                                                                88   88 888888 88 88     .dP"Y8
-      --                                                                88   88   88   88 88     `Ybo."
-      --                                                                Y8   8P   88   88 88  .o o.`Y8b
-      --                                                                `YbodP'   88   88 88ood8 8bodP'
+    { -- Utils
       key : Nav.Key
     , route : Route.Route
     , optionsOrder : List Int
@@ -77,10 +74,7 @@ type alias Model =
     -- dnd stands for drag-and-drop
     , dnd : DnDList.Model
 
-    --                                                                  88""Yb 88""Yb 888888 888888 888888 .dP"Y8 888888
-    --                                                                  88__dP 88__dP 88__     88   88__   `Ybo."   88
-    --                                                                  88"""  88"Yb  88""     88   88""   o.`Y8b   88
-    --                                                                  88     88  Yb 888888   88   888888 8bodP'   88
+    -- PreTest
     , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
     , packetsSended : Int
     , pilote : Pilote
@@ -90,12 +84,7 @@ type alias Model =
     , vks : Logic.Task VKS.Trial VKS.State
     , yesno : Logic.Task YesNo.Trial YesNo.State
 
-    --
-    --                                                                  ## ###  ##  ## ###  #  ###      #
-    --                                                                 #   #   #   #    #  # # # #     ##
-    --                                                                  #  ##   #   #   #  # # # #      #
-    --                                                                   # #     #   #  #  # # # #      #
-    --                                                                 ##  ### ##  ##  ###  #  # #     ###
+    -- Session 1
     , session1 : Session1.Session1
     , meaning : Logic.Task Meaning.Trial Meaning.State
     , spellingLvl1 : Logic.Task SpellingLvl1.Trial SpellingLvl1.State
@@ -105,34 +94,22 @@ type alias Model =
     , presentation : Logic.Task Presentation.Trial Presentation.State
     , endAcceptabilityDuration : Int
 
-    --                                                                  .dP"Y8 888888 .dP"Y8 .dP"Y8 88  dP"Yb  88b 88     oP"Yb.
-    --                                                                  `Ybo." 88__   `Ybo." `Ybo." 88 dP   Yb 88Yb88     "' dP'
-    --                                                                  o.`Y8b 88""   o.`Y8b o.`Y8b 88 Yb   dP 88 Y88       dP'
-    --                                                                  8bodP' 888888 8bodP' 8bodP' 88  YbodP  88  Y8     .d8888
+    -- Session 2
     , translationTask : Logic.Task Translation.Trial Translation.State
     , scrabbleTask : Logic.Task Scrabble.Trial Scrabble.State
     , cuLvl2 : Logic.Task CU2.Trial CU2.State
     , session2 : Session2.Session2
 
-    --                                                               .dP"Y8 888888 .dP"Y8 .dP"Y8 88  dP"Yb  88b 88     88888
-    --                                                               `Ybo." 88__   `Ybo." `Ybo." 88 dP   Yb 88Yb88       .dP
-    --                                                               o.`Y8b 88""   o.`Y8b o.`Y8b 88 Yb   dP 88 Y88     o `Yb
-    --                                                               8bodP' 888888 8bodP' 8bodP' 88  YbodP  88  Y8     YbodP
+    -- Session 3
     , spelling3 : Logic.Task Spelling3.Trial Spelling3.State
     , cu3 : Logic.Task CU3.Trial CU3.State
     , synonymTask : Logic.Task Synonym.Trial Synonym.State
     , session3 : Session3.Session3
 
-    --                                                              88""Yb  dP"Yb  .dP"Y8 888888 888888 .dP"Y8 888888
-    --                                                              88__dP dP   Yb `Ybo."   88   88__   `Ybo."   88
-    --                                                              88"""  Yb   dP o.`Y8b   88   88""   o.`Y8b   88
-    --                                                              88      YbodP  8bodP'   88   888888 8bodP'   88
+    -- PostTest
     , cloudWords : CloudWords.CloudWords
 
-    --                                                             .dP"Y8 88  88    db    88""Yb 888888 8888b.
-    --                                                             `Ybo." 88  88   dPYb   88__dP 88__    8I  Yb
-    --                                                             o.`Y8b 888888  dP__Yb  88"Yb  88""    8I  dY
-    --                                                             8bodP' 88  88 dP""""Yb 88  Yb 888888 8888Y"
+    -- Shared
     , infos : RemoteData Http.Error (Dict.Dict String ExperimentInfo.Task)
     , email : String
     , user : Maybe String
@@ -146,6 +123,65 @@ type alias Model =
     , consent : String
     , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
     , version : Maybe String
+    }
+
+
+defaultModel : Nav.Key -> Route.Route -> Model
+defaultModel key route =
+    { key = key
+    , route = route
+    , dnd = Scrabble.system.model
+
+    -- SESSION 1
+    , meaning = Logic.NotStarted
+    , spellingLvl1 = Logic.NotStarted
+    , cu1 = Logic.Loading
+    , presentation = Logic.NotStarted
+    , session1 = NotAsked
+
+    -- SESSION 2
+    , translationTask = Logic.NotStarted
+    , cuLvl2 = Logic.NotStarted
+    , scrabbleTask = Logic.NotStarted
+    , session2 = NotAsked
+
+    -- SESSION 3
+    , synonymTask = Logic.NotStarted
+    , spelling3 = Logic.NotStarted
+    , cu3 = Logic.NotStarted
+    , session3 = NotAsked
+
+    -- PILOTE
+    , acceptabilityTask = Logic.NotStarted
+    , packetsSended = 0
+    , endAcceptabilityDuration = 6000
+    , pilote = NotAsked
+
+    -- PRETEST
+    , spr = Logic.NotStarted
+    , pretest = NotAsked
+    , sentenceCompletion = Logic.NotStarted
+    , vks = Logic.NotStarted
+    , yesno = Logic.NotStarted
+
+    -- POSTEST
+    , cloudWords = CloudWords.Running (Dict.fromList CloudWords.words)
+
+    -- SHARED
+    , user = Just ""
+    , optionsOrder = [ 0, 1, 2, 3 ]
+    , infos = RemoteData.Loading
+    , errorTracking = []
+    , email = ""
+    , currentDate = Nothing
+    , preferedStartDate = Nothing
+    , sessions = RemoteData.Loading
+    , version = Nothing
+    , distributedSpacing = 7
+    , massedSpacing = 2
+    , retentionInterval = 14
+    , retentionIntervalSurprise = 56
+    , consent = ""
     }
 
 
@@ -167,66 +203,12 @@ init _ url key =
         ( loadingStateSession3, fetchSession3 ) =
             Session3.attempt
 
-        defaultInit =
-            { key = key
-            , route = route
-            , dnd = Scrabble.system.model
-
-            -- SESSION 1
-            , meaning = Logic.NotStarted
-            , spellingLvl1 = Logic.NotStarted
-            , cu1 = Logic.Loading
-            , presentation = Logic.NotStarted
-            , session1 = NotAsked
-
-            -- SESSION 2
-            , translationTask = Logic.NotStarted
-            , cuLvl2 = Logic.NotStarted
-            , scrabbleTask = Logic.NotStarted
-            , session2 = NotAsked
-
-            -- SESSION 3
-            , synonymTask = Logic.NotStarted
-            , spelling3 = Logic.NotStarted
-            , cu3 = Logic.NotStarted
-            , session3 = NotAsked
-
-            -- PILOTE
-            , acceptabilityTask = Logic.NotStarted
-            , packetsSended = 0
-            , endAcceptabilityDuration = 6000
-            , pilote = NotAsked
-
-            -- PRETEST
-            , spr = Logic.NotStarted
-            , pretest = NotAsked
-            , sentenceCompletion = Logic.NotStarted
-            , vks = Logic.NotStarted
-            , yesno = Logic.NotStarted
-
-            -- POSTEST
-            , cloudWords = CloudWords.Running (Dict.fromList CloudWords.words)
-
-            -- SHARED
-            , user = Just ""
-            , optionsOrder = [ 0, 1, 2, 3 ]
-            , infos = RemoteData.Loading
-            , errorTracking = []
-            , email = ""
-            , currentDate = Nothing
-            , preferedStartDate = Nothing
-            , sessions = RemoteData.Loading
-            , version = Nothing
-            , distributedSpacing = 7
-            , massedSpacing = 2
-            , retentionInterval = 14
-            , retentionIntervalSurprise = 56
-            , consent = ""
-            }
+        model =
+            defaultModel key route
     in
     case route of
         Route.Session1 userId _ ->
-            ( { defaultInit
+            ( { model
                 | -- SESSION 1
                   meaning = Logic.Loading
                 , spellingLvl1 = Logic.Loading
@@ -239,7 +221,7 @@ init _ url key =
             )
 
         Route.Home ->
-            ( { defaultInit
+            ( { model
                 | -- SESSION 1
                   meaning = Logic.Loading
                 , spellingLvl1 = Logic.Loading
@@ -252,7 +234,7 @@ init _ url key =
             )
 
         Route.TermsAndConditions ->
-            ( { defaultInit
+            ( { model
                 | -- SESSION 1
                   meaning = Logic.Loading
                 , spellingLvl1 = Logic.Loading
@@ -265,7 +247,7 @@ init _ url key =
             )
 
         Route.AuthenticatedSession2 userid _ ->
-            ( { defaultInit
+            ( { model
                 | -- SESSION 2
                   translationTask = Logic.Loading
                 , cuLvl2 = Logic.Loading
@@ -277,7 +259,7 @@ init _ url key =
             )
 
         Route.AuthenticatedSession3 userid _ ->
-            ( { defaultInit
+            ( { model
                 | -- SESSION 3
                   synonymTask = Logic.Loading
                 , spelling3 = Logic.Loading
@@ -293,7 +275,7 @@ init _ url key =
                 ( loadingStatePretest, fetchSessionPretest ) =
                     Pretest.attempt v
             in
-            ( { defaultInit
+            ( { model
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
                 , vks = Logic.Loading
@@ -312,22 +294,14 @@ init _ url key =
             )
 
         Route.Posttest _ _ ->
-            ( defaultInit, Ports.enableAlertOnExit () )
+            ( model, Ports.enableAlertOnExit () )
 
         NotFound ->
-            pure { defaultInit | route = NotFound }
+            ( { model | route = NotFound }, Cmd.none )
 
 
-main : Program Flags Model Msg
-main =
-    Browser.application
-        { init = init
-        , onUrlRequest = UserClickedLink
-        , onUrlChange = BrowserChangedUrl
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
+
+-- VIEW
 
 
 view : Model -> Browser.Document Msg
@@ -605,14 +579,12 @@ viewSessionInstructions remoteData sessionName url =
             [ text (Data.buildErrorMessage reason) ]
 
 
+
+-- UPDATE
+
+
 type Msg
-    = --
-      --                                                           # # ### ### #    ##
-      --                                                           # #  #   #  #   #
-      --                                                           # #  #   #  #    #
-      --                                                           # #  #   #  #     #
-      --                                                           ###  #  ### ### ##
-      PlaysoundInJS String
+    = PlaysoundInJS String
     | UserClickedLink Browser.UrlRequest
     | BrowserChangedUrl Url
     | UserClickedSignInButton
@@ -624,69 +596,41 @@ type Msg
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
     | GotGeneralParameters (Result.Result Http.Error (List Data.GeneralParameters))
     | NoOp
-      --
-      --                                                          ##  ##  ### ### ###  ## ###
-      --                                                          # # # # #    #  #   #    #
-      --                                                          ##  ##  ##   #  ##   #   #
-      --                                                          #   # # #    #  #     #  #
-      --                                                          #   # # ###  #  ### ##   #
+      -- PreTest
     | Acceptability Acceptability.Msg
     | Pretest Pretest.Msg
     | SentenceCompletion SentenceCompletion.Msg
     | SPR SPR.Msg
     | VKS VKS.Msg
     | YesNo YesNo.Msg
-      --
-      --                                                          ## ###  ##  ## ###  #  ###      #
-      --                                                         #   #   #   #    #  # # # #     ##
-      --                                                          #  ##   #   #   #  # # # #      #
-      --                                                           # #     #   #  #  # # # #      #
-      --                                                         ##  ### ##  ##  ###  #  # #     ###
+      -- Session 1
     | CU1 CU1.Msg
     | Presentation Presentation.Msg
     | Meaning Meaning.Msg
     | Spelling1 SpellingLvl1.Msg
     | Session1 Session1.Msg
-      --
-      --                                                          ## ###  ##  ## ###  #  ###     ###
-      --                                                         #   #   #   #    #  # # # #       #
-      --                                                          #  ##   #   #   #  # # # #     ###
-      --                                                           # #     #   #  #  # # # #     #
-      --                                                         ##  ### ##  ##  ###  #  # #     ###
+      -- Session 2
     | CU2 CU2.CU2Msg
     | Spelling2 Scrabble.Msg
     | Translation Translation.Msg
     | Session2 Session2.Msg
-      --
-      --                                                           ## ###  ##  ## ###  #  ###     ###
-      --                                                          #   #   #   #    #  # # # #       #
-      --                                                           #  ##   #   #   #  # # # #      ##
-      --                                                            # #     #   #  #  # # # #       #
-      --                                                          ##  ### ##  ##  ###  #  # #     ###
+      -- Session 3
     | CU3 CU3.Msg
     | Spelling3 Spelling3.Msg
     | Synonym Synonym.Msg
     | Session3 Session3.Msg
       --
-      --
-      --
     | WordCloud CloudWords.Msg
-
-
-pure model =
-    ( model, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         BrowserChangedUrl url ->
-            ( { model | route = Route.fromUrl url }
-            , enableAlertOnExit (Route.fromUrl url)
-            )
+            changeRouteTo (Route.fromUrl url) model
 
         NoOp ->
-            pure model
+            ( model, Cmd.none )
 
         UserClickedLink urlRequest ->
             case urlRequest of
@@ -701,147 +645,87 @@ update msg model =
                     )
 
         SPR submsg ->
-            let
-                ( newModel, newCmd ) =
-                    SPR.update submsg model
-            in
-            ( newModel, Cmd.map SPR newCmd )
+            SPR.update submsg model
+                |> updateWith SPR
 
         Pretest submsg ->
-            let
-                ( newModel, newCmd ) =
-                    Pretest.update submsg model
-            in
-            ( newModel, Cmd.map Pretest newCmd )
+            Pretest.update submsg model
+                |> updateWith Pretest
 
         Session1 submsg ->
-            let
-                ( newModel, newCmd ) =
-                    Session1.update submsg model
-            in
-            ( newModel, Cmd.map Session1 newCmd )
+            Session1.update submsg model
+                |> updateWith Session1
 
         Session2 submsg ->
-            let
-                ( newModel, newCmd ) =
-                    Session2.update submsg model
-            in
-            ( newModel, Cmd.map Session2 newCmd )
+            Session2.update submsg model
+                |> updateWith Session2
 
         Session3 submsg ->
-            let
-                ( newModel, newCmd ) =
-                    Session3.update submsg model
-            in
-            ( newModel, Cmd.map Session3 newCmd )
+            Session3.update submsg model
+                |> updateWith Session3
 
         SentenceCompletion submsg ->
-            let
-                ( newModel, newCmd ) =
-                    SentenceCompletion.update submsg model
-            in
-            ( newModel, Cmd.map SentenceCompletion newCmd )
+            SentenceCompletion.update submsg model
+                |> updateWith SentenceCompletion
 
         VKS submsg ->
-            let
-                ( newModel, newCmd ) =
-                    VKS.update submsg model
-            in
-            ( newModel, Cmd.map VKS newCmd )
+            VKS.update submsg model
+                |> updateWith VKS
 
         Acceptability submsg ->
-            let
-                ( newModel, newCmd ) =
-                    Acceptability.update submsg model
-            in
-            ( newModel, Cmd.map Acceptability newCmd )
+            Acceptability.update submsg model
+                |> updateWith Acceptability
 
         PlaysoundInJS url ->
             ( model, Ports.playAudio url )
 
-        Spelling1 message ->
-            let
-                ( newModel, newCmd ) =
-                    SpellingLvl1.update message model
-            in
-            ( newModel, Cmd.map Spelling1 newCmd )
+        Spelling1 submsg ->
+            SpellingLvl1.update submsg model
+                |> updateWith Spelling1
 
-        CU2 message ->
-            let
-                ( newModel, newCmd ) =
-                    CU2.update message model
-            in
-            ( newModel, Cmd.map CU2 newCmd )
+        CU2 submsg ->
+            CU2.update submsg model
+                |> updateWith CU2
 
-        Spelling2 message ->
-            let
-                ( newModel, newCmd ) =
-                    Scrabble.update message model
-            in
-            ( newModel, Cmd.map Spelling2 newCmd )
+        Spelling2 submsg ->
+            Scrabble.update submsg model
+                |> updateWith Spelling2
 
         CU1 submsg ->
-            let
-                ( newModel, newCmd ) =
-                    CU1.update submsg model
-            in
-            ( newModel, Cmd.map CU1 newCmd )
+            CU1.update submsg model
+                |> updateWith CU1
 
-        CU3 message ->
-            let
-                ( newModel, newCmd ) =
-                    CU3.update message model
-            in
-            ( newModel, Cmd.map CU3 newCmd )
+        CU3 submsg ->
+            CU3.update submsg model
+                |> updateWith CU3
 
-        Spelling3 message ->
-            let
-                ( newModel, newCmd ) =
-                    Spelling3.update message model
-            in
-            ( newModel, Cmd.map Spelling3 newCmd )
+        Spelling3 submsg ->
+            Spelling3.update submsg model
+                |> updateWith Spelling3
 
-        Presentation message ->
-            let
-                ( subModel, subCmd ) =
-                    Presentation.update message model
-            in
-            ( subModel, Cmd.map Presentation subCmd )
+        Presentation submsg ->
+            Presentation.update submsg model
+                |> updateWith Presentation
 
-        Synonym message ->
-            let
-                ( newModel, newCmd ) =
-                    Synonym.update message model
-            in
-            ( newModel, Cmd.map Synonym newCmd )
+        Synonym submsg ->
+            Synonym.update submsg model
+                |> updateWith Synonym
 
         Meaning submsg ->
-            let
-                ( subModel, subCmd ) =
-                    Meaning.update submsg model
-            in
-            ( subModel, Cmd.map Meaning subCmd )
+            Meaning.update submsg model
+                |> updateWith Meaning
 
         Translation submsg ->
-            let
-                ( subModel, subCmd ) =
-                    Translation.update submsg model
-            in
-            ( subModel, Cmd.map Translation subCmd )
+            Translation.update submsg model
+                |> updateWith Translation
 
         YesNo submsg ->
-            let
-                ( subModel, subCmd ) =
-                    YesNo.update submsg model
-            in
-            ( subModel, Cmd.map YesNo subCmd )
+            YesNo.update submsg model
+                |> updateWith YesNo
 
         WordCloud submsg ->
-            let
-                ( subModel, subCmd ) =
-                    CloudWords.update submsg model
-            in
-            ( subModel, Cmd.map WordCloud subCmd )
+            CloudWords.update submsg model
+                |> updateWith WordCloud
 
         UserClickedSignInButton ->
             ( model
@@ -922,6 +806,10 @@ update msg model =
                             )
 
 
+updateWith subMsg ( model, subCmd ) =
+    ( model, Cmd.map subMsg subCmd )
+
+
 decodeNewUser =
     Decode.field "id" Decode.string
 
@@ -941,10 +829,17 @@ project : { description : String, title : String, url : String }
 project =
     { title = "Apprentissage et espacement"
     , description = """
-        Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise. 
+        Une expérience visant à mieux comprendre l'acquisition de nouvelles structures grammaticales en langue anglaise.
       """
     , url = Url.Builder.absolute [ "start" ] []
     }
+
+
+changeRouteTo : Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo route model =
+    ( { model | route = route }
+    , enableAlertOnExit route
+    )
 
 
 enableAlertOnExit route =
@@ -974,14 +869,13 @@ enableAlertOnExit route =
             Ports.enableAlertOnExit ()
 
 
-
---
---                                                                   ## ##  ### #   #   ### ###  ## ###
---                                                                  #   # # #   #   #    #  # # #     #
---                                                                   #  ##  ##  #   #    #  # # # # ###
---                                                                    # #   #   #   #    #  # # # # #
---                                                                  ##  #   ### ### ### ### # #  ## ###
-
-
-beep =
-    "https://dl.airtable.com/.attachments/b000c72585c5f5145828b1cf3916c38d/88d9c821/beep.mp3"
+main : Program Flags Model Msg
+main =
+    Browser.application
+        { init = init
+        , onUrlRequest = UserClickedLink
+        , onUrlChange = BrowserChangedUrl
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
