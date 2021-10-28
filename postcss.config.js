@@ -10,7 +10,7 @@ const production = {
   plugins: [
     tailwindcss,
     purgecss({
-      content: ["./src/**/*.elm", "index.js"],
+      content: ["./src/**/*.elm", "index.js", "output.js"],
       whitelist: ["html", "body"],
     }),
     autoprefixer,
