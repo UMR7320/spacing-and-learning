@@ -2,6 +2,7 @@ elm-stuff
 node_modules
 .env
 .cache
+.parcel-cache
 .cache/61/86fcef40a9b1be14a291468df31b9e.json
 .cache/88/0cebda4c7caac146896b817d629f44.json
 .cache/f1/488ef091be843ba1f831dc9363e3a5.json

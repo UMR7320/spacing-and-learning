@@ -12,8 +12,6 @@ const flags = {};
 
 const app = Elm.Main.init({ flags });
 
-let beepUrl = require('./sounds/beep.mp3');
-
 function exitAlert(e) {
   var msg = "Voulez-vous vraiment quitter cette page? Des données pourraient être perdues si l'expérience n'est pas terminée.";
   if (!e) { e = window.event; }
