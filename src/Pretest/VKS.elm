@@ -25,7 +25,6 @@ import View
 type alias Model superModel =
     { superModel
         | vks : Logic.Task Trial Answer
-        , vksOutputId : Maybe String
         , user : Maybe String
         , version : Maybe String
     }
@@ -206,9 +205,7 @@ type Msg
     | UserUpdatedField Field Int String
     | RuntimeReordedAmorces Field
     | UserClickedNewKnowledge String
-    | GotOutputId (Result Http.Error (List String))
-    | OutputRecordWasCreated (Result Http.Error String)
-    | OutputRecordWasUpdated (Result Http.Error String)
+    | HistoryWasSaved (Result Http.Error String)
 
 
 type Field
@@ -225,19 +222,7 @@ update msg model =
             Logic.getState model.vks |> Maybe.withDefault emptyAnswer
     in
     case msg of
-        GotOutputId (Ok id) ->
-            ( { model | vksOutputId = List.head id }, Cmd.none )
-
-        GotOutputId (Err _) ->
-            ( model, Cmd.none )
-
-        OutputRecordWasCreated (Ok id) ->
-            ( { model | vksOutputId = Just id }, Cmd.none )
-
-        OutputRecordWasCreated (Err _) ->
-            ( model, Cmd.none )
-
-        OutputRecordWasUpdated _ ->
+        HistoryWasSaved _ ->
             ( model, Cmd.none )
 
         RuntimeReordedAmorces _ ->
@@ -311,53 +296,26 @@ decodeAcceptabilityTrials =
     Data.decodeRecords decoder
 
 
-{-| Fetches the id of the record that holds the user's answers
--}
-fetchOutputId : String -> Cmd Msg
-fetchOutputId userId =
-    Http.get
-        { url =
-            Url.Builder.absolute
-                [ ".netlify"
-                , "functions"
-                , "api"
-                ]
-                [ Url.Builder.string "app" Data.apps.spacing
-                , Url.Builder.string "base" "VKS_output"
-                , Url.Builder.string "view" "all"
-                , Url.Builder.string "filterByFormula" ("{LinkToUserUID} = '" ++ userId ++ "'")
-                ]
-        , expect = Http.expectJson GotOutputId outputIdDecoder
-        }
-
-
-outputIdDecoder =
-    Decode.field "records" (Decode.list (Decode.field "id" Decode.string))
-
-
 historyEncoder : String -> String -> List ( Trial, Answer ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
             case version of
                 "post" ->
-                    "PostTestAnswers"
+                    "VKS_postTest"
 
                 "post-diff" ->
-                    "PostTestDiffAnswers"
+                    "VKS_postTestDiff"
 
                 "surprise" ->
-                    "SurprisePostTestAnswers"
+                    "VKS_surprisePostTest"
 
                 _ ->
-                    "PreTestAnswers"
+                    "VKS_preTest"
     in
     Encode.object
-        -- The Airtable API forces link to other records to be arrays
-        [ ( "LinkToUserUID", Encode.list Encode.string [ userId ] )
-
-        -- airtable does not support JSON columns, so Answers is a giant JSON string
-        , ( answerField, Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( answerField, Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
         ]
 
 
@@ -373,13 +331,13 @@ historyItemEncoder ( { id }, { knowledge, definition, translation, synonym, usag
         ]
 
 
-updateHistoryEncoder : String -> String -> String -> List ( Trial, Answer ) -> Encode.Value
-updateHistoryEncoder outputId version userId history =
-    -- The Airtable API forces PATCH requests to send arrays
+updateHistoryEncoder : String -> String -> List ( Trial, Answer ) -> Encode.Value
+updateHistoryEncoder version userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
         (\_ ->
             Encode.object
-                [ ( "id", Encode.string outputId )
+                [ ( "id", Encode.string userId )
                 , ( "fields", historyEncoder version userId history )
                 ]
         )
@@ -396,48 +354,16 @@ saveData model =
 
         version =
             Maybe.withDefault "pre" model.version
-    in
-    case model.vksOutputId of
-        Nothing ->
-            createOutputRecord version userId history
 
-        Just id ->
-            updateOutputRecord id version userId history
-
-
-createOutputRecord version userId history =
-    let
         payload =
-            historyEncoder version userId history
-    in
-    Http.post
-        { url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "VKS_output"
-                , view_ = "all"
-                }
-        , body = Http.jsonBody payload
-        , expect = Http.expectJson OutputRecordWasCreated (Decode.field "id" Decode.string)
-        }
-
-
-updateOutputRecord outputId version userId history =
-    let
-        payload =
-            updateHistoryEncoder outputId version userId history
+            updateHistoryEncoder version userId history
     in
     Http.request
         { method = "PATCH"
         , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "VKS_output"
-                , view_ = "all"
-                }
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "output" }
         , body = Http.jsonBody payload
-        , expect = Http.expectJson OutputRecordWasUpdated (Decode.field "id" Decode.string)
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
         , timeout = Nothing
         , tracker = Nothing
         }

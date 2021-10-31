@@ -69,7 +69,6 @@ type alias Model superModel =
         , sentenceCompletion : SentenceCompletion.SentenceCompletion
         , pretest : Pretest
         , vks : Logic.Task VKS.Trial VKS.Answer
-        , vksOutputId : Maybe String
         , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
         , yesno : YesNo.YN
         , version : Maybe String

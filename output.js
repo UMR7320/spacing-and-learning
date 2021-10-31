@@ -1,18 +1,15 @@
 const formatVKSdata = records => {
   return records.flatMap(record => {
-    return [
-      "PreTestAnswers",
-      "PosTestAnswers",
-      "PostTestDiffAnswers",
-      "SurprisePostTestAnswers"
-    ].flatMap(session => {
-      const answers = JSON.parse(record[session] || "[]");
-      answers.forEach(answer => {
-        answer.session = session;
-        answer.userUID = record.UserUID;
-      })
-      return answers;
-    });
+    return ["VKS_preTest", "VKS_postTest", "VKS_surprisePostTest"].flatMap(
+      session => {
+        const answers = JSON.parse(record[session] || "[]");
+        answers.forEach(answer => {
+          answer.session = session;
+          answer.userUID = record.UID;
+        });
+        return answers;
+      }
+    );
   });
 };
 
@@ -33,9 +30,9 @@ const displayVKSdata = records => {
   html += "</tbody><table>";
 
   document.getElementById("root").insertAdjacentHTML("afterbegin", html);
-}
+};
 
-fetch("/.netlify/functions/api?app=appvKOc8FH0j48Hw1&base=VKS_output&view=all")
+fetch("/.netlify/functions/api?app=appvKOc8FH0j48Hw1&base=users&view=output")
   .then(response => response.json())
   .then(json => json.records)
   .then(formatVKSdata)

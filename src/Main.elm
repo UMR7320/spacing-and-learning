@@ -82,7 +82,6 @@ type alias Model =
     , pretest : Pretest.Pretest
     , sentenceCompletion : SentenceCompletion.SentenceCompletion
     , vks : Logic.Task VKS.Trial VKS.Answer
-    , vksOutputId : Maybe String
     , yesno : Logic.Task YesNo.Trial YesNo.State
 
     -- Session 1
@@ -163,7 +162,6 @@ defaultModel key route =
     , pretest = NotAsked
     , sentenceCompletion = Logic.NotStarted
     , vks = Logic.NotStarted
-    , vksOutputId = Nothing
     , yesno = Logic.NotStarted
 
     -- POSTEST
@@ -644,12 +642,7 @@ changeRouteTo route model =
             ( newModel, Cmd.none )
 
         Route.Pretest userId Route.VKS _ ->
-            ( newModel
-            , Cmd.batch
-                [ Ports.enableAlertOnExit ()
-                , Cmd.map VKS (VKS.fetchOutputId userId)
-                ]
-            )
+            ( newModel, Ports.enableAlertOnExit () )
 
         Route.Pretest _ _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
