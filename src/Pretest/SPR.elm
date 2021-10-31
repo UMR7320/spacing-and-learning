@@ -130,8 +130,7 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    [ viewTask data trial UserConfirmedChoice
-                    ]
+                    [ viewTask data trial UserConfirmedChoice ]
 
                 Nothing ->
                     [ div [ Attr.class "flex flex-col items-center" ]
@@ -150,7 +149,16 @@ view task =
                     [ viewTask data trial UserClickedNextTrial ]
 
                 Nothing ->
-                    [ div [ Attr.class "flow flex flex-col items-center" ] [ View.fromMarkdown data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here when you are ready!", isDisabled = False } ] ]
+                    [ div
+                        [ Attr.class "flow flex flex-col items-center" ]
+                        [ View.fromMarkdown data.infos.end
+                        , View.button
+                            { message = UserClickedSaveData
+                            , txt = "Click here when you are ready!"
+                            , isDisabled = False
+                            }
+                        ]
+                    ]
 
         Logic.Err reason ->
             [ text ("I encountered the following error: " ++ reason) ]
@@ -169,15 +177,26 @@ viewTask data trial endTrialMsg =
                 Start ->
                     div
                         [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
-                        [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
+                        [ p
+                            [ Attr.class "items-center" ]
+                            [ text "Press the space bar to start reading" ]
+                        ]
 
                 Reading _ ->
-                    div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2 font-bold text-xl" ] [ p [ Attr.class "items-center" ] [ text (Tuple.second taggedSegment) ] ]
+                    div
+                        [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2 font-bold text-xl" ]
+                        [ p
+                            [ Attr.class "items-center" ]
+                            [ text (Tuple.second taggedSegment) ]
+                        ]
 
         ( SPR _, Nothing ) ->
             div
                 [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
-                [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
+                [ p
+                    [ Attr.class "items-center" ]
+                    [ text "Press the space bar to start reading" ]
+                ]
 
         ( Question, _ ) ->
             div [ Attr.class "flex flex-col items-center p-16 border-2 flow" ]
