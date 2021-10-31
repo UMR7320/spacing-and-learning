@@ -244,16 +244,16 @@ update msg model =
             ( { model | vks = model.vks |> Logic.update prevAnswer }, Cmd.none )
 
         UserClickedNextTrial ->
-          let
-              newModel =
-                { model | vks = model.vks |> Logic.toggle |> Logic.next emptyAnswer }
-          in
-              ( newModel
-              , Cmd.batch
-                  [ Random.generate RuntimeReordedAmorces (Random.uniform Definition [ SecondProduction ])
-                  , saveData newModel
-                  ]
-              )
+            let
+                newModel =
+                    { model | vks = model.vks |> Logic.toggle |> Logic.next emptyAnswer }
+            in
+            ( newModel
+            , Cmd.batch
+                [ Random.generate RuntimeReordedAmorces (Random.uniform Definition [ SecondProduction ])
+                , saveData newModel
+                ]
+            )
 
         UserClickedStartMain ->
             ( { model | vks = Logic.startMain model.vks emptyAnswer }, Cmd.none )
@@ -394,21 +394,21 @@ saveData model =
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        version = (Maybe.withDefault "pre" model.version)
+        version =
+            Maybe.withDefault "pre" model.version
     in
     case model.vksOutputId of
         Nothing ->
-          createOutputRecord version userId history
+            createOutputRecord version userId history
 
         Just id ->
-          updateOutputRecord id version userId history
+            updateOutputRecord id version userId history
 
 
-createOutputRecord version userId history  =
+createOutputRecord version userId history =
     let
         payload =
             historyEncoder version userId history
-
     in
     Http.post
         { url =

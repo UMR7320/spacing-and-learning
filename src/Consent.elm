@@ -9,11 +9,11 @@ consent =
 
 **Chercheur titulaire responsable scientifique du projet :**
 
-Shona Whyte, Professeur. Laboratoire BCL, CNRS - UMR 7320, MSHS - Campus Saint Jean d\'Angély 3 - 24 avenue des Diables Bleus 06357 NICE Cedex 4. [Shona.whyte]{.ul}[\\@univ-cotedazur.fr](mailto:emilie.gerbier@univ-cotedazur.fr)
+Shona Whyte, Professeur. Laboratoire BCL, CNRS - UMR 7320, MSHS - Campus Saint Jean d'Angély 3 - 24 avenue des Diables Bleus 06357 NICE Cedex 4. [Shona.whyte]{.ul}[\\@univ-cotedazur.fr](mailto:emilie.gerbier@univ-cotedazur.fr)
 
 **Lieu de recherche :** Laboratoire Bases, Corpus, Langage, Université Côte d'Azur, CNRS
 
-**But du projet de recherche :** Etudier l'apprentissage d\'une langue étrangère à l'aide d'activités en ligne
+**But du projet de recherche :** Etudier l'apprentissage d'une langue étrangère à l'aide d'activités en ligne
 
 ## **Ce que l'on attend de vous (méthodologie)**
 
@@ -37,7 +37,7 @@ Il vous sera demandé de participer à 5 séances d'apprentissage de mots anglai
 
 4. Les données seront gardées dans un endroit sécurisé et seuls le responsable scientifique et éventuellement les chercheurs et étudiants associés pourront y avoir accès.
 
-5. Conformément aux dispositions de la loi Informatique et Libertés, vous pourrez exercer vos droits d\'accès, de rectification ou suppression des données auprès du responsable scientifique du projet. Cependant, une fois l'étude terminée, les données étant anonymisées, vous ne pourrez pas demander le retrait de vos données.
+5. Conformément aux dispositions de la loi Informatique et Libertés, vous pourrez exercer vos droits d'accès, de rectification ou suppression des données auprès du responsable scientifique du projet. Cependant, une fois l'étude terminée, les données étant anonymisées, vous ne pourrez pas demander le retrait de vos données.
 
 6. Tous les échanges éventuels que vous aurez avec l'expérimentateur par courrier électronique (hors formulaire de consentement) seront détruits à la fin de l'expérience.
 
