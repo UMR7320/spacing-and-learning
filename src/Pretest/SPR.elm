@@ -19,29 +19,8 @@ import Time
 import View exposing (unclickableButton)
 
 
-taskId : Maybe String -> String
-taskId version =
-    case version of
-        Nothing ->
-            versions.pre
 
-        Just specifiedVersion ->
-            case specifiedVersion of
-                "post" ->
-                    versions.post
-
-                "post-diff" ->
-                    versions.postDiff
-
-                "surprise" ->
-                    versions.surprise
-
-                _ ->
-                    versions.pre
-
-
-versions =
-    { pre = "rec7oxQBDY7rBTRDn", post = "recPo6XGa58q3wfRw", postDiff = "rec1g3y3VAgQwj2sy", surprise = "recfot07G3AMUVK3S" }
+-- MODEL
 
 
 type alias Pretest =
@@ -61,10 +40,6 @@ type alias Spr model =
     }
 
 
-
--- Types
-
-
 type alias Trial =
     { id : String
     , taggedSegments : List TaggedSegment
@@ -75,38 +50,10 @@ type alias Trial =
     }
 
 
-type Msg
-    = NoOp
-    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
-    | StartMain ExperimentInfo.Task (List Trial)
-    | TimestampedMsg TimedMsg (Maybe Time.Posix)
-    | UserClickedNextTrial Answer
-    | UserClickedSaveData
-    | UserConfirmedChoice Answer
-    | UserClickedStartTraining
-
-
-type TimedMsg
-    = UserPressedSpaceToStartParagraph
-    | UserPressedSpaceToReadNextSegment
-
-
 type Tag
     = NoUnit
     | Critic
     | SpillOver
-
-
-tagToString tag =
-    case tag of
-        NoUnit ->
-            "No unit"
-
-        Critic ->
-            "Critic"
-
-        SpillOver ->
-            "SpillOver"
 
 
 type alias TaggedSegment =
@@ -162,156 +109,109 @@ initState =
     }
 
 
-decodeSpace : Msg -> Decode.Decoder Msg
-decodeSpace msg =
-    Decode.map
-        (\k ->
-            case k of
-                " " ->
-                    msg
-
-                _ ->
-                    NoOp
-        )
-        (Decode.field "key" Decode.string)
+init infos trials model =
+    let
+        info =
+            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find SPR infos"
+    in
+    Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
 
-decodeYesNoUnsure : Decode.Decoder Msg
-decodeYesNoUnsure =
-    Decode.map
-        (\k ->
-            case k of
-                "y" ->
-                    UserClickedNextTrial Yes
 
-                "n" ->
-                    UserClickedNextTrial No
-
-                "k" ->
-                    UserClickedNextTrial Unsure
-
-                _ ->
-                    NoOp
-        )
-        (Decode.field "key" Decode.string)
+-- VIEW
 
 
-decodeYesNoUnsureInTraining : Decode.Decoder Msg
-decodeYesNoUnsureInTraining =
-    Decode.map
-        (\k ->
-            case k of
-                "y" ->
-                    UserConfirmedChoice Yes
-
-                "n" ->
-                    UserConfirmedChoice No
-
-                "k" ->
-                    UserConfirmedChoice Unsure
-
-                _ ->
-                    NoOp
-        )
-        (Decode.field "key" Decode.string)
-
-
-subscriptions : Logic.Task Trial State -> Sub Msg
-subscriptions task =
+view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
+view task =
     case task of
+        Logic.Loading ->
+            [ View.loading ]
+
         Logic.Running Logic.Training data ->
-            case data.state.step of
-                SPR step ->
-                    case step of
-                        Start ->
-                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToStartParagraph Nothing))
+            case data.current of
+                Just trial ->
+                    [ viewTask data trial UserConfirmedChoice
+                    ]
 
-                        Reading _ ->
-                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToReadNextSegment Nothing))
-
-                Feedback ->
-                    onKeyDown (decodeSpace (UserClickedNextTrial data.state.answer))
-
-                Question ->
-                    onKeyDown decodeYesNoUnsureInTraining
+                Nothing ->
+                    [ div [ Attr.class "flex flex-col items-center" ]
+                        [ View.fromMarkdown data.infos.introToMain
+                        , View.button
+                            { message = StartMain data.infos data.mainTrials
+                            , txt = "Start"
+                            , isDisabled = False
+                            }
+                        ]
+                    ]
 
         Logic.Running Logic.Main data ->
-            case data.state.step of
-                SPR step ->
-                    case step of
-                        Start ->
-                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToStartParagraph Nothing))
+            case data.current of
+                Just trial ->
+                    [ viewTask data trial UserClickedNextTrial ]
 
-                        Reading _ ->
-                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToReadNextSegment Nothing))
+                Nothing ->
+                    [ div [ Attr.class "flow flex flex-col items-center" ] [ View.fromMarkdown data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here when you are ready!", isDisabled = False } ] ]
 
-                Question ->
-                    onKeyDown decodeYesNoUnsure
+        Logic.Err reason ->
+            [ text ("I encountered the following error: " ++ reason) ]
 
-                _ ->
-                    Sub.none
+        Logic.NotStarted ->
+            [ p [] [ text "Thanks for your participation!" ] ]
 
-        _ ->
-            Sub.none
+        Logic.Running Logic.Instructions data ->
+            [ View.instructions data.infos UserClickedStartTraining ]
 
 
-saveSprData responseHandler model =
-    let
-        history =
-            Logic.getHistory model.spr
+viewTask data trial endTrialMsg =
+    case ( data.state.step, data.state.currentSegment ) of
+        ( SPR s, Just { taggedSegment } ) ->
+            case s of
+                Start ->
+                    div
+                        [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
+                        [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
 
-        taskId_ =
-            taskId model.version
+                Reading _ ->
+                    div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2 font-bold text-xl" ] [ p [ Attr.class "items-center" ] [ text (Tuple.second taggedSegment) ] ]
 
-        callbackHandler =
-            responseHandler
+        ( SPR _, Nothing ) ->
+            div
+                [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
+                [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
 
-        userId =
-            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+        ( Question, _ ) ->
+            div [ Attr.class "flex flex-col items-center p-16 border-2 flow" ]
+                [ span [ Attr.class "font-bold" ] [ text trial.question ]
+                , div [ Attr.class "spr-buttons" ]
+                    [ unclickableButton "bg-green-500 text-white" "Y = Yes"
+                    , unclickableButton "bg-red-500 text-white" "N = No"
+                    , unclickableButton "bg-gray-400" "K = I don't know"
+                    ]
+                ]
 
-        formattedData : List { tag : String, segment : String, startedAt : Int, endedAt : Int, id : String, answer : String }
-        formattedData =
-            history
-                |> List.foldl
-                    (\( { id }, { answer, seenSegments } ) acc ->
-                        List.map
-                            (\{ taggedSegment, startedAt, endedAt } ->
-                                { tag = tagToString (Tuple.first taggedSegment)
-                                , segment = Tuple.second taggedSegment
-                                , startedAt = Time.posixToMillis startedAt
-                                , endedAt = Time.posixToMillis endedAt
-                                , id = id
-                                , answer = answerToString answer
-                                }
-                            )
-                            seenSegments
-                            |> List.append acc
-                    )
-                    []
+        ( Feedback, _ ) ->
+            div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
+                [ View.fromMarkdown trial.feedback ]
 
-        summarizedTrialEncoder =
-            Encode.list
-                (\{ tag, segment, startedAt, endedAt, id, answer } ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "sprTrialId", Encode.list Encode.string [ id ] )
-                                , ( "answer", Encode.string answer )
-                                , ( "sprStartedAt", Encode.int startedAt )
-                                , ( "sprEndedAt", Encode.int endedAt )
-                                , ( "tag", Encode.string tag )
-                                , ( "segment", Encode.string segment )
-                                ]
-                          )
-                        ]
-                )
 
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder taskId_ userId formattedData
-    in
-    Task.attempt callbackHandler sendInBatch_
+
+-- UPDATE
+
+
+type Msg
+    = NoOp
+    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
+    | StartMain ExperimentInfo.Task (List Trial)
+    | TimestampedMsg TimedMsg (Maybe Time.Posix)
+    | UserClickedNextTrial Answer
+    | UserClickedSaveData
+    | UserConfirmedChoice Answer
+    | UserClickedStartTraining
+
+
+type TimedMsg
+    = UserPressedSpaceToStartParagraph
+    | UserPressedSpaceToReadNextSegment
 
 
 update : Msg -> Spr model -> ( Spr model, Cmd Msg )
@@ -445,100 +345,105 @@ updateWithTime msg timestamp prevModel newModel =
         )
 
 
-viewTask data trial endTrialMsg =
-    case ( data.state.step, data.state.currentSegment ) of
-        ( SPR s, Just { taggedSegment } ) ->
-            case s of
-                Start ->
-                    div
-                        [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
-                        [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
 
-                Reading _ ->
-                    div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2 font-bold text-xl" ] [ p [ Attr.class "items-center" ] [ text (Tuple.second taggedSegment) ] ]
-
-        ( SPR _, Nothing ) ->
-            div
-                [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
-                [ p [ Attr.class "items-center" ] [ text "Press the space bar to start reading" ] ]
-
-        ( Question, _ ) ->
-            div [ Attr.class "flex flex-col items-center p-16 border-2 flow" ]
-                [ span [ Attr.class "font-bold" ] [ text trial.question ]
-                , div [ Attr.class "spr-buttons" ]
-                    [ unclickableButton "bg-green-500 text-white" "Y = Yes"
-                    , unclickableButton "bg-red-500 text-white" "N = No"
-                    , unclickableButton "bg-gray-400" "K = I don't know"
-                    ]
-                ]
-
-        ( Feedback, _ ) ->
-            div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
-                [ View.fromMarkdown trial.feedback ]
+-- SUBSCRIPTIONS
 
 
-view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
-view task =
+subscriptions : Logic.Task Trial State -> Sub Msg
+subscriptions task =
     case task of
-        Logic.Loading ->
-            [ View.loading ]
-
         Logic.Running Logic.Training data ->
-            case data.current of
-                Just trial ->
-                    [ viewTask data trial UserConfirmedChoice
-                    ]
+            case data.state.step of
+                SPR step ->
+                    case step of
+                        Start ->
+                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToStartParagraph Nothing))
 
-                Nothing ->
-                    [ div [ Attr.class "flex flex-col items-center" ]
-                        [ View.fromMarkdown data.infos.introToMain
-                        , View.button
-                            { message = StartMain data.infos data.mainTrials
-                            , txt = "Start"
-                            , isDisabled = False
-                            }
-                        ]
-                    ]
+                        Reading _ ->
+                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToReadNextSegment Nothing))
+
+                Feedback ->
+                    onKeyDown (decodeSpace (UserClickedNextTrial data.state.answer))
+
+                Question ->
+                    onKeyDown decodeYesNoUnsureInTraining
 
         Logic.Running Logic.Main data ->
-            case data.current of
-                Just trial ->
-                    [ viewTask data trial UserClickedNextTrial ]
+            case data.state.step of
+                SPR step ->
+                    case step of
+                        Start ->
+                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToStartParagraph Nothing))
 
-                Nothing ->
-                    [ div [ Attr.class "flow flex flex-col items-center" ] [ View.fromMarkdown data.infos.end, View.button { message = UserClickedSaveData, txt = "Click here when you are ready!", isDisabled = False } ] ]
+                        Reading _ ->
+                            onKeyDown (decodeSpace (TimestampedMsg UserPressedSpaceToReadNextSegment Nothing))
 
-        Logic.Err reason ->
-            [ text ("I encountered the following error: " ++ reason) ]
+                Question ->
+                    onKeyDown decodeYesNoUnsure
 
-        Logic.NotStarted ->
-            [ p [] [ text "Thanks for your participation!" ] ]
+                _ ->
+                    Sub.none
 
-        Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos UserClickedStartTraining ]
-
-
-init infos trials model =
-    let
-        info =
-            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find SPR infos"
-    in
-    Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
+        _ ->
+            Sub.none
 
 
-decodeAcceptabilityTrials : Decode.Decoder (List Trial)
-decodeAcceptabilityTrials =
-    let
-        decoder =
-            Decode.succeed Trial
-                |> required "id" Decode.string
-                |> custom (Decode.field "Tagged Paragraph ($CRITIC$, ~SPILL-OVER~)" Decode.string |> Decode.map paragraphToTaggedSegments)
-                |> required "Question" Decode.string
-                |> optional "isGrammatical" Decode.bool False
-                |> optional "isTraining" Decode.bool False
-                |> optional "feedback" Decode.string "Missing feedback"
-    in
-    decodeRecords decoder
+decodeSpace : Msg -> Decode.Decoder Msg
+decodeSpace msg =
+    Decode.map
+        (\k ->
+            case k of
+                " " ->
+                    msg
+
+                _ ->
+                    NoOp
+        )
+        (Decode.field "key" Decode.string)
+
+
+decodeYesNoUnsure : Decode.Decoder Msg
+decodeYesNoUnsure =
+    Decode.map
+        (\k ->
+            case k of
+                "y" ->
+                    UserClickedNextTrial Yes
+
+                "n" ->
+                    UserClickedNextTrial No
+
+                "k" ->
+                    UserClickedNextTrial Unsure
+
+                _ ->
+                    NoOp
+        )
+        (Decode.field "key" Decode.string)
+
+
+decodeYesNoUnsureInTraining : Decode.Decoder Msg
+decodeYesNoUnsureInTraining =
+    Decode.map
+        (\k ->
+            case k of
+                "y" ->
+                    UserConfirmedChoice Yes
+
+                "n" ->
+                    UserConfirmedChoice No
+
+                "k" ->
+                    UserConfirmedChoice Unsure
+
+                _ ->
+                    NoOp
+        )
+        (Decode.field "key" Decode.string)
+
+
+
+-- HTTP
 
 
 getRecords version =
@@ -579,6 +484,21 @@ getRecords version =
         }
 
 
+decodeAcceptabilityTrials : Decode.Decoder (List Trial)
+decodeAcceptabilityTrials =
+    let
+        decoder =
+            Decode.succeed Trial
+                |> required "id" Decode.string
+                |> custom (Decode.field "Tagged Paragraph ($CRITIC$, ~SPILL-OVER~)" Decode.string |> Decode.map paragraphToTaggedSegments)
+                |> required "Question" Decode.string
+                |> optional "isGrammatical" Decode.bool False
+                |> optional "isTraining" Decode.bool False
+                |> optional "feedback" Decode.string "Missing feedback"
+    in
+    decodeRecords decoder
+
+
 paragraphToTaggedSegments : String -> List TaggedSegment
 paragraphToTaggedSegments str =
     String.split "|" str
@@ -593,6 +513,77 @@ paragraphToTaggedSegments str =
                 else
                     ( NoUnit, seg )
             )
+
+
+saveSprData responseHandler model =
+    let
+        history =
+            Logic.getHistory model.spr
+
+        taskId_ =
+            taskId model.version
+
+        callbackHandler =
+            responseHandler
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        formattedData : List { tag : String, segment : String, startedAt : Int, endedAt : Int, id : String, answer : String }
+        formattedData =
+            history
+                |> List.foldl
+                    (\( { id }, { answer, seenSegments } ) acc ->
+                        List.map
+                            (\{ taggedSegment, startedAt, endedAt } ->
+                                { tag = tagToString (Tuple.first taggedSegment)
+                                , segment = Tuple.second taggedSegment
+                                , startedAt = Time.posixToMillis startedAt
+                                , endedAt = Time.posixToMillis endedAt
+                                , id = id
+                                , answer = answerToString answer
+                                }
+                            )
+                            seenSegments
+                            |> List.append acc
+                    )
+                    []
+
+        summarizedTrialEncoder =
+            Encode.list
+                (\{ tag, segment, startedAt, endedAt, id, answer } ->
+                    Encode.object
+                        [ ( "fields"
+                          , Encode.object
+                                [ ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
+                                , ( "userUid", Encode.list Encode.string [ userId ] )
+                                , ( "sprTrialId", Encode.list Encode.string [ id ] )
+                                , ( "answer", Encode.string answer )
+                                , ( "sprStartedAt", Encode.int startedAt )
+                                , ( "sprEndedAt", Encode.int endedAt )
+                                , ( "tag", Encode.string tag )
+                                , ( "segment", Encode.string segment )
+                                ]
+                          )
+                        ]
+                )
+
+        sendInBatch_ =
+            Data.sendInBatch summarizedTrialEncoder taskId_ userId formattedData
+    in
+    Task.attempt callbackHandler sendInBatch_
+
+
+tagToString tag =
+    case tag of
+        NoUnit ->
+            "No unit"
+
+        Critic ->
+            "Critic"
+
+        SpillOver ->
+            "SpillOver"
 
 
 answerToString answer =
@@ -610,16 +601,30 @@ answerToString answer =
             ""
 
 
-answerFromString str =
-    case str of
-        "Yes" ->
-            Yes
 
-        "No" ->
-            No
+-- INTERNAL
 
-        "I don't know" ->
-            Unsure
 
-        _ ->
-            Unsure
+taskId : Maybe String -> String
+taskId version =
+    case version of
+        Nothing ->
+            versions.pre
+
+        Just specifiedVersion ->
+            case specifiedVersion of
+                "post" ->
+                    versions.post
+
+                "post-diff" ->
+                    versions.postDiff
+
+                "surprise" ->
+                    versions.surprise
+
+                _ ->
+                    versions.pre
+
+
+versions =
+    { pre = "rec7oxQBDY7rBTRDn", post = "recPo6XGa58q3wfRw", postDiff = "rec1g3y3VAgQwj2sy", surprise = "recfot07G3AMUVK3S" }
