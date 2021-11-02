@@ -1,15 +1,18 @@
 const formatVKSdata = records => {
   return records.flatMap(record => {
-    return ["VKS_preTest", "VKS_postTest", "VKS_surprisePostTest"].flatMap(
-      session => {
-        const answers = JSON.parse(record[session] || "[]");
-        answers.forEach(answer => {
-          answer.session = session;
-          answer.userUID = record.UID;
-        });
-        return answers;
-      }
-    );
+    return [
+      "VKS_preTest",
+      "VKS_postTest",
+      "VKS_postTestDiff",
+      "VKS_surprisePostTest"
+    ].flatMap(session => {
+      const answers = JSON.parse(record[session] || "[]");
+      answers.forEach(answer => {
+        answer.session = session;
+        answer.userUID = record.UID;
+      });
+      return answers;
+    });
   });
 };
 
