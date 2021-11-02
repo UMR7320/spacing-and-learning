@@ -10,6 +10,9 @@ const formatVKSdata = records => {
       answers.forEach(answer => {
         answer.session = session;
         answer.userUID = record.UID;
+        answer.condition = record.Group;
+        answer.proficiency = record.YesNo;
+        answer.userUID = record.UID;
       });
       return answers;
     });
