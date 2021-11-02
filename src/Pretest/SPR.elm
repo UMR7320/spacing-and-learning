@@ -47,6 +47,7 @@ type alias Trial =
     , isGrammatical : Bool
     , isTraining : Bool
     , feedback : String
+    , expectedAnswer : String
     }
 
 
@@ -226,6 +227,7 @@ type Msg
     | UserClickedSaveData
     | UserConfirmedChoice Answer
     | UserClickedStartTraining
+    | HistoryWasSaved (Result Http.Error String)
 
 
 type TimedMsg
@@ -246,8 +248,17 @@ update msg model =
         UserConfirmedChoice answer ->
             ( { model | spr = model.spr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
 
-        UserClickedNextTrial newanswer ->
-            ( { model | spr = model.spr |> Logic.update { prevState | answer = newanswer } |> Logic.next initState }, Cmd.none )
+        UserClickedNextTrial newAnswer ->
+            let
+                newModel =
+                    { model
+                        | spr =
+                            model.spr
+                                |> Logic.update { prevState | answer = newAnswer }
+                                |> Logic.next initState
+                    }
+            in
+            ( newModel, saveData newModel )
 
         UserClickedSaveData ->
             let
@@ -255,17 +266,14 @@ update msg model =
                     ServerRespondedWithLastRecords
             in
             ( { model | spr = Logic.Loading }
-            , Cmd.batch
-                [ saveSprData responseHandler model
-                , if model.version == Just "post" then
-                    Browser.Navigation.pushUrl model.key "acceptability/instructions"
+            , if model.version == Just "post" then
+                Browser.Navigation.pushUrl model.key "acceptability/instructions"
 
-                  else if model.version == Just "post-diff" then
-                    Browser.Navigation.pushUrl model.key "sentence-completion"
+              else if model.version == Just "post-diff" then
+                Browser.Navigation.pushUrl model.key "sentence-completion"
 
-                  else
-                    Cmd.none
-                ]
+              else
+                Cmd.none
             )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
@@ -351,6 +359,9 @@ update msg model =
 
         UserClickedStartTraining ->
             ( { model | spr = Logic.startTraining model.spr }, Cmd.none )
+
+        HistoryWasSaved _ ->
+            ( model, Cmd.none )
 
 
 updateWithTime : TimedMsg -> Maybe Time.Posix -> model -> model -> ( model, Cmd Msg )
@@ -514,6 +525,7 @@ decodeAcceptabilityTrials =
                 |> optional "isGrammatical" Decode.bool False
                 |> optional "isTraining" Decode.bool False
                 |> optional "feedback" Decode.string "Missing feedback"
+                |> required "expectedAnswer" Decode.string
     in
     decodeRecords decoder
 
@@ -534,63 +546,77 @@ paragraphToTaggedSegments str =
             )
 
 
-saveSprData responseHandler model =
+saveData model =
     let
         history =
             Logic.getHistory model.spr
-
-        taskId_ =
-            taskId model.version
-
-        callbackHandler =
-            responseHandler
+                |> List.filter (\( trial, _ ) -> not trial.isTraining)
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        formattedData : List { tag : String, segment : String, startedAt : Int, endedAt : Int, id : String, answer : String }
-        formattedData =
-            history
-                |> List.foldl
-                    (\( { id }, { answer, seenSegments } ) acc ->
-                        List.map
-                            (\{ taggedSegment, startedAt, endedAt } ->
-                                { tag = tagToString (Tuple.first taggedSegment)
-                                , segment = Tuple.second taggedSegment
-                                , startedAt = Time.posixToMillis startedAt
-                                , endedAt = Time.posixToMillis endedAt
-                                , id = id
-                                , answer = answerToString answer
-                                }
-                            )
-                            seenSegments
-                            |> List.append acc
-                    )
-                    []
+        version =
+            Maybe.withDefault "pre" model.version
 
-        summarizedTrialEncoder =
-            Encode.list
-                (\{ tag, segment, startedAt, endedAt, id, answer } ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "sprTrialId", Encode.list Encode.string [ id ] )
-                                , ( "answer", Encode.string answer )
-                                , ( "sprStartedAt", Encode.int startedAt )
-                                , ( "sprEndedAt", Encode.int endedAt )
-                                , ( "tag", Encode.string tag )
-                                , ( "segment", Encode.string segment )
-                                ]
-                          )
-                        ]
-                )
-
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder taskId_ userId formattedData
+        payload =
+            updateHistoryEncoder version userId history
     in
-    Task.attempt callbackHandler sendInBatch_
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "SPR_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateHistoryEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder version userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder version userId history )
+                ]
+        )
+        [ ( version, userId, history ) ]
+
+
+historyEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+historyEncoder version userId history =
+    let
+        answerField =
+            case version of
+                "post" ->
+                    "SPR_postTest"
+
+                "post-diff" ->
+                    "SPR_postTestDiff"
+
+                "surprise" ->
+                    "SPR_surprisePostTest"
+
+                _ ->
+                    "SPR_preTest"
+    in
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( answerField, Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State ) -> Encode.Value
+historyItemEncoder ( { expectedAnswer }, { answer, seenSegments } ) =
+    Encode.object
+        [ ( "answer", Encode.string (answerToString answer) )
+        , ( "expectedAnswer", Encode.string expectedAnswer )
+        , ( "timings", Encode.string (seenSegmentsToTimingsString seenSegments) )
+        , ( "criticalSegmentTime", Encode.string (criticalSegmentTime seenSegments) )
+        , ( "spillOverSegmentTime", Encode.string (spillOverSegmentTime seenSegments) )
+        ]
 
 
 tagToString tag =
@@ -618,6 +644,51 @@ answerToString answer =
 
         _ ->
             ""
+
+
+seenSegmentsToTimingsString : List TaggedSegmentOver -> String
+seenSegmentsToTimingsString segments =
+    segments
+        |> List.map segmentToTiming
+        |> List.map String.fromInt
+        |> String.join ","
+
+
+criticalSegmentTime : List TaggedSegmentOver -> String
+criticalSegmentTime segments =
+    let
+        isCritical { taggedSegment } =
+            case taggedSegment of
+                ( Critic, _ ) ->
+                    True
+
+                _ ->
+                    False
+    in
+    segments
+        |> List.filter isCritical
+        |> seenSegmentsToTimingsString
+
+
+spillOverSegmentTime : List TaggedSegmentOver -> String
+spillOverSegmentTime segments =
+    let
+        isSpillOver { taggedSegment } =
+            case taggedSegment of
+                ( SpillOver, _ ) ->
+                    True
+
+                _ ->
+                    False
+    in
+    segments
+        |> List.filter isSpillOver
+        |> seenSegmentsToTimingsString
+
+
+segmentToTiming : TaggedSegmentOver -> Int
+segmentToTiming { startedAt, endedAt } =
+    Time.posixToMillis endedAt - Time.posixToMillis startedAt
 
 
 

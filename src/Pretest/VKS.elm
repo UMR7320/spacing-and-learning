@@ -361,7 +361,7 @@ saveData model =
     Http.request
         { method = "PATCH"
         , headers = []
-        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "output" }
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "VKS_output" }
         , body = Http.jsonBody payload
         , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
         , timeout = Nothing
