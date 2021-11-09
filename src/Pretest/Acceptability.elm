@@ -268,10 +268,10 @@ type Msg
     | AudioStarted ( String, Time.Posix )
     | StartTraining
     | UserClickedSaveMsg
-    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | StartMain
     | PlayAudio String
     | UserClickedStartTraining
+    | HistoryWasSaved (Result Http.Error String)
     | NoOp
 
 
@@ -307,12 +307,19 @@ update msg model =
                     )
 
                 End ->
-                    ( { model
-                        | acceptabilityTask =
-                            Logic.update { pState | step = End } model.acceptabilityTask
-                                |> Logic.next pState
-                      }
-                    , toNextStep 0 Start
+                    let
+                        newModel =
+                            { model
+                                | acceptabilityTask =
+                                    Logic.update { pState | step = End } model.acceptabilityTask
+                                        |> Logic.next pState
+                            }
+                    in
+                    ( newModel
+                    , Cmd.batch
+                        [ toNextStep 0 Start
+                        , saveData newModel
+                        ]
                     )
 
                 Start ->
@@ -384,25 +391,18 @@ update msg model =
             ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask initState, endAcceptabilityDuration = 500 }, toNextStep 0 Init )
 
         UserClickedSaveMsg ->
-            let
-                responseHandler =
-                    ServerRespondedWithLastRecords
-            in
-            ( { model | acceptabilityTask = Logic.Loading }, saveAcceptabilityData responseHandler model )
-
-        ServerRespondedWithLastRecords (Result.Ok _) ->
             ( { model | acceptabilityTask = Logic.Loading }
-            , pushUrl model.key "end"
+            , Cmd.none
             )
 
         PlayAudio url ->
             ( model, Ports.playAudio url )
 
-        ServerRespondedWithLastRecords (Result.Err reason) ->
-            ( { model | acceptabilityTask = Logic.Err <| Data.buildErrorMessage reason ++ "Please report this error message to yacourt@unice.fr with a nice screenshot!" }, Cmd.none )
-
         UserClickedStartTraining ->
             ( { model | acceptabilityTask = Logic.startTraining model.acceptabilityTask }, Cmd.none )
+
+        HistoryWasSaved _ ->
+            ( model, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -565,51 +565,87 @@ decodeAcceptabilityTrials =
     decodeRecords decoder
 
 
-saveAcceptabilityData : (Result.Result Http.Error (List ()) -> msg) -> Model superModel -> Cmd msg
-saveAcceptabilityData responseHandler model =
+saveData model =
     let
         history =
             Logic.getHistory model.acceptabilityTask
 
-        taskId_ =
-            taskId model.version
-
-        callbackHandler =
-            responseHandler
-
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        whenNothing =
-            Time.millisToPosix 1000000000
+        version =
+            Maybe.withDefault "pre" model.version
 
-        intFromMillis posix =
-            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
-
-        summarizedTrialEncoder =
-            Encode.list
-                (\( t, s ) ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
-                                , ( "audioStartedAt", intFromMillis s.audioStartedAt )
-                                , ( "beepStartedAt", intFromMillis s.beepStartedAt )
-                                , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "beepEndedAt", Encode.int (Time.posixToMillis (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "userAnsweredAt", Encode.int (Time.posixToMillis (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
-                                , ( "acceptabilityEval", Encode.string (evalToString s.evaluation) )
-                                ]
-                          )
-                        ]
-                )
-
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
+        payload =
+            updateHistoryEncoder version userId history
     in
-    Task.attempt callbackHandler sendInBatch_
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "SPR_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateHistoryEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder version userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder version userId history )
+                ]
+        )
+        [ ( version, userId, history ) ]
+
+
+historyEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+historyEncoder version userId history =
+    let
+        answerField =
+            case version of
+                "post" ->
+                    "Acceptability_postTest"
+
+                "post-diff" ->
+                    "Acceptability_postTestDiff"
+
+                "surprise" ->
+                    "Acceptability_surprisePostTest"
+
+                _ ->
+                    "Acceptability_preTest"
+    in
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( answerField, Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State ) -> Encode.Value
+historyItemEncoder ( trial, state ) =
+    let
+        toMillisOrZero timestamp =
+            timestamp
+                |> Maybe.map Time.posixToMillis
+                |> Maybe.withDefault 0
+    in
+    Encode.object
+        [ ( "trialUid", Encode.string trial.uid )
+        , ( "audioStartedAt", Encode.int (state.audioStartedAt |> toMillisOrZero) )
+        , ( "beepStartedAt", Encode.int (state.beepStartedAt |> toMillisOrZero) )
+        , ( "audioEndedAt", Encode.int (state.audioEndedAt |> toMillisOrZero) )
+        , ( "beepEndedAt", Encode.int (state.beepEndedAt |> toMillisOrZero) )
+        , ( "userAnsweredAt", Encode.int (state.userAnsweredAt |> toMillisOrZero) )
+        , ( "acceptabilityEval", Encode.string (evalToString state.evaluation) )
+        , ( "sentenceType", Encode.string (sentenceTypeToString trial.sentenceType) )
+        , ( "trialType", Encode.string (trialTypeToString trial.trialType) )
+        , ( "isGrammatical", Encode.bool trial.isGrammatical )
+        ]
 
 
 
