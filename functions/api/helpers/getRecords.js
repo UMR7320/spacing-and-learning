@@ -10,7 +10,12 @@ module.exports = async event => {
   try {
     const table = event.queryStringParameters.base;
     const view = event.queryStringParameters.view;
-    if (table == "users" && view != "VKS_output" && view != "SPR_output") {
+    if (
+      table == "users" &&
+      view != "VKS_output" &&
+      view != "SPR_output" &&
+      view != "SentenceCompletion_output"
+    ) {
       throw Error("You can't access users' table(please?)");
     }
     const base = Airtable.base(event.queryStringParameters.app);

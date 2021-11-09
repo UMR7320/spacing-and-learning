@@ -38,6 +38,26 @@ const formatSPRdata = records => {
   });
 };
 
+const formatSentenceCompletiondata = records => {
+  return records.flatMap(record => {
+    return [
+      "SentenceCompletion_preTest",
+      "SentenceCompletion_postTest",
+      "SentenceCompletion_postTestDiff",
+      "SentenceCompletion_surprisePostTest"
+    ].flatMap(session => {
+      const answers = JSON.parse(record[session] || "[]");
+      answers.forEach(answer => {
+        answer.session = session.replace("SentenceCompletion_", "");
+        answer.userUID = record.UID;
+        answer.condition = record.Group;
+        answer.proficiency = record.YesNo;
+      });
+      return answers;
+    });
+  });
+};
+
 const displayAsTable = elementId => records => {
   let html;
   if (records.length === 0) {
@@ -77,3 +97,11 @@ fetch(
   .then(json => json.records)
   .then(formatSPRdata)
   .then(displayAsTable("spr"));
+
+fetch(
+  "/.netlify/functions/api?app=appvKOc8FH0j48Hw1&base=users&view=SentenceCompletion_output"
+)
+  .then(response => response.json())
+  .then(json => json.records)
+  .then(formatSentenceCompletiondata)
+  .then(displayAsTable("sentence-completion"));

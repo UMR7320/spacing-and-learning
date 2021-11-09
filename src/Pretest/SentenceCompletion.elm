@@ -226,10 +226,10 @@ type Msg
     | UserClickedNextTrial
     | UserClickedStartMain ExperimentInfo.Task (List Trial)
     | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | UserUpdatedField Field String
     | RuntimeReordedAmorces Field
     | UserClickedStartTraining
+    | HistoryWasSaved (Result Http.Error String)
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -243,7 +243,19 @@ update msg model =
             ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | order = field } }, Cmd.none )
 
         UserClickedNextTrial ->
-            ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.toggle |> Logic.next initState }, Random.generate RuntimeReordedAmorces (Random.uniform FirstProduction [ SecondProduction ]) )
+            ( { model
+                | sentenceCompletion =
+                    model.sentenceCompletion
+                        |> Logic.toggle
+                        |> Logic.next initState
+              }
+            , Cmd.batch
+                [ Random.generate
+                    RuntimeReordedAmorces
+                    (Random.uniform FirstProduction [ SecondProduction ])
+                , saveData model
+                ]
+            )
 
         UserClickedToggleFeedback ->
             ( { model | sentenceCompletion = Logic.toggle model.sentenceCompletion }, Cmd.none )
@@ -260,20 +272,13 @@ update msg model =
                     ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | secondProduction = new } }, Cmd.none )
 
         UserClickedSaveData ->
-            let
-                responseHandler =
-                    ServerRespondedWithLastRecords
-            in
-            ( { model | sentenceCompletion = Logic.Loading }, saveData responseHandler model )
-
-        ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( { model | sentenceCompletion = Logic.NotStarted }, Cmd.none )
-
-        ServerRespondedWithLastRecords (Result.Err reason) ->
-            ( { model | sentenceCompletion = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
+            ( { model | sentenceCompletion = Logic.Loading }, Cmd.none )
 
         UserClickedStartTraining ->
             ( { model | sentenceCompletion = Logic.startTraining model.sentenceCompletion }, Cmd.none )
+
+        HistoryWasSaved _ ->
+            ( model, Cmd.none )
 
 
 
@@ -312,7 +317,7 @@ decodeAcceptabilityTrials =
     Data.decodeRecords decoder
 
 
-saveData responseHandler model =
+saveData model =
     let
         history =
             Logic.getHistory model.sentenceCompletion
@@ -320,26 +325,68 @@ saveData responseHandler model =
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        summarizedTrialEncoder =
-            Encode.list
-                (\( { id }, { firstProduction, secondProduction } ) ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "sentenceCompletionTrialId", Encode.list Encode.string [ id ] )
-                                , ( "firstProduction", Encode.string firstProduction )
-                                , ( "secondProduction", Encode.string secondProduction )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId model ] )
-                                ]
-                          )
-                        ]
-                )
+        version =
+            Maybe.withDefault "pre" model.version
 
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder (taskId model) userId history
+        payload =
+            updateHistoryEncoder version userId history
     in
-    Task.attempt responseHandler sendInBatch_
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "SPR_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateHistoryEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder version userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder version userId history )
+                ]
+        )
+        [ ( version, userId, history ) ]
+
+
+historyEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+historyEncoder version userId history =
+    let
+        answerField =
+            case version of
+                "post" ->
+                    "SentenceCompletion_postTest"
+
+                "post-diff" ->
+                    "SentenceCompletion_postTestDiff"
+
+                "surprise" ->
+                    "SentenceCompletion_surprisePostTest"
+
+                _ ->
+                    "SentenceCompletion_preTest"
+    in
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( answerField, Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State ) -> Encode.Value
+historyItemEncoder ( { id, firstAmorce, secondAmorce }, { firstProduction, secondProduction } ) =
+    Encode.object
+        [ ( "trialId", Encode.string id )
+        , ( "firstAmorce", Encode.string firstAmorce )
+        , ( "secondAmorce", Encode.string secondAmorce )
+        , ( "firstProduction", Encode.string firstProduction )
+        , ( "secondProduction", Encode.string secondProduction )
+        ]
 
 
 
