@@ -17,44 +17,59 @@ import Task
 import View
 
 
-taskId model =
-    case model.version of
-        Nothing ->
-            "reczQs5ZD6g1x5F29"
 
-        Just version ->
-            case version of
-                "post-diff" ->
-                    "recs1XATsyG7fVfO6"
+-- MODEL
 
-                "pre" ->
-                    "reczQs5ZD6g1x5F29"
 
-                "surprise" ->
-                    "recA1dsUaJJsJ5WPY"
+type alias Trial =
+    { id : String
+    , context : String
+    , firstAmorce : String
+    , secondAmorce : String
+    , isTraining : Bool
+    , firstFeedback : String
+    , secondFeedback : String
+    }
 
-                _ ->
-                    "reczQs5ZD6g1x5F29"
+
+type Field
+    = FirstProduction
+    | SecondProduction
+
+
+type alias State =
+    { firstProduction : String
+    , secondProduction : String
+    , order : Field
+    }
 
 
 type alias SentenceCompletion =
     Logic.Task Trial State
 
 
-readOnlyOnFeedback data =
-    if data.feedback then
-        A.readonly True
+type alias Model superModel =
+    { superModel
+        | sentenceCompletion : Logic.Task Trial State
+        , user : Maybe String
+        , version : Maybe String
+    }
 
-    else
-        A.readonly False
+
+init infos trials model =
+    let
+        info =
+            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find Task infos"
+    in
+    Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
 
-readOnlyAmorce firstAmorce firstProduction =
-    if String.length firstProduction < String.length firstAmorce then
-        firstAmorce
+initState =
+    { firstProduction = "", secondProduction = "", order = FirstProduction }
 
-    else
-        firstProduction
+
+
+-- VIEW
 
 
 view : SentenceCompletion -> List (Html Msg)
@@ -186,54 +201,24 @@ view task =
             [ View.instructions data.infos UserClickedStartTraining ]
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "sentence_completion"
-                , view_ = "all"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials
-        , timeout = Just 5000
-        }
+readOnlyOnFeedback data =
+    if data.feedback then
+        A.readonly True
+
+    else
+        A.readonly False
 
 
-decodeAcceptabilityTrials : Decode.Decoder (List Trial)
-decodeAcceptabilityTrials =
-    let
-        decoder =
-            Decode.succeed Trial
-                |> required "id" Decode.string
-                |> required "context" Decode.string
-                |> required "amorce1" Decode.string
-                |> required "amorce2" Decode.string
-                |> optional "isTraining" Decode.bool False
-                |> optional "feedback1" Decode.string "Missing feedback"
-                |> optional "feedback2" Decode.string "Missing feedback 2"
-    in
-    Data.decodeRecords decoder
+readOnlyAmorce firstAmorce firstProduction =
+    if String.length firstProduction < String.length firstAmorce then
+        firstAmorce
+
+    else
+        firstProduction
 
 
-type alias Trial =
-    { id : String
-    , context : String
-    , firstAmorce : String
-    , secondAmorce : String
-    , isTraining : Bool
-    , firstFeedback : String
-    , secondFeedback : String
-    }
 
-
-type alias State =
-    { firstProduction : String
-    , secondProduction : String
-    , order : Field
-    }
+-- UPDATE
 
 
 type Msg
@@ -245,15 +230,6 @@ type Msg
     | UserUpdatedField Field String
     | RuntimeReordedAmorces Field
     | UserClickedStartTraining
-
-
-type Field
-    = FirstProduction
-    | SecondProduction
-
-
-type alias Model superModel =
-    { superModel | sentenceCompletion : Logic.Task Trial State, user : Maybe String, version : Maybe String }
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -300,16 +276,40 @@ update msg model =
             ( { model | sentenceCompletion = Logic.startTraining model.sentenceCompletion }, Cmd.none )
 
 
-init infos trials model =
+
+-- HTTP
+
+
+getRecords =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "sentence_completion"
+                , view_ = "all"
+                }
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials
+        , timeout = Just 5000
+        }
+
+
+decodeAcceptabilityTrials : Decode.Decoder (List Trial)
+decodeAcceptabilityTrials =
     let
-        info =
-            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find Task infos"
+        decoder =
+            Decode.succeed Trial
+                |> required "id" Decode.string
+                |> required "context" Decode.string
+                |> required "amorce1" Decode.string
+                |> required "amorce2" Decode.string
+                |> optional "isTraining" Decode.bool False
+                |> optional "feedback1" Decode.string "Missing feedback"
+                |> optional "feedback2" Decode.string "Missing feedback 2"
     in
-    Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
-
-
-initState =
-    { firstProduction = "", secondProduction = "", order = FirstProduction }
+    Data.decodeRecords decoder
 
 
 saveData responseHandler model =
@@ -340,3 +340,27 @@ saveData responseHandler model =
             Data.sendInBatch summarizedTrialEncoder (taskId model) userId history
     in
     Task.attempt responseHandler sendInBatch_
+
+
+
+-- INTERNAL
+
+
+taskId model =
+    case model.version of
+        Nothing ->
+            "reczQs5ZD6g1x5F29"
+
+        Just version ->
+            case version of
+                "post-diff" ->
+                    "recs1XATsyG7fVfO6"
+
+                "pre" ->
+                    "reczQs5ZD6g1x5F29"
+
+                "surprise" ->
+                    "recA1dsUaJJsJ5WPY"
+
+                _ ->
+                    "reczQs5ZD6g1x5F29"
