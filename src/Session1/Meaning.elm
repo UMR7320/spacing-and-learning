@@ -26,65 +26,12 @@ import String.Interpolate exposing (interpolate)
 import View
 
 
+
+-- MODEL
+
+
 type alias Meaning =
     Logic.Task Trial State
-
-
-taskId =
-    "rec9fDmVOpqDJktmQ"
-
-
-type Msg
-    = UserClickedNextTrial
-    | UserClickedToggleFeedback
-    | UserClickedRadioButton String
-    | UserClickedStartMain
-    | SaveDataMsg
-    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
-    | UserClickedStartTraining
-    | RuntimeShuffledOptionsOrder (List Int)
-
-
-decodeMeaningInput : Decoder (List Trial)
-decodeMeaningInput =
-    let
-        decoder =
-            Decode.succeed Trial
-                |> required "UID" string
-                |> required "Word_Text" string
-                |> required "Definition" string
-                |> optional "Distractor_1_Meaning" string "MISSING"
-                |> optional "Distractor_2_Meaning" string "MISSING"
-                |> optional "Distractor_3_Meaning" string "MISSING"
-                |> required "Feedback_Incorrect_Meaning" string
-                |> required "Feedback_Correct_Meaning" string
-                |> optional "isTraining" bool False
-    in
-    decodeRecords decoder
-
-
-getTrialsFromServer : (Result Http.Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer callbackMsg =
-    Data.getTrialsFromServer_ "input" "Meaning" callbackMsg decodeMeaningInput
-
-
-initState : State
-initState =
-    State "DefaultTrialUID" ""
-
-
-defaultTrial : Trial
-defaultTrial =
-    { uid = "MISSING"
-    , writtenWord = "MISSING"
-    , target = "MISSING"
-    , distractor1 = "MISSING"
-    , distractor2 = "MISSING"
-    , distractor3 = "MISSING"
-    , feedbackCorrect = "MISSING"
-    , feedbackIncorrect = "MISSING"
-    , isTraining = False
-    }
 
 
 type alias Trial =
@@ -106,15 +53,42 @@ type alias State =
     }
 
 
-viewQuestion word trialn =
-    div [ class "text-3xl font-bold italic my-6" ] [ text word ]
-
-
-view :
-    { task : Logic.Task Trial State
-    , optionsOrder : List comparable
+defaultTrial : Trial
+defaultTrial =
+    { uid = "MISSING"
+    , writtenWord = "MISSING"
+    , target = "MISSING"
+    , distractor1 = "MISSING"
+    , distractor2 = "MISSING"
+    , distractor3 = "MISSING"
+    , feedbackCorrect = "MISSING"
+    , feedbackIncorrect = "MISSING"
+    , isTraining = False
     }
-    -> Html Msg
+
+
+start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start info trials =
+    let
+        relatedInfos =
+            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+    in
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+initState : State
+initState =
+    State "DefaultTrialUID" ""
+
+
+
+-- VIEW
+
+
+view : { task : Logic.Task Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
         Logic.Loading ->
@@ -187,32 +161,23 @@ view task =
             View.instructions data.infos UserClickedStartTraining
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeMeaningInput
-        , timeout = Just 5000
-        }
+viewQuestion word trialn =
+    div [ class "text-3xl font-bold italic my-6" ] [ text word ]
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
-start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
+
+-- UPDATE
+
+
+type Msg
+    = UserClickedNextTrial
+    | UserClickedToggleFeedback
+    | UserClickedRadioButton String
+    | UserClickedStartMain
+    | SaveDataMsg
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedStartTraining
+    | RuntimeShuffledOptionsOrder (List Int)
 
 
 update msg model =
@@ -240,3 +205,54 @@ update msg model =
 
         RuntimeShuffledOptionsOrder newOrder ->
             ( { model | optionsOrder = newOrder }, Cmd.none )
+
+
+
+-- HTTP
+
+
+getRecords =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "input"
+                , view_ = "Presentation"
+                }
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeMeaningInput
+        , timeout = Just 5000
+        }
+
+
+decodeMeaningInput : Decoder (List Trial)
+decodeMeaningInput =
+    let
+        decoder =
+            Decode.succeed Trial
+                |> required "UID" string
+                |> required "Word_Text" string
+                |> required "Definition" string
+                |> optional "Distractor_1_Meaning" string "MISSING"
+                |> optional "Distractor_2_Meaning" string "MISSING"
+                |> optional "Distractor_3_Meaning" string "MISSING"
+                |> required "Feedback_Incorrect_Meaning" string
+                |> required "Feedback_Correct_Meaning" string
+                |> optional "isTraining" bool False
+    in
+    decodeRecords decoder
+
+
+getTrialsFromServer : (Result Http.Error (List Trial) -> msg) -> Cmd msg
+getTrialsFromServer callbackMsg =
+    Data.getTrialsFromServer_ "input" "Meaning" callbackMsg decodeMeaningInput
+
+
+
+-- INTERNALS
+
+
+taskId =
+    "rec9fDmVOpqDJktmQ"
