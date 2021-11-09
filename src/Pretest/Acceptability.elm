@@ -270,7 +270,7 @@ type Msg
     | UserClickedSaveMsg
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
     | StartMain
-    | UserClickedPlayAudio String
+    | PlayAudio String
     | UserClickedStartTraining
     | NoOp
 
@@ -291,22 +291,39 @@ update msg model =
         NextStepCinematic step ->
             case step of
                 Listening ->
-                    ( { model | acceptabilityTask = Logic.update { pState | step = Listening } model.acceptabilityTask }
-                    , Delay.after 500 (UserClickedPlayAudio trial.audio.url)
+                    ( { model
+                        | acceptabilityTask =
+                            Logic.update { pState | step = Listening } model.acceptabilityTask
+                      }
+                    , Delay.after 500 (PlayAudio trial.audio.url)
                     )
 
                 Answering ->
-                    ( { model | acceptabilityTask = Logic.update { pState | step = Answering } model.acceptabilityTask }, Delay.after trial.timeout (UserPressedButton Nothing) )
+                    ( { model
+                        | acceptabilityTask =
+                            Logic.update { pState | step = Answering } model.acceptabilityTask
+                      }
+                    , Delay.after trial.timeout (UserPressedButton Nothing)
+                    )
 
                 End ->
-                    ( { model | acceptabilityTask = Logic.update { pState | step = End } model.acceptabilityTask |> Logic.next pState }
+                    ( { model
+                        | acceptabilityTask =
+                            Logic.update { pState | step = End } model.acceptabilityTask
+                                |> Logic.next pState
+                      }
                     , toNextStep 0 Start
                     )
 
                 Start ->
-                    ( { model | acceptabilityTask = Logic.update newLoop model.acceptabilityTask }, Delay.after 0 (UserClickedPlayAudio beep) )
+                    ( { model
+                        | acceptabilityTask =
+                            Logic.update newLoop model.acceptabilityTask
+                      }
+                    , Delay.after 0 (PlayAudio beep)
+                    )
 
-                _ ->
+                Init ->
                     ( model, Cmd.none )
 
         UserPressedButton maybeBool ->
@@ -336,10 +353,18 @@ update msg model =
 
         AudioEnded ( name, timestamp ) ->
             if name == beep then
-                ( { model | acceptabilityTask = Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask }, Cmd.none )
+                ( { model
+                    | acceptabilityTask =
+                        Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask
+                  }
+                , Cmd.none
+                )
 
             else
-                ( { model | acceptabilityTask = Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask }
+                ( { model
+                    | acceptabilityTask =
+                        Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask
+                  }
                 , toNextStep 0 Answering
                 )
 
@@ -370,7 +395,7 @@ update msg model =
             , pushUrl model.key "end"
             )
 
-        UserClickedPlayAudio url ->
+        PlayAudio url ->
             ( model, Ports.playAudio url )
 
         ServerRespondedWithLastRecords (Result.Err reason) ->
