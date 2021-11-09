@@ -21,6 +21,38 @@ import User exposing (User)
 import View
 
 
+
+-- MODEL
+
+
+type alias Trial =
+    { uid : String
+    , sentence : String
+    , sentenceType : SentenceType
+    , trialType : TrialType
+    , isGrammatical : Bool
+    , audio : Data.AudioFile
+    , feedback : String
+    , timeout : Int
+    }
+
+
+type TrialType
+    = Target
+    | Training
+    | Distractor
+
+
+type SentenceType
+    = EmbeddedQuestion
+    | ZeroArticle
+    | AdjectiveAgreement
+    | PresentPerfectOrSimplePast
+    | Conditional
+    | Question
+    | RelativeClause
+
+
 type alias State =
     { trialuid : String
     , evaluation : Evaluation
@@ -33,83 +65,32 @@ type alias State =
     }
 
 
-saveAcceptabilityData : (Result.Result Http.Error (List ()) -> msg) -> Model superModel -> Cmd msg
-saveAcceptabilityData responseHandler model =
-    let
-        history =
-            Logic.getHistory model.acceptabilityTask
-
-        taskId_ =
-            taskId model.version
-
-        callbackHandler =
-            responseHandler
-
-        userId =
-            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
-
-        whenNothing =
-            Time.millisToPosix 1000000000
-
-        intFromMillis posix =
-            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
-
-        summarizedTrialEncoder =
-            Encode.list
-                (\( t, s ) ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
-                                , ( "audioStartedAt", intFromMillis s.audioStartedAt )
-                                , ( "beepStartedAt", intFromMillis s.beepStartedAt )
-                                , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "beepEndedAt", Encode.int (Time.posixToMillis (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
-                                , ( "userAnsweredAt", Encode.int (Time.posixToMillis (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
-                                , ( "acceptabilityEval", Encode.string (evalToString s.evaluation) )
-                                ]
-                          )
-                        ]
-                )
-
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
-    in
-    Task.attempt callbackHandler sendInBatch_
+type alias History =
+    List State
 
 
-type ErrorBlock
-    = FirstDistractorMissing Bool
-    | SecondDistractorMissing Bool
-    | ThirdDistractorMissing Bool
+type Step
+    = Start
+    | Listening
+    | Answering
+    | End
+    | Init
 
 
-type Msg
-    = UserPressedButton (Maybe Bool)
-    | UserPressedButtonWithTimestamp (Maybe Bool) Time.Posix
-    | NextStepCinematic Step
-    | AudioEnded ( String, Time.Posix )
-    | AudioStarted ( String, Time.Posix )
-    | StartTraining
-    | UserClickedSaveMsg
-    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
-    | StartMain
-    | UserClickedPlayAudio String
-    | UserClickedStartTraining
-    | NoOp
+type Evaluation
+    = NoEvaluation
+    | SentenceCorrect
+    | SentenceIncorrect
+    | EvaluationTimeOut
 
 
-type alias Trial =
-    { uid : String
-    , sentence : String
-    , sentenceType : SentenceType
-    , trialType : TrialType
-    , isGrammatical : Bool
-    , audio : Data.AudioFile
-    , feedback : String
-    , timeout : Int
+type alias Model supraModel =
+    { supraModel
+        | acceptabilityTask : Logic.Task Trial State
+        , endAcceptabilityDuration : Int
+        , key : Key
+        , user : Maybe String
+        , version : Maybe String
     }
 
 
@@ -125,78 +106,41 @@ dumbTrial =
     }
 
 
-testDistractors =
-    List.repeat 16
-        { uid = "uid"
-        , sentence = "sentence"
-        , sentenceType = EmbeddedQuestion
-        , trialType = Distractor
-        , isGrammatical = True
-        , audio = Data.AudioFile "" ""
-        }
+initState : State
+initState =
+    { trialuid = "defaulttrialuid"
+    , evaluation = NoEvaluation
+    , beepEndedAt = Nothing
+    , beepStartedAt = Nothing
+    , audioStartedAt = Nothing
+    , audioEndedAt = Nothing
+    , userAnsweredAt = Nothing
+    , step = Init
+    }
 
 
-testTargets =
-    List.repeat 4
-        { uid = "uid"
-        , sentence = "sentence"
-        , sentenceType = RelativeClause
-        , trialType = Target
-        , isGrammatical = True
-        , audio = Data.AudioFile "" ""
-        }
+newLoop : State
+newLoop =
+    { initState | step = Start }
 
 
-viewScreen =
-    div [ class "flex flex-col w-full h-screen items-center justify-center border-2", Html.Styled.Attributes.id "screen" ]
-
-
-viewKeys =
-    [ div [ class "flex flex-row" ] [ viewKey "f", viewKey "j" ] ]
-
-
-viewKey label =
+start : List ExperimentInfo.Task -> List Trial -> Maybe String -> Logic.Task Trial State
+start info trials version =
     let
-        bg =
-            if label == "j" then
-                "bg-green-500"
-
-            else if "f" == label then
-                "bg-red-500"
-
-            else
-                ""
+        relatedInfos =
+            Dict.get (taskId version) (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId version)
     in
-    div [ class <| "flex flex-col h-12 w-12 m-4 items-center justify-center border-2 rounded-lg " ++ bg ]
-        [ span [ class "flex flex-col  items-center text-2xl font-bold text-black" ]
-            [ text label
-            ]
-        ]
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.trialType == Training) trials)
+        (List.filter (\datum -> datum.trialType /= Training) trials)
+        initState
 
 
-viewTransition infos msg buttontext =
-    div [ class "flex flex-col items-center justify-center" ]
-        [ p [] [ View.fromUnsafeMarkdown infos ]
-        , View.button
-            { isDisabled = False
-            , message = msg
-            , txt = buttontext
-            }
-        ]
+
+-- VIEW
 
 
-grammaticalityToKey : Bool -> String
-grammaticalityToKey isGrammatical =
-    if isGrammatical then
-        "J = ACCEPTABLE: {0}."
-
-    else
-        "F = NOT ACCEPTABLE: {0}. The acceptable sentence is: {1}"
-
-
-view :
-    Logic.Task Trial State
-    -> List (Html Msg)
+view : Logic.Task Trial State -> List (Html Msg)
 view task =
     let
         prompt =
@@ -268,259 +212,67 @@ view task =
             [ View.unsafeInstructions data.infos UserClickedStartTraining ]
 
 
-decodeAcceptabilityTrials : Decode.Decoder (List Trial)
-decodeAcceptabilityTrials =
+viewScreen =
+    div
+        [ class "flex flex-col w-full h-screen items-center justify-center border-2"
+        , Html.Styled.Attributes.id "screen"
+        ]
+
+
+viewKeys =
+    [ div
+        [ class "flex flex-row" ]
+        [ viewKey "f", viewKey "j" ]
+    ]
+
+
+viewKey label =
     let
-        decoder =
-            Decode.succeed Trial
-                |> required "id" Decode.string
-                |> required "Acceptability Sentence" Decode.string
-                |> custom (Decode.field "Sentence type" Decode.string |> Decode.andThen toSentenceType)
-                |> custom (Decode.field "Trial type" Decode.string |> Decode.andThen toTrialTypeDecoder)
-                |> optional "IsGrammatical" Decode.bool False
-                |> required "Acceptability Audio" Data.decodeAudioFiles
-                |> optional "Acceptability Feedback" Decode.string "no feedback"
-                |> required "Timeout" Decode.int
+        bg =
+            if label == "j" then
+                "bg-green-500"
 
-        toTrialTypeDecoder str =
-            case str of
-                "Target" ->
-                    Decode.succeed Target
+            else if "f" == label then
+                "bg-red-500"
 
-                "Training" ->
-                    Decode.succeed Training
-
-                "Distractor" ->
-                    Decode.succeed Distractor
-
-                _ ->
-                    Decode.fail <| "I couldn't map " ++ str ++ " to TrialType"
-
-        toSentenceType str =
-            case str of
-                "Embedded Question" ->
-                    Decode.succeed EmbeddedQuestion
-
-                "Zero article" ->
-                    Decode.succeed ZeroArticle
-
-                "Adjective agreement" ->
-                    Decode.succeed AdjectiveAgreement
-
-                "Present perfect/simple past" ->
-                    Decode.succeed PresentPerfectOrSimplePast
-
-                "Conditional" ->
-                    Decode.succeed Conditional
-
-                "Question" ->
-                    Decode.succeed Question
-
-                "Relative clause" ->
-                    Decode.succeed RelativeClause
-
-                _ ->
-                    Decode.fail ("I couldn't find the corresponding SentenceType for this string :" ++ str)
+            else
+                ""
     in
-    decodeRecords decoder
+    div [ class <| "flex flex-col h-12 w-12 m-4 items-center justify-center border-2 rounded-lg " ++ bg ]
+        [ span [ class "flex flex-col  items-center text-2xl font-bold text-black" ]
+            [ text label
+            ]
+        ]
 
 
-enumSentenceType : List SentenceType
-enumSentenceType =
-    [ EmbeddedQuestion, ZeroArticle, AdjectiveAgreement, PresentPerfectOrSimplePast, Conditional, Question, RelativeClause ]
+viewTransition infos msg buttontext =
+    div [ class "flex flex-col items-center justify-center" ]
+        [ p [] [ View.fromUnsafeMarkdown infos ]
+        , View.button
+            { isDisabled = False
+            , message = msg
+            , txt = buttontext
+            }
+        ]
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "acceptability"
-                , view_ = "all"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials
-        , timeout = Just 5000
-        }
+
+-- UPDATE
 
 
-start : List ExperimentInfo.Task -> List Trial -> Maybe String -> Logic.Task Trial State
-start info trials version =
-    let
-        relatedInfos =
-            Dict.get (taskId version) (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId version)
-    in
-    Logic.startIntro relatedInfos
-        (List.filter (\datum -> datum.trialType == Training) trials)
-        (List.filter (\datum -> datum.trialType /= Training) trials)
-        initState
-
-
-taskId : Maybe String -> String
-taskId version =
-    case version of
-        Nothing ->
-            versions.pre
-
-        Just specifiedVersion ->
-            case specifiedVersion of
-                "post" ->
-                    versions.post
-
-                "post-diff" ->
-                    versions.postDiff
-
-                "surprise" ->
-                    versions.surprise
-
-                _ ->
-                    versions.pre
-
-
-versions =
-    { pre = "recR8areYkKRvQ6lU"
-    , post = "recOrxH3ebc5Jhmm4"
-    , postDiff = "recN5DtKXo2MEDdvc"
-    , surprise = "recTlSt6RDbluzbne"
-    }
-
-
-type TrialType
-    = Target
-    | Training
-    | Distractor
-
-
-trialTypeToString : TrialType -> String
-trialTypeToString trialType =
-    case trialType of
-        Target ->
-            "Target"
-
-        Training ->
-            "Training"
-
-        Distractor ->
-            "Distractor"
-
-
-type SentenceType
-    = EmbeddedQuestion
-    | ZeroArticle
-    | AdjectiveAgreement
-    | PresentPerfectOrSimplePast
-    | Conditional
-    | Question
-    | RelativeClause
-
-
-sentenceTypeToString : SentenceType -> String
-sentenceTypeToString sentenceType =
-    case sentenceType of
-        EmbeddedQuestion ->
-            "Embedded Question"
-
-        ZeroArticle ->
-            "Zero article"
-
-        AdjectiveAgreement ->
-            "Adjective agreement"
-
-        PresentPerfectOrSimplePast ->
-            "Present perfect/simple past"
-
-        Conditional ->
-            "Conditional"
-
-        Question ->
-            "Question"
-
-        RelativeClause ->
-            "Relative clause"
-
-
-initState : State
-initState =
-    { trialuid = "defaulttrialuid"
-    , evaluation = NoEvaluation
-    , beepEndedAt = Nothing
-    , beepStartedAt = Nothing
-    , audioStartedAt = Nothing
-    , audioEndedAt = Nothing
-    , userAnsweredAt = Nothing
-    , step = Init
-    }
-
-
-newLoop : State
-newLoop =
-    { initState
-        | step = Start
-    }
-
-
-type alias History =
-    List State
-
-
-type alias CurrentTrialNumber =
-    Int
-
-
-type Step
-    = Start
-    | Listening
-    | Answering
-    | End
-    | Init
-
-
-type Evaluation
-    = NoEvaluation
-    | SentenceCorrect
-    | SentenceIncorrect
-    | EvaluationTimeOut
-
-
-maybeBoolToEvaluation : Maybe Bool -> Evaluation
-maybeBoolToEvaluation maybeBool =
-    case maybeBool of
-        Nothing ->
-            EvaluationTimeOut
-
-        Just True ->
-            SentenceCorrect
-
-        Just False ->
-            SentenceIncorrect
-
-
-evalToString : Evaluation -> String
-evalToString eval =
-    case eval of
-        NoEvaluation ->
-            "No Eval"
-
-        SentenceCorrect ->
-            "Correct"
-
-        SentenceIncorrect ->
-            "Incorrect"
-
-        EvaluationTimeOut ->
-            "Timeout"
-
-
-type alias Model supraModel =
-    { supraModel
-        | acceptabilityTask : Logic.Task Trial State
-        , endAcceptabilityDuration : Int
-        , key : Key
-        , user : Maybe String
-        , version : Maybe String
-    }
+type Msg
+    = UserPressedButton (Maybe Bool)
+    | UserPressedButtonWithTimestamp (Maybe Bool) Time.Posix
+    | NextStepCinematic Step
+    | AudioEnded ( String, Time.Posix )
+    | AudioStarted ( String, Time.Posix )
+    | StartTraining
+    | UserClickedSaveMsg
+    | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
+    | StartMain
+    | UserClickedPlayAudio String
+    | UserClickedStartTraining
+    | NoOp
 
 
 update : Msg -> Model supraModel -> ( Model supraModel, Cmd Msg )
@@ -629,6 +381,295 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions model =
+    let
+        acceptabilityState =
+            Logic.getState model.acceptabilityTask
+
+        listenToInput : Sub Msg
+        listenToInput =
+            case acceptabilityState of
+                Just state ->
+                    if state.step == Answering then
+                        onKeyDown keyDecoder
+
+                    else if state.step == Init then
+                        onKeyDown decodeSpace
+
+                    else
+                        Sub.none
+
+                Nothing ->
+                    Sub.none
+    in
+    case model.acceptabilityTask of
+        Logic.Running Logic.Training _ ->
+            Sub.batch [ listenToInput, Ports.audioEnded toAcceptabilityMessage ]
+
+        Logic.Running Logic.Main _ ->
+            Sub.batch [ listenToInput, Ports.audioEnded toAcceptabilityMessage ]
+
+        _ ->
+            Sub.none
+
+
+keyDecoder : Decode.Decoder Msg
+keyDecoder =
+    Decode.map toEvaluation (Decode.field "key" Decode.string)
+
+
+decodeSpace : Decode.Decoder Msg
+decodeSpace =
+    Decode.map
+        (\k ->
+            case k of
+                " " ->
+                    NextStepCinematic Start
+
+                _ ->
+                    NoOp
+        )
+        (Decode.field "key" Decode.string)
+
+
+toEvaluation : String -> Msg
+toEvaluation x =
+    case x of
+        "j" ->
+            UserPressedButton (Just True)
+
+        "f" ->
+            UserPressedButton (Just False)
+
+        _ ->
+            NoOp
+
+
+toAcceptabilityMessage { eventType, name, timestamp } =
+    case eventType of
+        "SoundStarted" ->
+            AudioStarted ( name, Time.millisToPosix timestamp )
+
+        "SoundEnded" ->
+            AudioEnded ( name, Time.millisToPosix timestamp )
+
+        _ ->
+            NoOp
+
+
+
+-- HTTP
+
+
+getRecords =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "acceptability"
+                , view_ = "all"
+                }
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials
+        , timeout = Just 5000
+        }
+
+
+decodeAcceptabilityTrials : Decode.Decoder (List Trial)
+decodeAcceptabilityTrials =
+    let
+        decoder =
+            Decode.succeed Trial
+                |> required "id" Decode.string
+                |> required "Acceptability Sentence" Decode.string
+                |> custom (Decode.field "Sentence type" Decode.string |> Decode.andThen toSentenceType)
+                |> custom (Decode.field "Trial type" Decode.string |> Decode.andThen toTrialTypeDecoder)
+                |> optional "IsGrammatical" Decode.bool False
+                |> required "Acceptability Audio" Data.decodeAudioFiles
+                |> optional "Acceptability Feedback" Decode.string "no feedback"
+                |> required "Timeout" Decode.int
+
+        toTrialTypeDecoder str =
+            case str of
+                "Target" ->
+                    Decode.succeed Target
+
+                "Training" ->
+                    Decode.succeed Training
+
+                "Distractor" ->
+                    Decode.succeed Distractor
+
+                _ ->
+                    Decode.fail <| "I couldn't map " ++ str ++ " to TrialType"
+
+        toSentenceType str =
+            case str of
+                "Embedded Question" ->
+                    Decode.succeed EmbeddedQuestion
+
+                "Zero article" ->
+                    Decode.succeed ZeroArticle
+
+                "Adjective agreement" ->
+                    Decode.succeed AdjectiveAgreement
+
+                "Present perfect/simple past" ->
+                    Decode.succeed PresentPerfectOrSimplePast
+
+                "Conditional" ->
+                    Decode.succeed Conditional
+
+                "Question" ->
+                    Decode.succeed Question
+
+                "Relative clause" ->
+                    Decode.succeed RelativeClause
+
+                _ ->
+                    Decode.fail ("I couldn't find the corresponding SentenceType for this string :" ++ str)
+    in
+    decodeRecords decoder
+
+
+saveAcceptabilityData : (Result.Result Http.Error (List ()) -> msg) -> Model superModel -> Cmd msg
+saveAcceptabilityData responseHandler model =
+    let
+        history =
+            Logic.getHistory model.acceptabilityTask
+
+        taskId_ =
+            taskId model.version
+
+        callbackHandler =
+            responseHandler
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        whenNothing =
+            Time.millisToPosix 1000000000
+
+        intFromMillis posix =
+            Encode.int (Time.posixToMillis (posix |> Maybe.withDefault whenNothing))
+
+        summarizedTrialEncoder =
+            Encode.list
+                (\( t, s ) ->
+                    Encode.object
+                        [ ( "fields"
+                          , Encode.object
+                                [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
+                                , ( "userUid", Encode.list Encode.string [ userId ] )
+                                , ( "Task_UID", Encode.list Encode.string [ taskId_ ] )
+                                , ( "audioStartedAt", intFromMillis s.audioStartedAt )
+                                , ( "beepStartedAt", intFromMillis s.beepStartedAt )
+                                , ( "audioEndedAt", Encode.int (Time.posixToMillis (s.audioEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "beepEndedAt", Encode.int (Time.posixToMillis (s.beepEndedAt |> Maybe.withDefault whenNothing)) )
+                                , ( "userAnsweredAt", Encode.int (Time.posixToMillis (s.userAnsweredAt |> Maybe.withDefault whenNothing)) )
+                                , ( "acceptabilityEval", Encode.string (evalToString s.evaluation) )
+                                ]
+                          )
+                        ]
+                )
+
+        sendInBatch_ =
+            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
+    in
+    Task.attempt callbackHandler sendInBatch_
+
+
+
+-- INTERNALS
+
+
+type ErrorBlock
+    = FirstDistractorMissing Bool
+    | SecondDistractorMissing Bool
+    | ThirdDistractorMissing Bool
+
+
+versions =
+    { pre = "recR8areYkKRvQ6lU"
+    , post = "recOrxH3ebc5Jhmm4"
+    , postDiff = "recN5DtKXo2MEDdvc"
+    , surprise = "recTlSt6RDbluzbne"
+    }
+
+
+trialTypeToString : TrialType -> String
+trialTypeToString trialType =
+    case trialType of
+        Target ->
+            "Target"
+
+        Training ->
+            "Training"
+
+        Distractor ->
+            "Distractor"
+
+
+sentenceTypeToString : SentenceType -> String
+sentenceTypeToString sentenceType =
+    case sentenceType of
+        EmbeddedQuestion ->
+            "Embedded Question"
+
+        ZeroArticle ->
+            "Zero article"
+
+        AdjectiveAgreement ->
+            "Adjective agreement"
+
+        PresentPerfectOrSimplePast ->
+            "Present perfect/simple past"
+
+        Conditional ->
+            "Conditional"
+
+        Question ->
+            "Question"
+
+        RelativeClause ->
+            "Relative clause"
+
+
+maybeBoolToEvaluation : Maybe Bool -> Evaluation
+maybeBoolToEvaluation maybeBool =
+    case maybeBool of
+        Nothing ->
+            EvaluationTimeOut
+
+        Just True ->
+            SentenceCorrect
+
+        Just False ->
+            SentenceIncorrect
+
+
+evalToString : Evaluation -> String
+evalToString eval =
+    case eval of
+        NoEvaluation ->
+            "No Eval"
+
+        SentenceCorrect ->
+            "Correct"
+
+        SentenceIncorrect ->
+            "Incorrect"
+
+        EvaluationTimeOut ->
+            "Timeout"
 
 
 organizeAcceptabilityTrials : List Trial -> List Trial -> Result.Result ( ErrorBlock, List Trial ) (List (List Trial))
@@ -745,87 +786,6 @@ organizeAcceptabilityTrialsHelper targets distractors output =
                     organizeAcceptabilityTrialsHelper xs remainingDistractors (block :: output)
 
 
-toAcceptabilityMessage { eventType, name, timestamp } =
-    case eventType of
-        "SoundStarted" ->
-            AudioStarted ( name, Time.millisToPosix timestamp )
-
-        "SoundEnded" ->
-            AudioEnded ( name, Time.millisToPosix timestamp )
-
-        _ ->
-            NoOp
-
-
-keyDecoder : Decode.Decoder Msg
-keyDecoder =
-    Decode.map toEvaluation (Decode.field "key" Decode.string)
-
-
-decodeSpace : Decode.Decoder Msg
-decodeSpace =
-    Decode.map
-        (\k ->
-            case k of
-                " " ->
-                    NextStepCinematic Start
-
-                _ ->
-                    NoOp
-        )
-        (Decode.field "key" Decode.string)
-
-
-
---toEvaluation : String -> Msg
---toEvaluation : String -> Msg
-
-
-toEvaluation : String -> Msg
-toEvaluation x =
-    case x of
-        "j" ->
-            UserPressedButton (Just True)
-
-        "f" ->
-            UserPressedButton (Just False)
-
-        _ ->
-            NoOp
-
-
-subscriptions model =
-    let
-        acceptabilityState =
-            Logic.getState model.acceptabilityTask
-
-        listenToInput : Sub Msg
-        listenToInput =
-            case acceptabilityState of
-                Just state ->
-                    if state.step == Answering then
-                        onKeyDown keyDecoder
-
-                    else if state.step == Init then
-                        onKeyDown decodeSpace
-
-                    else
-                        Sub.none
-
-                Nothing ->
-                    Sub.none
-    in
-    case model.acceptabilityTask of
-        Logic.Running Logic.Training _ ->
-            Sub.batch [ listenToInput, Ports.audioEnded toAcceptabilityMessage ]
-
-        Logic.Running Logic.Main _ ->
-            Sub.batch [ listenToInput, Ports.audioEnded toAcceptabilityMessage ]
-
-        _ ->
-            Sub.none
-
-
 nextNewSentenceType buff dis =
     List.member dis.sentenceType (getSentenceTypes buff) |> not
 
@@ -861,3 +821,24 @@ isNextSentence dis blockBuffer =
 getSentenceTypes : List { a | sentenceType : SentenceType } -> List SentenceType
 getSentenceTypes sentences =
     List.map .sentenceType sentences
+
+
+taskId : Maybe String -> String
+taskId version =
+    case version of
+        Nothing ->
+            versions.pre
+
+        Just specifiedVersion ->
+            case specifiedVersion of
+                "post" ->
+                    versions.post
+
+                "post-diff" ->
+                    versions.postDiff
+
+                "surprise" ->
+                    versions.surprise
+
+                _ ->
+                    versions.pre
