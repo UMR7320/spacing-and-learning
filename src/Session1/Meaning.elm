@@ -17,6 +17,7 @@ import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
+import Json.Encode as Encode
 import Logic
 import Progressbar
 import Random
@@ -175,15 +176,22 @@ type Msg
     | UserClickedRadioButton String
     | UserClickedStartMain
     | SaveDataMsg
-    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedStartTraining
     | RuntimeShuffledOptionsOrder (List Int)
+    | HistoryWasSaved (Result Http.Error String)
 
 
 update msg model =
     case msg of
         UserClickedNextTrial ->
-            ( { model | meaning = Logic.next initState model.meaning }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
+            ( { model
+                | meaning = Logic.next initState model.meaning
+              }
+            , Cmd.batch
+                [ Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                , saveData model
+                ]
+            )
 
         UserClickedToggleFeedback ->
             ( { model | meaning = Logic.toggle model.meaning }, Cmd.none )
@@ -194,10 +202,11 @@ update msg model =
         UserClickedStartMain ->
             ( { model | meaning = Logic.startMain model.meaning initState }, Cmd.none )
 
+        -- data is now saved after each "trial", so this does nothing and shoud be removed
         SaveDataMsg ->
-            ( model, Logic.saveData ServerRespondedWithLastRecords model.user taskId model.meaning )
+            ( model, Cmd.none )
 
-        ServerRespondedWithLastRecords _ ->
+        HistoryWasSaved _ ->
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
@@ -248,6 +257,58 @@ decodeMeaningInput =
 getTrialsFromServer : (Result Http.Error (List Trial) -> msg) -> Cmd msg
 getTrialsFromServer callbackMsg =
     Data.getTrialsFromServer_ "input" "Meaning" callbackMsg decodeMeaningInput
+
+
+saveData model =
+    let
+        history =
+            Logic.getHistory model.meaning
+                |> List.filter (\( trial, _ ) -> not trial.isTraining)
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        payload =
+            updateHistoryEncoder userId history
+    in
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "Session1_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateHistoryEncoder : String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder userId history )
+                ]
+        )
+        [ ( userId, history ) ]
+
+
+historyEncoder : String -> List ( Trial, State ) -> Encode.Value
+historyEncoder userId history =
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( "Meaning1", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State ) -> Encode.Value
+historyItemEncoder ( { uid }, { userAnswer } ) =
+    Encode.object
+        [ ( "trialUid", Encode.string uid )
+        , ( "answser", Encode.string userAnswer )
+        ]
 
 
 

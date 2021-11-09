@@ -17,6 +17,17 @@ const formatData = (prefix, records) =>
     })
   );
 
+const formatMeaning1Data = records =>
+  records.flatMap(record => {
+    const answers = JSON.parse(record["Meaning1"] || "[]");
+    answers.forEach(answer => {
+      answer.userUID = record.UID;
+      answer.condition = record.Group;
+      answer.proficiency = record.YesNo;
+    });
+    return answers;
+  });
+
 const displayAsTable = (elementId, records) => {
   let html;
   if (records.length === 0) {
@@ -58,4 +69,6 @@ fetch(
     ].forEach(([elementId, prefix]) => {
       displayData(elementId, prefix, data);
     });
+
+    displayAsTable("meaning1", formatMeaning1Data(data));
   });
