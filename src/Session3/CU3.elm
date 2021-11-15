@@ -5,10 +5,10 @@ import Delay
 import Dict
 import ExperimentInfo
 import Html.Styled as Html exposing (div, label, span, text)
-import Html.Styled.Attributes exposing (class)
+import Html.Styled.Attributes exposing (class, classList)
 import Html.Styled.Events exposing (onInput)
 import Http exposing (Error)
-import Json.Decode as Decode exposing (Decoder, string)
+import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Ports
@@ -70,20 +70,33 @@ view exp =
 
 viewStep context nTimes trial feedback state =
     div [ class "flex flex-col items-center context-understanding-3 flow" ]
-        [ div [ class "p-4 bg-gray-200 rounded-lg context" ]
-            [ View.fromMarkdown context ]
+        [ div [ class "first-row" ]
+            [ div
+                [ class "p-4 bg-gray-200 rounded-lg context" ]
+                [ View.fromMarkdown context ]
+            , div [] [ viewLimitedTimesAudioButton nTimes trial ]
+            ]
         , div
             []
             [ div [ class "context-understanding-3--grid" ]
-                [ div [] [ viewLimitedTimesAudioButton nTimes trial ]
-                , div [ class "with-thought-bubble" ]
+                [ div
+                    [ classList
+                        [ ( "with-thought-bubble", True )
+                        , ( "speaking", state.showSpeaker1 )
+                        ]
+                    ]
                     [ div [ class "avatar-with-name" ]
                         [ div [ class "text-4xl" ] [ text trial.speaker1Emoji ]
                         , text (trial.speaker1Name ++ " ")
                         ]
                     , div [ class "speech-bubble" ] [ text trial.speaker1Line ]
                     ]
-                , div [ class "with-thought-bubble bubble-left" ]
+                , div
+                    [ classList
+                        [ ( "with-thought-bubble bubble-left", True )
+                        , ( "speaking", state.showSpeaker2 )
+                        ]
+                    ]
                     [ div [ class "avatar-with-name" ]
                         [ div [ class "text-4xl" ] [ text trial.speaker2Emoji ]
                         , text (trial.speaker2Name ++ " ")
@@ -117,8 +130,9 @@ type Msg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedStartTraining
     | RuntimeShuffledOptionsOrder (List Int)
-    | UserClickedAudio String
+    | UserClickedAudio Int String
     | UserClickedStartAnswering
+    | ShowSpeaker2
 
 
 update msg model =
@@ -155,13 +169,35 @@ update msg model =
         RuntimeShuffledOptionsOrder ls ->
             ( { model | optionsOrder = ls }, Cmd.none )
 
-        UserClickedAudio url ->
-            ( { model | cu3 = Logic.update { prevState | step = decrement prevState.step } model.cu3 }
+        UserClickedAudio speaker2Time url ->
+            ( { model
+                | cu3 =
+                    Logic.update
+                        { prevState
+                            | step = decrement prevState.step
+                            , showSpeaker1 = True
+                            , showSpeaker2 = False
+                        }
+                        model.cu3
+              }
             , if prevState.step /= Listening 0 then
-                Ports.playAudio url
+                Cmd.batch
+                    [ Ports.playAudio url
+                    , Delay.after (speaker2Time * 10) ShowSpeaker2
+                    ]
 
               else
                 Delay.after 0 UserClickedStartAnswering
+            )
+
+        ShowSpeaker2 ->
+            ( { model
+                | cu3 =
+                    Logic.update
+                        { prevState | showSpeaker1 = False, showSpeaker2 = True }
+                        model.cu3
+              }
+            , Cmd.none
             )
 
         UserClickedStartAnswering ->
@@ -172,15 +208,15 @@ update msg model =
 --( { model | cu3 = Logic.update { prevState | step = Answering } model.cu3 }, Cmd.none )
 
 
-viewLimitedTimesAudioButton nTimes trial =
+viewLimitedTimesAudioButton nTimes { audioSentence, speaker2Time } =
     if nTimes == 3 then
-        View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
+        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen"
 
     else if nTimes == 2 then
-        View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
+        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen again"
 
     else if nTimes == 1 then
-        View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
+        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen one last time"
 
     else
         View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened?" }
@@ -218,6 +254,7 @@ decodeTranslationInput =
                 |> required "CU_Lvl3_Speaker2Name" string
                 |> required "CU_Lvl3_Speaker2Emoji" string
                 |> required "CU_Lvl3_Speaker2Line" string
+                |> required "CU_Lvl3_Speaker2_Time" int
                 |> required "CU_Lvl3_TextToComplete_amorce" string
                 |> required "CU_Lvl3_Feedback" string
                 |> optional "isTraining" Decode.bool False
@@ -227,7 +264,7 @@ decodeTranslationInput =
 
 initState : State
 initState =
-    State "DefaultUid" "" (Listening 3)
+    State "DefaultUid" "" (Listening 3) False False
 
 
 defaultTrial : Trial
@@ -242,6 +279,7 @@ defaultTrial =
     , speaker2Name = "String"
     , speaker2Emoji = "String"
     , speaker2Line = "String"
+    , speaker2Time = 500
     , amorce = "String"
     , feedback = "String"
     , isTraining = False
@@ -259,6 +297,7 @@ type alias Trial =
     , speaker2Name : String
     , speaker2Emoji : String
     , speaker2Line : String
+    , speaker2Time : Int
     , amorce : String
     , feedback : String
     , isTraining : Bool
@@ -269,6 +308,8 @@ type alias State =
     { uid : String
     , userAnswer : String
     , step : Step
+    , showSpeaker1 : Bool
+    , showSpeaker2 : Bool
     }
 
 

@@ -412,23 +412,34 @@ input {
 }
 
 @media (min-width: 40ch) {
+  .context-understanding-3 .first-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .context-understanding-3 .first-row button {
+    margin: 0;
+  }
+
   .context-understanding-3--grid {
     margin-top: 2rem;
     display: grid;
     grid-template-columns: 1fr max-content;
     grid-gap: 1rem;
   }
-
-  .context-understanding-3--grid > *:first-child {
-    grid-row: 1 / 3;
-    grid-column: 2 / 3;
-    align-self: center;
-    justify-self: start;
-  }
 }
 
 .context-understanding-3 .with-thought-bubble:not(.bubble-left) {
   justify-self: start;
+}
+
+.context-understanding-3--grid > * {
+  opacity: 0.25;
+}
+
+.context-understanding-3--grid > .speaking {
+  opacity: 1;
 }
 
 .context-understanding-3 .bubble-left {
