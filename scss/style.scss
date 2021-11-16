@@ -511,3 +511,56 @@ input {
 .sentence-in-synonym > div {
   margin-top: 0.5rem;
 }
+
+.progress-bar {
+  display: grid;
+  grid-template-columns: repeat(var(--count, 5), 1fr);
+}
+
+.progress-bar > * {
+  padding: calc(0.5rem - 4px);
+  border-bottom: none;
+  text-align: center;
+  opacity: 0.5;
+}
+
+.progress-bar > *:last-child {
+  border-right: none;
+}
+
+.progress-bar > .active,
+.progress-bar > .active ~ * {
+  opacity: 1;
+}
+
+.progress-bar .active {
+  border-bottom: 4px solid;
+}
+
+.progress-bar > *:first-child {
+  @apply text-green-700 border-green-400 bg-green-200;
+}
+
+.progress-bar > *:nth-child(2) {
+  @apply text-blue-700 border-blue-400 bg-blue-200;
+}
+
+.progress-bar > *:nth-child(3) {
+  @apply text-pink-700 border-pink-400 bg-pink-200;
+}
+
+.progress-bar > *:nth-child(4) {
+  @apply text-purple-700 border-purple-400 bg-purple-200;
+}
+
+.progress-bar > *:nth-child(5) {
+  @apply text-yellow-700 border-yellow-400 bg-yellow-200;
+}
+
+.progress-bar > *:nth-child(6) {
+  @apply text-indigo-700 border-indigo-400 bg-indigo-200;
+}
+
+.progress-bar > *:nth-child(7) {
+  @apply text-gray-700 border-gray-400 bg-gray-200;
+}

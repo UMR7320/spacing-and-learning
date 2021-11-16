@@ -26,6 +26,7 @@ import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
 import Pretest.YesNo as YesNo
+import ProgressBar
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
 import Session exposing (Session(..))
@@ -319,6 +320,7 @@ body model =
         [ navOut "BCL" "https://bcl.cnrs.fr/"
         , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
         ]
+    , ProgressBar.view model.route model.version
     , View.mainEl <|
         case model.route of
             Route.Session1 _ task ->
