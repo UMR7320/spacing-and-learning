@@ -82,7 +82,7 @@ type alias Model =
     , spr : SPR.SPR
     , pretest : Pretest.Pretest
     , sentenceCompletion : SentenceCompletion.SentenceCompletion
-    , vks : Logic.Task VKS.Trial VKS.Answer
+    , vks : { task : Logic.Task VKS.Trial VKS.Answer, showVideo : Bool }
     , yesno : Logic.Task YesNo.Trial YesNo.State
 
     -- Session 1
@@ -162,7 +162,7 @@ defaultModel key route =
     , spr = Logic.NotStarted
     , pretest = NotAsked
     , sentenceCompletion = Logic.NotStarted
-    , vks = Logic.NotStarted
+    , vks = { task = Logic.NotStarted, showVideo = False }
     , yesno = Logic.NotStarted
 
     -- POSTEST
@@ -276,11 +276,17 @@ init _ url key =
             let
                 ( loadingStatePretest, fetchSessionPretest ) =
                     Pretest.attempt v
+
+                vks =
+                    model.vks
+
+                updatedVks =
+                    { vks | task = Logic.Loading }
             in
             ( { model
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
-                , vks = Logic.Loading
+                , vks = updatedVks
                 , acceptabilityTask = Logic.Loading
                 , yesno = Logic.Loading
                 , user = Just userid

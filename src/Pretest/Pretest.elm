@@ -47,7 +47,7 @@ type alias Model superModel =
         | spr : SPR.SPR
         , sentenceCompletion : SentenceCompletion.SentenceCompletion
         , pretest : Pretest
-        , vks : Logic.Task VKS.Trial VKS.Answer
+        , vks : { task : Logic.Task VKS.Trial VKS.Answer, showVideo : Bool }
         , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
         , yesno : YesNo.YN
         , version : Maybe String
@@ -82,10 +82,17 @@ update msg model =
             ( { model | pretest = updte }, cmd )
 
         ServerRespondedWithSomeError err ->
+            let
+                vks =
+                    model.vks
+
+                updatedVks =
+                    { vks | task = Logic.Err (Data.buildErrorMessage err) }
+            in
             ( { model
                 | spr = Logic.Err (Data.buildErrorMessage err)
                 , sentenceCompletion = Logic.Err (Data.buildErrorMessage err)
-                , vks = Logic.Err (Data.buildErrorMessage err)
+                , vks = updatedVks
                 , acceptabilityTask = Logic.Err (Data.buildErrorMessage err)
               }
             , Cmd.none
@@ -151,7 +158,10 @@ update msg model =
                             | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials) model.version
                             , spr = SPR.init infos spr model.version
                             , sentenceCompletion = SentenceCompletion.init infos sc model
-                            , vks = VKS.toTask infos (List.filter (not << .isTraining) vks) model
+                            , vks =
+                                { task = VKS.toTask infos (List.filter (not << .isTraining) vks) model
+                                , showVideo = False
+                                }
                             , yesno = YesNo.init infos yn
                           }
                         , Cmd.none

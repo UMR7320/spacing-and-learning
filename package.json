@@ -28,9 +28,11 @@
     "tailwindcss": "^1.5.2"
   },
   "scripts": {
-    "start": "npm run build-img && parcel index.html output.html",
+    "start": "npm run assets && parcel index.html output.html",
+    "assets": "npm run copy-static && npm run build-img",
     "build-img": "parcel build img/*",
-    "build": "npm run build-img && parcel build index.html output.html --no-cache",
+    "copy-static": "cp -r static dist/",
+    "build": "npm run assets && parcel build index.html output.html --no-cache",
     "test": "elm-test",
     "test:watch": "elm-test --watch"
   },

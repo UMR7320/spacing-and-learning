@@ -5,7 +5,7 @@ import Dict
 import ExperimentInfo
 import Html.Attributes exposing (placeholder)
 import Html.Styled exposing (..)
-import Html.Styled.Attributes as A exposing (class, type_)
+import Html.Styled.Attributes as A exposing (class, controls, src, type_)
 import Html.Styled.Events as E
 import Http
 import Json.Decode as Decode
@@ -24,7 +24,7 @@ import View
 
 type alias Model superModel =
     { superModel
-        | vks : Logic.Task Trial Answer
+        | vks : { task : Logic.Task Trial Answer, showVideo : Bool }
         , user : Maybe String
         , version : Maybe String
     }
@@ -82,9 +82,9 @@ emptyAnswer =
 -- VIEW
 
 
-view : SC -> List (Html Msg)
-view task =
-    case task of
+view : { task : SC, showVideo : Bool } -> List (Html Msg)
+view vks =
+    case vks.task of
         Logic.Running Logic.Training data ->
             case data.current of
                 Just _ ->
@@ -191,7 +191,20 @@ view task =
             [ text "C'est tout bon!" ]
 
         Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos UserClickedStartMain ]
+            if vks.showVideo then
+                [ div
+                    [ class "flow" ]
+                    [ video [ controls True, src "/vks.mp4" ] []
+                    , View.button
+                        { message = UserClickedStartMain
+                        , txt = "Start"
+                        , isDisabled = False
+                        }
+                    ]
+                ]
+
+            else
+                [ View.instructions data.infos UserClickedShowVideo ]
 
 
 
@@ -201,6 +214,7 @@ view task =
 type Msg
     = UserClickedNextTrial
     | UserClickedStartMain
+    | UserClickedShowVideo
     | UserClickedSaveData
     | UserUpdatedField Field Int String
     | RuntimeReordedAmorces Field
@@ -219,19 +233,25 @@ update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     let
         prevAnswer =
-            Logic.getState model.vks |> Maybe.withDefault emptyAnswer
+            Logic.getState model.vks.task |> Maybe.withDefault emptyAnswer
+
+        vks =
+            model.vks
+
+        updateTask f =
+            { vks | task = f vks.task }
     in
     case msg of
         HistoryWasSaved _ ->
             ( model, Cmd.none )
 
         RuntimeReordedAmorces _ ->
-            ( { model | vks = model.vks |> Logic.update prevAnswer }, Cmd.none )
+            ( { model | vks = updateTask (Logic.update prevAnswer) }, Cmd.none )
 
         UserClickedNextTrial ->
             let
                 newModel =
-                    { model | vks = model.vks |> Logic.toggle |> Logic.next emptyAnswer }
+                    { model | vks = updateTask (Logic.toggle >> Logic.next emptyAnswer) }
             in
             ( newModel
             , Cmd.batch
@@ -240,28 +260,60 @@ update msg model =
                 ]
             )
 
+        UserClickedShowVideo ->
+            let
+                updatedVks =
+                    { vks | showVideo = True }
+            in
+            ( { model | vks = updatedVks }, Cmd.none )
+
         UserClickedStartMain ->
-            ( { model | vks = Logic.startMain model.vks emptyAnswer }, Cmd.none )
+            let
+                -- gross hack
+                flippedStartMain a b =
+                    Logic.startMain b a
+            in
+            ( { model | vks = updateTask (flippedStartMain emptyAnswer) }, Cmd.none )
 
         UserUpdatedField fieldId subKey new ->
             case fieldId of
                 Definition ->
-                    ( { model | vks = model.vks |> Logic.update { prevAnswer | definition = new } }, Cmd.none )
+                    ( { model
+                        | vks = updateTask (Logic.update { prevAnswer | definition = new })
+                      }
+                    , Cmd.none
+                    )
 
                 Synonym ->
-                    ( { model | vks = model.vks |> Logic.update { prevAnswer | synonym = new } }, Cmd.none )
+                    ( { model
+                        | vks = updateTask (Logic.update { prevAnswer | synonym = new })
+                      }
+                    , Cmd.none
+                    )
 
                 Translation ->
-                    ( { model | vks = model.vks |> Logic.update { prevAnswer | translation = new } }, Cmd.none )
+                    ( { model
+                        | vks = updateTask (Logic.update { prevAnswer | translation = new })
+                      }
+                    , Cmd.none
+                    )
 
                 SecondProduction ->
-                    ( { model | vks = model.vks |> Logic.update { prevAnswer | usage = new } }, Cmd.none )
+                    ( { model
+                        | vks = updateTask (Logic.update { prevAnswer | usage = new })
+                      }
+                    , Cmd.none
+                    )
 
         UserClickedNewKnowledge str ->
-            ( { model | vks = model.vks |> Logic.update { prevAnswer | knowledge = familiarityFromString str } }, Cmd.none )
+            ( { model
+                | vks = updateTask (Logic.update { prevAnswer | knowledge = familiarityFromString str })
+              }
+            , Cmd.none
+            )
 
         UserClickedSaveData ->
-            ( { model | vks = Logic.Loading }, Cmd.none )
+            ( { model | vks = updateTask (always Logic.Loading) }, Cmd.none )
 
 
 
@@ -347,7 +399,7 @@ updateHistoryEncoder version userId history =
 saveData model =
     let
         history =
-            Logic.getHistory model.vks
+            Logic.getHistory model.vks.task
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
