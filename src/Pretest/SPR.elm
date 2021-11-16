@@ -261,19 +261,12 @@ update msg model =
             ( newModel, saveData newModel )
 
         UserClickedSaveData ->
-            let
-                responseHandler =
-                    ServerRespondedWithLastRecords
-            in
             ( { model | spr = Logic.Loading }
             , if model.version == Just "post" then
                 Browser.Navigation.pushUrl model.key "acceptability/instructions"
 
-              else if model.version == Just "post-diff" then
-                Browser.Navigation.pushUrl model.key "sentence-completion"
-
               else
-                Cmd.none
+                Browser.Navigation.pushUrl model.key "sentence-completion"
             )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
