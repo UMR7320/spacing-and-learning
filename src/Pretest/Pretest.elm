@@ -19,37 +19,16 @@ import Session
 import Task.Parallel as Para
 
 
+
+-- MODEL
+
+
 type alias Pretest =
     Session.Session (Para.State6 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial))
 
 
 type alias ParaMsg =
     Para.Msg6 (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
-
-
-
---attempt : Maybe String -> ( Pretest, Cmd Msg )
-
-
-attempt version =
-    Para.attempt6
-        { task1 = SPR.getRecords version
-        , task2 = SentenceCompletion.getRecords
-        , task3 = ExperimentInfo.getRecords
-        , task4 = VKS.getRecords
-        , task5 = Acceptability.getRecords
-        , task6 = YesNo.getRecords
-        , onUpdates = ServerRespondedWithSomePretestData
-        , onFailure = ServerRespondedWithSomeError
-        , onSuccess = ServerRespondedWithAllPretestData
-        }
-
-
-type Msg
-    = ServerRespondedWithSomePretestData ParaMsg
-    | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
-    | StartPretest ShuffledPretest
 
 
 type alias ShuffledPretest =
@@ -74,6 +53,17 @@ type alias Model superModel =
         , version : Maybe String
         , user : Maybe String
     }
+
+
+
+-- UPDATE
+
+
+type Msg
+    = ServerRespondedWithSomePretestData ParaMsg
+    | ServerRespondedWithSomeError Http.Error
+    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
+    | StartPretest ShuffledPretest
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -172,3 +162,21 @@ update msg model =
 
                 Result.Err reason ->
                     ( { model | acceptabilityTask = Logic.Err "Error trying to build blocks" }, Cmd.none )
+
+
+
+-- HTTP
+
+
+attempt version =
+    Para.attempt6
+        { task1 = SPR.getRecords version
+        , task2 = SentenceCompletion.getRecords
+        , task3 = ExperimentInfo.getRecords
+        , task4 = VKS.getRecords
+        , task5 = Acceptability.getRecords
+        , task6 = YesNo.getRecords
+        , onUpdates = ServerRespondedWithSomePretestData
+        , onFailure = ServerRespondedWithSomeError
+        , onSuccess = ServerRespondedWithAllPretestData
+        }
