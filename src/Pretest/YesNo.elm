@@ -88,8 +88,7 @@ update msg model =
                                 [ ( "id", Encode.string userId )
                                 , ( "fields"
                                   , Encode.object
-                                        [ ( "VocabLevel", Encode.int score )
-                                        ]
+                                        [ ( "YesNo", Encode.int score ) ]
                                   )
                                 ]
                         )
