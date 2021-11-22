@@ -32,7 +32,7 @@ type Route
     | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
-    | Posttest UserId PosttestTask
+    | Posttest UserId PosttestTask (Maybe String)
     | TermsAndConditions
 
 
@@ -158,9 +158,8 @@ parser =
             (s "user"
                 </> string
                 </> s "post-tests"
-                </> oneOf
-                        [ map CloudWords (s "cw")
-                        ]
+                </> oneOf [ map CloudWords (s "cw") ]
+                <?> Url.Parser.Query.string "session"
             )
 
         --  Add more routes like this:

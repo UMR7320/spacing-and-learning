@@ -120,20 +120,20 @@ update msg model =
                 responseDecoder =
                     Decode.field "id" Decode.string
             in
-            ( model, updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder )
+            ( model
+            , updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder
+            )
 
         ServerRespondedWithUpdatedUser response ->
-            let
-                isSession3Started =
-                    model.session3 /= Session.NotAsked
-            in
-            ( { model | cloudWords = End }
-            , if isSession3Started then
-                Browser.Navigation.load "../pretest/vks?version=post"
+            if model.session == Just "S3" then
+                ( model
+                , Browser.Navigation.load "../pretest/vks?version=post"
+                )
 
-              else
-                pushUrl model.key "cw"
-            )
+            else
+                ( { model | cloudWords = End }
+                , pushUrl model.key "cw"
+                )
 
 
 updateVocabularyScore : Http.Body -> (Result Http.Error a -> msg) -> Decode.Decoder a -> Cmd msg
@@ -165,6 +165,7 @@ type alias Model superModel =
         , session1 : Session1.Session1
         , session2 : Session2.Session2
         , session3 : Session3.Session3
+        , session : Maybe String
         , key : Browser.Navigation.Key
     }
 

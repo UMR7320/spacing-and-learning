@@ -124,6 +124,7 @@ type alias Model =
     , consent : String
     , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
     , version : Maybe String
+    , session : Maybe String
     }
 
 
@@ -178,6 +179,7 @@ defaultModel key route =
     , preferedStartDate = Nothing
     , sessions = RemoteData.Loading
     , version = Nothing
+    , session = Nothing
     , distributedSpacing = 7
     , massedSpacing = 2
     , retentionInterval = 14
@@ -219,7 +221,7 @@ init _ url key =
                 , user = Just userId
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ cmd, Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
+            , Cmd.batch [ cmd, Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
         Route.Home ->
@@ -257,7 +259,7 @@ init _ url key =
                 , user = Just userid
                 , session2 = Loading loadingStateSession2
               }
-            , Cmd.batch [ cmd, Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
+            , Cmd.batch [ cmd, Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
         Route.AuthenticatedSession3 userid _ ->
@@ -269,7 +271,7 @@ init _ url key =
                 , user = Just userid
                 , session3 = Loading loadingStateSession3
               }
-            , Cmd.batch [ cmd, Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos, Ports.enableAlertOnExit () ]
+            , Cmd.batch [ cmd, Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
         Route.Pretest userid _ v ->
@@ -298,15 +300,14 @@ init _ url key =
                 , Cmd.map Pretest fetchSessionPretest
                 , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
                 , Data.getGeneralParemeters GotGeneralParameters
-                , Ports.enableAlertOnExit ()
                 ]
             )
 
-        Route.Posttest _ _ ->
-            ( model, Cmd.batch [ cmd, Ports.enableAlertOnExit () ] )
+        Route.Posttest _ _ _ ->
+            ( model, cmd )
 
         NotFound ->
-            ( { model | route = NotFound }, Cmd.none )
+            ( { model | route = NotFound }, cmd )
 
 
 
@@ -402,7 +403,7 @@ body model =
                     Route.TopSession3 ->
                         viewSessionInstructions model.sessions "session3" "synonym"
 
-            Route.Posttest _ task ->
+            Route.Posttest _ task _ ->
                 case task of
                     Route.CloudWords ->
                         List.map (Html.Styled.map WordCloud) (CloudWords.view model)
@@ -664,8 +665,8 @@ changeRouteTo route model =
         Route.AuthenticatedSession3 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
 
-        Route.Posttest _ _ ->
-            ( newModel, Ports.enableAlertOnExit () )
+        Route.Posttest _ _ session ->
+            ( { newModel | session = session }, Ports.disableAlertOnExit () )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
