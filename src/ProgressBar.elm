@@ -35,6 +35,9 @@ view route version =
         AuthenticatedSession3 _ activity ->
             viewSession3 activity
 
+        Posttest _ _ session ->
+            viewWordCloud session
+
         _ ->
             text ""
 
@@ -114,6 +117,23 @@ viewSession3 activity =
         , div [] [ text "SPR" ]
         , div [] [ text "Acceptability" ]
         ]
+
+
+viewWordCloud session =
+    if session == Just "S3" then
+        div
+            [ class "progress-bar", attribute "style" "--count: 7" ]
+            [ div [] [ text "Meaning" ]
+            , div [] [ text "Form" ]
+            , div [] [ text "Use" ]
+            , div [ class "active" ] [ text "WordCloud" ]
+            , div [] [ text "VKS" ]
+            , div [] [ text "SPR" ]
+            , div [] [ text "Acceptability" ]
+            ]
+
+    else
+        text ""
 
 
 maybeStringToVersion : Maybe String -> Version
