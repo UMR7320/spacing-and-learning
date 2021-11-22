@@ -327,7 +327,7 @@ body model =
         [ navOut "BCL" "https://bcl.cnrs.fr/"
         , navOut "L'équipe" "https://bcl.cnrs.fr/rubrique225"
         ]
-    , ProgressBar.view model.route model.version
+    , ProgressBar.view model
     , View.mainEl <|
         case model.route of
             Route.Session1 _ task ->

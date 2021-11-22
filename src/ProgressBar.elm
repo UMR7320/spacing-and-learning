@@ -1,8 +1,12 @@
 module ProgressBar exposing (..)
 
-import Html.Styled exposing (..)
+import Css
+import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Html exposing (..)
+import Logic
 import Route exposing (..)
+import Tuple
+import View
 
 
 
@@ -20,14 +24,13 @@ type Version
     | SurprisePostTest
 
 
-view : Route -> Maybe String -> Html msg
-view route version =
-    case route of
+view model =
+    case model.route of
         Pretest _ activity _ ->
-            viewPretest activity version
+            viewPretest activity model.version
 
         Session1 _ activity ->
-            viewSession1 activity
+            viewSession1 activity model
 
         AuthenticatedSession2 _ activity ->
             viewSession2 activity
@@ -85,14 +88,29 @@ viewPretest activity version =
                 ]
 
 
-viewSession1 activity =
+viewSession1 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 5" ]
-        [ div [ classList [ ( "active", activity == Presentation ) ] ] [ text "Presentation" ]
-        , div [ classList [ ( "active", activity == Meaning ) ] ] [ text "Meaning" ]
-        , div [ classList [ ( "active", activity == SpellingLevel1 ) ] ] [ text "Form" ]
-        , div [ classList [ ( "active", activity == CU1 ) ] ] [ text "Context" ]
+        [ viewItem "Presentation" Presentation model.presentation activity
+        , viewItem "Meaning" Meaning model.meaning activity
+        , viewItem "Form" SpellingLevel1 model.spellingLvl1 activity
+        , viewItem "Context" CU1 model.cu1 activity
         , div [ classList [ ( "active", False ) ] ] [ text "WordCloud" ]
+        ]
+
+
+viewItem name activity task currentActivity =
+    div
+        [ classList [ ( "active", currentActivity == activity ) ] ]
+        [ div []
+            [ text name
+            , case task of
+                Logic.Running _ data ->
+                    viewActivityProgressBar data
+
+                _ ->
+                    text ""
+            ]
         ]
 
 
@@ -165,3 +183,25 @@ isAcceptability activity =
 
         _ ->
             False
+
+
+
+-- ACTIVITY PROGRESS BAR
+
+
+viewActivityProgressBar { history, trainingTrials, mainTrials } =
+    let
+        l =
+            List.length >> toFloat
+
+        pct_ =
+            l history / (l history + l trainingTrials + l mainTrials) * 100
+    in
+    div
+        [ class "activity-progress" ]
+        [ div
+            [ class "activity-progress--inner"
+            , Html.css [ Css.width (Css.pct pct_) ]
+            ]
+            []
+        ]

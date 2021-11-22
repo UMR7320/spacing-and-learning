@@ -104,9 +104,7 @@ view task =
                                     ( "defautpre", "defaultpOst" )
                     in
                     div [ class "flex flex-col w-full items-center justify-center " ]
-                        [ View.tooltip data.infos.instructions_short
-                        , Progressbar.progressBar data.history data.mainTrials
-                        , paragraphWithInput pre data.state.userAnswer post
+                        [ paragraphWithInput pre data.state.userAnswer post
                         , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback

@@ -10,7 +10,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Ports
-import Progressbar
 import Random
 import Random.List
 import Session2.CU2 exposing (Step(..))
@@ -182,13 +181,12 @@ view exp optionsOrder =
         Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just trial ->
-                    div [ class "flex flex-col justify-center items-center" ] <|
-                        View.tooltip data.infos.instructions_short
-                            :: Progressbar.progressBar history mainTrials
-                            :: viewTask
-                                data
-                                trial
-                                optionsOrder
+                    div [ class "flex flex-col justify-center items-center" ]
+                        (viewTask
+                            data
+                            trial
+                            optionsOrder
+                        )
 
                 Nothing ->
                     View.end infos.end UserClickedSavedData "context-understanding"

@@ -130,9 +130,7 @@ view task =
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center " ]
-                        [ View.tooltip (interpolate data.infos.instructions_short [ trial.writtenWord ])
-                        , Progressbar.progressBar data.history data.mainTrials
-                        , viewQuestion ("to " ++ trial.writtenWord) (List.length data.history)
+                        [ viewQuestion ("to " ++ trial.writtenWord) (List.length data.history)
                         , div
                             [ class " center-items justify-center w-full mt-6 ", disabled data.feedback ]
                           <|
