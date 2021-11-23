@@ -114,7 +114,7 @@ viewSession3 activity model =
         [ class "progress-bar", attribute "style" "--count: 7" ]
         [ viewItem "Meaning" Synonym model.synonymTask activity
         , viewItem "Form" Spelling3 model.spelling3 activity
-        , viewItem "Form" CU3 model.cu3 activity
+        , viewItem "Use" CU3 model.cu3 activity
         , div [] [ text "WordCloud" ]
         , div [] [ text "VKS" ]
         , div [] [ text "SPR" ]
