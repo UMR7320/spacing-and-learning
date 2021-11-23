@@ -138,20 +138,40 @@ viewItem name activity task currentActivity =
 
 
 viewWordCloud session =
-    if session == Just "S3" then
-        div
-            [ class "progress-bar", attribute "style" "--count: 7" ]
-            [ div [] [ text "Meaning" ]
-            , div [] [ text "Form" ]
-            , div [] [ text "Use" ]
-            , div [ class "active" ] [ text "WordCloud" ]
-            , div [] [ text "VKS" ]
-            , div [] [ text "SPR" ]
-            , div [] [ text "Acceptability" ]
-            ]
+    case session of
+        Just "S1" ->
+            div
+                [ class "progress-bar", attribute "style" "--count: 5" ]
+                [ div [] [ text "Presentation" ]
+                , div [] [ text "Meaning" ]
+                , div [] [ text "Form" ]
+                , div [] [ text "Context" ]
+                , div [ class "active" ] [ text "WordCloud" ]
+                ]
 
-    else
-        text ""
+        Just "S2" ->
+            div
+                [ class "progress-bar", attribute "style" "--count: 4" ]
+                [ div [] [ text "Meaning" ]
+                , div [] [ text "Form" ]
+                , div [] [ text "Use" ]
+                , div [ class "active" ] [ text "WordCloud" ]
+                ]
+
+        Just "S3" ->
+            div
+                [ class "progress-bar", attribute "style" "--count: 7" ]
+                [ div [] [ text "Meaning" ]
+                , div [] [ text "Form" ]
+                , div [] [ text "Use" ]
+                , div [ class "active" ] [ text "WordCloud" ]
+                , div [] [ text "VKS" ]
+                , div [] [ text "SPR" ]
+                , div [] [ text "Acceptability" ]
+                ]
+
+        _ ->
+            text ""
 
 
 maybeStringToVersion : Maybe String -> Version

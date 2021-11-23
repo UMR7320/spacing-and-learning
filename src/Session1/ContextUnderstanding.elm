@@ -117,7 +117,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end UserClickedSaveData "../post-tests/cw"
+                    View.end data.infos.end UserClickedSaveData "../post-tests/cw?session=S1"
 
         Logic.Loading ->
             View.loading

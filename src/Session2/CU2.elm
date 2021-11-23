@@ -37,7 +37,7 @@ view exp optionsOrder =
             viewTrialOrEnd optionsOrder data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
         Logic.Running Logic.Main data ->
-            viewTrialOrEnd optionsOrder data (View.end data.infos.end UserClickedSaveData "../post-tests/cw")
+            viewTrialOrEnd optionsOrder data (View.end data.infos.end UserClickedSaveData "../post-tests/cw?session=S2")
 
 
 viewTrialOrEnd optionsOrder data endView =
