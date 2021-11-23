@@ -27,7 +27,7 @@ type Version
 view model =
     case model.route of
         Pretest _ activity _ ->
-            viewPretest activity model.version
+            viewPretest activity model
 
         Session1 _ activity ->
             viewSession1 activity model
@@ -45,16 +45,16 @@ view model =
             text ""
 
 
-viewPretest activity version =
-    case maybeStringToVersion version of
+viewPretest activity model =
+    case maybeStringToVersion model.version of
         PreTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 5" ]
-                [ div [ classList [ ( "active", activity == YesNo ) ] ] [ text "Yes/No" ]
-                , div [ classList [ ( "active", activity == VKS ) ] ] [ text "VKS" ]
-                , div [ classList [ ( "active", activity == SPR ) ] ] [ text "SPR" ]
-                , div [ classList [ ( "active", activity == SentenceCompletion ) ] ] [ text "Sentence Completion" ]
-                , div [ classList [ ( "active", isAcceptability activity ) ] ] [ text "Acceptability" ]
+                [ viewItem "Yes/No" YesNo model.yesno activity
+                , viewItem "VKS" VKS model.vks.task activity
+                , viewItem "SPR" SPR model.spr activity
+                , viewItem "Sentence Completion" SentenceCompletion model.sentenceCompletion activity
+                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
         PostTest ->
@@ -64,27 +64,27 @@ viewPretest activity version =
                 , div [] [ text "Form" ]
                 , div [] [ text "Use" ]
                 , div [] [ text "WordCloud" ]
-                , div [ classList [ ( "active", activity == VKS ) ] ] [ text "VKS" ]
-                , div [ classList [ ( "active", activity == SPR ) ] ] [ text "SPR" ]
-                , div [ classList [ ( "active", isAcceptability activity ) ] ] [ text "Acceptability" ]
+                , viewItem "VKS" VKS model.vks.task activity
+                , viewItem "SPR" SPR model.spr activity
+                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
         PostTestDiff ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ div [ classList [ ( "active", activity == VKS ) ] ] [ text "VKS" ]
-                , div [ classList [ ( "active", activity == SPR ) ] ] [ text "SPR" ]
-                , div [ classList [ ( "active", activity == SentenceCompletion ) ] ] [ text "Sentence Completion" ]
-                , div [ classList [ ( "active", isAcceptability activity ) ] ] [ text "Acceptability" ]
+                [ viewItem "VKS" VKS model.vks.task activity
+                , viewItem "SPR" SPR model.spr activity
+                , viewItem "Sentence Completion" SentenceCompletion model.sentenceCompletion activity
+                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
         SurprisePostTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ div [ classList [ ( "active", activity == VKS ) ] ] [ text "VKS" ]
-                , div [ classList [ ( "active", activity == SPR ) ] ] [ text "SPR" ]
-                , div [ classList [ ( "active", activity == SentenceCompletion ) ] ] [ text "Sentence Completion" ]
-                , div [ classList [ ( "active", isAcceptability activity ) ] ] [ text "Acceptability" ]
+                [ viewItem "VKS" VKS model.vks.task activity
+                , viewItem "SPR" SPR model.spr activity
+                , viewItem "Sentence Completion" SentenceCompletion model.sentenceCompletion activity
+                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
 
