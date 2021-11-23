@@ -33,10 +33,10 @@ view model =
             viewSession1 activity model
 
         AuthenticatedSession2 _ activity ->
-            viewSession2 activity
+            viewSession2 activity model
 
         AuthenticatedSession3 _ activity ->
-            viewSession3 activity
+            viewSession3 activity model
 
         Posttest _ _ session ->
             viewWordCloud session
@@ -99,6 +99,29 @@ viewSession1 activity model =
         ]
 
 
+viewSession2 activity model =
+    div
+        [ class "progress-bar", attribute "style" "--count: 4" ]
+        [ viewItem "Meaning" Translation model.translationTask activity
+        , viewItem "Form" Spelling model.scrabbleTask activity
+        , viewItem "Use" CU model.cuLvl2 activity
+        , div [] [ text "WordCloud" ]
+        ]
+
+
+viewSession3 activity model =
+    div
+        [ class "progress-bar", attribute "style" "--count: 7" ]
+        [ viewItem "Meaning" Synonym model.synonymTask activity
+        , viewItem "Form" Spelling3 model.spelling3 activity
+        , viewItem "Form" CU3 model.cu3 activity
+        , div [] [ text "WordCloud" ]
+        , div [] [ text "VKS" ]
+        , div [] [ text "SPR" ]
+        , div [] [ text "Acceptability" ]
+        ]
+
+
 viewItem name activity task currentActivity =
     div
         [ classList [ ( "active", currentActivity == activity ) ] ]
@@ -111,29 +134,6 @@ viewItem name activity task currentActivity =
                 _ ->
                     text ""
             ]
-        ]
-
-
-viewSession2 activity =
-    div
-        [ class "progress-bar", attribute "style" "--count: 4" ]
-        [ div [ classList [ ( "active", activity == Translation ) ] ] [ text "Meaning" ]
-        , div [ classList [ ( "active", activity == Spelling ) ] ] [ text "Form" ]
-        , div [ classList [ ( "active", activity == CU ) ] ] [ text "Use" ]
-        , div [ classList [ ( "active", False ) ] ] [ text "WordCloud" ]
-        ]
-
-
-viewSession3 activity =
-    div
-        [ class "progress-bar", attribute "style" "--count: 7" ]
-        [ div [ classList [ ( "active", activity == Synonym ) ] ] [ text "Meaning" ]
-        , div [ classList [ ( "active", activity == Spelling3 ) ] ] [ text "Form" ]
-        , div [ classList [ ( "active", activity == CU3 ) ] ] [ text "Use" ]
-        , div [ classList [ ( "active", False ) ] ] [ text "WordCloud" ]
-        , div [] [ text "VKS" ]
-        , div [] [ text "SPR" ]
-        , div [] [ text "Acceptability" ]
         ]
 
 
