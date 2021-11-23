@@ -50,41 +50,41 @@ viewPretest activity model =
         PreTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 5" ]
-                [ viewItem "Yes/No" YesNo model.yesno activity
-                , viewItem "VKS" VKS model.vks.task activity
-                , viewItem "SPR" SPR model.spr activity
-                , viewItem "Sentence Completion" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
+                [ viewItem "General Vocabulary" YesNo model.yesno activity
+                , viewItem "LexLearn verbs" VKS model.vks.task activity
+                , viewItem "Reading test" SPR model.spr activity
+                , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
+                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
         PostTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 7" ]
                 [ div [] [ text "Meaning" ]
-                , div [] [ text "Form" ]
-                , div [] [ text "Use" ]
-                , div [] [ text "WordCloud" ]
-                , viewItem "VKS" VKS model.vks.task activity
-                , viewItem "SPR" SPR model.spr activity
-                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
+                , div [] [ text "Spelling" ]
+                , div [] [ text "Context" ]
+                , div [] [ text "How was it?" ]
+                , viewItem "LexLearn verbs" VKS model.vks.task activity
+                , viewItem "Reading test" SPR model.spr activity
+                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
         PostTestDiff ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ viewItem "VKS" VKS model.vks.task activity
-                , viewItem "SPR" SPR model.spr activity
-                , viewItem "Sentence Completion" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
+                [ viewItem "LexLearn verbs" VKS model.vks.task activity
+                , viewItem "Reading test" SPR model.spr activity
+                , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
+                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
         SurprisePostTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ viewItem "VKS" VKS model.vks.task activity
-                , viewItem "SPR" SPR model.spr activity
-                , viewItem "Sentence Completion" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Acceptability" (isAcceptability activity) model.acceptabilityTask True
+                [ viewItem "LexLearn verbs" VKS model.vks.task activity
+                , viewItem "Reading test" SPR model.spr activity
+                , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
+                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
 
@@ -93,9 +93,9 @@ viewSession1 activity model =
         [ class "progress-bar", attribute "style" "--count: 5" ]
         [ viewItem "Presentation" Presentation model.presentation activity
         , viewItem "Meaning" Meaning model.meaning activity
-        , viewItem "Form" SpellingLevel1 model.spellingLvl1 activity
+        , viewItem "Spelling" SpellingLevel1 model.spellingLvl1 activity
         , viewItem "Context" CU1 model.cu1 activity
-        , div [ classList [ ( "active", False ) ] ] [ text "WordCloud" ]
+        , div [ classList [ ( "active", False ) ] ] [ text "How was it?" ]
         ]
 
 
@@ -103,9 +103,9 @@ viewSession2 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 4" ]
         [ viewItem "Meaning" Translation model.translationTask activity
-        , viewItem "Form" Spelling model.scrabbleTask activity
-        , viewItem "Use" CU model.cuLvl2 activity
-        , div [] [ text "WordCloud" ]
+        , viewItem "Spelling" Spelling model.scrabbleTask activity
+        , viewItem "Context" CU model.cuLvl2 activity
+        , div [] [ text "How was it?" ]
         ]
 
 
@@ -113,12 +113,12 @@ viewSession3 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 7" ]
         [ viewItem "Meaning" Synonym model.synonymTask activity
-        , viewItem "Form" Spelling3 model.spelling3 activity
-        , viewItem "Use" CU3 model.cu3 activity
-        , div [] [ text "WordCloud" ]
-        , div [] [ text "VKS" ]
-        , div [] [ text "SPR" ]
-        , div [] [ text "Acceptability" ]
+        , viewItem "Spelling" Spelling3 model.spelling3 activity
+        , viewItem "Context" CU3 model.cu3 activity
+        , div [] [ text "How was it?" ]
+        , div [] [ text "LexLearn verbs" ]
+        , div [] [ text "Reading test" ]
+        , div [] [ text "Listening test" ]
         ]
 
 
@@ -144,30 +144,30 @@ viewWordCloud session =
                 [ class "progress-bar", attribute "style" "--count: 5" ]
                 [ div [] [ text "Presentation" ]
                 , div [] [ text "Meaning" ]
-                , div [] [ text "Form" ]
+                , div [] [ text "Spelling" ]
                 , div [] [ text "Context" ]
-                , div [ class "active" ] [ text "WordCloud" ]
+                , div [ class "active" ] [ text "How was it?" ]
                 ]
 
         Just "S2" ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
                 [ div [] [ text "Meaning" ]
-                , div [] [ text "Form" ]
-                , div [] [ text "Use" ]
-                , div [ class "active" ] [ text "WordCloud" ]
+                , div [] [ text "Spelling" ]
+                , div [] [ text "Context" ]
+                , div [ class "active" ] [ text "How was it?" ]
                 ]
 
         Just "S3" ->
             div
                 [ class "progress-bar", attribute "style" "--count: 7" ]
                 [ div [] [ text "Meaning" ]
-                , div [] [ text "Form" ]
-                , div [] [ text "Use" ]
-                , div [ class "active" ] [ text "WordCloud" ]
-                , div [] [ text "VKS" ]
-                , div [] [ text "SPR" ]
-                , div [] [ text "Acceptability" ]
+                , div [] [ text "Spelling" ]
+                , div [] [ text "Context" ]
+                , div [ class "active" ] [ text "How was it?" ]
+                , div [] [ text "LexLearn verbs" ]
+                , div [] [ text "Reading test" ]
+                , div [] [ text "Listening test" ]
                 ]
 
         _ ->
