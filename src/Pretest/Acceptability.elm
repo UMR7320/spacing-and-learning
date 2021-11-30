@@ -184,7 +184,10 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Nothing ->
-                    [ viewTransition data.infos.end UserClickedSaveMsg "Click to save your answers"
+                    [ viewTransition
+                        data.infos.end
+                        UserClickedEndActivity
+                        "Continue"
                     ]
 
                 Just _ ->
@@ -268,7 +271,7 @@ type Msg
     | AudioEnded ( String, Time.Posix )
     | AudioStarted ( String, Time.Posix )
     | StartTraining
-    | UserClickedSaveMsg
+    | UserClickedEndActivity
     | StartMain
     | PlayAudio String
     | UserClickedStartTraining
@@ -391,10 +394,8 @@ update msg model =
         StartMain ->
             ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask initState, endAcceptabilityDuration = 500 }, toNextStep 0 Init )
 
-        UserClickedSaveMsg ->
-            ( { model | acceptabilityTask = Logic.Loading }
-            , Cmd.none
-            )
+        UserClickedEndActivity ->
+            ( model, pushUrl model.key "end" )
 
         PlayAudio url ->
             ( model, Ports.playAudio url )
