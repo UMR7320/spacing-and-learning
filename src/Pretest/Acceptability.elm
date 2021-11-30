@@ -158,11 +158,12 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Nothing ->
-                    [ div [ class "flex flex-col items-center" ]
-                        [ View.button
+                    [ div [ class "flex flex-col items-center flow" ]
+                        [ View.fromMarkdown data.infos.introToMain
+                        , View.button
                             { isDisabled = False
                             , message = StartMain
-                            , txt = "That's it for the practice items"
+                            , txt = "Continue"
                             }
                         ]
                     ]
