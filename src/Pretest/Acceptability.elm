@@ -171,8 +171,7 @@ view task =
                 Just trial ->
                     case data.state.step of
                         Init ->
-                            [ p [ class "flex flex-col  text-center " ] [ View.fromUnsafeMarkdown data.infos.instructions_short ]
-                            ]
+                            [ View.fromUnsafeMarkdown data.infos.instructions_short ]
 
                         End ->
                             [ div [ class "flex flex-col items-center justify-center" ] [ View.fromUnsafeMarkdown trial.feedback ] ]

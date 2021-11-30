@@ -168,7 +168,7 @@ view task =
             [ p [] [ text "Thanks for your participation!" ] ]
 
         Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos UserClickedStartTraining ]
+            [ View.unsafeInstructions data.infos UserClickedStartTraining ]
 
 
 viewTask data trial endTrialMsg =
@@ -180,7 +180,10 @@ viewTask data trial endTrialMsg =
                         [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
                         [ p
                             [ Attr.class "items-center" ]
-                            [ text "Press the space bar to start reading" ]
+                            [ text "Press the "
+                            , span [ Attr.class "keyboard-key" ] [ text "space" ]
+                            , text " bar to start reading"
+                            ]
                         ]
 
                 Reading _ ->
@@ -196,22 +199,31 @@ viewTask data trial endTrialMsg =
                 [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
                 [ p
                     [ Attr.class "items-center" ]
-                    [ text "Press the space bar to start reading" ]
+                    [ text "Press the "
+                    , kbd [] [ text "space" ]
+                    , text " bar to start reading"
+                    ]
                 ]
 
         ( Question, _ ) ->
             div [ Attr.class "flex flex-col items-center p-16 border-2 flow" ]
                 [ span [ Attr.class "font-bold" ] [ text trial.question ]
                 , div [ Attr.class "spr-buttons" ]
-                    [ unclickableButton "bg-green-500 text-white" "Y = Yes"
-                    , unclickableButton "bg-red-500 text-white" "N = No"
-                    , unclickableButton "bg-gray-400" "K = I don't know"
+                    [ unclickableButton
+                        "bg-green-500 text-white"
+                        [ kbd [] [ text "y" ], text " = Yes" ]
+                    , unclickableButton
+                        "bg-red-500 text-white"
+                        [ kbd [] [ text "n" ], text " = No" ]
+                    , unclickableButton
+                        "bg-gray-400"
+                        [ kbd [] [ text "k" ], text " = I don't know" ]
                     ]
                 ]
 
         ( Feedback, _ ) ->
             div [ Attr.class "w-max h-max flex flex-col items-center p-16 border-2" ]
-                [ View.fromMarkdown trial.feedback ]
+                [ View.fromUnsafeMarkdown trial.feedback ]
 
 
 

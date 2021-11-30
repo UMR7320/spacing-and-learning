@@ -100,8 +100,10 @@ shuffledOptions state fb radioMsg trial optionsOrder =
     [ div [ class "shuffled-options" ] (ordoredOptions ++ [ option "I don't know" ]) ]
 
 
-unclickableButton color txt =
-    div [ class <| "flex flex-col items-center m-2 p-4 rounded-lg " ++ color ++ " justify-center" ] [ text txt ]
+unclickableButton color children =
+    div
+        [ class ("flex items-center m-2 p-4 rounded-lg " ++ color ++ " justify-center") ]
+        children
 
 
 loading =

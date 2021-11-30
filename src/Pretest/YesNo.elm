@@ -4,7 +4,7 @@ import Browser.Events exposing (onKeyDown)
 import Data
 import Dict
 import ExperimentInfo
-import Html.Styled exposing (Html, div, p, text)
+import Html.Styled exposing (Html, div, kbd, p, text)
 import Html.Styled.Attributes exposing (class)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -215,7 +215,7 @@ view task =
         Logic.Running step data ->
             case step of
                 Logic.Instructions ->
-                    [ View.instructions data.infos UserClickedStartTask ]
+                    [ View.unsafeInstructions data.infos UserClickedStartTask ]
 
                 Logic.Training ->
                     []
@@ -226,8 +226,20 @@ view task =
                             [ div []
                                 [ div [ class "text-3xl font-bold italic my-6 text-center" ] [ text trial.word ]
                                 , div [ class "yes-no-buttons" ]
-                                    [ unclickableButton "bg-gray-300" "F = I don't know or I'm not sure"
-                                    , unclickableButton "bg-green-500 text-white" "J = I know this word"
+                                    [ unclickableButton
+                                        "bg-gray-300"
+                                        [ kbd
+                                            []
+                                            [ text "f" ]
+                                        , text " = I don't know or I'm not sure"
+                                        ]
+                                    , unclickableButton
+                                        "bg-green-500 text-white"
+                                        [ kbd
+                                            []
+                                            [ text "j" ]
+                                        , text "= I don't know or I'm not sure"
+                                        ]
                                     ]
                                 ]
                             ]
