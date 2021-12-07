@@ -166,24 +166,23 @@ type Msg
     | UserClickedRadioButton String
     | UserClickedStartTraining
     | UserClickedStartMain
-    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | RuntimeShuffledOptionsOrder (List Int)
+    | HistoryWasSaved (Result Http.Error String)
 
 
 update msg model =
     case msg of
         UserClickedNextTrial ->
-            ( { model | translationTask = Logic.next initState model.translationTask }
+            let
+                newModel =
+                    { model | translationTask = Logic.next initState model.translationTask }
+            in
+            ( newModel
             , Cmd.batch
                 [ Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                , saveData newModel
                 ]
             )
-
-        ServerRespondedWithLastRecords (Ok _) ->
-            ( model, Cmd.none )
-
-        ServerRespondedWithLastRecords (Err _) ->
-            ( model, Cmd.none )
 
         UserClickedToggleFeedback ->
             ( { model | translationTask = Logic.toggle model.translationTask }, Cmd.none )
@@ -197,15 +196,15 @@ update msg model =
         UserClickedStartMain ->
             ( { model | translationTask = Logic.startMain model.translationTask initState }, Cmd.none )
 
+        -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
-            let
-                responseHandler =
-                    ServerRespondedWithLastRecords
-            in
-            ( model, Logic.saveData responseHandler model.user taskId model.translationTask )
+            ( model, Cmd.none )
 
         RuntimeShuffledOptionsOrder ls ->
             ( { model | optionsOrder = ls }, Cmd.none )
+
+        HistoryWasSaved _ ->
+            ( model, Cmd.none )
 
 
 
@@ -251,13 +250,57 @@ decodeTrials =
     Data.decodeRecords decoder
 
 
-encodeHistory : SummarizedTrial -> Encode.Value
-encodeHistory trial =
-    Encode.object [ ( "userUid", Encode.string trial.userUid ), ( "trialUid", Encode.string trial.trialuid ), ( "attempt", Encode.string trial.attempt ) ]
+saveData model =
+    let
+        history =
+            Logic.getHistory model.translationTask
+                |> List.filter (\( trial, _ ) -> not trial.isTraining)
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        payload =
+            updateHistoryEncoder userId history
+    in
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "Session2_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
-payload history =
-    Encode.list encodeHistory history
+updateHistoryEncoder : String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder userId history )
+                ]
+        )
+        [ ( userId, history ) ]
+
+
+historyEncoder : String -> List ( Trial, State ) -> Encode.Value
+historyEncoder userId history =
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( "Meaning2", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State ) -> Encode.Value
+historyItemEncoder ( { uid, target }, { userAnswer } ) =
+    Encode.object
+        [ ( "trialUid", Encode.string uid )
+        , ( "target", Encode.string target )
+        , ( "answser", Encode.string userAnswer )
+        ]
 
 
 
