@@ -19,6 +19,72 @@ import Session3.CU3 exposing (Msg(..))
 import View
 
 
+
+-- MODEL
+
+
+type Step
+    = Listening Ntimes
+    | Answering
+
+
+type alias Ntimes =
+    Int
+
+
+type alias Trial =
+    { uid : String
+    , writtenWord : String
+    , audioSentence : Data.AudioFile
+    , context : String
+    , target : String
+    , distractor1 : String
+    , distractor2 : String
+    , distractor3 : String
+    , feedback : String
+    , speakerName : String
+    , responseType : ResponseType
+    , isTraining : Bool
+    }
+
+
+type ResponseType
+    = Speech
+    | Thought
+
+
+type alias State =
+    { userAnswer : String
+    , step : Step
+    }
+
+
+initState : State
+initState =
+    State "" (Listening 3)
+
+
+defaultTrial : Trial
+defaultTrial =
+    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
+
+
+start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start info trials =
+    let
+        relatedInfos =
+            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+    in
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+
+-- VIEW
+
+
 view exp optionsOrder =
     case exp of
         Logic.NotStarted ->
@@ -126,6 +192,23 @@ smallAudio txt =
     div [] [ text txt ]
 
 
+
+-- UPDATE
+
+
+type CU2Msg
+    = UserClickedNextTrial
+    | UserClickedToggleFeedback
+    | UserClickedRadioButton String
+    | UserClickedStartMain (List Trial) ExperimentInfo.Task
+    | UserClickedSaveData
+    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
+    | UserClickedAudio String
+    | RuntimeShuffledOptionsOrder (List Int)
+    | UserClickedStartTraining
+    | UserClickedStartAnswering
+
+
 update msg model =
     let
         prevState =
@@ -173,15 +256,6 @@ update msg model =
             ( { model | cuLvl2 = Logic.update { prevState | step = Answering } model.cuLvl2 }, Cmd.none )
 
 
-type Step
-    = Listening Ntimes
-    | Answering
-
-
-type alias Ntimes =
-    Int
-
-
 decrement : Step -> Step
 decrement step =
     case step of
@@ -192,17 +266,24 @@ decrement step =
             Answering
 
 
-type CU2Msg
-    = UserClickedNextTrial
-    | UserClickedToggleFeedback
-    | UserClickedRadioButton String
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
-    | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
-    | UserClickedAudio String
-    | RuntimeShuffledOptionsOrder (List Int)
-    | UserClickedStartTraining
-    | UserClickedStartAnswering
+
+-- HTTP
+
+
+getRecords =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "input"
+                , view_ = "Presentation"
+                }
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
+        , timeout = Just 5000
+        }
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
@@ -241,70 +322,9 @@ decodeTranslationInput =
     Data.decodeRecords decoder
 
 
-initState : State
-initState =
-    State "" (Listening 3)
 
-
-defaultTrial : Trial
-defaultTrial =
-    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
-
-
-type alias Trial =
-    { uid : String
-    , writtenWord : String
-    , audioSentence : Data.AudioFile
-    , context : String
-    , target : String
-    , distractor1 : String
-    , distractor2 : String
-    , distractor3 : String
-    , feedback : String
-    , speakerName : String
-    , responseType : ResponseType
-    , isTraining : Bool
-    }
-
-
-type ResponseType
-    = Speech
-    | Thought
-
-
-type alias State =
-    { userAnswer : String
-    , step : Step
-    }
-
-
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
-start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
+-- INTERNALS
 
 
 taskId =
     "recwxsmowpB18bpLj"
-
-
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
-        , timeout = Just 5000
-        }
