@@ -19,33 +19,8 @@ import Session1.Spelling exposing (Step(..))
 import View
 
 
-getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "SpellingLvl2" msgHandler decodeTranslationInput
 
-
-decodeTranslationInput : Decoder (List Trial)
-decodeTranslationInput =
-    let
-        decoder =
-            Decode.succeed Trial
-                |> required "UID" string
-                |> required "Word_Text" string
-                |> required "Word_Audio" Data.decodeAudioFiles
-                |> optional "isTraining" Decode.bool False
-                |> required "Word_Text" string
-    in
-    Data.decodeRecords decoder
-
-
-initState : State
-initState =
-    State "DefaultUid" "" [] 3 ListeningFirstTime
-
-
-defaultTrial : Trial
-defaultTrial =
-    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") False ""
+-- MODEL
 
 
 type alias Trial =
@@ -79,43 +54,14 @@ type alias KeyedItem =
     ( String, Item )
 
 
-dedupeHelper : List String -> List ( String, Int ) -> List ( String, Int )
-dedupeHelper letters acc =
-    let
-        lettersInAcc =
-            List.map Tuple.first acc
-
-        countRecLetters target =
-            List.foldr
-                (\letter acc_ ->
-                    if target == letter then
-                        acc_ + 1
-
-                    else
-                        acc_
-                )
-                1
-                lettersInAcc
-    in
-    case letters of
-        [] ->
-            acc |> List.reverse
-
-        x :: xs ->
-            if List.member x lettersInAcc then
-                dedupeHelper xs <|
-                    ( x
-                    , countRecLetters x
-                    )
-                        :: acc
-
-            else
-                dedupeHelper xs <| ( x, 1 ) :: acc
+initState : State
+initState =
+    State "DefaultUid" "" [] 3 ListeningFirstTime
 
 
-dedupe : List String -> List ( String, Int )
-dedupe letters =
-    dedupeHelper letters []
+defaultTrial : Trial
+defaultTrial =
+    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") False ""
 
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
@@ -140,135 +86,8 @@ start info trials =
             Logic.Err "I tried to initate the state with the first trial but I couldn't find a first trial. Please report this error."
 
 
-toItems : String -> List KeyedItem
-toItems string =
-    string
-        |> String.toList
-        |> List.map String.fromChar
-        |> toKeyedItem
 
-
-toKeyedItem : List String -> List ( String, String )
-toKeyedItem letters =
-    List.map (\( lett, rec ) -> ( "key-" ++ lett ++ String.fromInt rec, lett )) (dedupe letters)
-
-
-taskId =
-    "recSL8cthViyXRx8u"
-
-
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
-        , timeout = Just 5000
-        }
-
-
-type Msg
-    = UserDragsLetter DnDList.Msg
-    | PlayAudio String
-    | UserClickedFeedbackButton
-    | UserClickedNextTrial (Maybe Trial)
-    | UserClickedStartMainloop (List Trial)
-    | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
-    | UserClickedStartTraining
-    | UserClickedStartAudio String
-    | AudioEnded { eventType : String, name : String, timestamp : Int }
-
-
-update msg model =
-    let
-        currentScrabbleState =
-            case Logic.getState model.scrabbleTask of
-                Just x ->
-                    x
-
-                _ ->
-                    initState
-    in
-    case msg of
-        UserDragsLetter dndmsg ->
-            let
-                ( dnd, items ) =
-                    system.update dndmsg model.dnd currentScrabbleState.scrambledLetter
-            in
-            ( { model
-                | dnd = dnd
-                , scrabbleTask = Logic.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.scrabbleTask
-              }
-            , system.commands dnd
-            )
-
-        PlayAudio url ->
-            ( model, Ports.playAudio url )
-
-        UserClickedFeedbackButton ->
-            ( { model | scrabbleTask = Logic.toggle model.scrabbleTask }, Cmd.none )
-
-        UserClickedNextTrial (Just nextTrial) ->
-            ( { model
-                | scrabbleTask =
-                    Logic.next
-                        { currentScrabbleState
-                            | userAnswer = nextTrial.writtenWord
-                            , scrambledLetter = toItems nextTrial.writtenWord
-                            , remainingListenings = 3
-                            , step = ListeningFirstTime
-                        }
-                        model.scrabbleTask
-              }
-            , Cmd.none
-            )
-
-        UserClickedNextTrial Nothing ->
-            ( { model
-                | scrabbleTask =
-                    Logic.next currentScrabbleState model.scrabbleTask
-              }
-            , Cmd.none
-            )
-
-        UserClickedSaveData ->
-            let
-                responseHandler =
-                    ServerRespondedWithLastRecords
-            in
-            ( model, Logic.saveData responseHandler model.user taskId model.scrabbleTask )
-
-        ServerRespondedWithLastRecords _ ->
-            ( model, Cmd.none )
-
-        UserClickedStartMainloop trials ->
-            case trials of
-                [] ->
-                    ( { model | scrabbleTask = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
-
-                x :: _ ->
-                    ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
-
-        UserClickedStartTraining ->
-            ( { model | scrabbleTask = Logic.startTraining model.scrabbleTask }, Cmd.none )
-
-        UserClickedStartAudio url ->
-            ( { model | scrabbleTask = Logic.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.scrabbleTask }, Ports.playAudio url )
-
-        AudioEnded { eventType } ->
-            case eventType of
-                "SoundEnded" ->
-                    ( { model | scrabbleTask = Logic.update { currentScrabbleState | step = Answering } model.scrabbleTask }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+--VIEW
 
 
 viewScrabbleTask : { a | scrabbleTask : Logic.Task Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
@@ -457,6 +276,122 @@ ghostView dnd items =
             text ""
 
 
+
+-- UPDATE
+
+
+type Msg
+    = UserDragsLetter DnDList.Msg
+    | PlayAudio String
+    | UserClickedFeedbackButton
+    | UserClickedNextTrial (Maybe Trial)
+    | UserClickedStartMainloop (List Trial)
+    | UserClickedSaveData
+    | UserClickedStartTraining
+    | UserClickedStartAudio String
+    | AudioEnded { eventType : String, name : String, timestamp : Int }
+    | HistoryWasSaved (Result Http.Error String)
+
+
+update msg model =
+    let
+        currentScrabbleState =
+            case Logic.getState model.scrabbleTask of
+                Just x ->
+                    x
+
+                _ ->
+                    initState
+    in
+    case msg of
+        UserDragsLetter dndmsg ->
+            let
+                ( dnd, items ) =
+                    system.update dndmsg model.dnd currentScrabbleState.scrambledLetter
+            in
+            ( { model
+                | dnd = dnd
+                , scrabbleTask = Logic.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.scrabbleTask
+              }
+            , system.commands dnd
+            )
+
+        PlayAudio url ->
+            ( model, Ports.playAudio url )
+
+        UserClickedFeedbackButton ->
+            ( { model | scrabbleTask = Logic.toggle model.scrabbleTask }, Cmd.none )
+
+        UserClickedNextTrial (Just nextTrial) ->
+            ( { model
+                | scrabbleTask =
+                    Logic.next
+                        { currentScrabbleState
+                            | userAnswer = nextTrial.writtenWord
+                            , scrambledLetter = toItems nextTrial.writtenWord
+                            , remainingListenings = 3
+                            , step = ListeningFirstTime
+                        }
+                        model.scrabbleTask
+              }
+            , Cmd.none
+            )
+
+        UserClickedNextTrial Nothing ->
+            ( { model
+                | scrabbleTask =
+                    Logic.next currentScrabbleState model.scrabbleTask
+              }
+            , Cmd.none
+            )
+
+        -- data is now saved after each "trial", so this does nothing and shoud be removed
+        UserClickedSaveData ->
+            ( model, Cmd.none )
+
+        HistoryWasSaved _ ->
+            ( model, Cmd.none )
+
+        UserClickedStartMainloop trials ->
+            case trials of
+                [] ->
+                    ( { model | scrabbleTask = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
+
+                x :: _ ->
+                    ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
+
+        UserClickedStartTraining ->
+            ( { model | scrabbleTask = Logic.startTraining model.scrabbleTask }, Cmd.none )
+
+        UserClickedStartAudio url ->
+            ( { model | scrabbleTask = Logic.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.scrabbleTask }, Ports.playAudio url )
+
+        AudioEnded { eventType } ->
+            case eventType of
+                "SoundEnded" ->
+                    ( { model | scrabbleTask = Logic.update { currentScrabbleState | step = Answering } model.scrabbleTask }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+
+toItems : String -> List KeyedItem
+toItems string =
+    string
+        |> String.toList
+        |> List.map String.fromChar
+        |> toKeyedItem
+
+
+toKeyedItem : List String -> List ( String, String )
+toKeyedItem letters =
+    List.map (\( lett, rec ) -> ( "key-" ++ lett ++ String.fromInt rec, lett )) (dedupe letters)
+
+
+
+-- SUBSCRIPTIONS
+
+
 subscriptions model =
     case model.scrabbleTask of
         Logic.Running _ { state } ->
@@ -472,7 +407,6 @@ subscriptions model =
 
 
 
---DATA
 -- SYSTEM
 
 
@@ -527,3 +461,89 @@ itemStyles color =
     , Html.Styled.Attributes.style "align-items" "center"
     , Html.Styled.Attributes.style "justify-content" "center"
     ]
+
+
+
+-- HTTP
+
+
+getRecords =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "input"
+                , view_ = "Presentation"
+                }
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
+        , timeout = Just 5000
+        }
+
+
+getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
+getTrialsFromServer msgHandler =
+    Data.getTrialsFromServer_ "input" "SpellingLvl2" msgHandler decodeTranslationInput
+
+
+decodeTranslationInput : Decoder (List Trial)
+decodeTranslationInput =
+    let
+        decoder =
+            Decode.succeed Trial
+                |> required "UID" string
+                |> required "Word_Text" string
+                |> required "Word_Audio" Data.decodeAudioFiles
+                |> optional "isTraining" Decode.bool False
+                |> required "Word_Text" string
+    in
+    Data.decodeRecords decoder
+
+
+
+-- INTERNALS
+
+
+dedupeHelper : List String -> List ( String, Int ) -> List ( String, Int )
+dedupeHelper letters acc =
+    let
+        lettersInAcc =
+            List.map Tuple.first acc
+
+        countRecLetters target =
+            List.foldr
+                (\letter acc_ ->
+                    if target == letter then
+                        acc_ + 1
+
+                    else
+                        acc_
+                )
+                1
+                lettersInAcc
+    in
+    case letters of
+        [] ->
+            acc |> List.reverse
+
+        x :: xs ->
+            if List.member x lettersInAcc then
+                dedupeHelper xs <|
+                    ( x
+                    , countRecLetters x
+                    )
+                        :: acc
+
+            else
+                dedupeHelper xs <| ( x, 1 ) :: acc
+
+
+dedupe : List String -> List ( String, Int )
+dedupe letters =
+    dedupeHelper letters []
+
+
+taskId =
+    "recSL8cthViyXRx8u"
