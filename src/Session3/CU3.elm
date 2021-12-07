@@ -19,6 +19,81 @@ import Session3.Spelling3 exposing (Msg(..))
 import View
 
 
+
+-- MODEL
+
+
+type alias Trial =
+    { uid : String
+    , writtenWord : String
+    , audioSentence : Data.AudioFile
+    , context : String
+    , speaker1Name : String
+    , speaker1Emoji : String
+    , speaker1Line : String
+    , speaker2Name : String
+    , speaker2Emoji : String
+    , speaker2Line : String
+    , speaker2Time : Int
+    , amorce : String
+    , feedback : String
+    , isTraining : Bool
+    }
+
+
+type alias State =
+    { uid : String
+    , userAnswer : String
+    , step : Step
+    , showSpeaker1 : Bool
+    , showSpeaker2 : Bool
+    }
+
+
+type Step
+    = Listening Int
+
+
+defaultTrial : Trial
+defaultTrial =
+    { uid = ""
+    , writtenWord = "String"
+    , audioSentence = Data.AudioFile "" ""
+    , context = "String"
+    , speaker1Name = "String"
+    , speaker1Emoji = "String"
+    , speaker1Line = "String"
+    , speaker2Name = "String"
+    , speaker2Emoji = "String"
+    , speaker2Line = "String"
+    , speaker2Time = 500
+    , amorce = "String"
+    , feedback = "String"
+    , isTraining = False
+    }
+
+
+initState : State
+initState =
+    State "DefaultUid" "" (Listening 3) False False
+
+
+start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start info trials =
+    let
+        relatedInfos =
+            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+    in
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+
+-- VIEW
+
+
 view exp =
     case exp of
         Logic.NotStarted ->
@@ -121,6 +196,24 @@ viewStep context nTimes trial feedback state =
         ]
 
 
+viewLimitedTimesAudioButton nTimes { audioSentence, speaker2Time } =
+    if nTimes == 3 then
+        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen"
+
+    else if nTimes == 2 then
+        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen again"
+
+    else if nTimes == 1 then
+        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen one last time"
+
+    else
+        View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened?" }
+
+
+
+-- UPDATE
+
+
 type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
@@ -204,39 +297,20 @@ update msg model =
             ( model, Cmd.none )
 
 
+decrement : Step -> Step
+decrement step =
+    case step of
+        Listening nTimes ->
+            Listening (nTimes - 1)
 
---( { model | cu3 = Logic.update { prevState | step = Answering } model.cu3 }, Cmd.none )
 
 
-viewLimitedTimesAudioButton nTimes { audioSentence, speaker2Time } =
-    if nTimes == 3 then
-        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen"
-
-    else if nTimes == 2 then
-        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen again"
-
-    else if nTimes == 1 then
-        View.audioButton (UserClickedAudio speaker2Time) audioSentence.url "Listen one last time"
-
-    else
-        View.button { isDisabled = nTimes == 0, message = UserClickedStartAnswering, txt = "What happened?" }
+-- HTTP
 
 
 getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
 getTrialsFromServer msgHandler =
     Data.getTrialsFromServer_ "input" "ContextUnderstandingLvl3" msgHandler decodeTranslationInput
-
-
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
-start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
 
 
 decodeTranslationInput : Decoder (List Trial)
@@ -262,72 +336,6 @@ decodeTranslationInput =
     Data.decodeRecords decoder
 
 
-initState : State
-initState =
-    State "DefaultUid" "" (Listening 3) False False
-
-
-defaultTrial : Trial
-defaultTrial =
-    { uid = ""
-    , writtenWord = "String"
-    , audioSentence = Data.AudioFile "" ""
-    , context = "String"
-    , speaker1Name = "String"
-    , speaker1Emoji = "String"
-    , speaker1Line = "String"
-    , speaker2Name = "String"
-    , speaker2Emoji = "String"
-    , speaker2Line = "String"
-    , speaker2Time = 500
-    , amorce = "String"
-    , feedback = "String"
-    , isTraining = False
-    }
-
-
-type alias Trial =
-    { uid : String
-    , writtenWord : String
-    , audioSentence : Data.AudioFile
-    , context : String
-    , speaker1Name : String
-    , speaker1Emoji : String
-    , speaker1Line : String
-    , speaker2Name : String
-    , speaker2Emoji : String
-    , speaker2Line : String
-    , speaker2Time : Int
-    , amorce : String
-    , feedback : String
-    , isTraining : Bool
-    }
-
-
-type alias State =
-    { uid : String
-    , userAnswer : String
-    , step : Step
-    , showSpeaker1 : Bool
-    , showSpeaker2 : Bool
-    }
-
-
-type Step
-    = Listening Int
-
-
-decrement : Step -> Step
-decrement step =
-    case step of
-        Listening nTimes ->
-            Listening (nTimes - 1)
-
-
-taskId =
-    "recFEtKbtuBSolHnI"
-
-
 getRecords =
     Http.task
         { method = "GET"
@@ -342,3 +350,11 @@ getRecords =
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
         , timeout = Just 5000
         }
+
+
+
+-- INTERNALS
+
+
+taskId =
+    "recFEtKbtuBSolHnI"

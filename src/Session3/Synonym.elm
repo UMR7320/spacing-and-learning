@@ -14,6 +14,135 @@ import Session1.ContextUnderstanding exposing (Msg(..))
 import View
 
 
+
+-- MODEL
+
+
+type alias Trial =
+    { uid : String
+    , target : String
+    , pre : String
+    , stimulus : String
+    , post : String
+    , isTraining : Bool
+    , radical : String
+    }
+
+
+type alias State =
+    { uid : String
+    , userAnswer : String
+    }
+
+
+initState : State
+initState =
+    State "DefaultUserUID" ""
+
+
+defaultTrial : Trial
+defaultTrial =
+    { uid = "uidMISSING"
+    , target = "targetMISSING"
+    , pre = "preMissing"
+    , stimulus = "stimulusMissing"
+    , post = "postMissing"
+    , isTraining = False
+    , radical = "defaultRadical"
+    }
+
+
+start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start info trials =
+    let
+        relatedInfos =
+            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+    in
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+
+-- VIEW
+
+
+trainingWheels : Int -> String -> String -> Html msg
+trainingWheels trialn radical target =
+    let
+        helpSentence =
+            div [ class "flex flex-col pt-4 italic text-xl " ]
+                [ p []
+                    [ text "The synonym of "
+                    , span [ class "font-bold" ] [ text radical ]
+                    , text " is "
+                    , span [ class "font-bold" ] [ text target ]
+                    ]
+                , span [] [ text "Type it here and you're good to go!" ]
+                ]
+    in
+    case trialn of
+        0 ->
+            helpSentence
+
+        _ ->
+            div [] []
+
+
+viewTask : Logic.Task Trial State -> List (Html Msg)
+viewTask experiment =
+    case experiment of
+        Logic.Err reason ->
+            [ h4 [] [ p [] [ text ("Failure" ++ reason) ] ]
+            ]
+
+        Logic.NotStarted ->
+            [ text "I'm not started yet." ]
+
+        Logic.Loading ->
+            [ View.loading ]
+
+        Logic.Running Logic.Instructions data ->
+            [ View.instructions data.infos UserCLickedStartTraining ]
+
+        Logic.Running Logic.Training task ->
+            case task.current of
+                Just x ->
+                    [ div [ class "flow" ]
+                        [ View.sentenceInSynonym x task.state UserChangedInput task.feedback
+                        , View.genericNeutralFeedback
+                            { isVisible = task.feedback
+                            , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
+                            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial task.feedback task.state.userAnswer
+                            }
+                        ]
+                    ]
+
+                Nothing ->
+                    [ View.introToMain <| UserClickedStartMainloop ]
+
+        Logic.Running Logic.Main task ->
+            case task.current of
+                Just x ->
+                    [ div [ class "flow" ]
+                        [ View.sentenceInSynonym x task.state UserChangedInput task.feedback
+                        , View.genericNeutralFeedback
+                            { isVisible = task.feedback
+                            , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
+                            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial task.feedback task.state.userAnswer
+                            }
+                        ]
+                    ]
+
+                Nothing ->
+                    [ View.end task.infos.end SaveDataMsg "spelling" ]
+
+
+
+-- UPDATE
+
+
 type Msg
     = UserClickedFeedback
     | UserChangedInput String
@@ -69,89 +198,8 @@ update msg model =
             ( { model | synonymTask = Logic.startTraining model.synonymTask }, Cmd.none )
 
 
-trainingWheels : Int -> String -> String -> Html msg
-trainingWheels trialn radical target =
-    let
-        helpSentence =
-            div [ class "flex flex-col pt-4 italic text-xl " ]
-                [ p []
-                    [ text "The synonym of "
-                    , span [ class "font-bold" ] [ text radical ]
-                    , text " is "
-                    , span [ class "font-bold" ] [ text target ]
-                    ]
-                , span [] [ text "Type it here and you're good to go!" ]
-                ]
-    in
-    case trialn of
-        0 ->
-            helpSentence
 
-        _ ->
-            div [] []
-
-
-viewTask :
-    Logic.Task Trial State
-    -> List (Html Msg)
-viewTask experiment =
-    case experiment of
-        Logic.Err reason ->
-            [ h4 [] [ p [] [ text ("Failure" ++ reason) ] ]
-            ]
-
-        Logic.NotStarted ->
-            [ text "I'm not started yet." ]
-
-        Logic.Loading ->
-            [ View.loading ]
-
-        Logic.Running Logic.Instructions data ->
-            [ View.instructions data.infos UserCLickedStartTraining ]
-
-        Logic.Running Logic.Training task ->
-            case task.current of
-                Just x ->
-                    [ div [ class "flow" ]
-                        [ View.sentenceInSynonym x task.state UserChangedInput task.feedback
-                        , View.genericNeutralFeedback
-                            { isVisible = task.feedback
-                            , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
-                            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial task.feedback task.state.userAnswer
-                            }
-                        ]
-                    ]
-
-                Nothing ->
-                    [ View.introToMain <| UserClickedStartMainloop ]
-
-        Logic.Running Logic.Main task ->
-            case task.current of
-                Just x ->
-                    [ div [ class "flow" ]
-                        [ View.sentenceInSynonym x task.state UserChangedInput task.feedback
-                        , View.genericNeutralFeedback
-                            { isVisible = task.feedback
-                            , feedback_Correct = ( task.infos.feedback_correct, [ x.radical, x.target ] )
-                            , button = View.navigationButton UserClickedFeedback UserClickedNextTrial task.feedback task.state.userAnswer
-                            }
-                        ]
-                    ]
-
-                Nothing ->
-                    [ View.end task.infos.end SaveDataMsg "spelling" ]
-
-
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
-start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
+-- HTTP
 
 
 decodeSynonymTrials : Decode.Decoder (List Trial)
@@ -179,27 +227,6 @@ decodeSynonymTrials =
     decodeRecords decoder
 
 
-initState : State
-initState =
-    State "DefaultUserUID" ""
-
-
-defaultTrial : Trial
-defaultTrial =
-    { uid = "uidMISSING"
-    , target = "targetMISSING"
-    , pre = "preMissing"
-    , stimulus = "stimulusMissing"
-    , post = "postMissing"
-    , isTraining = False
-    , radical = "defaultRadical"
-    }
-
-
-taskId =
-    "recB3kUQW4jNTlou6"
-
-
 getRecords =
     Http.task
         { method = "GET"
@@ -216,18 +243,9 @@ getRecords =
         }
 
 
-type alias Trial =
-    { uid : String
-    , target : String
-    , pre : String
-    , stimulus : String
-    , post : String
-    , isTraining : Bool
-    , radical : String
-    }
+
+-- INTERNALS
 
 
-type alias State =
-    { uid : String
-    , userAnswer : String
-    }
+taskId =
+    "recB3kUQW4jNTlou6"
