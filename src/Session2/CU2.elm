@@ -9,6 +9,7 @@ import Html.Styled.Attributes exposing (class)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
+import Json.Encode as Encode
 import Logic
 import Ports
 import Progressbar exposing (progressBar)
@@ -202,11 +203,11 @@ type CU2Msg
     | UserClickedRadioButton String
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserClickedSaveData
-    | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedAudio String
     | RuntimeShuffledOptionsOrder (List Int)
     | UserClickedStartTraining
     | UserClickedStartAnswering
+    | HistoryWasSaved (Result Http.Error String)
 
 
 update msg model =
@@ -216,7 +217,16 @@ update msg model =
     in
     case msg of
         UserClickedNextTrial ->
-            ( { model | cuLvl2 = Logic.next initState model.cuLvl2 }, Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder) )
+            let
+                newModel =
+                    { model | cuLvl2 = Logic.next initState model.cuLvl2 }
+            in
+            ( newModel
+            , Cmd.batch
+                [ Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                , saveData newModel
+                ]
+            )
 
         UserClickedToggleFeedback ->
             ( { model | cuLvl2 = Logic.toggle model.cuLvl2 }, Cmd.none )
@@ -227,15 +237,12 @@ update msg model =
         UserClickedStartMain _ _ ->
             ( { model | cuLvl2 = Logic.startMain model.cuLvl2 initState }, Cmd.none )
 
-        ServerRespondedWithLastRecords _ ->
+        -- data is now saved after each "trial", so this does nothing and shoud be removed
+        UserClickedSaveData ->
             ( model, Cmd.none )
 
-        UserClickedSaveData ->
-            let
-                responseHandler =
-                    ServerRespondedWithLastRecords
-            in
-            ( model, Logic.saveData responseHandler model.user taskId model.cuLvl2 )
+        HistoryWasSaved _ ->
+            ( model, Cmd.none )
 
         UserClickedAudio url ->
             ( { model | cuLvl2 = Logic.update { prevState | step = decrement prevState.step } model.cuLvl2 }
@@ -320,6 +327,59 @@ decodeTranslationInput =
                 |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
+
+
+saveData model =
+    let
+        history =
+            Logic.getHistory model.cuLvl2
+                |> List.filter (\( trial, _ ) -> not trial.isTraining)
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        payload =
+            updateHistoryEncoder userId history
+    in
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "Session2_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateHistoryEncoder : String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder userId history )
+                ]
+        )
+        [ ( userId, history ) ]
+
+
+historyEncoder : String -> List ( Trial, State ) -> Encode.Value
+historyEncoder userId history =
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( "CU2", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State ) -> Encode.Value
+historyItemEncoder ( { uid, writtenWord }, { userAnswer } ) =
+    Encode.object
+        [ ( "trialUid", Encode.string uid )
+        , ( "writtenWord", Encode.string writtenWord )
+        , ( "answser", Encode.string userAnswer )
+        ]
 
 
 
