@@ -12,6 +12,7 @@ import Http exposing (Error)
 import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
+import Json.Encode as Encode
 import Logic
 import Ports
 import Progressbar
@@ -322,27 +323,28 @@ update msg model =
         UserClickedFeedbackButton ->
             ( { model | scrabbleTask = Logic.toggle model.scrabbleTask }, Cmd.none )
 
-        UserClickedNextTrial (Just nextTrial) ->
-            ( { model
-                | scrabbleTask =
-                    Logic.next
-                        { currentScrabbleState
-                            | userAnswer = nextTrial.writtenWord
-                            , scrambledLetter = toItems nextTrial.writtenWord
-                            , remainingListenings = 3
-                            , step = ListeningFirstTime
-                        }
-                        model.scrabbleTask
-              }
-            , Cmd.none
-            )
+        UserClickedNextTrial maybeNextTrial ->
+            let
+                scrabbleTask =
+                    case maybeNextTrial of
+                        Just nextTrial ->
+                            Logic.next
+                                { currentScrabbleState
+                                    | userAnswer = nextTrial.writtenWord
+                                    , scrambledLetter = toItems nextTrial.writtenWord
+                                    , remainingListenings = 3
+                                    , step = ListeningFirstTime
+                                }
+                                model.scrabbleTask
 
-        UserClickedNextTrial Nothing ->
-            ( { model
-                | scrabbleTask =
-                    Logic.next currentScrabbleState model.scrabbleTask
-              }
-            , Cmd.none
+                        Nothing ->
+                            Logic.next currentScrabbleState model.scrabbleTask
+
+                newModel =
+                    { model | scrabbleTask = scrabbleTask }
+            in
+            ( newModel
+            , saveData newModel
             )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
@@ -500,6 +502,59 @@ decodeTranslationInput =
                 |> required "Word_Text" string
     in
     Data.decodeRecords decoder
+
+
+saveData model =
+    let
+        history =
+            Logic.getHistory model.scrabbleTask
+                |> List.filter (\( trial, _ ) -> not trial.isTraining)
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        payload =
+            updateHistoryEncoder userId history
+    in
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "Session2_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateHistoryEncoder : String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder userId history )
+                ]
+        )
+        [ ( userId, history ) ]
+
+
+historyEncoder : String -> List ( Trial, State ) -> Encode.Value
+historyEncoder userId history =
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( "Spelling2", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State ) -> Encode.Value
+historyItemEncoder ( { uid, target }, { userAnswer } ) =
+    Encode.object
+        [ ( "trialUid", Encode.string uid )
+        , ( "target", Encode.string target )
+        , ( "answser", Encode.string userAnswer )
+        ]
 
 
 
