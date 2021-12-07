@@ -182,12 +182,14 @@ type Msg
 update msg model =
     case msg of
         UserClickedNextTrial ->
-            ( { model
-                | meaning = Logic.next initState model.meaning
-              }
+            let
+                newModel =
+                    { model | meaning = Logic.next initState model.meaning }
+            in
+            ( newModel
             , Cmd.batch
                 [ Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
-                , saveData model
+                , saveData newModel
                 ]
             )
 
@@ -302,9 +304,10 @@ historyEncoder userId history =
 
 
 historyItemEncoder : ( Trial, State ) -> Encode.Value
-historyItemEncoder ( { uid }, { userAnswer } ) =
+historyItemEncoder ( { uid, writtenWord }, { userAnswer } ) =
     Encode.object
         [ ( "trialUid", Encode.string uid )
+        , ( "writtenWord", Encode.string writtenWord )
         , ( "answser", Encode.string userAnswer )
         ]
 
