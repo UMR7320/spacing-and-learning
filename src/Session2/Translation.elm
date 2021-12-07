@@ -15,7 +15,6 @@ import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
-import Progressbar
 import Random
 import Random.List
 import View
@@ -129,11 +128,6 @@ renderTask task trial data history allTrials =
 
           else
             div [] []
-        , if List.length data.trainingTrials > 0 then
-            div [] []
-
-          else
-            Progressbar.progressBar history allTrials
         , View.fromMarkdown trial.question
         , div
             [ class "w-full pt-8", disabled data.feedback ]

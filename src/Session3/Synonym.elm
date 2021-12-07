@@ -10,7 +10,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
-import Progressbar
 import Session1.ContextUnderstanding exposing (Msg(..))
 import View
 

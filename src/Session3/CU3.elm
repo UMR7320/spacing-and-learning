@@ -13,7 +13,6 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
 import Ports
-import Progressbar exposing (progressBar)
 import Random
 import Random.List
 import Session3.Spelling3 exposing (Msg(..))

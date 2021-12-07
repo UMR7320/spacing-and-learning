@@ -11,7 +11,6 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
-import Progressbar exposing (progressBar)
 import View exposing (unclickableButton)
 
 

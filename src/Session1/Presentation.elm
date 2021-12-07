@@ -11,7 +11,6 @@ import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Ports
-import Progressbar exposing (progressBar)
 import Session3.Synonym exposing (Msg(..))
 import Set
 import Task

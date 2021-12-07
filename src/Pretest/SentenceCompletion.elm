@@ -11,7 +11,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
-import Progressbar exposing (progressBar)
 import Random
 import Task
 import View
@@ -139,8 +138,7 @@ view task =
             case data.current of
                 Just trial ->
                     [ div [ A.class "flex flex-col w-full items-center" ]
-                        [ progressBar data.history data.mainTrials
-                        , p [ A.class "max-w-2xl m-4 p-2" ] [ text trial.context ]
+                        [ p [ A.class "max-w-2xl m-4 p-2" ] [ text trial.context ]
                         , Html.Styled.textarea
                             [ A.id "firstProd"
                             , A.class "border-2 w-full max-w-2xl p-2"

@@ -15,7 +15,6 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
 import Ports
-import Progressbar
 import Session1.Spelling exposing (Step(..))
 import View
 
@@ -115,9 +114,7 @@ viewScrabbleTask model =
             case data.current of
                 Just currentTrial ->
                     div [ class "flex flex-col items-center justify-center" ]
-                        [ View.tooltip data.infos.instructions_short
-                        , Progressbar.progressBar data.history data.mainTrials
-                        , viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
+                        [ viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
                         , if data.state.step == ListeningFirstTime then
                             div [] []
 

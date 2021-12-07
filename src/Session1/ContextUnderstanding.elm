@@ -10,7 +10,6 @@ import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
-import Progressbar
 import Random
 import Random.List
 import View

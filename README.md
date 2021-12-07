@@ -61,7 +61,7 @@ La communication entre l'application et la base de donnée est gérée par une A
        - [SPR.elm](src/Pretest/SPR.elm)
        - [SentenceCompletion.elm](src/Pretest/SentenceCompletion.elm)
        - [VKS.elm](src/Pretest/VKS.elm)
-     - [Progressbar.elm](src/Progressbar.elm) -> Expose une barre de progrès
+     - [ProgressBar.elm](src/ProgressBar.elm) -> Expose une barre de progrès
      - [Route.elm](src/Route.elm) -> C'est ici que le routing est géré !
      - [Session.elm](src/Session.elm) -> Fonctions pour décoder les informatins relatives aux sessions
      - __Session1__ -> Les tâches de la session 1

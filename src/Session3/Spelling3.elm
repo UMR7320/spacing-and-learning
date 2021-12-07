@@ -14,7 +14,6 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
 import Ports
-import Progressbar exposing (progressBar)
 import Session1.Presentation exposing (Msg(..))
 import View
 

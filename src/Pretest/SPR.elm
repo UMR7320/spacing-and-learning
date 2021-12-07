@@ -12,7 +12,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Logic
-import Progressbar exposing (progressBar)
 import Task
 import Task.Parallel as Para
 import Time
