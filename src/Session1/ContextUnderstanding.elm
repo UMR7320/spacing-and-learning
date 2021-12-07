@@ -16,37 +16,58 @@ import View
 
 
 
---view : { a | task : Logic.Task t s, optionsOrder : Maybe (List comparable), nextTrialMsg : f, userClickedAudio : String -> f, radioMsg : String -> f, toggleFeedbackMsg : f, startMainMsg : List t -> f, inputChangedMsg : String -> f } -> Html msg
+-- MODEL
+
+
+type alias Trial =
+    { uid : String
+    , text : String
+    , target : String
+    , distractor1 : String
+    , distractor2 : String
+    , distractor3 : String
+    , definition : String
+    , isTraining : Bool
+    }
+
+
+type alias State =
+    { uid : String
+    , userAnswer : String
+    }
 
 
 type alias CU =
     Logic.Task Trial State
 
 
-taskId =
-    "recsN8oyy3LIC8URx"
+initState : State
+initState =
+    State "DefaultUid" ""
 
 
-paragraphWithInput pre userAnswer post =
-    p [ class "bg-gray-200 mb-8 rounded-lg p-4" ]
-        [ text pre
-        , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
-            [ text <|
-                if userAnswer == "I don't know" then
-                    "???"
-
-                else
-                    userAnswer
-            ]
-        , text post
-        ]
+defaultTrial : Trial
+defaultTrial =
+    Trial "defaultuid" "defaulttarger" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
 
 
-view :
-    { task : Logic.Task Trial State
-    , optionsOrder : List comparable
-    }
-    -> Html Msg
+start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start info trials =
+    let
+        relatedInfos =
+            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+    in
+    Logic.startIntro relatedInfos
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+
+-- VIEW
+
+
+view : { task : Logic.Task Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
         Logic.NotStarted ->
@@ -126,6 +147,25 @@ view task =
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
 
+paragraphWithInput pre userAnswer post =
+    p [ class "bg-gray-200 mb-8 rounded-lg p-4" ]
+        [ text pre
+        , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
+            [ text <|
+                if userAnswer == "I don't know" then
+                    "???"
+
+                else
+                    userAnswer
+            ]
+        , text post
+        ]
+
+
+
+-- UPDATE
+
+
 type Msg
     = UserClickedNextTrial
     | UserClickedToggleFeedback
@@ -135,23 +175,6 @@ type Msg
     | ServerRespondedWithLastRecords (Result Http.Error (List ()))
     | UserClickedStartTraining
     | RuntimeShuffledOptionsOrder (List Int)
-
-
-getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "ContextUnderstandingLvl1" msgHandler decodeTranslationInput
-
-
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
-start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
 
 
 update msg model =
@@ -188,6 +211,15 @@ update msg model =
             ( { model | optionsOrder = newOrder }, Cmd.none )
 
 
+
+-- HTTP
+
+
+getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
+getTrialsFromServer msgHandler =
+    Data.getTrialsFromServer_ "input" "ContextUnderstandingLvl1" msgHandler decodeTranslationInput
+
+
 decodeTranslationInput : Decoder (List Trial)
 decodeTranslationInput =
     let
@@ -221,29 +253,9 @@ getRecords =
         }
 
 
-initState : State
-initState =
-    State "DefaultUid" ""
+
+-- INTERNALS
 
 
-defaultTrial : Trial
-defaultTrial =
-    Trial "defaultuid" "defaulttarger" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
-
-
-type alias Trial =
-    { uid : String
-    , text : String
-    , target : String
-    , distractor1 : String
-    , distractor2 : String
-    , distractor3 : String
-    , definition : String
-    , isTraining : Bool
-    }
-
-
-type alias State =
-    { uid : String
-    , userAnswer : String
-    }
+taskId =
+    "recsN8oyy3LIC8URx"
