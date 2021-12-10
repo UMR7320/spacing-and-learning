@@ -73,10 +73,10 @@ update msg model =
                         |> List.map
                             (\block ->
                                 let
-                                    ( falseAlarms, hits ) =
+                                    ( hits, falseAlarms ) =
                                         countHitsAndFalseAlarms block
                                 in
-                                scoreVoc hits falseAlarms
+                                vocabularyScore hits falseAlarms
                             )
                         |> List.sum
 
@@ -113,8 +113,8 @@ correctionFactor falseAlarms hits =
     1 - (weighted falseAlarms / weighted hits)
 
 
-scoreVoc : Int -> Int -> Int
-scoreVoc hits falseAlarms =
+vocabularyScore : Int -> Int -> Int
+vocabularyScore hits falseAlarms =
     (toFloat hits * 100.0 * correctionFactor falseAlarms hits) |> round
 
 
@@ -156,18 +156,16 @@ weighted x =
 
 countHitsAndFalseAlarms =
     List.foldl
-        (\( t, s ) ( h, f ) ->
-            if t.exists == True && s.evaluation == Just True then
-                ( h + 1, f )
+        (\( word, answer ) ( hits, falseAlarms ) ->
+            if answer.evaluation == Just True then
+                if word.exists == True then
+                    ( hits + 1, falseAlarms )
 
-            else if t.exists == False && s.evaluation == Just True then
-                ( h, f + 1 )
-
-            else if t.exists == True && s.evaluation == Just False then
-                ( h, f + 1 )
+                else
+                    ( hits, falseAlarms + 1 )
 
             else
-                ( h, f )
+                ( hits, falseAlarms )
         )
         ( 0, 0 )
 
