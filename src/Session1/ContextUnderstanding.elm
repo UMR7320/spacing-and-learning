@@ -230,7 +230,7 @@ decodeTranslationInput =
             Decode.succeed Trial
                 |> required "UID" string
                 |> required "Text_To_Complete" string
-                |> required "Word_Text" string
+                |> required "Target_CU1" string
                 |> required "Distractor_1_CU_Lvl1" string
                 |> required "Distractor_2_CU_Lvl1" string
                 |> required "Distractor_3_CU_Lvl1" string
