@@ -23,6 +23,7 @@ type alias Trial =
     { uid : String
     , text : String
     , target : String
+    , infinitiveWord : String -- the non-modified word, like dread instead of dreading
     , distractor1 : String
     , distractor2 : String
     , distractor3 : String
@@ -48,7 +49,7 @@ initState =
 
 defaultTrial : Trial
 defaultTrial =
-    Trial "defaultuid" "defaulttarger" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
+    Trial "defaultuid" "defaulttarger" "defaultWrittenWord" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
 
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
@@ -99,8 +100,8 @@ view task =
                                 { isVisible = data.feedback
                                 , userAnswer = data.state.userAnswer
                                 , target = trial.target
-                                , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
-                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
+                                , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
+                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
                                 , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
                                 }
                             ]
@@ -131,8 +132,8 @@ view task =
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
                             , target = trial.target
-                            , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.target, View.bold trial.definition ] )
-                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target, View.bold trial.definition ] )
+                            , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
+                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
                             , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
                             }
                         ]
@@ -231,6 +232,7 @@ decodeTranslationInput =
                 |> required "UID" string
                 |> required "Text_To_Complete" string
                 |> required "Target_CU1" string
+                |> required "Word_Text" string
                 |> required "Distractor_1_CU_Lvl1" string
                 |> required "Distractor_2_CU_Lvl1" string
                 |> required "Distractor_3_CU_Lvl1" string
@@ -301,10 +303,10 @@ historyEncoder userId history =
 
 
 historyItemEncoder : ( Trial, State ) -> Encode.Value
-historyItemEncoder ( { uid, target }, { userAnswer } ) =
+historyItemEncoder ( { uid, infinitiveWord }, { userAnswer } ) =
     Encode.object
         [ ( "trialUid", Encode.string uid )
-        , ( "target", Encode.string target )
+        , ( "target", Encode.string infinitiveWord )
         , ( "answser", Encode.string userAnswer )
         ]
 
