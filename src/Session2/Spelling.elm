@@ -96,7 +96,7 @@ viewScrabbleTask model =
         viewLetters scrambledLetters =
             scrambledLetters
                 |> List.indexedMap (itemView model.dnd)
-                |> Keyed.node "div" containerStyles
+                |> Keyed.node "div" (containerStyles (List.length scrambledLetters))
 
         audioButton url =
             div
@@ -126,7 +126,10 @@ viewScrabbleTask model =
                                 ]
 
                           else
-                            data.state.userAnswer |> String.toList |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ]) |> div containerStyles
+                            data.state.userAnswer
+                                |> String.toList
+                                |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ])
+                                |> div (containerStyles (String.length data.state.userAnswer))
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
@@ -168,7 +171,10 @@ viewScrabbleTask model =
                                 ]
 
                           else
-                            data.state.userAnswer |> String.toList |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ]) |> div containerStyles
+                            data.state.userAnswer
+                                |> String.toList
+                                |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ])
+                                |> div (containerStyles (String.length data.state.userAnswer))
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
@@ -438,10 +444,10 @@ ghostYellow =
     "#fcf279"
 
 
-containerStyles : List (Html.Styled.Attribute msg)
-containerStyles =
+containerStyles : Int -> List (Html.Styled.Attribute msg)
+containerStyles lettersCount =
     [ Html.Styled.Attributes.style "display" "grid"
-    , Html.Styled.Attributes.style "grid-template-columns" "repeat(auto-fill, 5rem)"
+    , Html.Styled.Attributes.style "grid-template-columns" ("repeat(" ++ String.fromInt lettersCount ++ ", 1fr)")
     , Html.Styled.Attributes.style "grid-gap" "3rem"
     , Html.Styled.Attributes.style "justify-content" "center"
     , class "font-bold text-2xl w-full mt-12 mb-8"
