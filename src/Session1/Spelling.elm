@@ -177,6 +177,7 @@ type Msg
     | UserClickedSavedData
     | UserClickedPlayAudio String
     | UserClickedStartTraining
+    | RuntimeShuffledOptionsOrder (List Int)
     | AudioEnded { eventType : String, name : String, timestamp : Int }
     | HistoryWasSaved (Result Http.Error String)
 
@@ -213,8 +214,14 @@ update msg model =
                     { model | spellingLvl1 = Logic.next iniState model.spellingLvl1 }
             in
             ( newModel
-            , saveData newModel
+            , Cmd.batch
+                [ saveData newModel
+                , Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
+                ]
             )
+
+        RuntimeShuffledOptionsOrder newOrder ->
+            ( { model | optionsOrder = newOrder }, Cmd.none )
 
         UserClickedStartMainloop ->
             ( { model | spellingLvl1 = Logic.startMain model.spellingLvl1 iniState }, Cmd.none )
