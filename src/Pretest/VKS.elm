@@ -194,10 +194,11 @@ view vks =
             if vks.showVideo then
                 [ div
                     [ class "flow" ]
-                    [ video [ controls True, src "/vks.mp4" ] []
+                    [ p [] [ text "Watch the video to understand how this activity works:" ]
+                    , video [ controls True, src "/vks.mp4" ] []
                     , View.button
                         { message = UserClickedStartMain
-                        , txt = "Start"
+                        , txt = "Start the activity"
                         , isDisabled = False
                         }
                     ]
