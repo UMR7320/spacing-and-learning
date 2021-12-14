@@ -47,8 +47,6 @@ type Familiarity
 type alias Answer =
     { knowledge : Familiarity
     , definition : String
-    , translation : String
-    , synonym : String
     , usage : String
     }
 
@@ -72,8 +70,6 @@ emptyAnswer : Answer
 emptyAnswer =
     { knowledge = NoAnswer
     , definition = ""
-    , synonym = ""
-    , translation = ""
     , usage = ""
     }
 
@@ -143,20 +139,12 @@ view vks =
                         , if data.state.knowledge == Known then
                             Html.Styled.fieldset [ class "flex flex-col p-2" ]
                                 [ label [ class "flex flex-col p-2" ]
-                                    [ text "What do you think this verb means? (give as many answers as you can.)"
-                                    , input [ class "border-2", E.onInput (UserUpdatedField Definition 1) ] []
-                                    ]
-                                , label [ class "flex flex-col p-2" ]
-                                    [ text "What would be a good translation?"
-                                    , input [ class "border-2", E.onInput (UserUpdatedField Translation 1) ] []
-                                    ]
-                                , label [ class "flex flex-col p-2" ]
-                                    [ text "What would be a good synonym?"
-                                    , input [ class "border-2", E.onInput (UserUpdatedField Synonym 1) ] []
+                                    [ text "What does this verb mean? Give definitions, synonyms, and/or translations, as many as you can."
+                                    , input [ class "border-2", E.onInput (UserUpdatedField Definition) ] []
                                     ]
                                 , label [ class "flex flex-col p-2" ]
                                     [ text "Please use this verb in a sentence. The sentence should show that you know what the word means."
-                                    , textarea [ class "border-2", E.onInput (UserUpdatedField SecondProduction 1) ] []
+                                    , textarea [ class "border-2", E.onInput (UserUpdatedField Sentence) ] []
                                     ]
                                 ]
 
@@ -166,7 +154,7 @@ view vks =
                             { txt = "Next Item"
                             , message = UserClickedNextTrial
                             , isDisabled =
-                                if data.state.knowledge == Known && List.all String.isEmpty [ data.state.translation, data.state.definition, data.state.synonym ] then
+                                if data.state.knowledge == Known && List.all String.isEmpty [ data.state.definition ] then
                                     True
 
                                 else if data.state.knowledge == NoAnswer then
@@ -217,7 +205,7 @@ type Msg
     | UserClickedStartMain
     | UserClickedShowVideo
     | UserClickedSaveData
-    | UserUpdatedField Field Int String
+    | UserUpdatedField Field String
     | RuntimeReordedAmorces Field
     | UserClickedNewKnowledge String
     | HistoryWasSaved (Result Http.Error String)
@@ -225,9 +213,7 @@ type Msg
 
 type Field
     = Definition
-    | Synonym
-    | Translation
-    | SecondProduction
+    | Sentence
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -256,7 +242,7 @@ update msg model =
             in
             ( newModel
             , Cmd.batch
-                [ Random.generate RuntimeReordedAmorces (Random.uniform Definition [ SecondProduction ])
+                [ Random.generate RuntimeReordedAmorces (Random.uniform Definition [ Sentence ])
                 , saveData newModel
                 ]
             )
@@ -276,7 +262,7 @@ update msg model =
             in
             ( { model | vks = updateTask (flippedStartMain emptyAnswer) }, Cmd.none )
 
-        UserUpdatedField fieldId subKey new ->
+        UserUpdatedField fieldId new ->
             case fieldId of
                 Definition ->
                     ( { model
@@ -285,21 +271,7 @@ update msg model =
                     , Cmd.none
                     )
 
-                Synonym ->
-                    ( { model
-                        | vks = updateTask (Logic.update { prevAnswer | synonym = new })
-                      }
-                    , Cmd.none
-                    )
-
-                Translation ->
-                    ( { model
-                        | vks = updateTask (Logic.update { prevAnswer | translation = new })
-                      }
-                    , Cmd.none
-                    )
-
-                SecondProduction ->
+                Sentence ->
                     ( { model
                         | vks = updateTask (Logic.update { prevAnswer | usage = new })
                       }
@@ -373,13 +345,11 @@ historyEncoder version userId history =
 
 
 historyItemEncoder : ( Trial, Answer ) -> Encode.Value
-historyItemEncoder ( { id, verb }, { knowledge, definition, translation, synonym, usage } ) =
+historyItemEncoder ( { id, verb }, { knowledge, definition, usage } ) =
     Encode.object
         [ ( "verb", Encode.string verb )
         , ( "vks_knowledge", Encode.string (familiarityToString knowledge) )
         , ( "vks_definition", Encode.string definition )
-        , ( "vks_synonym", Encode.string synonym )
-        , ( "vks_translation", Encode.string translation )
         , ( "vks_usage", Encode.string usage )
         ]
 
