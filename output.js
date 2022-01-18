@@ -17,9 +17,9 @@ const formatData = (prefix, records) =>
     })
   );
 
-const formatMeaning1Data = records =>
+const formatActivityData = (activity, records) =>
   records.flatMap(record => {
-    const answers = JSON.parse(record["Meaning1"] || "[]");
+    const answers = JSON.parse(record[activity] || "[]");
     answers.forEach(answer => {
       answer.userUID = record.UID;
       answer.condition = record.Group;
@@ -70,5 +70,17 @@ fetch(
       displayData(elementId, prefix, data);
     });
 
-    displayAsTable("meaning1", formatMeaning1Data(data));
+    [
+      ["meaning1", "Meaning1"],
+      ["meaning2", "Meaning2"],
+      ["meaning3", "Meaning3"],
+      ["CU1", "CU1"],
+      ["CU2", "CU2"],
+      ["CU3", "CU3"],
+      ["spelling1", "Spelling1"],
+      ["spelling2", "Spelling2"],
+      ["spelling3", "Spelling3"]
+    ].forEach(([elementId, activity]) => {
+      displayAsTable(elementId, formatActivityData(activity, data));
+    });
   });
