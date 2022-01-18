@@ -14,6 +14,7 @@ import Ports
 import Session3.Synonym exposing (Msg(..))
 import Set
 import Task
+import Time
 import View
 
 
@@ -112,6 +113,7 @@ viewTrial trial data =
 
 type Msg
     = UserClickedNextTrial
+    | NextTrial Time.Posix
     | UserClickedStartMain (List Trial) ExperimentInfo.Task
     | UserToggleElementOfEntry String
     | UserClickedStartAudio String
@@ -178,7 +180,10 @@ update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     case msg of
         UserClickedNextTrial ->
-            ( { model | presentation = Logic.next initState model.presentation }, Cmd.none )
+            ( model, Task.perform NextTrial Time.now )
+
+        NextTrial timestamp ->
+            ( { model | presentation = Logic.next timestamp initState model.presentation }, Cmd.none )
 
         UserClickedStartMain _ _ ->
             ( { model | presentation = Logic.startMain model.presentation initState }, Cmd.none )

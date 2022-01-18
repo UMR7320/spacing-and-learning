@@ -16,6 +16,8 @@ import Json.Encode as Encode
 import Logic
 import Ports
 import Session1.Spelling exposing (Step(..))
+import Task
+import Time
 import View
 
 
@@ -289,6 +291,7 @@ type Msg
     | PlayAudio String
     | UserClickedFeedbackButton
     | UserClickedNextTrial (Maybe Trial)
+    | NextTrial (Maybe Trial) Time.Posix
     | UserClickedStartMainloop (List Trial)
     | UserClickedSaveData
     | UserClickedStartTraining
@@ -327,11 +330,15 @@ update msg model =
             ( { model | scrabbleTask = Logic.toggle model.scrabbleTask }, Cmd.none )
 
         UserClickedNextTrial maybeNextTrial ->
+            ( model, Task.perform (NextTrial maybeNextTrial) Time.now )
+
+        NextTrial maybeNextTrial timestamp ->
             let
                 scrabbleTask =
                     case maybeNextTrial of
                         Just nextTrial ->
                             Logic.next
+                                timestamp
                                 { currentScrabbleState
                                     | userAnswer = nextTrial.writtenWord
                                     , scrambledLetter = toItems nextTrial.writtenWord
@@ -341,7 +348,7 @@ update msg model =
                                 model.scrabbleTask
 
                         Nothing ->
-                            Logic.next currentScrabbleState model.scrabbleTask
+                            Logic.next timestamp currentScrabbleState model.scrabbleTask
 
                 newModel =
                     { model | scrabbleTask = scrabbleTask }
@@ -511,7 +518,7 @@ saveData model =
     let
         history =
             Logic.getHistory model.scrabbleTask
-                |> List.filter (\( trial, _ ) -> not trial.isTraining)
+                |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
@@ -530,7 +537,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -543,7 +550,7 @@ updateHistoryEncoder userId history =
         [ ( userId, history ) ]
 
 
-historyEncoder : String -> List ( Trial, State ) -> Encode.Value
+historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder userId history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
@@ -551,12 +558,13 @@ historyEncoder userId history =
         ]
 
 
-historyItemEncoder : ( Trial, State ) -> Encode.Value
-historyItemEncoder ( { uid, target }, { userAnswer } ) =
+historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
+historyItemEncoder ( { uid, target }, { userAnswer }, timestamp ) =
     Encode.object
         [ ( "trialUid", Encode.string uid )
         , ( "target", Encode.string target )
-        , ( "answser", Encode.string userAnswer )
+        , ( "answer", Encode.string userAnswer )
+        , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
 
 

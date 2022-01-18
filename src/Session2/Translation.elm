@@ -17,6 +17,8 @@ import Json.Encode as Encode
 import Logic
 import Random
 import Random.List
+import Task
+import Time
 import View
 
 
@@ -150,6 +152,7 @@ renderTask task trial data history allTrials =
 
 type Msg
     = UserClickedNextTrial
+    | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedSaveData
     | UserClickedRadioButton String
@@ -162,9 +165,12 @@ type Msg
 update msg model =
     case msg of
         UserClickedNextTrial ->
+            ( model, Task.perform NextTrial Time.now )
+
+        NextTrial timestamp ->
             let
                 newModel =
-                    { model | translationTask = Logic.next initState model.translationTask }
+                    { model | translationTask = Logic.next timestamp initState model.translationTask }
             in
             ( newModel
             , Cmd.batch
@@ -243,7 +249,7 @@ saveData model =
     let
         history =
             Logic.getHistory model.translationTask
-                |> List.filter (\( trial, _ ) -> not trial.isTraining)
+                |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
@@ -262,7 +268,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -275,7 +281,7 @@ updateHistoryEncoder userId history =
         [ ( userId, history ) ]
 
 
-historyEncoder : String -> List ( Trial, State ) -> Encode.Value
+historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder userId history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
@@ -283,12 +289,13 @@ historyEncoder userId history =
         ]
 
 
-historyItemEncoder : ( Trial, State ) -> Encode.Value
-historyItemEncoder ( { uid, target }, { userAnswer } ) =
+historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
+historyItemEncoder ( { uid, target }, { userAnswer }, timestamp ) =
     Encode.object
         [ ( "trialUid", Encode.string uid )
         , ( "target", Encode.string target )
-        , ( "answser", Encode.string userAnswer )
+        , ( "answer", Encode.string userAnswer )
+        , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
 
 

@@ -11,6 +11,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
+import Task
+import Time
 import View exposing (unclickableButton)
 
 
@@ -60,7 +62,10 @@ update msg model =
             ( { model | yesno = Logic.startMain model.yesno initState }, Cmd.none )
 
         UserPressedButton maybeBool ->
-            ( { model | yesno = Logic.update { evaluation = maybeBool } model.yesno |> Logic.next initState }, Cmd.none )
+            ( model, Task.perform (NextTrial maybeBool) Time.now )
+
+        NextTrial maybeBool timestamp ->
+            ( { model | yesno = Logic.update { evaluation = maybeBool } model.yesno |> Logic.next timestamp initState }, Cmd.none )
 
         UserClickedSaveData ->
             let
@@ -156,7 +161,7 @@ weighted x =
 
 countHitsAndFalseAlarms =
     List.foldl
-        (\( word, answer ) ( hits, falseAlarms ) ->
+        (\( word, answer, _ ) ( hits, falseAlarms ) ->
             if answer.evaluation == Just True then
                 if word.exists == True then
                     ( hits + 1, falseAlarms )
@@ -174,6 +179,7 @@ type Msg
     = NoOp
     | UserClickedStartTask
     | UserPressedButton (Maybe Bool)
+    | NextTrial (Maybe Bool) Time.Posix
     | UserClickedSaveData
     | ServerRespondedWithUpdatedUser (Result Http.Error String)
 

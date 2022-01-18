@@ -261,6 +261,7 @@ type Msg
     = UserPressedButton (Maybe Bool)
     | UserPressedButtonWithTimestamp (Maybe Bool) Time.Posix
     | NextStepCinematic Step
+    | NextStepCinematicWithTimestamp Step Time.Posix
     | AudioEnded ( String, Time.Posix )
     | AudioStarted ( String, Time.Posix )
     | StartTraining
@@ -286,6 +287,9 @@ update msg model =
     in
     case msg of
         NextStepCinematic step ->
+            ( model, Task.perform (NextStepCinematicWithTimestamp step) Time.now )
+
+        NextStepCinematicWithTimestamp step timestamp ->
             case step of
                 Listening ->
                     ( { model
@@ -309,7 +313,7 @@ update msg model =
                             { model
                                 | acceptabilityTask =
                                     Logic.update { pState | step = End } model.acceptabilityTask
-                                        |> Logic.next pState
+                                        |> Logic.next timestamp pState
                             }
                     in
                     ( newModel
@@ -585,7 +589,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -598,7 +602,7 @@ updateHistoryEncoder version userId history =
         [ ( version, userId, history ) ]
 
 
-historyEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+historyEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
@@ -621,8 +625,8 @@ historyEncoder version userId history =
         ]
 
 
-historyItemEncoder : ( Trial, State ) -> Encode.Value
-historyItemEncoder ( trial, state ) =
+historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
+historyItemEncoder ( trial, state, _ ) =
     let
         toMillisOrZero timestamp =
             timestamp

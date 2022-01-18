@@ -235,6 +235,7 @@ type Msg
     | StartMain ExperimentInfo.Task (List Trial)
     | TimestampedMsg TimedMsg (Maybe Time.Posix)
     | UserClickedNextTrial Answer
+    | NextTrial Answer Time.Posix
     | UserClickedSaveData
     | UserConfirmedChoice Answer
     | UserClickedStartTraining
@@ -260,13 +261,16 @@ update msg model =
             ( { model | spr = model.spr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
 
         UserClickedNextTrial newAnswer ->
+            ( model, Task.perform (NextTrial newAnswer) Time.now )
+
+        NextTrial newAnswer timestamp ->
             let
                 newModel =
                     { model
                         | spr =
                             model.spr
                                 |> Logic.update { prevState | answer = newAnswer }
-                                |> Logic.next initState
+                                |> Logic.next timestamp initState
                     }
             in
             ( newModel, saveData newModel )
@@ -554,7 +558,7 @@ saveData model =
     let
         history =
             Logic.getHistory model.spr
-                |> List.filter (\( trial, _ ) -> not trial.isTraining)
+                |> List.filter (\( trial, _, timestamp ) -> not trial.isTraining)
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
@@ -576,7 +580,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -589,7 +593,7 @@ updateHistoryEncoder version userId history =
         [ ( version, userId, history ) ]
 
 
-historyEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+historyEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
@@ -612,14 +616,15 @@ historyEncoder version userId history =
         ]
 
 
-historyItemEncoder : ( Trial, State ) -> Encode.Value
-historyItemEncoder ( { expectedAnswer }, { answer, seenSegments } ) =
+historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
+historyItemEncoder ( { expectedAnswer }, { answer, seenSegments }, timestamp ) =
     Encode.object
         [ ( "answer", Encode.string (answerToString answer) )
         , ( "expectedAnswer", Encode.string expectedAnswer )
         , ( "timings", Encode.string (seenSegmentsToTimingsString seenSegments) )
         , ( "criticalSegmentTime", Encode.string (criticalSegmentTime seenSegments) )
         , ( "spillOverSegmentTime", Encode.string (spillOverSegmentTime seenSegments) )
+        , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
 
 

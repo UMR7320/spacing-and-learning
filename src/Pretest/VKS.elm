@@ -14,6 +14,7 @@ import Json.Encode as Encode
 import Logic
 import Random
 import Task
+import Time
 import Url.Builder
 import View
 
@@ -201,6 +202,7 @@ view vks =
 
 type Msg
     = UserClickedNextTrial
+    | NextTrial Time.Posix
     | UserClickedStartMain
     | UserClickedShowVideo
     | UserClickedSaveData
@@ -235,9 +237,12 @@ update msg model =
             ( { model | vks = updateTask (Logic.update prevAnswer) }, Cmd.none )
 
         UserClickedNextTrial ->
+            ( model, Task.perform NextTrial Time.now )
+
+        NextTrial timestamp ->
             let
                 newModel =
-                    { model | vks = updateTask (Logic.toggle >> Logic.next emptyAnswer) }
+                    { model | vks = updateTask (Logic.toggle >> Logic.next timestamp emptyAnswer) }
             in
             ( newModel
             , Cmd.batch
@@ -320,7 +325,7 @@ decodeAcceptabilityTrials =
     Data.decodeRecords decoder
 
 
-historyEncoder : String -> String -> List ( Trial, Answer ) -> Encode.Value
+historyEncoder : String -> String -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
@@ -343,17 +348,18 @@ historyEncoder version userId history =
         ]
 
 
-historyItemEncoder : ( Trial, Answer ) -> Encode.Value
-historyItemEncoder ( { id, verb }, { knowledge, definition, usage } ) =
+historyItemEncoder : ( Trial, Answer, Time.Posix ) -> Encode.Value
+historyItemEncoder ( { id, verb }, { knowledge, definition, usage }, timestamp ) =
     Encode.object
         [ ( "verb", Encode.string verb )
         , ( "vks_knowledge", Encode.string (familiarityToString knowledge) )
         , ( "vks_definition", Encode.string definition )
         , ( "vks_usage", Encode.string usage )
+        , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, Answer ) -> Encode.Value
+updateHistoryEncoder : String -> String -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list

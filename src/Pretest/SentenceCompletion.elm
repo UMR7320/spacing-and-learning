@@ -13,6 +13,7 @@ import Json.Encode as Encode
 import Logic
 import Random
 import Task
+import Time
 import View
 
 
@@ -222,6 +223,7 @@ readOnlyAmorce firstAmorce firstProduction =
 type Msg
     = UserClickedToggleFeedback
     | UserClickedNextTrial
+    | NextTrial Time.Posix
     | UserClickedStartMain ExperimentInfo.Task (List Trial)
     | UserClickedSaveData
     | UserUpdatedField Field String
@@ -241,11 +243,14 @@ update msg model =
             ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | order = field } }, Cmd.none )
 
         UserClickedNextTrial ->
+            ( model, Task.perform NextTrial Time.now )
+
+        NextTrial timestamp ->
             ( { model
                 | sentenceCompletion =
                     model.sentenceCompletion
                         |> Logic.toggle
-                        |> Logic.next initState
+                        |> Logic.next timestamp initState
               }
             , Cmd.batch
                 [ Random.generate
@@ -340,7 +345,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+updateHistoryEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -353,7 +358,7 @@ updateHistoryEncoder version userId history =
         [ ( version, userId, history ) ]
 
 
-historyEncoder : String -> String -> List ( Trial, State ) -> Encode.Value
+historyEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
@@ -376,14 +381,15 @@ historyEncoder version userId history =
         ]
 
 
-historyItemEncoder : ( Trial, State ) -> Encode.Value
-historyItemEncoder ( { id, firstAmorce, secondAmorce }, { firstProduction, secondProduction } ) =
+historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
+historyItemEncoder ( { id, firstAmorce, secondAmorce }, { firstProduction, secondProduction }, timestamp ) =
     Encode.object
         [ ( "trialId", Encode.string id )
         , ( "firstAmorce", Encode.string firstAmorce )
         , ( "secondAmorce", Encode.string secondAmorce )
         , ( "firstProduction", Encode.string firstProduction )
         , ( "secondProduction", Encode.string secondProduction )
+        , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
 
 

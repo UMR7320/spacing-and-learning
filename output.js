@@ -33,7 +33,10 @@ const displayAsTable = (elementId, records) => {
   if (records.length === 0) {
     html = "No data available";
   } else {
-    const keys = Object.keys(records[0]);
+    const keys = records.reduce(
+      (keys, record) => new Set([...keys, ...Object.keys(record)]),
+      new Set()
+    );
     html = "<table><thead><tr>";
     for (key of keys) {
       html += `<td>${key}</td>`;

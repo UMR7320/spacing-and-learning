@@ -5,6 +5,7 @@ import ExperimentInfo
 import Html.Styled as Html
 import Json.Encode as Encode
 import Task
+import Time
 
 
 type Task trial state
@@ -27,44 +28,9 @@ type alias Data trial state =
     , next : Maybe trial
     , state : state
     , feedback : Bool
-    , history : List ( trial, state )
+    , history : List ( trial, state, Time.Posix )
     , infos : ExperimentInfo.Task
     }
-
-
-saveData responseHandler maybeUserId taskId task =
-    let
-        history =
-            getHistory task
-
-        taskId_ =
-            taskId
-
-        callbackHandler =
-            responseHandler
-
-        userId =
-            maybeUserId |> Maybe.withDefault "recd18l2IBRQNI05y"
-
-        summarizedTrialEncoder =
-            Encode.list
-                (\( t, s ) ->
-                    Encode.object
-                        [ ( "fields"
-                          , Encode.object
-                                [ ( "trialUid", Encode.list Encode.string [ t.uid ] )
-                                , ( "userUid", Encode.list Encode.string [ userId ] )
-                                , ( "Task_UID", Encode.list Encode.string [ taskId ] )
-                                , ( "attempt", Encode.string s.userAnswer )
-                                ]
-                          )
-                        ]
-                )
-
-        sendInBatch_ =
-            Data.sendInBatch summarizedTrialEncoder taskId_ userId history
-    in
-    Task.attempt callbackHandler sendInBatch_
 
 
 type alias Info =
@@ -89,8 +55,8 @@ type alias Identified state =
     { state | uid : String }
 
 
-next : s -> Task t s -> Task t s
-next resetedState task =
+next : Time.Posix -> s -> Task t s -> Task t s
+next timestamp resetedState task =
     case task of
         Running Training data ->
             case data.trainingTrials of
@@ -100,7 +66,7 @@ next resetedState task =
                             | trainingTrials = y :: z :: zs
                             , current = Just y
                             , next = Just z
-                            , history = ( x, data.state ) :: data.history
+                            , history = ( x, data.state, timestamp ) :: data.history
                             , feedback = not data.feedback
                             , state = resetedState
                         }
@@ -111,7 +77,7 @@ next resetedState task =
                             | trainingTrials = []
                             , current = Nothing
                             , next = Nothing
-                            , history = ( last, data.state ) :: data.history
+                            , history = ( last, data.state, timestamp ) :: data.history
                             , feedback = not data.feedback
                             , state = resetedState
                         }
@@ -122,7 +88,7 @@ next resetedState task =
                             | trainingTrials = [ y ]
                             , current = Just y
                             , next = Nothing
-                            , history = ( x, data.state ) :: data.history
+                            , history = ( x, data.state, timestamp ) :: data.history
                             , feedback = not data.feedback
                             , state = resetedState
                         }
@@ -146,7 +112,7 @@ next resetedState task =
                             | mainTrials = y :: z :: zs
                             , current = Just y
                             , next = Just z
-                            , history = ( x, data.state ) :: data.history
+                            , history = ( x, data.state, timestamp ) :: data.history
                             , feedback = not data.feedback
                             , state = resetedState
                         }
@@ -157,7 +123,7 @@ next resetedState task =
                             | mainTrials = []
                             , current = Nothing
                             , next = Nothing
-                            , history = ( last, data.state ) :: data.history
+                            , history = ( last, data.state, timestamp ) :: data.history
                             , feedback = not data.feedback
                             , state = resetedState
                         }
@@ -168,7 +134,7 @@ next resetedState task =
                             | mainTrials = [ y ]
                             , current = Just y
                             , next = Nothing
-                            , history = ( x, data.state ) :: data.history
+                            , history = ( x, data.state, timestamp ) :: data.history
                             , feedback = not data.feedback
                             , state = resetedState
                         }
@@ -328,7 +294,7 @@ getTrial task =
             Nothing
 
 
-getHistory : Task t s -> List ( t, s )
+getHistory : Task t s -> List ( t, s, Time.Posix )
 getHistory task =
     case task of
         Running _ { history } ->
