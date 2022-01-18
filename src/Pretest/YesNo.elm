@@ -235,7 +235,7 @@ view task =
                                         [ kbd
                                             []
                                             [ text "j" ]
-                                        , text "= I don't know or I'm not sure"
+                                        , text "I know this word"
                                         ]
                                     ]
                                 ]
