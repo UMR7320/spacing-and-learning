@@ -250,13 +250,7 @@ viewKey label =
 
 viewTransition infos msg buttontext =
     div [ class "flex flex-col items-center justify-center" ]
-        [ p [] [ View.fromUnsafeMarkdown infos ]
-        , View.button
-            { isDisabled = False
-            , message = msg
-            , txt = buttontext
-            }
-        ]
+        [ p [] [ View.fromUnsafeMarkdown infos ] ]
 
 
 
