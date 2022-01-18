@@ -123,12 +123,7 @@ view task =
 
 renderTask task trial data history allTrials =
     div [ class "w-full" ]
-        [ if List.isEmpty data.trainingTrials then
-            View.tooltip data.infos.instructions_short
-
-          else
-            div [] []
-        , View.fromMarkdown trial.question
+        [ View.fromMarkdown trial.question
         , div
             [ class "w-full pt-8", disabled data.feedback ]
           <|
