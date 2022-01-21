@@ -46,7 +46,7 @@ const downloadCSV = event => {
 
   const csvFile = new Blob([data.join("\n")], { type: "text/csv" });
   const downloadLink = document.createElement("a");
-  downloadLink.download = `${table.parentNode.id}-${new Date().toUTCString()}`;
+  downloadLink.download = `${table.parentNode.id}-${new Date().toUTCString()}.csv`;
   downloadLink.href = window.URL.createObjectURL(csvFile);
   downloadLink.style.display = "none";
   document.body.appendChild(downloadLink);
