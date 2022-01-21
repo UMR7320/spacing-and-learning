@@ -28,10 +28,35 @@ const formatActivityData = (activity, records) =>
     return answers;
   });
 
+const downloadCSV = event => {
+  const table = event.target.parentNode.querySelector("table");
+  const data = [];
+  const rows = table.querySelectorAll("tr");
+
+  for (var i = 0; i < rows.length; i++) {
+    const row = [];
+    const cols = rows[i].querySelectorAll("td, th");
+
+    for (var j = 0; j < cols.length; j++) {
+      row.push(cols[j].innerText);
+    }
+
+    data.push(row.join(";"));
+  }
+
+  const csvFile = new Blob([data.join("\n")], { type: "text/csv" });
+  const downloadLink = document.createElement("a");
+  downloadLink.download = `${table.parentNode.id}-${new Date().toUTCString()}`;
+  downloadLink.href = window.URL.createObjectURL(csvFile);
+  downloadLink.style.display = "none";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+};
+
 const displayAsTable = (elementId, records) => {
   let html;
   if (records.length === 0) {
-    html = "No data available";
+    html = "<div>No data available</div>";
   } else {
     const keys = records.reduce(
       (keys, record) => new Set([...keys, ...Object.keys(record)]),
@@ -53,6 +78,10 @@ const displayAsTable = (elementId, records) => {
   }
 
   document.getElementById(elementId).insertAdjacentHTML("afterbegin", html);
+  const button = document.createElement("button");
+  button.innerHTML = "Download";
+  button.addEventListener("click", downloadCSV);
+  document.getElementById(elementId).prepend(button);
 };
 
 const displayData = (elementId, prefix, records) =>

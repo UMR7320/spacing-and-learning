@@ -24,3 +24,12 @@ td {
 tbody tr:nth-child(odd) {
   background: #fafafa;
 }
+
+details > * + *,
+div[id] > * + * {
+  margin-top: 1rem;
+}
+
+button {
+  display: block;
+}
