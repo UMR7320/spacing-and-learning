@@ -46,7 +46,9 @@ const downloadCSV = event => {
 
   const csvFile = new Blob([data.join("\n")], { type: "text/csv" });
   const downloadLink = document.createElement("a");
-  downloadLink.download = `${table.parentNode.id}-${new Date().toUTCString()}.csv`;
+  downloadLink.download = `${
+    table.parentNode.id
+  }-${new Date().toUTCString()}.csv`;
   downloadLink.href = window.URL.createObjectURL(csvFile);
   downloadLink.style.display = "none";
   document.body.appendChild(downloadLink);
@@ -77,6 +79,7 @@ const displayAsTable = (elementId, records) => {
     html += "</tbody><table>";
   }
 
+  document.getElementById(elementId).innerHTML = "";
   document.getElementById(elementId).insertAdjacentHTML("afterbegin", html);
   const button = document.createElement("button");
   button.innerHTML = "Download";
@@ -87,32 +90,45 @@ const displayAsTable = (elementId, records) => {
 const displayData = (elementId, prefix, records) =>
   displayAsTable(elementId, formatData(prefix, records));
 
-fetch(
-  "/.netlify/functions/api?app=appvKOc8FH0j48Hw1&base=users&view=VKS_output"
-)
-  .then(response => response.json())
-  .then(json => json.records)
-  .then(data => {
-    [
-      ["vks", "VKS"],
-      ["spr", "SPR"],
-      ["sentence-completion", "SentenceCompletion"],
-      ["acceptability", "Acceptability"]
-    ].forEach(([elementId, prefix]) => {
-      displayData(elementId, prefix, data);
+const fetchData = offset => {
+  return fetch(
+    `/.netlify/functions/api?app=appvKOc8FH0j48Hw1&base=users&view=VKS_output&pageSize=80&outputRequest=1${
+      offset ? `&offset=${offset}` : ""
+    }`
+  )
+    .then(response => response.json())
+    .then(json => {
+      if (!json.offset) {
+        return json.records;
+      } else {
+        return fetchData(json.offset).then(records =>
+          json.records.concat(records)
+        );
+      }
     });
+};
 
-    [
-      ["meaning1", "Meaning1"],
-      ["meaning2", "Meaning2"],
-      ["meaning3", "Meaning3"],
-      ["CU1", "CU1"],
-      ["CU2", "CU2"],
-      ["CU3", "CU3"],
-      ["spelling1", "Spelling1"],
-      ["spelling2", "Spelling2"],
-      ["spelling3", "Spelling3"]
-    ].forEach(([elementId, activity]) => {
-      displayAsTable(elementId, formatActivityData(activity, data));
-    });
+fetchData().then(data => {
+  [
+    ["vks", "VKS"],
+    ["spr", "SPR"],
+    ["sentence-completion", "SentenceCompletion"],
+    ["acceptability", "Acceptability"]
+  ].forEach(([elementId, prefix]) => {
+    displayData(elementId, prefix, data);
   });
+
+  [
+    ["meaning1", "Meaning1"],
+    ["meaning2", "Meaning2"],
+    ["meaning3", "Meaning3"],
+    ["CU1", "CU1"],
+    ["CU2", "CU2"],
+    ["CU3", "CU3"],
+    ["spelling1", "Spelling1"],
+    ["spelling2", "Spelling2"],
+    ["spelling3", "Spelling3"]
+  ].forEach(([elementId, activity]) => {
+    displayAsTable(elementId, formatActivityData(activity, data));
+  });
+});
