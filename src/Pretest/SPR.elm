@@ -617,9 +617,11 @@ historyEncoder version userId history =
 
 
 historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
-historyItemEncoder ( { expectedAnswer }, { answer, seenSegments }, timestamp ) =
+historyItemEncoder ( { id, expectedAnswer, isGrammatical }, { answer, seenSegments }, timestamp ) =
     Encode.object
-        [ ( "answer", Encode.string (answerToString answer) )
+        [ ("trialId", Encode.string id)
+        , ( "answer", Encode.string (answerToString answer) )
+        , ( "isGrammatical", Encode.bool isGrammatical )
         , ( "expectedAnswer", Encode.string expectedAnswer )
         , ( "timings", Encode.string (seenSegmentsToTimingsString seenSegments) )
         , ( "criticalSegmentTime", Encode.string (criticalSegmentTime seenSegments) )

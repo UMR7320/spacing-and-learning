@@ -351,7 +351,8 @@ historyEncoder version userId history =
 historyItemEncoder : ( Trial, Answer, Time.Posix ) -> Encode.Value
 historyItemEncoder ( { id, verb }, { knowledge, definition, usage }, timestamp ) =
     Encode.object
-        [ ( "verb", Encode.string verb )
+        [ ( "trialId", Encode.string id )
+        , ( "verb", Encode.string verb )
         , ( "vks_knowledge", Encode.string (familiarityToString knowledge) )
         , ( "vks_definition", Encode.string definition )
         , ( "vks_usage", Encode.string usage )
