@@ -41,6 +41,7 @@ type alias Spr model =
 
 type alias Trial =
     { id : String
+    , identifier : String
     , taggedSegments : List TaggedSegment
     , question : String
     , isGrammatical : Bool
@@ -528,6 +529,7 @@ decodeAcceptabilityTrials =
         decoder =
             Decode.succeed Trial
                 |> required "id" Decode.string
+                |> required "Identifier" Decode.string
                 |> custom (Decode.field "Tagged Paragraph ($CRITIC$, ~SPILL-OVER~)" Decode.string |> Decode.map paragraphToTaggedSegments)
                 |> required "Question" Decode.string
                 |> optional "isGrammatical" Decode.bool False
@@ -617,9 +619,10 @@ historyEncoder version userId history =
 
 
 historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
-historyItemEncoder ( { id, expectedAnswer, isGrammatical }, { answer, seenSegments }, timestamp ) =
+historyItemEncoder ( { id, identifier, expectedAnswer, isGrammatical }, { answer, seenSegments }, timestamp ) =
     Encode.object
         [ ("trialId", Encode.string id)
+        , ("identifier", Encode.string identifier)
         , ( "answer", Encode.string (answerToString answer) )
         , ( "isGrammatical", Encode.bool isGrammatical )
         , ( "expectedAnswer", Encode.string expectedAnswer )
