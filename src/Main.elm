@@ -1,9 +1,7 @@
 module Main exposing (main)
 
 import Browser
-import Browser.Events exposing (onKeyDown)
-import Browser.Navigation as Nav exposing (pushUrl)
-import Consent
+import Browser.Navigation as Nav
 import Data
 import Date
 import Dict
@@ -11,11 +9,10 @@ import DnDList
 import DnDList.Groups exposing (Model)
 import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (accept, checked, class, href, type_)
+import Html.Styled.Attributes exposing (checked, class, href, type_)
 import Html.Styled.Events
 import Http
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
 import Ports
@@ -35,7 +32,6 @@ import Session1.Meaning as Meaning
 import Session1.Presentation as Presentation
 import Session1.Session as Session1
 import Session1.Spelling as SpellingLvl1
-import Session1.Top
 import Session2.CU2 as CU2
 import Session2.Session as Session2
 import Session2.Spelling as Scrabble
@@ -44,13 +40,11 @@ import Session3.CU3 as CU3
 import Session3.Session as Session3
 import Session3.Spelling3 as Spelling3
 import Session3.Synonym as Synonym
-import Svg.Attributes exposing (xlinkHref)
 import Task
 import Task.Parallel as Para
 import Time
 import Url exposing (Url)
 import Url.Builder
-import Url.Parser.Query
 import View exposing (navOut)
 
 
@@ -194,9 +188,6 @@ init _ url key =
         route =
             Route.fromUrl url
 
-        version =
-            Url.Parser.Query.string "version"
-
         ( loadingStateSession1, fetchSession1 ) =
             Session1.getAll
 
@@ -234,7 +225,7 @@ init _ url key =
                 , user = Nothing
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ cmd, Data.getGeneralParemeters GotGeneralParameters ]
+            , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
             )
 
         Route.TermsAndConditions ->
@@ -247,7 +238,7 @@ init _ url key =
                 , user = Nothing
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ cmd, Data.getGeneralParemeters GotGeneralParameters ]
+            , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
             )
 
         Route.AuthenticatedSession2 userid _ ->
@@ -299,7 +290,7 @@ init _ url key =
                 [ cmd
                 , Cmd.map Pretest fetchSessionPretest
                 , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
-                , Data.getGeneralParemeters GotGeneralParameters
+                , Data.getGeneralParameters GotGeneralParameters
                 ]
             )
 

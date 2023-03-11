@@ -211,7 +211,7 @@ getTrialsFromServer_ baseName viewName callbackMsg decoder =
         }
 
 
-getGeneralParemeters responseHandler =
+getGeneralParameters responseHandler =
     Http.get
         { url =
             buildQuery
