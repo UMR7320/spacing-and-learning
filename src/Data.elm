@@ -6,6 +6,7 @@ import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Process
+import RemoteData
 import Task
 import Url.Builder
 
@@ -221,11 +222,12 @@ getGeneralParameters responseHandler =
                 }
         , expect =
             Http.expectJson
-                responseHandler
+                (RemoteData.fromResult >> responseHandler)
                 decodeGeneralParameters
         }
 
 
+decodeGeneralParameters : Decoder GeneralParameters
 decodeGeneralParameters =
     let
         decoder =
@@ -234,16 +236,16 @@ decodeGeneralParameters =
                 |> required "m_spacing (DAYS)" int
                 |> required "RI (DAYS)" int
                 |> required "RI Surprise (DAYS)" int
-                |> optional "Consentement" string "MISSING CONSENTEMENT"
+                |> required "Consentement" string
     in
-    decodeRecords decoder
+    decodeSingleRecord decoder
 
 
 type alias GeneralParameters =
     { distributedSpacing : Int
     , massedSpacing : Int
     , retentionInterval : Int
-    , retentionIntervalSuprise : Int
+    , retentionIntervalSurprise : Int
     , consent : String
     }
 
@@ -326,6 +328,28 @@ decodeRecords xs =
     in
     decode (Decode.list xs)
 
+
+decodeSingleRecord : Decoder a -> Decoder a
+decodeSingleRecord xs =
+    let
+        decode fieldsDecoder =
+            Decode.field "records" fieldsDecoder
+    in
+    decode (singleElementArrayDecoder xs)
+
+
+singleElementArrayDecoder : Decoder a -> Decoder a
+singleElementArrayDecoder decoder =
+    list decoder
+        |> andThen
+            (\elements ->
+                case elements of
+                    element :: [] ->
+                        succeed element
+
+                    _ ->
+                        fail "Expected exactly one element"
+            )
 
 type alias AudioFile =
     { url : String

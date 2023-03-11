@@ -1,4 +1,5 @@
 module Main exposing (main)
+import Maybe exposing (withDefault)
 
 import Browser
 import Browser.Navigation as Nav
@@ -111,14 +112,10 @@ type alias Model =
     , errorTracking : List Http.Error
     , currentDate : Maybe ( Time.Zone, Time.Posix )
     , preferedStartDate : Maybe Date.Date
-    , distributedSpacing : Int
-    , massedSpacing : Int
-    , retentionInterval : Int
-    , retentionIntervalSurprise : Int
-    , consent : String
     , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
     , version : Maybe String
     , session : Maybe String
+    , generalParameters: RemoteData Http.Error Data.GeneralParameters
     }
 
 
@@ -174,11 +171,7 @@ defaultModel key route =
     , sessions = RemoteData.Loading
     , version = Nothing
     , session = Nothing
-    , distributedSpacing = 7
-    , massedSpacing = 2
-    , retentionInterval = 14
-    , retentionIntervalSurprise = 56
-    , consent = ""
+    , generalParameters = RemoteData.Loading
     }
 
 
@@ -423,104 +416,18 @@ body model =
                         List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
                     Route.Calendar group ->
-                        case model.currentDate of
-                            Just ( zone, date_ ) ->
-                                let
-                                    date =
-                                        Date.fromPosix zone date_
+                        case model.generalParameters of
+                            RemoteData.NotAsked ->
+                                [ View.loading ]
 
-                                    possibleDates =
-                                        Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Days 8 date)
-                                            |> List.map
-                                                (\time ->
-                                                    label []
-                                                        [ input
-                                                            [ type_ "radio"
-                                                            , Html.Styled.Events.onClick (UserClickedChoseNewDate time)
-                                                            , checked
-                                                                (case model.preferedStartDate of
-                                                                    Just d ->
-                                                                        d == time
+                            RemoteData.Loading ->
+                                [ View.loading ]
 
-                                                                    _ ->
-                                                                        False
-                                                                )
-                                                            ]
-                                                            []
-                                                        , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
-                                                        ]
-                                                )
-                                in
-                                [ div [ class "flow calendar" ]
-                                    [ h1 [] [ text "Planning" ]
-                                    , p [] [ text "Before starting today, choose your personalised calendar for your LexLearn sessions. Click on a starting date to see which four days you need to be available. If some days don't suit, click on a different starting date." ]
-                                    , div [ class "possible-dates" ] possibleDates
-                                    , case model.preferedStartDate of
-                                        Nothing ->
-                                            text ""
+                            RemoteData.Failure error ->
+                                [ text (Data.buildErrorMessage error) ]
 
-                                        Just d ->
-                                            let
-                                                datesToBook =
-                                                    List.map
-                                                        (\eachDate ->
-                                                            let
-                                                                formattedDate =
-                                                                    Date.format "EEEE, d MMMM y" eachDate
-                                                            in
-                                                            li [] [ text formattedDate ]
-                                                        )
-                                                        sessionsDates
-                                                        |> ul [ class "dates-to-book" ]
-
-                                                sessionsDates =
-                                                    [ s1, s2, s3, s4 ]
-
-                                                spacing =
-                                                    case group of
-                                                        Route.Massed ->
-                                                            model.massedSpacing
-
-                                                        Route.Distributed ->
-                                                            model.distributedSpacing
-
-                                                s1 =
-                                                    Date.add Date.Days 0 d
-
-                                                s2 =
-                                                    Date.add Date.Days spacing s1
-
-                                                s3 =
-                                                    Date.add Date.Days spacing s2
-
-                                                s4 =
-                                                    Date.add Date.Days model.retentionInterval s3
-
-                                                s5 =
-                                                    Date.add Date.Days model.retentionIntervalSurprise s3
-                                            in
-                                            div [ class "flow" ]
-                                                ([ p [] [ text "You need to be available at least one hour on each of these days" ] ]
-                                                    ++ [ datesToBook ]
-                                                    ++ [ View.button
-                                                            { message =
-                                                                UserConfirmedPreferedDates
-                                                                    { s1 = Date.toIsoString s1
-                                                                    , s2 = Date.toIsoString s2
-                                                                    , s3 = Date.toIsoString s3
-                                                                    , s4 = Date.toIsoString s4
-                                                                    , s5 = Date.toIsoString s5
-                                                                    }
-                                                            , txt = "Continue"
-                                                            , isDisabled = False
-                                                            }
-                                                       ]
-                                                )
-                                    ]
-                                ]
-
-                            Nothing ->
-                                []
+                            RemoteData.Success parameters ->
+                                viewCalendar model group parameters
 
             Home ->
                 [ div [ class "flex flex-col" ]
@@ -540,11 +447,22 @@ body model =
                 ]
 
             TermsAndConditions ->
-                [ div [ class "flex flex-col items-center" ]
-                    [ div [ class "mb-8" ] [ View.fromMarkdown model.consent ]
-                    , View.button { message = UserClickedSignInButton, txt = "Confirmer", isDisabled = False }
-                    ]
-                ]
+                case model.generalParameters of
+                    RemoteData.NotAsked ->
+                        [ View.loading ]
+
+                    RemoteData.Loading ->
+                        [ View.loading ]
+
+                    RemoteData.Failure error ->
+                        [ text (Data.buildErrorMessage error) ]
+
+                    RemoteData.Success parameters ->
+                        [ div [ class "flex flex-col items-center" ]
+                            [ div [ class "mb-8" ] [ View.fromMarkdown parameters.consent ]
+                            , View.button { message = UserClickedSignInButton, txt = "Confirmer", isDisabled = False }
+                            ]
+                        ]
 
             NotFound ->
                 View.notFound
@@ -582,6 +500,107 @@ viewSessionInstructions remoteData sessionName url =
 
 
 
+viewCalendar : Model -> Route.Group -> Data.GeneralParameters -> List (Html Msg)
+viewCalendar model group generalParameters =
+    case model.currentDate of
+        Just ( zone, date_ ) ->
+            let
+                date =
+                    Date.fromPosix zone date_
+
+                possibleDates =
+                    Date.range Date.Day 1 (Date.add Date.Days 1 date) (Date.add Date.Days 8 date)
+                        |> List.map
+                            (\time ->
+                                label []
+                                    [ input
+                                        [ type_ "radio"
+                                        , Html.Styled.Events.onClick (UserClickedChoseNewDate time)
+                                        , checked
+                                            (case model.preferedStartDate of
+                                                Just d ->
+                                                    d == time
+
+                                                _ ->
+                                                    False
+                                            )
+                                        ]
+                                        []
+                                    , Date.format "EEEE, d MMMM y" time |> String.append " " |> text
+                                    ]
+                            )
+            in
+            [ div [ class "flow calendar" ]
+                [ h1 [] [ text "Planning" ]
+                , p [] [ text "Before starting today, choose your personalised calendar for your LexLearn sessions. Click on a starting date to see which four days you need to be available. If some days don't suit, click on a different starting date." ]
+                , div [ class "possible-dates" ] possibleDates
+                , case model.preferedStartDate of
+                    Nothing ->
+                        text ""
+
+                    Just d ->
+                        let
+                            datesToBook =
+                                List.map
+                                    (\eachDate ->
+                                        let
+                                            formattedDate =
+                                                Date.format "EEEE, d MMMM y" eachDate
+                                        in
+                                        li [] [ text formattedDate ]
+                                    )
+                                    sessionsDates
+                                    |> ul [ class "dates-to-book" ]
+
+                            sessionsDates =
+                                [ s1, s2, s3, s4 ]
+
+                            spacing =
+                                case group of
+                                    Route.Massed ->
+                                        generalParameters.massedSpacing
+
+                                    Route.Distributed ->
+                                        generalParameters.distributedSpacing
+
+                            s1 =
+                                Date.add Date.Days 0 d
+
+                            s2 =
+                                Date.add Date.Days spacing s1
+
+                            s3 =
+                                Date.add Date.Days spacing s2
+
+                            s4 =
+                                Date.add Date.Days generalParameters.retentionInterval s3
+
+                            s5 =
+                                Date.add Date.Days generalParameters.retentionIntervalSurprise s3
+                        in
+                        div [ class "flow" ]
+                            ([ p [] [ text "You need to be available at least one hour on each of these days" ] ]
+                                ++ [ datesToBook ]
+                                ++ [ View.button
+                                        { message =
+                                            UserConfirmedPreferedDates
+                                                { s1 = Date.toIsoString s1
+                                                , s2 = Date.toIsoString s2
+                                                , s3 = Date.toIsoString s3
+                                                , s4 = Date.toIsoString s4
+                                                , s5 = Date.toIsoString s5
+                                                }
+                                        , txt = "Continue"
+                                        , isDisabled = False
+                                        }
+                                   ]
+                            )
+                ]
+            ]
+
+        Nothing ->
+            []
+
 -- UPDATE
 
 
@@ -596,7 +615,7 @@ type Msg
     | UserClickedChoseNewDate Date.Date
     | UserConfirmedPreferedDates { s1 : String, s2 : String, s3 : String, s4 : String, s5 : String }
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
-    | GotGeneralParameters (Result.Result Http.Error (List Data.GeneralParameters))
+    | GotGeneralParameters (RemoteData Http.Error Data.GeneralParameters)
     | NoOp
       -- PreTest
     | Acceptability Acceptability.Msg
@@ -818,27 +837,7 @@ update msg model =
             ( { model | sessions = result }, Cmd.none )
 
         GotGeneralParameters parameters ->
-            case parameters of
-                Result.Err reason ->
-                    ( model, Cmd.none )
-
-                Result.Ok params ->
-                    let
-                        maybeGeneralParameters =
-                            List.head params
-                    in
-                    case maybeGeneralParameters of
-                        Nothing ->
-                            ( model, Cmd.none )
-
-                        Just p ->
-                            ( { model
-                                | distributedSpacing = p.distributedSpacing
-                                , massedSpacing = p.massedSpacing
-                                , retentionInterval = p.retentionInterval
-                                , retentionIntervalSurprise = p.retentionIntervalSuprise
-                                , consent = p.consent
-                              }
+                            ( { model | generalParameters = parameters }
                             , Cmd.none
                             )
 

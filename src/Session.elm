@@ -5,7 +5,7 @@ import Dict
 import Http exposing (expectJson)
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
-import RemoteData exposing (RemoteData)
+import RemoteData
 
 
 type Session a
