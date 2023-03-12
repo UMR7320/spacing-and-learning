@@ -18,7 +18,7 @@ function handleTableRequest(table_name) {
 const formattedReturn = require("./formattedReturn");
 module.exports = async (event) => {
   try {
-    const base = Airtable.base(event.queryStringParameters.app);
+    const base = Airtable.base(process.env.AIRTABLE_BASE);
     const learningData = await base(handleTableRequest(event.queryStringParameters.base))
       .select({ maxRecords: 200, view: (event.queryStringParameters.view) })
       .all();

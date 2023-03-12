@@ -9,7 +9,7 @@ const formattedReturn = require("./formattedReturn");
 module.exports = async (event) => {
   const fields = JSON.parse(event.body);
   try {
-    const base = Airtable.base(event.queryStringParameters.app);
+    const base = Airtable.base(process.env.AIRTABLE_BASE);
     const createdRecord = await base(event.queryStringParameters.base).create(
       fields
 

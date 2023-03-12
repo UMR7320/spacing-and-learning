@@ -1,6 +1,6 @@
 const Airtable = require("airtable");
-const https = require("https");
 const queryString = require("querystring");
+const getJson = require("./getJson");
 
 Airtable.configure({
   endpointUrl: process.env.API_URL,
@@ -65,7 +65,7 @@ const outputRequest = async event => {
   if (event.queryStringParameters.offset) {
     options.offset = event.queryStringParameters.offset;
   }
-  const learningData = await getJSON(
+  const learningData = await getJson(
     `https://api.airtable.com/v0/${
       event.queryStringParameters.app
     }/${table}?${queryString.stringify(options)}`
@@ -77,24 +77,4 @@ const outputRequest = async event => {
   }));
 
   return formattedReturn(200, learningData);
-};
-
-const getJSON = url => {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, resp => {
-        let data = "";
-
-        resp.on("data", chunk => {
-          data += chunk;
-        });
-
-        resp.on("end", () => {
-          resolve(JSON.parse(data));
-        });
-      })
-      .on("error", err => {
-        reject({ err });
-      });
-  });
 };

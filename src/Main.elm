@@ -1,5 +1,4 @@
 module Main exposing (main)
-import Maybe exposing (withDefault)
 
 import Browser
 import Browser.Navigation as Nav
@@ -16,6 +15,7 @@ import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Logic
+import Maybe exposing (withDefault)
 import Ports
 import PostTests.CloudWords as CloudWords
 import Pretest.Acceptability as Acceptability
@@ -115,7 +115,8 @@ type alias Model =
     , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
     , version : Maybe String
     , session : Maybe String
-    , generalParameters: RemoteData Http.Error Data.GeneralParameters
+    , generalParameters : RemoteData Http.Error Data.GeneralParameters
+    , userCanParticipate : RemoteData Http.Error Bool
     }
 
 
@@ -172,6 +173,7 @@ defaultModel key route =
     , version = Nothing
     , session = Nothing
     , generalParameters = RemoteData.Loading
+    , userCanParticipate = RemoteData.NotAsked
     }
 
 
@@ -278,12 +280,14 @@ init _ url key =
                 , user = Just userid
                 , version = v
                 , pretest = Loading loadingStatePretest
+                , userCanParticipate = RemoteData.Loading
               }
             , Cmd.batch
                 [ cmd
                 , Cmd.map Pretest fetchSessionPretest
                 , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
                 , Data.getGeneralParameters GotGeneralParameters
+                , Data.getCanUserParticipate userid GotCanUserParticipate
                 ]
             )
 
@@ -393,41 +397,55 @@ body model =
                         List.map (Html.Styled.map WordCloud) (CloudWords.view model)
 
             Route.Pretest userId task version ->
-                case task of
-                    Route.EmailSent ->
-                        [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
+                case model.userCanParticipate of
+                    RemoteData.NotAsked ->
+                        [ View.loading ]
 
-                    Route.SPR ->
-                        List.map (Html.Styled.map SPR) (SPR.view model.spr)
+                    RemoteData.Loading ->
+                        [ View.loading ]
 
-                    Route.SentenceCompletion ->
-                        List.map (Html.Styled.map SentenceCompletion) (SentenceCompletion.view model.sentenceCompletion)
+                    RemoteData.Failure error ->
+                        [ text (Data.buildErrorMessage error) ]
 
-                    Route.GeneralInfos ->
-                        []
+                    RemoteData.Success userCanParticipate ->
+                        if not userCanParticipate then
+                            [ text "Vous ne pouvez pas participer plusieurs fois à cette expérience." ]
+                        else
+                            case task of
+                                Route.EmailSent ->
+                                    [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
 
-                    Route.VKS ->
-                        List.map (Html.Styled.map VKS) (VKS.view model.vks)
+                                Route.SPR ->
+                                    List.map (Html.Styled.map SPR) (SPR.view model.spr)
 
-                    Route.Acceptability sub ->
-                        List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
+                                Route.SentenceCompletion ->
+                                    List.map (Html.Styled.map SentenceCompletion) (SentenceCompletion.view model.sentenceCompletion)
 
-                    Route.YesNo ->
-                        List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
+                                Route.GeneralInfos ->
+                                    []
 
-                    Route.Calendar group ->
-                        case model.generalParameters of
-                            RemoteData.NotAsked ->
-                                [ View.loading ]
+                                Route.VKS ->
+                                    List.map (Html.Styled.map VKS) (VKS.view model.vks)
 
-                            RemoteData.Loading ->
-                                [ View.loading ]
+                                Route.Acceptability sub ->
+                                    List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
 
-                            RemoteData.Failure error ->
-                                [ text (Data.buildErrorMessage error) ]
+                                Route.YesNo ->
+                                    List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
-                            RemoteData.Success parameters ->
-                                viewCalendar model group parameters
+                                Route.Calendar group ->
+                                    case model.generalParameters of
+                                        RemoteData.NotAsked ->
+                                            [ View.loading ]
+
+                                        RemoteData.Loading ->
+                                            [ View.loading ]
+
+                                        RemoteData.Failure error ->
+                                            [ text (Data.buildErrorMessage error) ]
+
+                                        RemoteData.Success parameters ->
+                                            viewCalendar model group parameters
 
             Home ->
                 [ div [ class "flex flex-col" ]
@@ -497,7 +515,6 @@ viewSessionInstructions remoteData sessionName url =
 
         RemoteData.Failure reason ->
             [ text (Data.buildErrorMessage reason) ]
-
 
 
 viewCalendar : Model -> Route.Group -> Data.GeneralParameters -> List (Html Msg)
@@ -601,6 +618,8 @@ viewCalendar model group generalParameters =
         Nothing ->
             []
 
+
+
 -- UPDATE
 
 
@@ -616,6 +635,7 @@ type Msg
     | UserConfirmedPreferedDates { s1 : String, s2 : String, s3 : String, s4 : String, s5 : String }
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
     | GotGeneralParameters (RemoteData Http.Error Data.GeneralParameters)
+    | GotCanUserParticipate (RemoteData Http.Error Bool)
     | NoOp
       -- PreTest
     | Acceptability Acceptability.Msg
@@ -837,9 +857,14 @@ update msg model =
             ( { model | sessions = result }, Cmd.none )
 
         GotGeneralParameters parameters ->
-                            ( { model | generalParameters = parameters }
-                            , Cmd.none
-                            )
+            ( { model | generalParameters = parameters }
+            , Cmd.none
+            )
+
+        GotCanUserParticipate userCanParticipate ->
+            ( { model | userCanParticipate = userCanParticipate }
+            , Cmd.none
+            )
 
 
 updateWith subMsg ( model, subCmd ) =

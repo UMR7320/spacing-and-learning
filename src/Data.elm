@@ -355,3 +355,13 @@ type alias AudioFile =
     { url : String
     , type_ : String
     }
+
+
+getCanUserParticipate : String -> (RemoteData.RemoteData Http.Error Bool -> msg) -> Cmd msg
+getCanUserParticipate userId msg =
+    Http.get
+        { url = Url.Builder.absolute
+            [ ".netlify" , "functions" , "user-can-participate"]
+            [ Url.Builder.string "id" userId ]
+        , expect = Http.expectJson (RemoteData.fromResult >> msg) Decode.bool
+        }
