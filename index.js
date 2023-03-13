@@ -8,7 +8,7 @@ if (module.hot) {
   });
 }
 
-const flags = {};
+const flags = process.env.BACKGROUND_QUESTIONNAIRE_URL;
 
 const app = Elm.Main.init({ flags });
 

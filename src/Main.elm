@@ -50,7 +50,7 @@ import View exposing (navOut)
 
 
 type alias Flags =
-    {}
+    String
 
 
 
@@ -117,11 +117,12 @@ type alias Model =
     , session : Maybe String
     , generalParameters : RemoteData Http.Error Data.GeneralParameters
     , userCanParticipate : RemoteData Http.Error Bool
+    , backgroundQuestionnaireUrl : String
     }
 
 
-defaultModel : Nav.Key -> Route.Route -> Model
-defaultModel key route =
+defaultModel : Nav.Key -> Route.Route -> String -> Model
+defaultModel key route backgroundQuestionnaireUrl =
     { key = key
     , route = route
     , dnd = Scrabble.system.model
@@ -174,11 +175,12 @@ defaultModel key route =
     , session = Nothing
     , generalParameters = RemoteData.Loading
     , userCanParticipate = RemoteData.NotAsked
+    , backgroundQuestionnaireUrl = backgroundQuestionnaireUrl
     }
 
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init _ url key =
+init backgroundQuestionnaireUrl url key =
     let
         route =
             Route.fromUrl url
@@ -193,7 +195,7 @@ init _ url key =
             Session3.attempt
 
         ( model, cmd ) =
-            defaultModel key route
+            defaultModel key route backgroundQuestionnaireUrl
                 |> changeRouteTo route
     in
     case route of
@@ -805,7 +807,7 @@ update msg model =
 
         UserClickedSignInButton ->
             ( model
-            , Nav.load "https://airtable.com/shrXTWi9PfYOkpS6Y"
+            , Nav.load model.backgroundQuestionnaireUrl
             )
 
         UserUpdatedEmailField email ->
