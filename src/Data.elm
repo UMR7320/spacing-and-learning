@@ -9,6 +9,7 @@ import Process
 import RemoteData
 import Task
 import Url.Builder
+import Html exposing (thead)
 
 
 splitIn : Int -> List a -> List (List a)
@@ -357,11 +358,25 @@ type alias AudioFile =
     }
 
 
-getCanUserParticipate : String -> (RemoteData.RemoteData Http.Error Bool -> msg) -> Cmd msg
+type UserCanParticipate = Yes | No String
+
+
+decodeUserCanParticipate : Decoder UserCanParticipate
+decodeUserCanParticipate =
+    field "userCanParticipate" bool
+    |> andThen (\userCanParticipate ->
+        if userCanParticipate then
+            succeed Yes
+        else
+            map No (field "reason" string)
+      )
+
+
+getCanUserParticipate : String -> (RemoteData.RemoteData Http.Error UserCanParticipate -> msg) -> Cmd msg
 getCanUserParticipate userId msg =
     Http.get
         { url = Url.Builder.absolute
             [ ".netlify" , "functions" , "user-can-participate"]
             [ Url.Builder.string "id" userId ]
-        , expect = Http.expectJson (RemoteData.fromResult >> msg) Decode.bool
+        , expect = Http.expectJson (RemoteData.fromResult >> msg) decodeUserCanParticipate
         }

@@ -17,9 +17,31 @@ exports.handler = async (event, context) => {
       .all()
 
     const currentUserEmail = currentUser.get("Email");
+    const currentUserProficiency = currentUser.get("proficiency");
     const userEmails = users.map(record => record.get('email'));
 
-    return { statusCode: 200, body: JSON.stringify(!userEmails.includes(currentUserEmail)) };
+    if (userEmails.includes(currentUserEmail)) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          userCanParticipate: false,
+          reason: "You cannot participate multiple times to this experiment."
+        })
+      }
+    }
+    if (currentUserProficiency == "C2 (near-native)") {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          userCanParticipate: false,
+          reason: "Native speakers cannot participate in this experiment."
+        })
+      }
+    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ userCanParticipate: true })
+    };
   } catch (error) {
     console.log(error);
     return {

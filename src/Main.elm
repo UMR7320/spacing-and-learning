@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation as Nav
-import Data
+import Data exposing (UserCanParticipate(..))
 import Date
 import Dict
 import DnDList
@@ -116,7 +116,7 @@ type alias Model =
     , version : Maybe String
     , session : Maybe String
     , generalParameters : RemoteData Http.Error Data.GeneralParameters
-    , userCanParticipate : RemoteData Http.Error Bool
+    , userCanParticipate : RemoteData Http.Error UserCanParticipate
     , backgroundQuestionnaireUrl : String
     }
 
@@ -410,44 +410,45 @@ body model =
                         [ text (Data.buildErrorMessage error) ]
 
                     RemoteData.Success userCanParticipate ->
-                        if not userCanParticipate then
-                            [ text "Vous ne pouvez pas participer plusieurs fois à cette expérience." ]
-                        else
-                            case task of
-                                Route.EmailSent ->
-                                    [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
+                        case userCanParticipate of
+                            No reason ->
+                                [ text reason ]
+                            Yes ->
+                                case task of
+                                    Route.EmailSent ->
+                                        [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
 
-                                Route.SPR ->
-                                    List.map (Html.Styled.map SPR) (SPR.view model.spr)
+                                    Route.SPR ->
+                                        List.map (Html.Styled.map SPR) (SPR.view model.spr)
 
-                                Route.SentenceCompletion ->
-                                    List.map (Html.Styled.map SentenceCompletion) (SentenceCompletion.view model.sentenceCompletion)
+                                    Route.SentenceCompletion ->
+                                        List.map (Html.Styled.map SentenceCompletion) (SentenceCompletion.view model.sentenceCompletion)
 
-                                Route.GeneralInfos ->
-                                    []
+                                    Route.GeneralInfos ->
+                                        []
 
-                                Route.VKS ->
-                                    List.map (Html.Styled.map VKS) (VKS.view model.vks)
+                                    Route.VKS ->
+                                        List.map (Html.Styled.map VKS) (VKS.view model.vks)
 
-                                Route.Acceptability sub ->
-                                    List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
+                                    Route.Acceptability sub ->
+                                        List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
 
-                                Route.YesNo ->
-                                    List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
+                                    Route.YesNo ->
+                                        List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
-                                Route.Calendar group ->
-                                    case model.generalParameters of
-                                        RemoteData.NotAsked ->
-                                            [ View.loading ]
+                                    Route.Calendar group ->
+                                        case model.generalParameters of
+                                            RemoteData.NotAsked ->
+                                                [ View.loading ]
 
-                                        RemoteData.Loading ->
-                                            [ View.loading ]
+                                            RemoteData.Loading ->
+                                                [ View.loading ]
 
-                                        RemoteData.Failure error ->
-                                            [ text (Data.buildErrorMessage error) ]
+                                            RemoteData.Failure error ->
+                                                [ text (Data.buildErrorMessage error) ]
 
-                                        RemoteData.Success parameters ->
-                                            viewCalendar model group parameters
+                                            RemoteData.Success parameters ->
+                                                viewCalendar model group parameters
 
             Home ->
                 [ div [ class "flex flex-col" ]
@@ -637,7 +638,7 @@ type Msg
     | UserConfirmedPreferedDates { s1 : String, s2 : String, s3 : String, s4 : String, s5 : String }
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
     | GotGeneralParameters (RemoteData Http.Error Data.GeneralParameters)
-    | GotCanUserParticipate (RemoteData Http.Error Bool)
+    | GotCanUserParticipate (RemoteData Http.Error UserCanParticipate)
     | NoOp
       -- PreTest
     | Acceptability Acceptability.Msg
