@@ -22,13 +22,14 @@ import Url.Parser as Parser
         , string
         , top
         )
-import Url.Parser.Query
+import Url.Parser.Query as Query
+import Pretest.Version exposing (Version)
 
 
 type Route
     = Home
     | NotFound
-    | Pretest UserId Pretest (Maybe String)
+    | Pretest UserId Pretest Version
     | Session1 UserId Session1Task
     | AuthenticatedSession2 UserId Session2Task
     | AuthenticatedSession3 UserId Session3Task
@@ -118,7 +119,7 @@ parser =
                                         ]
                             )
                         ]
-                <?> Url.Parser.Query.string "version"
+                <?> Query.map (Maybe.withDefault "pre" >> Pretest.Version.fromString) (Query.string "version")
             )
         , map Session1
             (s "user"
@@ -159,7 +160,7 @@ parser =
                 </> string
                 </> s "post-tests"
                 </> oneOf [ map CloudWords (s "cw") ]
-                <?> Url.Parser.Query.string "session"
+                <?> Query.string "session"
             )
 
         --  Add more routes like this:

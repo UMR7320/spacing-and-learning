@@ -12,6 +12,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
 import Logic
+import Pretest.Version exposing (Version(..))
 import Task
 import Task.Parallel as Para
 import Time
@@ -34,7 +35,7 @@ type alias Spr model =
     { model
         | spr : Logic.Task Trial State
         , user : Maybe String
-        , version : Maybe String
+        , version : Version
         , key : Key
     }
 
@@ -110,10 +111,13 @@ initState =
     }
 
 
-init infos trials model =
+init infos trials version =
     let
         info =
-            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find SPR infos"
+           infos
+           |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "Reading test")
+           |> List.head
+           |> Result.fromMaybe ("Could not find SPR info for version " ++ Pretest.Version.toString version)
     in
     Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
@@ -278,7 +282,7 @@ update msg model =
 
         UserClickedSaveData ->
             ( { model | spr = Logic.Loading }
-            , if model.version == Just "post" then
+            , if model.version == PostTest then
                 Browser.Navigation.pushUrl model.key "acceptability/instructions"
 
               else
@@ -495,25 +499,20 @@ getRecords version =
                 , base = "SPR"
                 , view_ =
                     case version of
-                        Nothing ->
+                        PreTest ->
                             "Pretest"
 
-                        Just specifiedVersion ->
-                            case specifiedVersion of
-                                "pre" ->
-                                    "Pretest"
+                        Surprise ->
+                            "Pretest"
 
-                                "surprise" ->
-                                    "Pretest"
-
-                                "post" ->
+                        PostTest ->
                                     "Post-test"
 
-                                "post-diff" ->
-                                    "Post-test 2"
+                        PostTestDiff ->
+                            "Post-test 2"
 
-                                _ ->
-                                    "Pretest"
+                        Unknown _ ->
+                            "Pretest"
 
                 --}
                 }
@@ -565,11 +564,8 @@ saveData model =
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        version =
-            Maybe.withDefault "pre" model.version
-
         payload =
-            updateHistoryEncoder version userId history
+            updateHistoryEncoder model.version userId history
     in
     Http.request
         { method = "PATCH"
@@ -582,7 +578,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
+updateHistoryEncoder : Version -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -595,22 +591,25 @@ updateHistoryEncoder version userId history =
         [ ( version, userId, history ) ]
 
 
-historyEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder : Version -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
             case version of
-                "post" ->
+                PreTest ->
+                    "SPR_preTest"
+
+                PostTest ->
                     "SPR_postTest"
 
-                "post-diff" ->
+                PostTestDiff ->
                     "SPR_postTestDiff"
 
-                "surprise" ->
+                Surprise ->
                     "SPR_surprisePostTest"
 
-                _ ->
-                    "SPR_preTest"
+                Unknown val ->
+                    "SPR_" ++ val
     in
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings

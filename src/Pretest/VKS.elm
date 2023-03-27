@@ -12,6 +12,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
+import Pretest.Version exposing (Version(..))
 import Random
 import Task
 import Time
@@ -27,7 +28,7 @@ type alias Model superModel =
     { superModel
         | vks : { task : Logic.Task Trial Answer, showVideo : Bool }
         , user : Maybe String
-        , version : Maybe String
+        , version : Version
     }
 
 
@@ -56,13 +57,14 @@ type alias SC =
     Logic.Task Trial Answer
 
 
-toTask : List ExperimentInfo.Task -> List Trial -> Model superModel -> Logic.Task Trial Answer
-toTask infos trials model =
+toTask : List ExperimentInfo.Task -> List Trial -> Version -> Logic.Task Trial Answer
+toTask infos trials version =
     let
         info =
-            ExperimentInfo.toDict infos
-                |> Dict.get (taskId model)
-                |> Result.fromMaybe "I couldn't find Task infos"
+           infos
+           |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "LexLearn verbs")
+           |> List.head
+           |> Result.fromMaybe ("Could not find VKS info for version " ++ Pretest.Version.toString version)
     in
     Logic.startIntro info [] trials emptyAnswer
 
@@ -325,22 +327,25 @@ decodeAcceptabilityTrials =
     Data.decodeRecords decoder
 
 
-historyEncoder : String -> String -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
+historyEncoder : Version -> String -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
             case version of
-                "post" ->
+                PreTest ->
+                    "VKS_preTest"
+
+                PostTest ->
                     "VKS_postTest"
 
-                "post-diff" ->
+                PostTestDiff ->
                     "VKS_postTestDiff"
 
-                "surprise" ->
+                Surprise ->
                     "VKS_surprisePostTest"
 
-                _ ->
-                    "VKS_preTest"
+                Unknown val ->
+                    "VKS_" ++ val
     in
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
@@ -360,7 +365,7 @@ historyItemEncoder ( { id, verb }, { knowledge, definition, usage }, timestamp )
         ]
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
+updateHistoryEncoder : Version -> String -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -381,11 +386,8 @@ saveData model =
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        version =
-            Maybe.withDefault "pre" model.version
-
         payload =
-            updateHistoryEncoder version userId history
+            updateHistoryEncoder model.version userId history
     in
     Http.request
         { method = "PATCH"
@@ -400,29 +402,6 @@ saveData model =
 
 
 -- INTERNAL
-
-
-taskId model =
-    case model.version of
-        Nothing ->
-            "recR6grI83e1so6Zl"
-
-        Just specifiedVersion ->
-            case specifiedVersion of
-                "pre" ->
-                    "recR6grI83e1so6Zl"
-
-                "post" ->
-                    "recAlZreFoiVGfSbN"
-
-                "post-diff" ->
-                    "rec4WlQXhH06yutJ5"
-
-                "surprise" ->
-                    "recYe82wpkoFoW39K"
-
-                _ ->
-                    "recR6grI83e1so6Zl"
 
 
 familiarityToString : Familiarity -> String

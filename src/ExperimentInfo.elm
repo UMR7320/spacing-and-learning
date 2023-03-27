@@ -19,6 +19,7 @@ type Session
     | Pretest
     | Posttest
     | PosttestDiff
+    | PosttestDiffSurprise
     | OtherSession
 
 
@@ -41,6 +42,9 @@ sessionToString str =
 
         PosttestDiff ->
             "Post-test-diff"
+
+        PosttestDiffSurprise ->
+            "Post-test-diff-surprise"
 
         OtherSession ->
             "Other"

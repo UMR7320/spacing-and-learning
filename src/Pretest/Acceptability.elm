@@ -14,6 +14,7 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import List.Extra
 import Logic exposing (Task)
+import Pretest.Version exposing (Version(..))
 import Ports
 import Task
 import Time
@@ -90,7 +91,7 @@ type alias Model supraModel =
         , endAcceptabilityDuration : Int
         , key : Key
         , user : Maybe String
-        , version : Maybe String
+        , version : Version
     }
 
 
@@ -124,11 +125,14 @@ newLoop =
     { initState | step = Start }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Maybe String -> Logic.Task Trial State
+start : List ExperimentInfo.Task -> List Trial -> Version -> Logic.Task Trial State
 start info trials version =
     let
         relatedInfos =
-            Dict.get (taskId version) (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId version)
+           info
+           |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "acceptability")
+           |> List.head
+           |> Result.fromMaybe ("I couldn't fetch Acceptability info for version : " ++ Pretest.Version.toString version)
     in
     Logic.startIntro relatedInfos
         (List.filter (\datum -> datum.trialType == Training) trials)
@@ -572,11 +576,8 @@ saveData model =
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        version =
-            Maybe.withDefault "pre" model.version
-
         payload =
-            updateHistoryEncoder version userId history
+            updateHistoryEncoder model.version userId history
     in
     Http.request
         { method = "PATCH"
@@ -589,7 +590,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
+updateHistoryEncoder : Version -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -602,22 +603,25 @@ updateHistoryEncoder version userId history =
         [ ( version, userId, history ) ]
 
 
-historyEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder : Version -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
             case version of
-                "post" ->
+                PreTest ->
+                    "Acceptability_preTest"
+
+                PostTest ->
                     "Acceptability_postTest"
 
-                "post-diff" ->
+                PostTestDiff ->
                     "Acceptability_postTestDiff"
 
-                "surprise" ->
+                Surprise ->
                     "Acceptability_surprisePostTest"
 
-                _ ->
-                    "Acceptability_preTest"
+                Unknown val ->
+                    "Acceptability_" ++ val
     in
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
@@ -655,14 +659,6 @@ type ErrorBlock
     = FirstDistractorMissing Bool
     | SecondDistractorMissing Bool
     | ThirdDistractorMissing Bool
-
-
-versions =
-    { pre = "recR8areYkKRvQ6lU"
-    , post = "recOrxH3ebc5Jhmm4"
-    , postDiff = "recN5DtKXo2MEDdvc"
-    , surprise = "recTlSt6RDbluzbne"
-    }
 
 
 trialTypeToString : TrialType -> String
@@ -881,24 +877,3 @@ isNextSentence dis blockBuffer =
 getSentenceTypes : List { a | sentenceType : SentenceType } -> List SentenceType
 getSentenceTypes sentences =
     List.map .sentenceType sentences
-
-
-taskId : Maybe String -> String
-taskId version =
-    case version of
-        Nothing ->
-            versions.pre
-
-        Just specifiedVersion ->
-            case specifiedVersion of
-                "post" ->
-                    versions.post
-
-                "post-diff" ->
-                    versions.postDiff
-
-                "surprise" ->
-                    versions.surprise
-
-                _ ->
-                    versions.pre

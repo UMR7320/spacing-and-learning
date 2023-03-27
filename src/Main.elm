@@ -24,6 +24,7 @@ import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
 import Pretest.YesNo as YesNo
+import Pretest.Version exposing (Version(..))
 import ProgressBar
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
@@ -113,7 +114,7 @@ type alias Model =
     , currentDate : Maybe ( Time.Zone, Time.Posix )
     , preferedStartDate : Maybe Date.Date
     , sessions : RemoteData Http.Error (Dict.Dict String Session.Info)
-    , version : Maybe String
+    , version : Version
     , session : Maybe String
     , generalParameters : RemoteData Http.Error Data.GeneralParameters
     , userCanParticipate : RemoteData Http.Error UserCanParticipate
@@ -171,7 +172,7 @@ defaultModel key route backgroundQuestionnaireUrl =
     , currentDate = Nothing
     , preferedStartDate = Nothing
     , sessions = RemoteData.Loading
-    , version = Nothing
+    , version = PreTest
     , session = Nothing
     , generalParameters = RemoteData.Loading
     , userCanParticipate = RemoteData.NotAsked

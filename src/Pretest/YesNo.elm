@@ -2,8 +2,7 @@ module Pretest.YesNo exposing (..)
 
 import Browser.Events exposing (onKeyDown)
 import Data
-import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, kbd, p, text)
 import Html.Styled.Attributes exposing (class)
 import Http
@@ -286,13 +285,13 @@ subscriptions model =
             Sub.none
 
 
-taskId =
-    "rechYdq4MyLcb2nRG"
-
 
 init infos trials =
     let
         info =
-            ExperimentInfo.toDict infos |> Dict.get taskId |> Result.fromMaybe "I couldn't find Task infos"
+            infos
+            |> List.filter (\task -> task.session == Pretest && task.name == "General vocabulary")
+            |> List.head
+            |> Result.fromMaybe "Could not find Yes/No infos"
     in
     Logic.startIntro info [] trials initState

@@ -26,7 +26,10 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({
           userCanParticipate: false,
           reason: "You cannot participate multiple times to this experiment."
-        })
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
       }
     }
     if (currentUserProficiency == "C2 (near-native)") {
@@ -35,18 +38,27 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({
           userCanParticipate: false,
           reason: "Native speakers cannot participate in this experiment."
-        })
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
       }
     }
     return {
       statusCode: 200,
-      body: JSON.stringify({ userCanParticipate: true })
+      body: JSON.stringify({ userCanParticipate: true }),
+      headers: {
+        "Content-Type": "application/json"
+      },
     };
   } catch (error) {
     console.log(error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Failed fetching data' }),
+      headers: {
+        "Content-Type": "application/json"
+      },
     };
   }
 };

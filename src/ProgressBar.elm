@@ -4,6 +4,7 @@ import Css
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Html exposing (..)
 import Logic
+import Pretest.Version exposing (Version(..))
 import Route exposing (..)
 import Tuple
 import View
@@ -15,13 +16,6 @@ import View
    probably be refactored to make sure that it does not go out of sync if
    activities are re-organized.
 -}
-
-
-type Version
-    = PreTest
-    | PostTest
-    | PostTestDiff
-    | SurprisePostTest
 
 
 view model =
@@ -46,7 +40,7 @@ view model =
 
 
 viewPretest activity model =
-    case maybeStringToVersion model.version of
+    case model.version of
         PreTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 5" ]
@@ -78,7 +72,7 @@ viewPretest activity model =
                 , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
                 ]
 
-        SurprisePostTest ->
+        Surprise ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
                 [ viewItem "LexLearn verbs" VKS model.vks.task activity
@@ -86,6 +80,9 @@ viewPretest activity model =
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
                 ]
+
+        Unknown _ ->
+              text ""
 
 
 viewSession1 activity model =
@@ -172,28 +169,6 @@ viewWordCloud session =
 
         _ ->
             text ""
-
-
-maybeStringToVersion : Maybe String -> Version
-maybeStringToVersion maybeVersion =
-    Maybe.map stringToVersion maybeVersion
-        |> Maybe.withDefault PreTest
-
-
-stringToVersion : String -> Version
-stringToVersion version =
-    case version of
-        "post" ->
-            PostTest
-
-        "post-diff" ->
-            PostTestDiff
-
-        "surprise" ->
-            SurprisePostTest
-
-        _ ->
-            PreTest
 
 
 isAcceptability activity =

@@ -7,6 +7,7 @@ import Html.Attributes exposing (accept)
 import Http
 import List.Extra
 import Logic
+import Pretest.Version exposing (Version)
 import Pretest.Acceptability as Acceptability exposing (ErrorBlock)
 import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
@@ -50,7 +51,7 @@ type alias Model superModel =
         , vks : { task : Logic.Task VKS.Trial VKS.Answer, showVideo : Bool }
         , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
         , yesno : YesNo.YN
-        , version : Maybe String
+        , version : Version
         , user : Maybe String
     }
 
@@ -157,9 +158,9 @@ update msg model =
                         ( { model
                             | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials) model.version
                             , spr = SPR.init infos spr model.version
-                            , sentenceCompletion = SentenceCompletion.init infos sc model
+                            , sentenceCompletion = SentenceCompletion.init infos sc model.version
                             , vks =
-                                { task = VKS.toTask infos (List.filter (not << .isTraining) vks) model
+                                { task = VKS.toTask infos (List.filter (not << .isTraining) vks) model.version
                                 , showVideo = False
                                 }
                             , yesno = YesNo.init infos yn

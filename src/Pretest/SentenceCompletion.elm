@@ -11,6 +11,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Logic
+import Pretest.Version exposing (Version(..))
 import Random
 import Task
 import Time
@@ -52,14 +53,17 @@ type alias Model superModel =
     { superModel
         | sentenceCompletion : Logic.Task Trial State
         , user : Maybe String
-        , version : Maybe String
+        , version : Version
     }
 
 
-init infos trials model =
+init infos trials version =
     let
         info =
-            ExperimentInfo.toDict infos |> Dict.get (taskId model) |> Result.fromMaybe "I couldn't find Task infos"
+           infos
+           |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "Writing test")
+           |> List.head
+           |> Result.fromMaybe ("Could not find SPR info for version " ++ Pretest.Version.toString version)
     in
     Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
@@ -328,11 +332,8 @@ saveData model =
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
-        version =
-            Maybe.withDefault "pre" model.version
-
         payload =
-            updateHistoryEncoder version userId history
+            updateHistoryEncoder model.version userId history
     in
     Http.request
         { method = "PATCH"
@@ -345,7 +346,7 @@ saveData model =
         }
 
 
-updateHistoryEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
+updateHistoryEncoder : Version -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 updateHistoryEncoder version userId history =
     -- The Netflify function that receives PATCH requests only works with arrays
     Encode.list
@@ -358,22 +359,25 @@ updateHistoryEncoder version userId history =
         [ ( version, userId, history ) ]
 
 
-historyEncoder : String -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder : Version -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
 historyEncoder version userId history =
     let
         answerField =
             case version of
-                "post" ->
+                PreTest ->
+                    "SentenceCompletion_preTest"
+
+                PostTest ->
                     "SentenceCompletion_postTest"
 
-                "post-diff" ->
+                PostTestDiff ->
                     "SentenceCompletion_postTestDiff"
 
-                "surprise" ->
+                Surprise ->
                     "SentenceCompletion_surprisePostTest"
 
-                _ ->
-                    "SentenceCompletion_preTest"
+                Unknown val ->
+                    "SentenceCompletion_" ++ val
     in
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
@@ -391,27 +395,3 @@ historyItemEncoder ( { id, firstAmorce, secondAmorce }, { firstProduction, secon
         , ( "secondProduction", Encode.string secondProduction )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
-
-
-
--- INTERNAL
-
-
-taskId model =
-    case model.version of
-        Nothing ->
-            "reczQs5ZD6g1x5F29"
-
-        Just version ->
-            case version of
-                "post-diff" ->
-                    "recs1XATsyG7fVfO6"
-
-                "pre" ->
-                    "reczQs5ZD6g1x5F29"
-
-                "surprise" ->
-                    "recA1dsUaJJsJ5WPY"
-
-                _ ->
-                    "reczQs5ZD6g1x5F29"
