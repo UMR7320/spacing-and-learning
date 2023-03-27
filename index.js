@@ -1,6 +1,5 @@
 import { Elm } from "./src/Main.elm";
 import "./scss/style.scss";
-import { Howl, Howler } from "howler";
 
 if (module.hot) {
   module.hot.dispose(() => {
@@ -33,11 +32,9 @@ app.ports.disableAlertOnExit.subscribe(() => {
 });
 
 app.ports.playAudio.subscribe(audio => {
-  var sound = new Howl({
-    src: [audio]
-  });
+  const sound = new Audio(audio);
   sound.play();
-  sound.once("play", () => {
+  sound.addEventListener("play", () => {
     let audioCallback = {
       eventType: "SoundStarted",
       timestamp: Date.now(),
@@ -45,8 +42,8 @@ app.ports.playAudio.subscribe(audio => {
     };
     app.ports.audioEnded.send(audioCallback);
     console.log({ "sound started": audio, timestamp: Date.now() });
-  });
-  sound.once("end", () => {
+  }, { once: true });
+  sound.addEventListener("ended", () => {
     let audioCallback = {
       eventType: "SoundEnded",
       timestamp: Date.now(),
@@ -54,6 +51,5 @@ app.ports.playAudio.subscribe(audio => {
     };
     app.ports.audioEnded.send(audioCallback);
     console.log({ "sound is over": audio, timestamp: Date.now() });
-    console.log(audio);
-  });
+  }, { once: true });
 });
