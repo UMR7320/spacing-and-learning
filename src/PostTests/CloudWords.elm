@@ -222,7 +222,7 @@ view model =
                             , maybeKnownWords = filterWords w MaybeKnown
                             , unknownWords = filterWords w NotKnown
                             }
-                    , txt = "Click here to save data"
+                    , txt = "Save"
                     , isDisabled = False
                     }
                 ]

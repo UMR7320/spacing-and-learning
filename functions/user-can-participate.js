@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
       .all()
 
     const currentUserEmail = currentUser.get("Email");
-    const currentUserProficiency = currentUser.get("proficiency");
+    const nativeLanguages = currentUser.get("Langs learnt before school");
     const userEmails = users.map(record => record.get('email'));
 
     if (userEmails.includes(currentUserEmail)) {
@@ -32,7 +32,19 @@ exports.handler = async (event, context) => {
         },
       }
     }
-    if (currentUserProficiency == "C2 (near-native)") {
+    if (!nativeLanguages) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          userCanParticipate: false,
+          reason: "Please complete the background questionnaire before beginning the experiment."
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+      }
+    }
+    if (nativeLanguages.includes("English")) {
       return {
         statusCode: 200,
         body: JSON.stringify({
