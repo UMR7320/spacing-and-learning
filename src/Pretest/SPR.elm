@@ -702,32 +702,3 @@ spillOverSegmentTime segments =
 segmentToTiming : TaggedSegmentOver -> Int
 segmentToTiming { startedAt, endedAt } =
     Time.posixToMillis endedAt - Time.posixToMillis startedAt
-
-
-
--- INTERNAL
-
-
-taskId : Maybe String -> String
-taskId version =
-    case version of
-        Nothing ->
-            versions.pre
-
-        Just specifiedVersion ->
-            case specifiedVersion of
-                "post" ->
-                    versions.post
-
-                "post-diff" ->
-                    versions.postDiff
-
-                "surprise" ->
-                    versions.surprise
-
-                _ ->
-                    versions.pre
-
-
-versions =
-    { pre = "rec7oxQBDY7rBTRDn", post = "recPo6XGa58q3wfRw", postDiff = "rec1g3y3VAgQwj2sy", surprise = "recfot07G3AMUVK3S" }
