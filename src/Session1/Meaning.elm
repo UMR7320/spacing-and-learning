@@ -2,7 +2,7 @@ module Session1.Meaning exposing (..)
 
 import Data exposing (decodeRecords)
 import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled
     exposing
         ( Html
@@ -73,7 +73,10 @@ start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
     let
         relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+            info
+                |> List.filter (\task -> task.session == Session1 && task.name == "Meaning 1")
+                |> List.head
+                |> Result.fromMaybe "Could not find Meaning1  info"
     in
     Logic.startIntro relatedInfos
         (List.filter (\datum -> datum.isTraining) trials)
@@ -316,11 +319,3 @@ historyItemEncoder ( { uid, writtenWord }, { userAnswer }, timestamp ) =
         , ( "answer", Encode.string userAnswer )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
-
-
-
--- INTERNALS
-
-
-taskId =
-    "rec9fDmVOpqDJktmQ"

@@ -2,7 +2,7 @@ module Session1.Presentation exposing (..)
 
 import Data
 import Dict exposing (Dict)
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, li, p, span, text, ul)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
@@ -277,14 +277,12 @@ start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
     let
         relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+            info
+                |> List.filter (\task -> task.session == Session1 && task.name == "Words to learn")
+                |> List.head
+                |> Result.fromMaybe "Could not find words to learn info"
     in
     Logic.startIntro relatedInfos
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
-
-
-taskId : String
-taskId =
-    "rec8eKMwCMFFtKVKD"

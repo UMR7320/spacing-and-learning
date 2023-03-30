@@ -2,7 +2,7 @@ module Session1.ContextUnderstanding exposing (..)
 
 import Data
 import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
 import Http exposing (Error)
@@ -58,7 +58,10 @@ start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
     let
         relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
+            info
+                |> List.filter (\task -> task.session == Session1 && task.name == "Context 1")
+                |> List.head
+                |> Result.fromMaybe "Could not find Context 1 info"
     in
     Logic.startIntro relatedInfos
         (List.filter (\datum -> datum.isTraining) trials)
