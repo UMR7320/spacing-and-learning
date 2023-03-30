@@ -2,7 +2,7 @@ module Session3.Synonym exposing (..)
 
 import Data exposing (decodeRecords)
 import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, h4, p, span, text)
 import Html.Styled.Attributes exposing (class)
 import Http
@@ -56,11 +56,8 @@ defaultTrial =
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info Session3 "Meaning 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
@@ -306,11 +303,3 @@ historyItemEncoder ( { uid, target }, { userAnswer }, timestamp ) =
         , ( "answer", Encode.string userAnswer )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
-
-
-
--- INTERNALS
-
-
-taskId =
-    "recB3kUQW4jNTlou6"

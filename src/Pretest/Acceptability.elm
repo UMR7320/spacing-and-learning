@@ -5,7 +5,7 @@ import Browser.Navigation exposing (Key, pushUrl)
 import Data exposing (decodeRecords)
 import Delay
 import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, h1, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, height, src, width)
 import Http
@@ -127,14 +127,8 @@ newLoop =
 
 start : List ExperimentInfo.Task -> List Trial -> Version -> Logic.Task Trial State
 start info trials version =
-    let
-        relatedInfos =
-           info
-           |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "acceptability")
-           |> List.head
-           |> Result.fromMaybe ("I couldn't fetch Acceptability info for version : " ++ Pretest.Version.toString version)
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info (Pretest.Version.toSession version) "Listening test")
         (List.filter (\datum -> datum.trialType == Training) trials)
         (List.filter (\datum -> datum.trialType /= Training) trials)
         initState

@@ -3,7 +3,7 @@ module Session3.CU3 exposing (..)
 import Data
 import Delay
 import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled as Html exposing (div, label, span, text)
 import Html.Styled.Attributes exposing (class, classList)
 import Html.Styled.Events exposing (onInput)
@@ -82,11 +82,8 @@ initState =
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info Session3 "Context 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
@@ -417,11 +414,3 @@ historyItemEncoder ( { uid, writtenWord }, { userAnswer }, timestamp ) =
         , ( "answer", Encode.string userAnswer )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
-
-
-
--- INTERNALS
-
-
-taskId =
-    "recFEtKbtuBSolHnI"
