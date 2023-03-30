@@ -3,7 +3,7 @@ module Session2.CU2 exposing (..)
 import Data
 import Delay
 import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled as Html exposing (div, span, text)
 import Html.Styled.Attributes exposing (class)
 import Http exposing (Error)
@@ -73,11 +73,8 @@ defaultTrial =
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info Session2 "Context 2")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

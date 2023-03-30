@@ -3,7 +3,7 @@ module Session2.Spelling exposing (..)
 import Data
 import Dict
 import DnDList
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
@@ -69,9 +69,6 @@ defaultTrial =
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
     let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-
         nextTrial =
             trials
                 |> List.filter .isTraining
@@ -79,7 +76,8 @@ start info trials =
     in
     case nextTrial of
         Just x ->
-            Logic.startIntro relatedInfos
+            Logic.startIntro
+                (ExperimentInfo.activityInfo info Session2 "Spelling 2")
                 (List.filter .isTraining trials)
                 (List.filter (not << .isTraining) trials)
                 { initState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord }
@@ -609,7 +607,3 @@ dedupeHelper letters acc =
 dedupe : List String -> List ( String, Int )
 dedupe letters =
     dedupeHelper letters []
-
-
-taskId =
-    "recSL8cthViyXRx8u"

@@ -1,8 +1,7 @@
 module Session2.Translation exposing (..)
 
 import Data
-import Dict
-import ExperimentInfo
+import ExperimentInfo exposing (Session(..))
 import Html.Styled
     exposing
         ( Html
@@ -72,11 +71,8 @@ initState =
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
-    let
-        relatedInfos =
-            Dict.get taskId (ExperimentInfo.toDict info) |> Result.fromMaybe ("I couldn't fetch the value associated with: " ++ taskId)
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info Session2 "Meaning 2")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
@@ -297,11 +293,3 @@ historyItemEncoder ( { uid, target }, { userAnswer }, timestamp ) =
         , ( "answer", Encode.string userAnswer )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
-
-
-
--- INTERNALS
-
-
-taskId =
-    "recf5HANE632FLKbc"
