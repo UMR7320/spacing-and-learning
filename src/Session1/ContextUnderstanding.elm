@@ -56,14 +56,8 @@ defaultTrial =
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
-    let
-        relatedInfos =
-            info
-                |> List.filter (\task -> task.session == Session1 && task.name == "Context 1")
-                |> List.head
-                |> Result.fromMaybe "Could not find Context 1 info"
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info Session1 "Context 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

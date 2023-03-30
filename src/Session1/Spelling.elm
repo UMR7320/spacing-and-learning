@@ -58,14 +58,8 @@ iniState =
 
 
 start info trials =
-    let
-        relatedInfos =
-            info
-                |> List.filter (\task -> task.session == Session1 && task.name == "Spelling 1")
-                |> List.head
-                |> Result.fromMaybe "Could not find Meaning1  info"
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info Session1 "Spelling 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         iniState

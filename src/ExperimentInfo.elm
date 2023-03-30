@@ -5,6 +5,7 @@ import Dict
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
+import Platform exposing (Task)
 
 
 getInfos : (Result Http.Error (List Task) -> msg) -> Cmd msg
@@ -85,6 +86,14 @@ toDict newInfos =
                 )
             )
         |> Dict.fromList
+
+
+activityInfo : List Task -> Session -> String -> Result String Task
+activityInfo infos session name =
+    infos
+        |> List.filter (\task -> task.session == session && task.name == name)
+        |> List.head
+        |> Result.fromMaybe ("Could not find " ++ name ++ " info for session " ++ sessionToString session)
 
 
 type alias Task =

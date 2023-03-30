@@ -275,14 +275,8 @@ type alias State =
 
 start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
 start info trials =
-    let
-        relatedInfos =
-            info
-                |> List.filter (\task -> task.session == Session1 && task.name == "Words to learn")
-                |> List.head
-                |> Result.fromMaybe "Could not find words to learn info"
-    in
-    Logic.startIntro relatedInfos
+    Logic.startIntro
+        (ExperimentInfo.activityInfo info Session1 "Words to learn")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
