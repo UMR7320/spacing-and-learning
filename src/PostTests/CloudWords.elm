@@ -2,9 +2,9 @@ module PostTests.CloudWords exposing (CloudWords(..), Msg(..), Word, WordKnowled
 
 import Browser.Navigation exposing (pushUrl)
 import Data
-import Dict
-import Html.Styled exposing (div, h1, input, label, p, span, text)
-import Html.Styled.Attributes exposing (class, type_)
+import Dict exposing (Dict)
+import Html.Styled exposing (div, h1, p, span, text)
+import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http
 import Json.Decode as Decode
@@ -49,6 +49,7 @@ type CloudWords
     | End
 
 
+words : List ( String, { word : String, knowledge : WordKnowledge } )
 words =
     [ ( "recCWc45cPRRz6k4k", { word = "crave", knowledge = NotKnown } )
     , ( "recJxzByUxGCTz7bC", { word = "curb", knowledge = NotKnown } )
@@ -134,6 +135,7 @@ view model =
             ]
 
 
+filterWords : Dict comparable { a | knowledge : b } -> b -> List comparable
 filterWords w wordknowledge =
     Dict.filter (\_ v -> v.knowledge == wordknowledge) w |> Dict.keys
 
@@ -163,7 +165,7 @@ update msg model =
                 End ->
                     ( model, Cmd.none )
 
-        UserClickedSaveData ({ knownWords, maybeKnownWords, unknownWords } as result) ->
+        UserClickedSaveData result ->
             let
                 userId =
                     model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
@@ -201,7 +203,7 @@ update msg model =
             , updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder
             )
 
-        ServerRespondedWithUpdatedUser response ->
+        ServerRespondedWithUpdatedUser _ ->
             if model.session == Just "S3" then
                 ( model
                 , Browser.Navigation.load "../pretest/vks?version=post"
@@ -215,22 +217,20 @@ update msg model =
 
 toggle : comparable -> Dict.Dict comparable Word -> Dict.Dict comparable Word
 toggle key =
-    Dict.update key
-        (\old ->
-            case old of
-                Just value ->
-                    case value.knowledge of
-                        NotKnown ->
-                            Just { value | knowledge = MaybeKnown }
+    Dict.update
+        key
+        (Maybe.map
+            (\value ->
+                case value.knowledge of
+                    NotKnown ->
+                        { value | knowledge = MaybeKnown }
 
-                        MaybeKnown ->
-                            Just { value | knowledge = Known }
+                    MaybeKnown ->
+                        { value | knowledge = Known }
 
-                        Known ->
-                            Just { value | knowledge = NotKnown }
-
-                Nothing ->
-                    Nothing
+                    Known ->
+                        { value | knowledge = NotKnown }
+            )
         )
 
 
