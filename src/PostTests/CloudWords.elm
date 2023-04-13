@@ -16,37 +16,37 @@ import Session3.Session as Session3
 import View
 
 
+
+-- MODEL
+
+
 type WordKnowledge
     = Known
     | NotKnown
     | MaybeKnown
 
 
-toggle : comparable -> Dict.Dict comparable Word -> Dict.Dict comparable Word
-toggle key =
-    Dict.update key
-        (\old ->
-            case old of
-                Just value ->
-                    case value.knowledge of
-                        NotKnown ->
-                            Just { value | knowledge = MaybeKnown }
-
-                        MaybeKnown ->
-                            Just { value | knowledge = Known }
-
-                        Known ->
-                            Just { value | knowledge = NotKnown }
-
-                Nothing ->
-                    Nothing
-        )
-
-
 type alias Word =
     { word : String
     , knowledge : WordKnowledge
     }
+
+
+type alias Model superModel =
+    { superModel
+        | cloudWords : CloudWords
+        , user : Maybe String
+        , session1 : Session1.Session1
+        , session2 : Session2.Session2
+        , session3 : Session3.Session3
+        , session : Maybe String
+        , key : Browser.Navigation.Key
+    }
+
+
+type CloudWords
+    = Running (Dict.Dict String Word)
+    | End
 
 
 words =
@@ -67,6 +67,83 @@ words =
     , ( "reci13I4WD6BL2aYe", { word = "wield", knowledge = NotKnown } )
     , ( "recMzEWiaVwdBxAsS", { word = "withstand", knowledge = NotKnown } )
     ]
+
+
+
+-- VIEW
+
+
+view : Model superModel -> List (Html.Styled.Html Msg)
+view model =
+    case model.cloudWords of
+        Running w ->
+            [ div [ class "cloudwords" ]
+                [ h1 [] [ text "Progress check" ]
+                , div [ class "pb-8 flow" ] [ View.fromMarkdown "How well do you think you know our verbs now?\n\nClick on each verb to change its color:\n\n- grey: I don't know it yet\n\n- white: I know it a little\n\n- green: I know it well" ]
+                , div [ class "grid grid-flow-col content-center grid-rows-4 grid-cols-4 gap-4 pb-8 " ] <|
+                    (Dict.map
+                        (\id value ->
+                            div
+                                [ class "transition duration-300 ease-in-out rounded-lg cursor-pointer p-2 align-baseline flex flex-row"
+                                , class
+                                    (if value.knowledge == NotKnown then
+                                        "bg-gray-500"
+
+                                     else if value.knowledge == MaybeKnown then
+                                        ""
+
+                                     else
+                                        "bg-green-500"
+                                    )
+                                , Html.Styled.Events.onClick <|
+                                    UserToggledInCloudWords id
+                                ]
+                                [ text <|
+                                    if value.knowledge == NotKnown then
+                                        "🤷\u{200D}♀️"
+
+                                    else if value.knowledge == MaybeKnown then
+                                        "🤔"
+
+                                    else
+                                        "👍"
+                                , span [ class "pl-2" ] [ text value.word ]
+                                ]
+                        )
+                        w
+                        |> Dict.values
+                    )
+                , View.button
+                    { message =
+                        UserClickedSaveData
+                            { knownWords = filterWords w Known
+                            , maybeKnownWords = filterWords w MaybeKnown
+                            , unknownWords = filterWords w NotKnown
+                            }
+                    , txt = "Save"
+                    , isDisabled = False
+                    }
+                ]
+            ]
+
+        End ->
+            [ h1
+                []
+                [ text "This is the end of the session" ]
+            , p [] [ text "Check your calendar for your next learning session. You will receive an email with the link on the correct day." ]
+            ]
+
+
+filterWords w wordknowledge =
+    Dict.filter (\_ v -> v.knowledge == wordknowledge) w |> Dict.keys
+
+
+
+-- UPDATE
+
+
+type alias Payload =
+    { knownWords : List String, maybeKnownWords : List String, unknownWords : List String }
 
 
 type Msg
@@ -136,6 +213,31 @@ update msg model =
                 )
 
 
+toggle : comparable -> Dict.Dict comparable Word -> Dict.Dict comparable Word
+toggle key =
+    Dict.update key
+        (\old ->
+            case old of
+                Just value ->
+                    case value.knowledge of
+                        NotKnown ->
+                            Just { value | knowledge = MaybeKnown }
+
+                        MaybeKnown ->
+                            Just { value | knowledge = Known }
+
+                        Known ->
+                            Just { value | knowledge = NotKnown }
+
+                Nothing ->
+                    Nothing
+        )
+
+
+
+-- HTTP
+
+
 updateVocabularyScore : Http.Body -> (Result Http.Error a -> msg) -> Decode.Decoder a -> Cmd msg
 updateVocabularyScore payload callbackMsg decoder =
     Http.request
@@ -152,89 +254,3 @@ updateVocabularyScore payload callbackMsg decoder =
         , timeout = Nothing
         , tracker = Nothing
         }
-
-
-type alias Payload =
-    { knownWords : List String, maybeKnownWords : List String, unknownWords : List String }
-
-
-type alias Model superModel =
-    { superModel
-        | cloudWords : CloudWords
-        , user : Maybe String
-        , session1 : Session1.Session1
-        , session2 : Session2.Session2
-        , session3 : Session3.Session3
-        , session : Maybe String
-        , key : Browser.Navigation.Key
-    }
-
-
-type CloudWords
-    = Running (Dict.Dict String Word)
-    | End
-
-
-view : Model superModel -> List (Html.Styled.Html Msg)
-view model =
-    case model.cloudWords of
-        Running w ->
-            [ div [ class "cloudwords" ]
-                [ h1 [] [ text "Progress check" ]
-                , div [ class "pb-8 flow" ] [ View.fromMarkdown "How well do you think you know our verbs now?\n\nClick on each verb to change its color:\n\n- grey: I don't know it yet\n\n- white: I know it a little\n\n- green: I know it well" ]
-                , div [ class "grid grid-flow-col content-center grid-rows-4 grid-cols-4 gap-4 pb-8 " ] <|
-                    (Dict.map
-                        (\id value ->
-                            div
-                                [ class "transition duration-300 ease-in-out rounded-lg cursor-pointer p-2 align-baseline flex flex-row"
-                                , class
-                                    (if value.knowledge == NotKnown then
-                                        "bg-gray-500"
-
-                                     else if value.knowledge == MaybeKnown then
-                                        ""
-
-                                     else
-                                        "bg-green-500"
-                                    )
-                                , Html.Styled.Events.onClick <|
-                                    UserToggledInCloudWords id
-                                ]
-                                [ text <|
-                                    if value.knowledge == NotKnown then
-                                        "\u{1F937}\u{200D}♀️"
-
-                                    else if value.knowledge == MaybeKnown then
-                                        "\u{1F914}"
-
-                                    else
-                                        "👍"
-                                , span [ class "pl-2" ] [ text value.word ]
-                                ]
-                        )
-                        w
-                        |> Dict.values
-                    )
-                , View.button
-                    { message =
-                        UserClickedSaveData
-                            { knownWords = filterWords w Known
-                            , maybeKnownWords = filterWords w MaybeKnown
-                            , unknownWords = filterWords w NotKnown
-                            }
-                    , txt = "Save"
-                    , isDisabled = False
-                    }
-                ]
-            ]
-
-        End ->
-            [ h1
-                []
-                [ text "This is the end of the session" ]
-            , p [] [ text "Check your calendar for your next learning session. You will receive an email with the link on the correct day." ]
-            ]
-
-
-filterWords w wordknowledge =
-    Dict.filter (\_ v -> v.knowledge == wordknowledge) w |> Dict.keys
