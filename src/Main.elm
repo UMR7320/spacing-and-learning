@@ -23,8 +23,8 @@ import Pretest.Pretest as Pretest
 import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion
 import Pretest.VKS as VKS
-import Pretest.YesNo as YesNo
 import Pretest.Version exposing (Version(..))
+import Pretest.YesNo as YesNo
 import ProgressBar
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Task(..), Session2Task(..))
@@ -161,7 +161,7 @@ defaultModel key route backgroundQuestionnaireUrl =
     , yesno = Logic.NotStarted
 
     -- POSTEST
-    , cloudWords = CloudWords.Running (Dict.fromList CloudWords.words)
+    , cloudWords = CloudWords.Loading
 
     -- SHARED
     , user = Nothing
@@ -294,8 +294,8 @@ init backgroundQuestionnaireUrl url key =
                 ]
             )
 
-        Route.Posttest _ _ _ ->
-            ( model, cmd )
+        Route.Posttest userId _ _ ->
+            ( { model | user = Just userId }, cmd )
 
         NotFound ->
             ( { model | route = NotFound }, cmd )
@@ -414,6 +414,7 @@ body model =
                         case userCanParticipate of
                             No reason ->
                                 [ text reason ]
+
                             Yes ->
                                 case task of
                                     Route.EmailSent ->
@@ -700,7 +701,12 @@ changeRouteTo route model =
             ( newModel, Ports.enableAlertOnExit () )
 
         Route.Posttest _ _ session ->
-            ( { newModel | session = session }, Ports.disableAlertOnExit () )
+            ( { newModel | session = session }
+            , Cmd.batch
+                [ Cmd.map WordCloud CloudWords.getWords
+                , Ports.disableAlertOnExit ()
+                ]
+            )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

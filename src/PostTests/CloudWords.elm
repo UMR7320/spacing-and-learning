@@ -1,15 +1,15 @@
-module PostTests.CloudWords exposing (CloudWords(..), Msg(..), Word, WordKnowledge, toggle, update, view, words)
+module PostTests.CloudWords exposing (CloudWords(..), Msg(..), Word, WordKnowledge, getWords, toggle, update, view)
 
 import Browser.Navigation exposing (pushUrl)
 import Data
 import Dict exposing (Dict)
-import Html.Styled exposing (div, h1, p, span, text)
+import Html.Styled exposing (code, div, h1, p, pre, span, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode
-import Session
+import Session exposing (Session(..))
 import Session1.Session as Session1
 import Session2.Session as Session2
 import Session3.Session as Session3
@@ -18,6 +18,13 @@ import View
 
 
 -- MODEL
+
+
+type alias InputWord =
+    { id: String
+    , word : String
+    , isExperimental : Bool
+    }
 
 
 type WordKnowledge
@@ -45,29 +52,10 @@ type alias Model superModel =
 
 
 type CloudWords
-    = Running (Dict.Dict String Word)
+    = Loading
+    | Running (Dict String Word)
+    | Error Http.Error
     | End
-
-
-words : List ( String, { word : String, knowledge : WordKnowledge } )
-words =
-    [ ( "recCWc45cPRRz6k4k", { word = "crave", knowledge = NotKnown } )
-    , ( "recJxzByUxGCTz7bC", { word = "curb", knowledge = NotKnown } )
-    , ( "reclQIspVCkKaQ93J", { word = "dazzle", knowledge = NotKnown } )
-    , ( "recJbufDTI1F4ps0i", { word = "dread", knowledge = NotKnown } )
-    , ( "recvjrjv0o2uwTXDt", { word = "equate", knowledge = NotKnown } )
-    , ( "recDHT4TX9gtv9Jnn", { word = "hinder", knowledge = NotKnown } )
-    , ( "recpqxWfX5CGMrFkx", { word = "incur", knowledge = NotKnown } )
-    , ( "recPdvyZoRGIZcA57", { word = "loathe", knowledge = NotKnown } )
-    , ( "recI5YFzd7aMRs1Gg", { word = "moan", knowledge = NotKnown } )
-    , ( "recl26ebnJ5zOfvxO", { word = "pinpoint", knowledge = NotKnown } )
-    , ( "recmjaHTHFXrBGQSP", { word = "ponder", knowledge = NotKnown } )
-    , ( "reckyzxJrCqcbzg9p", { word = "relish", knowledge = NotKnown } )
-    , ( "recUiB0O0W8Lwyymv", { word = "strive", knowledge = NotKnown } )
-    , ( "recXkLmHDF43nt14L", { word = "uphold", knowledge = NotKnown } )
-    , ( "reci13I4WD6BL2aYe", { word = "wield", knowledge = NotKnown } )
-    , ( "recMzEWiaVwdBxAsS", { word = "withstand", knowledge = NotKnown } )
-    ]
 
 
 
@@ -77,6 +65,17 @@ words =
 view : Model superModel -> List (Html.Styled.Html Msg)
 view model =
     case model.cloudWords of
+        Loading ->
+            [ text "Loading words..." ]
+
+        Error error ->
+            [ div
+                []
+                [ text "Failed loading words:"
+                , pre [ class "overflow-x-scroll" ] [ code [] [ text (Data.buildErrorMessage error) ] ]
+                ]
+            ]
+
         Running w ->
             [ div [ class "cloudwords" ]
                 [ h1 [] [ text "Progress check" ]
@@ -152,17 +151,41 @@ type Msg
     = UserToggledInCloudWords String
     | UserClickedSaveData Payload
     | ServerRespondedWithUpdatedUser (Result Http.Error String)
+    | GotWords (Result Http.Error (List InputWord))
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     case msg of
+        GotWords (Result.Err error) ->
+            ( { model | cloudWords = Error error }
+            , Cmd.none
+            )
+
+        GotWords (Result.Ok inputWords) ->
+            case model.cloudWords of
+                Loading ->
+                    ( { model
+                        | cloudWords =
+                            Running
+                                (inputWords
+                                    |> List.filter (\word -> word.isExperimental == True)
+                                    |> List.map (\word -> ( word.id, Word word.word NotKnown ))
+                                    |> Dict.fromList
+                                )
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
         UserToggledInCloudWords word ->
             case model.cloudWords of
                 Running w ->
                     ( { model | cloudWords = Running (toggle word w) }, Cmd.none )
 
-                End ->
+                _ ->
                     ( model, Cmd.none )
 
         UserClickedSaveData result ->
@@ -238,7 +261,38 @@ toggle key =
 -- HTTP
 
 
-updateVocabularyScore : Http.Body -> (Result Http.Error a -> msg) -> Decode.Decoder a -> Cmd msg
+getWords : Cmd Msg
+getWords =
+    Http.get
+        { url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "input"
+                , view_ = "all"
+                }
+        , expect = Http.expectJson GotWords decodeWords
+        }
+
+
+decodeWords : Decoder (List InputWord)
+decodeWords =
+    field "records"
+        (list
+            (map3 InputWord
+                (field "id" string)
+                (field "Word_Text" string)
+                (optionalBool "isExperimental")
+            )
+        )
+
+
+-- Airtable is weird and diesn't include boolean properties when they're "false"
+optionalBool: String -> Decoder Bool
+optionalBool fieldName=
+    maybe (field fieldName bool) |> map (Maybe.withDefault False)
+
+
+updateVocabularyScore : Http.Body -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
 updateVocabularyScore payload callbackMsg decoder =
     Http.request
         { method = "PATCH"
