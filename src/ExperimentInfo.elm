@@ -134,6 +134,9 @@ decode =
                 "Post-test" ->
                     Decode.succeed Posttest
 
+                "Post-test-diff" ->
+                    Decode.succeed PosttestDiff
+
                 _ ->
                     Decode.succeed OtherSession
 

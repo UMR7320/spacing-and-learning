@@ -59,14 +59,11 @@ type alias SC =
 
 toTask : List ExperimentInfo.Task -> List Trial -> Version -> Logic.Task Trial Answer
 toTask infos trials version =
-    let
-        info =
-           infos
-           |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "LexLearn verbs")
-           |> List.head
-           |> Result.fromMaybe ("Could not find VKS info for version " ++ Pretest.Version.toString version)
-    in
-    Logic.startIntro info [] trials emptyAnswer
+    Logic.startIntro
+        (ExperimentInfo.activityInfo infos (Pretest.Version.toSession version) "LexLearn verbs")
+        []
+        trials
+        emptyAnswer
 
 
 emptyAnswer : Answer
