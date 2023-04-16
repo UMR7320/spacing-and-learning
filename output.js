@@ -65,13 +65,13 @@ const displayAsTable = (elementId, records) => {
       new Set()
     );
     html = "<table><thead><tr>";
-    for (key of keys) {
+    for (const key of keys) {
       html += `<td>${key}</td>`;
     }
     html += "</tr></thead><tbody>";
-    for (record of records) {
+    for (const record of records) {
       html += "<tr>";
-      for (key of keys) {
+      for (const key of keys) {
         html += `<td>${record[key]}</td>`;
       }
       html += "</tr>";
@@ -87,12 +87,14 @@ const displayAsTable = (elementId, records) => {
   document.getElementById(elementId).prepend(button);
 };
 
+const airtableBase = process.env.AIRTABLE_BASE;
+
 const displayData = (elementId, prefix, records) =>
   displayAsTable(elementId, formatData(prefix, records));
 
 const fetchData = offset => {
   return fetch(
-    `/.netlify/functions/api?app=appvKOc8FH0j48Hw1&base=users&view=VKS_output&pageSize=80&outputRequest=1${
+    `/.netlify/functions/api?app=${airtableBase}&base=users&view=VKS_output&pageSize=80&outputRequest=1${
       offset ? `&offset=${offset}` : ""
     }`
   )
