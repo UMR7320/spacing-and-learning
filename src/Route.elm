@@ -10,6 +10,7 @@ module Route exposing
     , fromUrl
     )
 
+import Pretest.Version exposing (Version)
 import Url
 import Url.Parser as Parser
     exposing
@@ -23,11 +24,11 @@ import Url.Parser as Parser
         , top
         )
 import Url.Parser.Query as Query
-import Pretest.Version exposing (Version)
 
 
 type Route
     = Home
+    | CalendarUpdated
     | NotFound
     | Pretest UserId Pretest Version
     | Session1 UserId Session1Task
@@ -64,7 +65,7 @@ type Pretest
     | VKS
     | Acceptability AcceptabilityRoute
     | YesNo
-    | Calendar Group
+    | Calendar Bool Group
 
 
 type Group
@@ -97,6 +98,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ map Home top
+        , map CalendarUpdated (s "calendar-updated")
         , map TermsAndConditions (s "terms-and-conditions")
         , map Pretest
             (s "user"
@@ -109,7 +111,8 @@ parser =
                         , map SentenceCompletion (s "sentence-completion")
                         , map VKS (s "vks")
                         , map YesNo (s "yes-no")
-                        , map Calendar (s "calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
+                        , map (Calendar False) (s "calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
+                        , map (Calendar True) (s "update-calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
                         , map Acceptability
                             (s "acceptability"
                                 </> oneOf

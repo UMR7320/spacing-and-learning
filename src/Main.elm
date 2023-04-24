@@ -297,6 +297,9 @@ init backgroundQuestionnaireUrl url key =
         Route.Posttest userId _ _ ->
             ( { model | user = Just userId }, cmd )
 
+        Route.CalendarUpdated ->
+            ( { model | route = CalendarUpdated }, Cmd.none )
+
         NotFound ->
             ( { model | route = NotFound }, cmd )
 
@@ -438,7 +441,7 @@ body model =
                                     Route.YesNo ->
                                         List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
-                                    Route.Calendar group ->
+                                    Route.Calendar isUpdate group ->
                                         case model.generalParameters of
                                             RemoteData.NotAsked ->
                                                 [ View.loading ]
@@ -486,6 +489,9 @@ body model =
                             , View.button { message = UserClickedSignInButton, txt = "Confirmer", isDisabled = False }
                             ]
                         ]
+
+            CalendarUpdated ->
+                [ text "Your planning has been updated!" ]
 
             NotFound ->
                 View.notFound
@@ -708,6 +714,9 @@ changeRouteTo route model =
                 ]
             )
 
+        Route.CalendarUpdated ->
+           ( newModel, Cmd.none )
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -822,7 +831,14 @@ update msg model =
             ( { model | email = email }, Cmd.none )
 
         ServerRespondedWithNewUser (Result.Ok id) ->
-            ( { model | user = Just id }, Nav.pushUrl model.key "../yes-no" )
+            ( { model | user = Just id }
+            , case model.route of
+                Route.Pretest _ (Route.Calendar False _) _ ->
+                  Nav.pushUrl model.key "../yes-no"
+
+                _ ->
+                  Nav.pushUrl model.key "/calendar-updated"
+            )
 
         ServerRespondedWithNewUser (Result.Err reason) ->
             ( model, Cmd.none )
@@ -853,6 +869,11 @@ update msg model =
                                         , ( "dateThirdEmail", Encode.string s3 )
                                         , ( "dateFourthEmail", Encode.string s4 )
                                         , ( "dateFifthEmail", Encode.string s5 )
+                                        , ( "isFirstEmailSent", Encode.bool False )
+                                        , ( "isSecondEmailSent", Encode.bool False )
+                                        , ( "isThirdEmailSent", Encode.bool False )
+                                        , ( "isFourthEmailSent", Encode.bool False )
+                                        , ( "isSurpriseEmailSent", Encode.bool False )
                                         ]
                                   )
                                 ]
