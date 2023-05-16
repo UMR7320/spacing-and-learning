@@ -460,15 +460,8 @@ body model =
                     [ h1 [] [ text "Welcome to the LexLearn project!" ]
                     , div
                         [ class "mb-10 flow" ]
-                        [ p [] [ text "You’re invited to participate in an online English vocabulary learning experiment. As a learner of English, you’ll be able to test your knowledge and learn some new words. As researchers, we will use your answers to help us develop online learning resources and understand better how students learn vocabulary." ]
-                        , p [] [ text "To get started, you need to do two things:" ]
-                        , ol
-                            []
-                            [ li [] [ text "Give us permission to collect your responses" ]
-                            , li [] [ text "Provide a little background information" ]
-                            ]
+                        [ p [] [ text "Merci de votre intérêt, malheureusement nous n'acceptons plus de nouvelles participations pour le moment." ]
                         ]
-                    , a [ class "button self-center", href "/terms-and-conditions" ] [ text "Continue" ]
                     ]
                 ]
 
