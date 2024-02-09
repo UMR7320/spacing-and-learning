@@ -23,7 +23,7 @@ type Entry
 
 
 type alias Presentation =
-    Logic.Task Trial State
+    Logic.Activity Trial State
 
 
 viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
@@ -62,7 +62,7 @@ entries d e t msg toggledEntries =
             )
 
 
-view : Logic.Task Trial State -> Html Msg
+view : Logic.Activity Trial State -> Html Msg
 view task =
     case task of
         Logic.NotStarted ->
@@ -114,7 +114,7 @@ viewTrial trial data =
 type Msg
     = UserClickedNextTrial
     | NextTrial Time.Posix
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
+    | UserClickedStartMain (List Trial) ExperimentInfo.Activity
     | UserToggleElementOfEntry String
     | UserClickedStartAudio String
     | UserClickedStartTraining
@@ -173,7 +173,7 @@ initState =
 
 
 type alias Model superModel =
-    { superModel | presentation : Logic.Task Trial State }
+    { superModel | presentation : Logic.Activity Trial State }
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -273,7 +273,7 @@ type alias State =
     }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session1 "Words to learn")

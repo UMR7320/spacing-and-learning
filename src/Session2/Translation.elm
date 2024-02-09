@@ -69,7 +69,7 @@ initState =
     }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session2 "Meaning 2")
@@ -82,7 +82,7 @@ start info trials =
 -- VIEW
 
 
-view : { task : Logic.Task Trial State, optionsOrder : List comparable } -> Html Msg
+view : { task : Logic.Activity Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
         Logic.Running Logic.Training data ->
@@ -90,7 +90,7 @@ view task =
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
                         [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ trial.target ]
-                        , renderTask task trial data data.history data.trainingTrials
+                        , renderActivity task trial data data.history data.trainingTrials
                         ]
 
                 Nothing ->
@@ -100,7 +100,7 @@ view task =
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
-                        [ renderTask task trial data data.history data.mainTrials
+                        [ renderActivity task trial data data.history data.mainTrials
                         ]
 
                 Nothing ->
@@ -119,7 +119,7 @@ view task =
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
 
-renderTask task trial data history allTrials =
+renderActivity task trial data history allTrials =
     div [ class "w-full" ]
         [ View.fromMarkdown trial.question
         , div

@@ -3,7 +3,6 @@ module Pretest.SPR exposing (..)
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (Key)
 import Data exposing (decodeRecords)
-import Dict
 import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as Attr
@@ -24,16 +23,16 @@ import View exposing (unclickableButton)
 
 
 type alias Pretest =
-    Para.State2 Msg (List Trial) (List ExperimentInfo.Task)
+    Para.State2 Msg (List Trial) (List ExperimentInfo.Activity)
 
 
 type alias SPR =
-    Logic.Task Trial State
+    Logic.Activity Trial State
 
 
 type alias Spr model =
     { model
-        | spr : Logic.Task Trial State
+        | spr : Logic.Activity Trial State
         , user : Maybe String
         , version : Version
         , key : Key
@@ -126,7 +125,7 @@ init infos trials version =
 -- VIEW
 
 
-view : Logic.Task Trial State -> List (Html.Styled.Html Msg)
+view : Logic.Activity Trial State -> List (Html.Styled.Html Msg)
 view task =
     case task of
         Logic.Loading ->
@@ -135,7 +134,7 @@ view task =
         Logic.Running Logic.Training data ->
             case data.current of
                 Just trial ->
-                    [ viewTask data trial UserConfirmedChoice ]
+                    [ viewActivity data trial UserConfirmedChoice ]
 
                 Nothing ->
                     [ div [ Attr.class "flex flex-col items-center" ]
@@ -151,7 +150,7 @@ view task =
         Logic.Running Logic.Main data ->
             case data.current of
                 Just trial ->
-                    [ viewTask data trial UserClickedNextTrial ]
+                    [ viewActivity data trial UserClickedNextTrial ]
 
                 Nothing ->
                     [ div
@@ -175,7 +174,7 @@ view task =
             [ View.unsafeInstructions data.infos UserClickedStartTraining ]
 
 
-viewTask data trial endTrialMsg =
+viewActivity data trial endTrialMsg =
     case ( data.state.step, data.state.currentSegment ) of
         ( SPR s, Just { taggedSegment } ) ->
             case s of
@@ -237,7 +236,7 @@ viewTask data trial endTrialMsg =
 type Msg
     = NoOp
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
-    | StartMain ExperimentInfo.Task (List Trial)
+    | StartMain ExperimentInfo.Activity (List Trial)
     | TimestampedMsg TimedMsg (Maybe Time.Posix)
     | UserClickedNextTrial Answer
     | NextTrial Answer Time.Posix
@@ -392,7 +391,7 @@ updateWithTime msg timestamp prevModel newModel =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Logic.Task Trial State -> Sub Msg
+subscriptions : Logic.Activity Trial State -> Sub Msg
 subscriptions task =
     case task of
         Logic.Running Logic.Training data ->

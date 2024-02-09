@@ -1,7 +1,6 @@
 module Session3.Synonym exposing (..)
 
 import Data exposing (decodeRecords)
-import Dict
 import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, h4, p, span, text)
 import Html.Styled.Attributes exposing (class)
@@ -54,7 +53,7 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session3 "Meaning 3")
@@ -89,8 +88,8 @@ trainingWheels trialn radical target =
             div [] []
 
 
-viewTask : Logic.Task Trial State -> List (Html Msg)
-viewTask experiment =
+viewActivity : Logic.Activity Trial State -> List (Html Msg)
+viewActivity experiment =
     case experiment of
         Logic.Err reason ->
             [ h4 [] [ p [] [ text ("Failure" ++ reason) ] ]

@@ -28,7 +28,7 @@ import View
 
 
 type alias Meaning =
-    Logic.Task Trial State
+    Logic.Activity Trial State
 
 
 type alias Trial =
@@ -64,7 +64,7 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session1 "Meaning 1")
@@ -82,7 +82,7 @@ initState =
 -- VIEW
 
 
-view : { task : Logic.Task Trial State, optionsOrder : List comparable } -> Html Msg
+view : { task : Logic.Activity Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
         Logic.Loading ->

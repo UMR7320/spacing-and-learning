@@ -67,40 +67,40 @@ type alias Model =
     , dnd : DnDList.Model
 
     -- PreTest
-    , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
+    , acceptabilityTask : Logic.Activity Acceptability.Trial Acceptability.State
     , spr : SPR.SPR
     , pretest : Pretest.Pretest
     , sentenceCompletion : SentenceCompletion.SentenceCompletion
-    , vks : { task : Logic.Task VKS.Trial VKS.Answer, showVideo : Bool }
-    , yesno : Logic.Task YesNo.Trial YesNo.State
+    , vks : { task : Logic.Activity VKS.Trial VKS.Answer, showVideo : Bool }
+    , yesno : Logic.Activity YesNo.Trial YesNo.State
 
     -- Session 1
     , session1 : Session1.Session1
-    , meaning : Logic.Task Meaning.Trial Meaning.State
-    , spellingLvl1 : Logic.Task SpellingLvl1.Trial SpellingLvl1.State
+    , meaning : Logic.Activity Meaning.Trial Meaning.State
+    , spellingLvl1 : Logic.Activity SpellingLvl1.Trial SpellingLvl1.State
 
     --cu1 stands for context-understanding-1
-    , cu1 : Logic.Task CU1.Trial CU1.State
-    , presentation : Logic.Task Presentation.Trial Presentation.State
+    , cu1 : Logic.Activity CU1.Trial CU1.State
+    , presentation : Logic.Activity Presentation.Trial Presentation.State
     , endAcceptabilityDuration : Int
 
     -- Session 2
-    , translationTask : Logic.Task Translation.Trial Translation.State
-    , scrabbleTask : Logic.Task Scrabble.Trial Scrabble.State
-    , cuLvl2 : Logic.Task CU2.Trial CU2.State
+    , translationTask : Logic.Activity Translation.Trial Translation.State
+    , scrabbleTask : Logic.Activity Scrabble.Trial Scrabble.State
+    , cuLvl2 : Logic.Activity CU2.Trial CU2.State
     , session2 : Session2.Session2
 
     -- Session 3
-    , spelling3 : Logic.Task Spelling3.Trial Spelling3.State
-    , cu3 : Logic.Task CU3.Trial CU3.State
-    , synonymTask : Logic.Task Synonym.Trial Synonym.State
+    , spelling3 : Logic.Activity Spelling3.Trial Spelling3.State
+    , cu3 : Logic.Activity CU3.Trial CU3.State
+    , synonymTask : Logic.Activity Synonym.Trial Synonym.State
     , session3 : Session3.Session3
 
     -- PostTest
     , cloudWords : CloudWords.CloudWords
 
     -- Shared
-    , infos : RemoteData Http.Error (Dict.Dict String ExperimentInfo.Task)
+    , infos : RemoteData Http.Error (Dict.Dict String ExperimentInfo.Activity)
     , email : String
     , user : Maybe String
     , errorTracking : List Http.Error
@@ -375,7 +375,7 @@ body model =
                         ]
 
                     Route.Spelling2 ->
-                        [ Html.Styled.map Spelling2 (Scrabble.viewScrabbleTask model) ]
+                        [ Html.Styled.map Spelling2 (Scrabble.viewScrabbleActivity model) ]
 
                     Route.Context2 ->
                         [ Html.Styled.map CU2
@@ -390,7 +390,7 @@ body model =
                         viewSessionInstructions model.sessions "session3" "synonym"
 
                     Route.Meaning3 ->
-                        List.map (Html.Styled.map Synonym) <| Synonym.viewTask model.synonymTask
+                        List.map (Html.Styled.map Synonym) <| Synonym.viewActivity model.synonymTask
 
                     Route.Spelling3 ->
                         [ Html.Styled.map Spelling3 <| Spelling3.view model.spelling3 ]
@@ -846,7 +846,7 @@ update msg model =
                     Nav.pushUrl model.key "/calendar-updated"
             )
 
-        ServerRespondedWithNewUser (Result.Err reason) ->
+        ServerRespondedWithNewUser (Result.Err _) ->
             ( model, Cmd.none )
 
         GotCurrentTime ( zone, time ) ->

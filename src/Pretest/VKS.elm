@@ -1,9 +1,7 @@
 module Pretest.VKS exposing (..)
 
 import Data
-import Dict
 import ExperimentInfo
-import Html.Attributes exposing (placeholder)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A exposing (class, controls, src, type_)
 import Html.Styled.Events as E
@@ -16,7 +14,6 @@ import Pretest.Version exposing (Version(..))
 import Random
 import Task
 import Time
-import Url.Builder
 import View
 
 
@@ -26,7 +23,7 @@ import View
 
 type alias Model superModel =
     { superModel
-        | vks : { task : Logic.Task Trial Answer, showVideo : Bool }
+        | vks : { task : Logic.Activity Trial Answer, showVideo : Bool }
         , user : Maybe String
         , version : Version
     }
@@ -54,11 +51,11 @@ type alias Answer =
 
 
 type alias SC =
-    Logic.Task Trial Answer
+    Logic.Activity Trial Answer
 
 
-toTask : List ExperimentInfo.Task -> List Trial -> Version -> Logic.Task Trial Answer
-toTask infos trials version =
+toActivity : List ExperimentInfo.Activity -> List Trial -> Version -> Logic.Activity Trial Answer
+toActivity infos trials version =
     Logic.startIntro
         (ExperimentInfo.activityInfo infos (Pretest.Version.toSession version) "LexLearn verbs")
         []

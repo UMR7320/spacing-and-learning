@@ -28,18 +28,18 @@ attempt =
 
 
 type alias ShuffledSession3 =
-    { cu : List CU.Trial, spelling : List Spelling.Trial, synonym : List Synonym.Trial, infos : List ExperimentInfo.Task }
+    { cu : List CU.Trial, spelling : List Spelling.Trial, synonym : List Synonym.Trial, infos : List ExperimentInfo.Activity }
 
 
 type Msg
-    = ServerRespondedWithSomeSession3Data (Para.Msg4 (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Task))
-    | ServerRespondedWithAllSession3Data (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Task)
+    = ServerRespondedWithSomeSession3Data (Para.Msg4 (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Activity))
+    | ServerRespondedWithAllSession3Data (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Activity)
     | ServerRespondedWithSomeError Http.Error
     | StartSession ShuffledSession3
 
 
 type alias Session3 =
-    Session.Session (Para.State4 Msg (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Task))
+    Session.Session (Para.State4 Msg (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Activity))
 
 
 update msg model =

@@ -17,7 +17,7 @@ import Task.Parallel as Para
 
 
 type alias Session1 =
-    Session (Para.State5 Msg (List Meaning.Trial) (List Spelling.Trial) (List CU.Trial) (List Presentation.Trial) (List ExperimentInfo.Task))
+    Session (Para.State5 Msg (List Meaning.Trial) (List Spelling.Trial) (List CU.Trial) (List Presentation.Trial) (List ExperimentInfo.Activity))
 
 
 type alias Model superModel =
@@ -26,7 +26,7 @@ type alias Model superModel =
         , spellingLvl1 : Spelling.Spelling
         , cu1 : CU.CU
         , presentation : Presentation.Presentation
-        , infos : RemoteData.RemoteData Http.Error (Dict.Dict String ExperimentInfo.Task)
+        , infos : RemoteData.RemoteData Http.Error (Dict.Dict String ExperimentInfo.Activity)
         , session1 : Session1
     }
 
@@ -36,19 +36,19 @@ type alias ShuffledSession1 =
     , spelling : List Spelling.Trial
     , cu1 : List CU.Trial
     , presentation : List Presentation.Trial
-    , infos_ : List ExperimentInfo.Task
+    , infos_ : List ExperimentInfo.Activity
     }
 
 
 type Msg
     = ServerRespondedWithSomeData LoadingMsg
     | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllData (List Meaning.Trial) (List Spelling.Trial) (List CU.Trial) (List Presentation.Trial) (List ExperimentInfo.Task)
+    | ServerRespondedWithAllData (List Meaning.Trial) (List Spelling.Trial) (List CU.Trial) (List Presentation.Trial) (List ExperimentInfo.Activity)
     | StartSession ShuffledSession1
 
 
 type alias LoadingMsg =
-    Para.Msg5 (List Meaning.Trial) (List Spelling.Trial) (List CU.Trial) (List Presentation.Trial) (List ExperimentInfo.Task)
+    Para.Msg5 (List Meaning.Trial) (List Spelling.Trial) (List CU.Trial) (List Presentation.Trial) (List ExperimentInfo.Activity)
 
 
 getAll =

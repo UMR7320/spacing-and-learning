@@ -2,9 +2,8 @@ module Session2.CU2 exposing (..)
 
 import Data
 import Delay
-import Dict
 import ExperimentInfo exposing (Session(..))
-import Html.Styled as Html exposing (div, span, text)
+import Html.Styled as Html exposing (div, text)
 import Html.Styled.Attributes exposing (class)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
@@ -71,7 +70,7 @@ defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session2 "Context 2")
@@ -200,7 +199,7 @@ type CU2Msg
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
+    | UserClickedStartMain (List Trial) ExperimentInfo.Activity
     | UserClickedSaveData
     | UserClickedAudio String
     | RuntimeShuffledOptionsOrder (List Int)

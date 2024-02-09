@@ -1,7 +1,6 @@
 module Pretest.SentenceCompletion exposing (..)
 
 import Data
-import Dict
 import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A
@@ -46,12 +45,12 @@ type alias State =
 
 
 type alias SentenceCompletion =
-    Logic.Task Trial State
+    Logic.Activity Trial State
 
 
 type alias Model superModel =
     { superModel
-        | sentenceCompletion : Logic.Task Trial State
+        | sentenceCompletion : Logic.Activity Trial State
         , user : Maybe String
         , version : Version
     }
@@ -228,7 +227,7 @@ type Msg
     = UserClickedToggleFeedback
     | UserClickedNextTrial
     | NextTrial Time.Posix
-    | UserClickedStartMain ExperimentInfo.Task (List Trial)
+    | UserClickedStartMain ExperimentInfo.Activity (List Trial)
     | UserClickedSaveData
     | UserUpdatedField Field String
     | RuntimeReordedAmorces Field

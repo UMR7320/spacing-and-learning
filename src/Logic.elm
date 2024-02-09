@@ -1,14 +1,11 @@
 module Logic exposing (..)
 
-import Data
 import ExperimentInfo
 import Html.Styled as Html
-import Json.Encode as Encode
-import Task
 import Time
 
 
-type Task trial state
+type Activity trial state
     = Running Step (Data trial state)
     | Err String
     | Loading
@@ -29,21 +26,21 @@ type alias Data trial state =
     , state : state
     , feedback : Bool
     , history : List ( trial, state, Time.Posix )
-    , infos : ExperimentInfo.Task
+    , infos : ExperimentInfo.Activity
     }
 
 
 type alias Info =
-    Result String ExperimentInfo.Task
+    Result String ExperimentInfo.Activity
 
 
-type alias ViewConfig t s msg =
-    { task : Task t s, instructions : List (Html.Html msg) }
+type alias ViewConfig trial state msg =
+    { activity : Activity trial state, instructions : List (Html.Html msg) }
 
 
-update : s -> Task t s -> Task t s
-update newState task =
-    case task of
+update : s -> Activity t s -> Activity t s
+update newState activity =
+    case activity of
         Running step data ->
             Running step { data | state = newState }
 
@@ -55,9 +52,9 @@ type alias Identified state =
     { state | uid : String }
 
 
-next : Time.Posix -> s -> Task t s -> Task t s
-next timestamp resetedState task =
-    case task of
+next : Time.Posix -> s -> Activity t s -> Activity t s
+next timestamp resetedState activity =
+    case activity of
         Running Training data ->
             case data.trainingTrials of
                 x :: y :: z :: zs ->
@@ -157,9 +154,9 @@ next timestamp resetedState task =
             Err "There is no next trial to access"
 
 
-{-| Init the task with infos, trainingTrials, mainTrials and the initial state
+{-| Init the activity with infos, trainingTrials, mainTrials and the initial state
 -}
-startIntro : Info -> List t -> List t -> s -> Task t s
+startIntro : Info -> List t -> List t -> s -> Activity t s
 startIntro info trainingTrials mainTrials initStat =
     case info of
         Result.Ok info_ ->
@@ -204,9 +201,9 @@ startIntro info trainingTrials mainTrials initStat =
             Err <| "I tried to start the intro of this task but I stumbled into an error : " ++ error
 
 
-newStep : Step -> Task t s -> Task t s
-newStep step task =
-    case task of
+newStep : Step -> Activity t s -> Activity t s
+newStep step activity =
+    case activity of
         Running _ data ->
             Running step data
 
@@ -214,9 +211,9 @@ newStep step task =
             Err "I can't change Step here"
 
 
-startMain : Task t s -> s -> Task t s
-startMain task initState =
-    case task of
+startMain : Activity t s -> s -> Activity t s
+startMain activity initState =
+    case activity of
         Running _ data ->
             case data.mainTrials of
                 x :: y :: _ ->
@@ -259,14 +256,14 @@ startMain task initState =
             Err "I can't go to Main from here"
 
 
-startTraining : Task t s -> Task t s
-startTraining task =
-    newStep Training task
+startTraining : Activity t s -> Activity t s
+startTraining activity =
+    newStep Training activity
 
 
-toggle : Task t s -> Task t s
-toggle task =
-    case task of
+toggle : Activity t s -> Activity t s
+toggle activity =
+    case activity of
         Running step data ->
             Running step { data | feedback = not data.feedback }
 
@@ -274,9 +271,9 @@ toggle task =
             Err "I tried to toggle the feedback but the task is still loading. Please report this error."
 
 
-getState : Task t s -> Maybe s
-getState task =
-    case task of
+getState : Activity t s -> Maybe s
+getState activity =
+    case activity of
         Running _ { state } ->
             Just state
 
@@ -284,9 +281,9 @@ getState task =
             Nothing
 
 
-getTrial : Task t s -> Maybe t
-getTrial task =
-    case task of
+getTrial : Activity t s -> Maybe t
+getTrial activity =
+    case activity of
         Running _ { current } ->
             current
 
@@ -294,9 +291,9 @@ getTrial task =
             Nothing
 
 
-getHistory : Task t s -> List ( t, s, Time.Posix )
-getHistory task =
-    case task of
+getHistory : Activity t s -> List ( t, s, Time.Posix )
+getHistory activity =
+    case activity of
         Running _ { history } ->
             history
 

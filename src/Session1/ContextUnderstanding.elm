@@ -1,7 +1,6 @@
 module Session1.ContextUnderstanding exposing (..)
 
 import Data
-import Dict
 import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
@@ -41,7 +40,7 @@ type alias State =
 
 
 type alias CU =
-    Logic.Task Trial State
+    Logic.Activity Trial State
 
 
 initState : State
@@ -54,7 +53,7 @@ defaultTrial =
     Trial "defaultuid" "defaulttarger" "defaultWrittenWord" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session1 "Context 1")
@@ -67,7 +66,7 @@ start info trials =
 -- VIEW
 
 
-view : { task : Logic.Task Trial State, optionsOrder : List comparable } -> Html Msg
+view : { task : Logic.Activity Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
         Logic.NotStarted ->
@@ -171,7 +170,7 @@ type Msg
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
-    | UserClickedStartMain (List Trial) ExperimentInfo.Task
+    | UserClickedStartMain (List Trial) ExperimentInfo.Activity
     | UserClickedSaveData
     | UserClickedStartTraining
     | RuntimeShuffledOptionsOrder (List Int)

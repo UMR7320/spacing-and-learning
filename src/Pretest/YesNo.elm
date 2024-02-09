@@ -57,7 +57,7 @@ type alias Trial =
 
 update msg model =
     case msg of
-        UserClickedStartTask ->
+        UserClickedStartActivity ->
             ( { model | yesno = Logic.startMain model.yesno initState }, Cmd.none )
 
         UserPressedButton maybeBool ->
@@ -176,7 +176,7 @@ countHitsAndFalseAlarms =
 
 type Msg
     = NoOp
-    | UserClickedStartTask
+    | UserClickedStartActivity
     | UserPressedButton (Maybe Bool)
     | NextTrial (Maybe Bool) Time.Posix
     | UserClickedSaveData
@@ -202,7 +202,7 @@ updateVocabularyScore payload callbackMsg decoder =
 
 
 type alias YN =
-    Logic.Task Trial State
+    Logic.Activity Trial State
 
 
 view : YN -> List (Html Msg)
@@ -217,7 +217,7 @@ view task =
         Logic.Running step data ->
             case step of
                 Logic.Instructions ->
-                    [ View.unsafeInstructions data.infos UserClickedStartTask ]
+                    [ View.unsafeInstructions data.infos UserClickedStartActivity ]
 
                 Logic.Training ->
                     []

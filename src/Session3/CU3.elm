@@ -2,11 +2,9 @@ module Session3.CU3 exposing (..)
 
 import Data
 import Delay
-import Dict
 import ExperimentInfo exposing (Session(..))
-import Html.Styled as Html exposing (div, label, span, text)
+import Html.Styled as Html exposing (div, label, text)
 import Html.Styled.Attributes exposing (class, classList)
-import Html.Styled.Events exposing (onInput)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (..)
@@ -80,7 +78,7 @@ initState =
     State "DefaultUid" "" (Listening 3) False False
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session3 "Context 3")
@@ -96,7 +94,7 @@ start info trials =
 view exp =
     case exp of
         Logic.NotStarted ->
-            div [] [ text "Task is not started yet." ]
+            div [] [ text "Activity is not started yet." ]
 
         Logic.Loading ->
             View.loading

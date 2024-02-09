@@ -1,9 +1,8 @@
 module Session1.Spelling exposing (..)
 
 import Data exposing (decodeRecords)
-import Dict
 import ExperimentInfo exposing (Session(..))
-import Html.Styled exposing (Html, div, fieldset, h2, p, pre, span, text)
+import Html.Styled exposing (Html, div, h2, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode
@@ -38,7 +37,7 @@ type Step
 
 
 type alias Spelling =
-    Logic.Task Trial State
+    Logic.Activity Trial State
 
 
 type alias Trial =
@@ -83,7 +82,7 @@ trainingBox =
     div [ class "w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col" ]
 
 
-viewTask data currentTrial optionsOrder =
+viewActivity data currentTrial optionsOrder =
     [ viewAudioButton data.state.remainingListenings currentTrial.audio.url
     , div
         [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
@@ -104,7 +103,7 @@ viewTask data currentTrial optionsOrder =
     ]
 
 
-view : Logic.Task Trial State -> List Int -> Html Msg
+view : Logic.Activity Trial State -> List Int -> Html Msg
 view exp optionsOrder =
     case exp of
         Logic.Loading ->
@@ -127,7 +126,7 @@ view exp optionsOrder =
                             (List.length history)
                             data.infos.trainingWheel
                             [ View.bold x.target ]
-                            :: viewTask data x optionsOrder
+                            :: viewActivity data x optionsOrder
 
                 Nothing ->
                     View.introToMain UserClickedStartMainloop
@@ -136,7 +135,7 @@ view exp optionsOrder =
             case current of
                 Just trial ->
                     div [ class "flex flex-col justify-center items-center" ]
-                        (viewTask
+                        (viewActivity
                             data
                             trial
                             optionsOrder

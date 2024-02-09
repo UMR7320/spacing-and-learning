@@ -2,13 +2,11 @@ module Session3.Spelling3 exposing (..)
 
 import Data
 import Delay
-import Dict
 import ExperimentInfo exposing (Session(..))
-import Html.Styled exposing (Html, div, fromUnstyled, input, label, text)
+import Html.Styled exposing (Html, div, input, label, text)
 import Html.Styled.Attributes exposing (class, for, id, value)
 import Html.Styled.Events exposing (onInput)
 import Http exposing (Error)
-import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
@@ -58,7 +56,7 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     Logic.startIntro
         (ExperimentInfo.activityInfo info Session3 "Spelling 3")
@@ -71,7 +69,7 @@ start info trials =
 --VIEW
 
 
-view : Logic.Task Trial State -> Html Msg
+view : Logic.Activity Trial State -> Html Msg
 view exp =
     case exp of
         Logic.NotStarted ->

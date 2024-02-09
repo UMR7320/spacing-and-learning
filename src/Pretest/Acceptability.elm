@@ -4,21 +4,19 @@ import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (Key, pushUrl)
 import Data exposing (decodeRecords)
 import Delay
-import Dict
 import ExperimentInfo exposing (Session(..))
-import Html.Styled exposing (Html, div, h1, p, pre, span, text)
+import Html.Styled exposing (Html, div, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, height, src, width)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import List.Extra
-import Logic exposing (Task)
+import Logic
 import Pretest.Version exposing (Version(..))
 import Ports
 import Task
 import Time
-import User exposing (User)
 import View
 
 
@@ -87,7 +85,7 @@ type Evaluation
 
 type alias Model supraModel =
     { supraModel
-        | acceptabilityTask : Logic.Task Trial State
+        | acceptabilityTask : Logic.Activity Trial State
         , endAcceptabilityDuration : Int
         , key : Key
         , user : Maybe String
@@ -125,7 +123,7 @@ newLoop =
     { initState | step = Start }
 
 
-start : List ExperimentInfo.Task -> List Trial -> Version -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Version -> Logic.Activity Trial State
 start info trials version =
     Logic.startIntro
         (ExperimentInfo.activityInfo info (Pretest.Version.toSession version) "Listening test")
@@ -138,7 +136,7 @@ start info trials version =
 -- VIEW
 
 
-view : Logic.Task Trial State -> List (Html Msg)
+view : Logic.Activity Trial State -> List (Html Msg)
 view task =
     let
         prompt =
@@ -598,7 +596,7 @@ updateHistoryEncoder version userId history =
 
 
 historyEncoder : Version -> String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder version userId history =
+historyEncoder version _ history =
     let
         answerField =
             case version of

@@ -1,9 +1,7 @@
 module Pretest.Pretest exposing (..)
 
 import Data
-import Delay
 import ExperimentInfo
-import Html.Attributes exposing (accept)
 import Http
 import List.Extra
 import Logic
@@ -25,17 +23,17 @@ import Task.Parallel as Para
 
 
 type alias Pretest =
-    Session.Session (Para.State6 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial))
+    Session.Session (Para.State6 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Activity) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial))
 
 
 type alias ParaMsg =
-    Para.Msg6 (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
+    Para.Msg6 (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Activity) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
 
 
 type alias ShuffledPretest =
     { spr : List SPR.Trial
     , sc : List SentenceCompletion.Trial
-    , infos : List ExperimentInfo.Task
+    , infos : List ExperimentInfo.Activity
     , vks : List VKS.Trial
     , acceptability :
         Result ( ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
@@ -48,8 +46,8 @@ type alias Model superModel =
         | spr : SPR.SPR
         , sentenceCompletion : SentenceCompletion.SentenceCompletion
         , pretest : Pretest
-        , vks : { task : Logic.Task VKS.Trial VKS.Answer, showVideo : Bool }
-        , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
+        , vks : { task : Logic.Activity VKS.Trial VKS.Answer, showVideo : Bool }
+        , acceptabilityTask : Logic.Activity Acceptability.Trial Acceptability.State
         , yesno : YesNo.YN
         , version : Version
         , user : Maybe String
@@ -63,7 +61,7 @@ type alias Model superModel =
 type Msg
     = ServerRespondedWithSomePretestData ParaMsg
     | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Task) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
+    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Activity) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
     | StartPretest ShuffledPretest
 
 
@@ -160,7 +158,7 @@ update msg model =
                             , spr = SPR.init infos spr model.version
                             , sentenceCompletion = SentenceCompletion.init infos sc model.version
                             , vks =
-                                { task = VKS.toTask infos (List.filter (not << .isTraining) vks) model.version
+                                { task = VKS.toActivity infos (List.filter (not << .isTraining) vks) model.version
                                 , showVideo = False
                                 }
                             , yesno = YesNo.init infos yn

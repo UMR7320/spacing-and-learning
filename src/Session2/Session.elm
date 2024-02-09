@@ -1,7 +1,6 @@
 module Session2.Session exposing (..)
 
 import Data
-import Debug exposing (todo)
 import ExperimentInfo
 import Http
 import Logic
@@ -16,18 +15,18 @@ import Task.Parallel as Para
 
 
 type alias Session2 =
-    Session.Session (Para.State4 Msg (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Task))
+    Session.Session (Para.State4 Msg (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Activity))
 
 
 type Msg
-    = ServerRespondedWithSomeData (Para.Msg4 (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Task))
-    | ServerRespondedWithAllData (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Task)
+    = ServerRespondedWithSomeData (Para.Msg4 (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Activity))
+    | ServerRespondedWithAllData (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Activity)
     | ServerRespondedWithSomeError Http.Error
     | StartSession ShuffledSession2
 
 
 type alias ShuffledSession2 =
-    { cu : List CU2.Trial, spelling : List Scrabble.Trial, translation : List Translation.Trial, infos : List ExperimentInfo.Task }
+    { cu : List CU2.Trial, spelling : List Scrabble.Trial, translation : List Translation.Trial, infos : List ExperimentInfo.Activity }
 
 
 getAll =

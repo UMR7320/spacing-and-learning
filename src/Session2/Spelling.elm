@@ -1,7 +1,6 @@
 module Session2.Spelling exposing (..)
 
 import Data
-import Dict
 import DnDList
 import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
@@ -66,7 +65,7 @@ defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") False ""
 
 
-start : List ExperimentInfo.Task -> List Trial -> Logic.Task Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
 start info trials =
     let
         nextTrial =
@@ -90,8 +89,8 @@ start info trials =
 --VIEW
 
 
-viewScrabbleTask : { a | scrabbleTask : Logic.Task Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
-viewScrabbleTask model =
+viewScrabbleActivity : { a | scrabbleTask : Logic.Activity Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
+viewScrabbleActivity model =
     let
         viewLetters scrambledLetters =
             scrambledLetters

@@ -5,12 +5,11 @@ import Dict
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
-import Platform exposing (Task)
 
 
-getInfos : (Result Http.Error (List Task) -> msg) -> Cmd msg
+getInfos : (Result Http.Error (List Activity) -> msg) -> Cmd msg
 getInfos toMsg =
-    Data.getTrialsFromServer_ "tasks" "allTasksGrid" toMsg decode
+    Data.getTrialsFromServer_ "tasks" "allActivitysGrid" toMsg decode
 
 
 type Session
@@ -88,7 +87,7 @@ toDict newInfos =
         |> Dict.fromList
 
 
-activityInfo : List Task -> Session -> String -> Result String Task
+activityInfo : List Activity -> Session -> String -> Result String Activity
 activityInfo infos session name =
     infos
         |> List.filter (\task -> task.session == session && task.name == name)
@@ -96,7 +95,7 @@ activityInfo infos session name =
         |> Result.fromMaybe ("Could not find " ++ name ++ " info for session " ++ sessionToString session)
 
 
-type alias Task =
+type alias Activity =
     { uid : String
     , session : Session
     , type_ : Type_
@@ -113,7 +112,7 @@ type alias Task =
     }
 
 
-decode : Decode.Decoder (List Task)
+decode : Decode.Decoder (List Activity)
 decode =
     let
         mapToSession : String -> Decode.Decoder Session
@@ -159,7 +158,7 @@ decode =
                     Decode.succeed Other
 
         decoder =
-            Decode.succeed Task
+            Decode.succeed Activity
                 |> required "id" Decode.string
                 |> custom (Decode.field "Session" Decode.string |> Decode.andThen mapToSession)
                 |> custom (Decode.field "Type" Decode.string |> Decode.andThen mapToType_)
