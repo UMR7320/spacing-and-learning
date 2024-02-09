@@ -15,7 +15,6 @@ import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Logic
-import Maybe exposing (withDefault)
 import Ports
 import PostTests.CloudWords as CloudWords
 import Pretest.Acceptability as Acceptability
@@ -47,6 +46,7 @@ import Task.Parallel as Para
 import Time
 import Url exposing (Url)
 import Url.Builder
+import UserCode
 import View exposing (navOut)
 
 
@@ -56,10 +56,6 @@ type alias Flags =
 
 
 -- MODEL
-
-
-type alias Pilote =
-    Session (Para.State2 Msg (List Acceptability.Trial) (List ExperimentInfo.Task))
 
 
 type alias Model =
@@ -73,8 +69,6 @@ type alias Model =
 
     -- PreTest
     , acceptabilityTask : Logic.Task Acceptability.Trial Acceptability.State
-    , packetsSended : Int
-    , pilote : Pilote
     , spr : SPR.SPR
     , pretest : Pretest.Pretest
     , sentenceCompletion : SentenceCompletion.SentenceCompletion
@@ -119,6 +113,9 @@ type alias Model =
     , generalParameters : RemoteData Http.Error Data.GeneralParameters
     , userCanParticipate : RemoteData Http.Error UserCanParticipate
     , backgroundQuestionnaireUrl : String
+
+    -- User Code
+    , userCode : UserCode.Model
     }
 
 
@@ -149,9 +146,7 @@ defaultModel key route backgroundQuestionnaireUrl =
 
     -- PILOTE
     , acceptabilityTask = Logic.NotStarted
-    , packetsSended = 0
     , endAcceptabilityDuration = 6000
-    , pilote = NotAsked
 
     -- PRETEST
     , spr = Logic.NotStarted
@@ -162,6 +157,9 @@ defaultModel key route backgroundQuestionnaireUrl =
 
     -- POSTEST
     , cloudWords = CloudWords.Loading
+
+    -- UserCode
+    , userCode = UserCode.emptyModel
 
     -- SHARED
     , user = Nothing
@@ -210,7 +208,11 @@ init backgroundQuestionnaireUrl url key =
                 , user = Just userId
                 , session1 = Loading loadingStateSession1
               }
-            , Cmd.batch [ cmd, Cmd.map Session1 fetchSession1, Session.getInfos ServerRespondedWithSessionsInfos ]
+            , Cmd.batch
+                [ cmd
+                , Cmd.map Session1 fetchSession1
+                , Session.getInfos ServerRespondedWithSessionsInfos
+                ]
             )
 
         Route.Home ->
@@ -239,7 +241,7 @@ init backgroundQuestionnaireUrl url key =
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
             )
 
-        Route.AuthenticatedSession2 userid _ ->
+        Route.Session2 userid _ ->
             ( { model
                 | -- SESSION 2
                   translationTask = Logic.Loading
@@ -251,7 +253,7 @@ init backgroundQuestionnaireUrl url key =
             , Cmd.batch [ cmd, Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
-        Route.AuthenticatedSession3 userid _ ->
+        Route.Session3 userid _ ->
             ( { model
                 | -- SESSION 3
                   synonymTask = Logic.Loading
@@ -299,6 +301,9 @@ init backgroundQuestionnaireUrl url key =
 
         Route.CalendarUpdated ->
             ( { model | route = CalendarUpdated }, Cmd.none )
+
+        Route.UserCode _ ->
+            ( model, Cmd.none )
 
         NotFound ->
             ( { model | route = NotFound }, cmd )
@@ -357,7 +362,7 @@ body model =
                             )
                         ]
 
-            Route.AuthenticatedSession2 _ task ->
+            Route.Session2 _ task ->
                 case task of
                     CU ->
                         [ Html.Styled.map CU2
@@ -381,7 +386,7 @@ body model =
                     Route.TopSession2 ->
                         viewSessionInstructions model.sessions "session2" "translation"
 
-            Route.AuthenticatedSession3 _ task ->
+            Route.Session3 _ task ->
                 case task of
                     Route.CU3 ->
                         [ Html.Styled.map CU3 <| CU3.view model.cu3
@@ -402,7 +407,7 @@ body model =
                     Route.CloudWords ->
                         List.map (Html.Styled.map WordCloud) (CloudWords.view model)
 
-            Route.Pretest userId task version ->
+            Route.Pretest _ task _ ->
                 case model.userCanParticipate of
                     RemoteData.NotAsked ->
                         [ View.loading ]
@@ -435,13 +440,13 @@ body model =
                                     Route.VKS ->
                                         List.map (Html.Styled.map VKS) (VKS.view model.vks)
 
-                                    Route.Acceptability sub ->
+                                    Route.Acceptability _ ->
                                         List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
 
                                     Route.YesNo ->
                                         List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
 
-                                    Route.Calendar isUpdate group ->
+                                    Route.Calendar _ group ->
                                         case model.generalParameters of
                                             RemoteData.NotAsked ->
                                                 [ View.loading ]
@@ -485,6 +490,9 @@ body model =
 
             CalendarUpdated ->
                 [ text "Your planning has been updated!" ]
+
+            Route.UserCode _ ->
+                List.map (Html.Styled.map UserCode) (UserCode.view model.userCode)
 
             NotFound ->
                 View.notFound
@@ -664,8 +672,10 @@ type Msg
     | Spelling3 Spelling3.Msg
     | Synonym Synonym.Msg
     | Session3 Session3.Msg
-      --
+      -- WordCloud
     | WordCloud CloudWords.Msg
+      -- User Code
+    | UserCode UserCode.Msg
 
 
 changeRouteTo : Route -> Model -> ( Model, Cmd Msg )
@@ -684,19 +694,16 @@ changeRouteTo route model =
         Route.NotFound ->
             ( newModel, Cmd.none )
 
-        Route.Pretest userId Route.VKS _ ->
-            ( newModel, Ports.enableAlertOnExit () )
-
         Route.Pretest _ _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
 
         Route.Session1 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
 
-        Route.AuthenticatedSession2 _ _ ->
+        Route.Session2 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
 
-        Route.AuthenticatedSession3 _ _ ->
+        Route.Session3 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
 
         Route.Posttest _ _ session ->
@@ -708,7 +715,16 @@ changeRouteTo route model =
             )
 
         Route.CalendarUpdated ->
-           ( newModel, Cmd.none )
+            ( newModel, Cmd.none )
+
+        Route.UserCode maybeDate ->
+          let
+              userCodeModel =
+                newModel.userCode
+              newUserCodeModel =
+                { userCodeModel | date = maybeDate }
+          in
+            ( { newModel | userCode = newUserCodeModel }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -827,10 +843,10 @@ update msg model =
             ( { model | user = Just id }
             , case model.route of
                 Route.Pretest _ (Route.Calendar False _) _ ->
-                  Nav.pushUrl model.key "../yes-no"
+                    Nav.pushUrl model.key "../yes-no"
 
                 _ ->
-                  Nav.pushUrl model.key "/calendar-updated"
+                    Nav.pushUrl model.key "/calendar-updated"
             )
 
         ServerRespondedWithNewUser (Result.Err reason) ->
@@ -889,6 +905,10 @@ update msg model =
             ( { model | userCanParticipate = userCanParticipate }
             , Cmd.none
             )
+
+        UserCode submsg ->
+            UserCode.update submsg model
+                |> updateWith UserCode
 
 
 updateWith subMsg ( model, subCmd ) =

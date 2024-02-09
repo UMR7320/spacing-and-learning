@@ -1,11 +1,11 @@
 module Session exposing (Info, Session(..), getInfos)
 
 import Data
-import Dict
+import Dict exposing (Dict)
 import Http exposing (expectJson)
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
-import RemoteData
+import RemoteData exposing (RemoteData)
 
 
 type Session a
@@ -15,6 +15,7 @@ type Session a
     | Error String
 
 
+getInfos : (RemoteData Http.Error (Dict String Info) -> c) -> Cmd c
 getInfos handler =
     Http.get
         { url = Data.buildQuery { app = "appvKOc8FH0j48Hw1", base = "sessions", view_ = "" }
@@ -28,6 +29,7 @@ type alias Info =
     }
 
 
+decode : Decoder (Dict String Info)
 decode =
     let
         decoder =

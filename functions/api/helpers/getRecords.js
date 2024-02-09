@@ -1,13 +1,10 @@
 const Airtable = require("airtable");
 const queryString = require("querystring");
 const getJson = require("./getJson");
-
-Airtable.configure({
-  endpointUrl: process.env.API_URL,
-  apiKey: process.env.API_KEY
-});
-
 const formattedReturn = require("./formattedReturn");
+
+Airtable.configure({ apiKey: process.env.API_KEY });
+
 module.exports = async event => {
   try {
     const table = event.queryStringParameters.base;
@@ -23,7 +20,7 @@ module.exports = async event => {
     if (event.queryStringParameters.outputRequest) {
       return outputRequest(event);
     }
-    const base = Airtable.base(event.queryStringParameters.app);
+    const base = Airtable.base(process.env.AIRTABLE_BASE);
     const options = {
       view: event.queryStringParameters.view
     };

@@ -1,11 +1,7 @@
 const Airtable = require("airtable");
+const formattedReturn = require("./formattedReturn");
 
-Airtable.configure({
-  endpointUrl: process.env.API_URL,
-  apiKey: process.env.API_KEY,
-});
-
-
+Airtable.configure({ apiKey: process.env.API_KEY });
 
 function handleTableRequest(table_name) {
   if (table_name == "users") {
@@ -15,7 +11,6 @@ function handleTableRequest(table_name) {
   }
 }
 
-const formattedReturn = require("./formattedReturn");
 module.exports = async (event) => {
   try {
     const base = Airtable.base(process.env.AIRTABLE_BASE);

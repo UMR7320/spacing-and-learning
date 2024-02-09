@@ -1,15 +1,10 @@
 module Data exposing (..)
 
-import Dict
 import Http exposing (Error(..), Response(..))
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (custom, optional, required)
-import Json.Encode as Encode
-import Process
+import Json.Decode.Pipeline exposing (required)
 import RemoteData
-import Task
 import Url.Builder
-import Html exposing (thead)
 
 
 splitIn : Int -> List a -> List (List a)
@@ -25,93 +20,6 @@ splitIn k xs =
 
     else
         [ xs ]
-
-
-{--}
-sendInBatch : (List history -> Encode.Value) -> String -> String -> List history -> Task.Task Http.Error (List ())
-sendInBatch historyEncoder taskId userId history =
-    let
-        chuncks =
-            splitIn 10 history
-
-        fieldsToUpdate =
-            Encode.object [ ( "tasks", Encode.list Encode.string [ taskId ] ) ]
-    in
-    chuncks
-        |> List.map
-            (\sublist ->
-                Process.sleep 0
-                    |> Task.andThen
-                        (\_ -> postRecordsBatch (Http.jsonBody <| historyEncoder sublist))
-            )
-        {--|> (::)
-            (updateUserCompletedTasks
-                (Http.jsonBody <|
-                    Encode.object
-                        [ ( "id", Encode.string userId )
-                        , ( "fields", fieldsToUpdate )
-                        ]
-                )
-            )--}
-        |> Task.sequence
-
-
-
---|> Task.map List.concat
---}
-
-
-postRecordsBatch : Http.Body -> Task.Task Http.Error ()
-postRecordsBatch payload =
-    Http.task
-        { method = "POST"
-        , headers = []
-        , url =
-            buildQuery
-                { app = apps.spacing
-                , base = "output"
-                , view_ = "all"
-                }
-        , body = payload
-        , resolver = Http.stringResolver <| resolve <| always (Ok ()) --<| handleJsonResponse <| decode
-        , timeout = Just 5000
-        }
-
-
-resolve : (body -> Result String a) -> Http.Response body -> Result Http.Error a
-resolve bodyParser response =
-    case response of
-        BadUrl_ url ->
-            Result.Err (BadUrl url)
-
-        Timeout_ ->
-            Err Timeout
-
-        NetworkError_ ->
-            Err NetworkError
-
-        BadStatus_ metadata _ ->
-            Err (BadStatus metadata.statusCode)
-
-        GoodStatus_ _ body ->
-            Result.mapError BadBody (bodyParser body)
-
-
-updateUserCompletedTasks : Http.Body -> Task.Task Http.Error ()
-updateUserCompletedTasks payload =
-    Http.task
-        { method = "PATCH"
-        , headers = []
-        , url =
-            buildQuery
-                { app = apps.spacing
-                , base = "users"
-                , view_ = "all"
-                }
-        , body = payload
-        , resolver = Http.stringResolver <| resolve <| always (Ok ()) -- Http.stringResolver <| handleJsonResponse <| decode
-        , timeout = Just 5000
-        }
 
 
 handleJsonResponse : Decoder a -> Http.Response String -> Result Http.Error a
@@ -173,6 +81,7 @@ getTrialsFromServer_ baseName viewName callbackMsg decoder =
         }
 
 
+getGeneralParameters : (RemoteData.RemoteData Http.Error GeneralParameters -> c) -> Cmd c
 getGeneralParameters responseHandler =
     Http.get
         { url =
@@ -209,35 +118,6 @@ type alias GeneralParameters =
     , retentionIntervalSurprise : Int
     , consent : String
     }
-
-
-decodeBool : String -> Decoder (Bool -> b) -> Decoder b
-decodeBool fieldname =
-    let
-        stringToBoolDecoder : String -> Decode.Decoder Bool
-        stringToBoolDecoder str =
-            case str of
-                "true" ->
-                    Decode.succeed True
-
-                _ ->
-                    Decode.succeed False
-    in
-    custom (Decode.field fieldname Decode.string |> Decode.andThen stringToBoolDecoder)
-
-
-sendUserData : Http.Body -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
-sendUserData payload callbackMsg decoder =
-    Http.post
-        { url =
-            buildQuery
-                { app = apps.spacing
-                , base = "users"
-                , view_ = "allUsers"
-                }
-        , body = payload
-        , expect = Http.expectJson callbackMsg decoder
-        }
 
 
 type alias AirtableQueryParameters =
@@ -312,31 +192,37 @@ singleElementArrayDecoder decoder =
                         fail "Expected exactly one element"
             )
 
+
 type alias AudioFile =
     { url : String
     , type_ : String
     }
 
 
-type UserCanParticipate = Yes | No String
+type UserCanParticipate
+    = Yes
+    | No String
 
 
 decodeUserCanParticipate : Decoder UserCanParticipate
 decodeUserCanParticipate =
     field "userCanParticipate" bool
-    |> andThen (\userCanParticipate ->
-        if userCanParticipate then
-            succeed Yes
-        else
-            map No (field "reason" string)
-      )
+        |> andThen
+            (\userCanParticipate ->
+                if userCanParticipate then
+                    succeed Yes
+
+                else
+                    map No (field "reason" string)
+            )
 
 
 getCanUserParticipate : String -> (RemoteData.RemoteData Http.Error UserCanParticipate -> msg) -> Cmd msg
 getCanUserParticipate userId msg =
     Http.get
-        { url = Url.Builder.absolute
-            [ ".netlify" , "functions" , "user-can-participate"]
-            [ Url.Builder.string "id" userId ]
+        { url =
+            Url.Builder.absolute
+                [ ".netlify", "functions", "user-can-participate" ]
+                [ Url.Builder.string "id" userId ]
         , expect = Http.expectJson (RemoteData.fromResult >> msg) decodeUserCanParticipate
         }

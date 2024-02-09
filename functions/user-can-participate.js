@@ -8,6 +8,14 @@ Airtable.configure({
 });
 
 exports.handler = async (event, context) => {
+  // update Feb 2024, we're launching a new experiment without this check
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ userCanParticipate: true }),
+    headers: {
+      "Content-Type": "application/json"
+    },
+  }
   try {
     const base = Airtable.base(process.env.AIRTABLE_BASE);
     const userId = event.queryStringParameters.id;

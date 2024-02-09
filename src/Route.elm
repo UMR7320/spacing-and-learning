@@ -32,9 +32,10 @@ type Route
     | NotFound
     | Pretest UserId Pretest Version
     | Session1 UserId Session1Task
-    | AuthenticatedSession2 UserId Session2Task
-    | AuthenticatedSession3 UserId Session3Task
+    | Session2 UserId Session2Task
+    | Session3 UserId Session3Task
     | Posttest UserId PosttestTask (Maybe String)
+    | UserCode (Maybe String)
     | TermsAndConditions
 
 
@@ -136,7 +137,7 @@ parser =
                         , map TopSession1 top
                         ]
             )
-        , map AuthenticatedSession2
+        , map Session2
             (s "user"
                 </> string
                 </> s "session2"
@@ -147,7 +148,7 @@ parser =
                         , map TopSession2 top
                         ]
             )
-        , map AuthenticatedSession3
+        , map Session3
             (s "user"
                 </> string
                 </> s "session3"
@@ -165,6 +166,7 @@ parser =
                 </> oneOf [ map CloudWords (s "cw") ]
                 <?> Query.string "session"
             )
+        , map UserCode (s "code" <?> Query.string "date")
 
         --  Add more routes like this:
         --  , map Comment (s "user" </> string </> s "comment" </> int)

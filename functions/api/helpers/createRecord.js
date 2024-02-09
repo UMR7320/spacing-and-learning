@@ -1,9 +1,6 @@
 const Airtable = require("airtable");
 
-Airtable.configure({
-  endpointUrl: process.env.API_URL,
-  apiKey: process.env.API_KEY,
-});
+Airtable.configure({ apiKey: process.env.API_KEY });
 
 const formattedReturn = require("./formattedReturn");
 module.exports = async (event) => {

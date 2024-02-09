@@ -7,6 +7,7 @@ import Logic
 import Pretest.Version exposing (Version(..))
 import Route exposing (..)
 import Tuple
+import User exposing (Activity)
 import View
 
 
@@ -26,10 +27,10 @@ view model =
         Session1 _ activity ->
             viewSession1 activity model
 
-        AuthenticatedSession2 _ activity ->
+        Session2 _ activity ->
             viewSession2 activity model
 
-        AuthenticatedSession3 _ activity ->
+        Session3 _ activity ->
             viewSession3 activity model
 
         Posttest _ _ session ->
@@ -82,7 +83,7 @@ viewPretest activity model =
                 ]
 
         Unknown _ ->
-              text ""
+            text ""
 
 
 viewSession1 activity model =

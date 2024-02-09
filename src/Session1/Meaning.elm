@@ -1,16 +1,12 @@
 module Session1.Meaning exposing (..)
 
 import Data exposing (decodeRecords)
-import Dict
 import ExperimentInfo exposing (Session(..))
 import Html.Styled
     exposing
         ( Html
         , div
-        , h1
-        , h3
         , p
-        , span
         , text
         )
 import Html.Styled.Attributes exposing (class, disabled)
@@ -22,7 +18,6 @@ import Logic
 import Random
 import Random.List
 import Session2.Translation exposing (Msg(..))
-import String.Interpolate exposing (interpolate)
 import Task
 import Time
 import View
