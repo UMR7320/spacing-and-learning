@@ -1,12 +1,12 @@
 module Route exposing
     ( AcceptabilityRoute(..)
     , Group(..)
-    , PosttestTask(..)
-    , Pretest(..)
+    , PosttestActivity(..)
+    , PretestRoute(..)
     , Route(..)
-    , Session1Task(..)
-    , Session2Task(..)
-    , Session3Task(..)
+    , Session1Activity(..)
+    , Session2Activity(..)
+    , Session3Activity(..)
     , fromUrl
     )
 
@@ -28,37 +28,44 @@ import Url.Parser.Query as Query
 
 type Route
     = Home
-    | CalendarUpdated
-    | NotFound
-    | Pretest UserId Pretest Version
-    | Session1 UserId Session1Task
-    | Session2 UserId Session2Task
-    | Session3 UserId Session3Task
-    | Posttest UserId PosttestTask (Maybe String)
+    | Pretest UserId PretestRoute Version
+    | Session1 UserId Session1Activity
+    | Session2 UserId Session2Activity
+    | Session3 UserId Session3Activity
+    | Posttest UserId PosttestActivity (Maybe String)
     | UserCode (Maybe String)
     | TermsAndConditions
+    | CalendarUpdated
+    | NotFound
 
 
 type alias UserId =
     String
 
 
-type Session1Task
-    = Meaning
-    | SpellingLevel1
+type Session1Activity
+    = TopSession1
     | Presentation
-    | CU1
-    | TopSession1
+    | Meaning1
+    | Spelling1
+    | Context1
 
 
-type Session2Task
-    = Translation
-    | Spelling
-    | CU
-    | TopSession2
+type Session2Activity
+    = TopSession2
+    | Meaning2
+    | Spelling2
+    | Context2
 
 
-type Pretest
+type Session3Activity
+    = TopSession3
+    | Meaning3
+    | Spelling3
+    | Context3
+
+
+type PretestRoute
     = GeneralInfos
     | EmailSent
     | SPR
@@ -80,27 +87,16 @@ type AcceptabilityRoute
     | AcceptabilityEnd
 
 
-
---| Acceptability
-
-
-type PosttestTask
+type PosttestActivity
     = CloudWords
-
-
-type Session3Task
-    = CU3
-    | Spelling3
-    | Synonym
-    | TopSession3
 
 
 parser : Parser (Route -> a) a
 parser =
     oneOf
         [ map Home top
-        , map CalendarUpdated (s "calendar-updated")
         , map TermsAndConditions (s "terms-and-conditions")
+        , map CalendarUpdated (s "calendar-updated")
         , map Pretest
             (s "user"
                 </> string
@@ -130,11 +126,11 @@ parser =
                 </> string
                 </> s "session1"
                 </> oneOf
-                        [ map Meaning (s "meaning")
-                        , map SpellingLevel1 (s "spelling")
+                        [ map TopSession1 top
                         , map Presentation (s "presentation")
-                        , map CU1 (s "context-understanding")
-                        , map TopSession1 top
+                        , map Meaning1 (s "meaning")
+                        , map Spelling1 (s "spelling")
+                        , map Context1 (s "context-understanding")
                         ]
             )
         , map Session2
@@ -142,10 +138,10 @@ parser =
                 </> string
                 </> s "session2"
                 </> oneOf
-                        [ map Spelling (s "spelling")
-                        , map Translation (s "translation")
-                        , map CU (s "context-understanding")
-                        , map TopSession2 top
+                        [ map TopSession2 top
+                        , map Meaning2 (s "meaning")
+                        , map Spelling2 (s "spelling")
+                        , map Context2 (s "context-understanding")
                         ]
             )
         , map Session3
@@ -153,10 +149,10 @@ parser =
                 </> string
                 </> s "session3"
                 </> oneOf
-                        [ map CU3 (s "context-understanding")
+                        [ map TopSession3 top
+                        , map Meaning3 (s "meaning")
                         , map Spelling3 (s "spelling")
-                        , map Synonym (s "synonym")
-                        , map TopSession3 top
+                        , map Context3 (s "context-understanding")
                         ]
             )
         , map Posttest

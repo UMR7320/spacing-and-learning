@@ -6,9 +6,6 @@ import Html.Styled.Attributes as Html exposing (..)
 import Logic
 import Pretest.Version exposing (Version(..))
 import Route exposing (..)
-import Tuple
-import User exposing (Activity)
-import View
 
 
 
@@ -90,9 +87,9 @@ viewSession1 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 5" ]
         [ viewItem "Presentation" Presentation model.presentation activity
-        , viewItem "Meaning" Meaning model.meaning activity
-        , viewItem "Spelling" SpellingLevel1 model.spellingLvl1 activity
-        , viewItem "Context" CU1 model.cu1 activity
+        , viewItem "Meaning" Meaning1 model.meaning activity
+        , viewItem "Spelling" Spelling1 model.spellingLvl1 activity
+        , viewItem "Context" Context1 model.cu1 activity
         , div [ classList [ ( "active", False ) ] ] [ text "How was it?" ]
         ]
 
@@ -100,9 +97,9 @@ viewSession1 activity model =
 viewSession2 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 4" ]
-        [ viewItem "Meaning" Translation model.translationTask activity
-        , viewItem "Spelling" Spelling model.scrabbleTask activity
-        , viewItem "Context" CU model.cuLvl2 activity
+        [ viewItem "Meaning" Meaning2 model.translationTask activity
+        , viewItem "Spelling" Spelling2 model.scrabbleTask activity
+        , viewItem "Context" Context2 model.cuLvl2 activity
         , div [] [ text "How was it?" ]
         ]
 
@@ -110,9 +107,9 @@ viewSession2 activity model =
 viewSession3 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 7" ]
-        [ viewItem "Meaning" Synonym model.synonymTask activity
+        [ viewItem "Meaning" Meaning3 model.synonymTask activity
         , viewItem "Spelling" Spelling3 model.spelling3 activity
-        , viewItem "Context" CU3 model.cu3 activity
+        , viewItem "Context" Context3 model.cu3 activity
         , div [] [ text "How was it?" ]
         , div [] [ text "LexLearn verbs" ]
         , div [] [ text "Reading test" ]

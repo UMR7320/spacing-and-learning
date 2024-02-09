@@ -26,7 +26,7 @@ import Pretest.Version exposing (Version(..))
 import Pretest.YesNo as YesNo
 import ProgressBar
 import RemoteData exposing (RemoteData)
-import Route exposing (Route(..), Session1Task(..), Session2Task(..))
+import Route exposing (Route(..), Session1Activity(..), Session2Activity(..))
 import Session exposing (Session(..))
 import Session1.ContextUnderstanding as CU1
 import Session1.Meaning as Meaning
@@ -42,7 +42,6 @@ import Session3.Session as Session3
 import Session3.Spelling3 as Spelling3
 import Session3.Synonym as Synonym
 import Task
-import Task.Parallel as Para
 import Time
 import Url exposing (Url)
 import Url.Builder
@@ -329,12 +328,15 @@ body model =
     , ProgressBar.view model
     , View.mainEl <|
         case model.route of
-            Route.Session1 _ task ->
-                case task of
+            Route.Session1 _ activity ->
+                case activity of
                     Route.TopSession1 ->
                         viewSessionInstructions model.sessions "session1" "presentation"
 
-                    Route.Meaning ->
+                    Route.Presentation ->
+                        [ Html.Styled.map Presentation (Presentation.view model.presentation) ]
+
+                    Route.Meaning1 ->
                         [ Html.Styled.map Meaning <|
                             Meaning.view
                                 { task = model.meaning
@@ -342,18 +344,14 @@ body model =
                                 }
                         ]
 
-                    Route.Presentation ->
-                        [ Html.Styled.map Presentation (Presentation.view model.presentation)
-                        ]
-
-                    SpellingLevel1 ->
+                    Route.Spelling1 ->
                         [ Html.Styled.map Spelling1
                             (SpellingLvl1.view model.spellingLvl1
                                 model.optionsOrder
                             )
                         ]
 
-                    Route.CU1 ->
+                    Route.Context1 ->
                         [ Html.Styled.map CU1
                             (CU1.view
                                 { task = model.cu1
@@ -362,16 +360,12 @@ body model =
                             )
                         ]
 
-            Route.Session2 _ task ->
-                case task of
-                    CU ->
-                        [ Html.Styled.map CU2
-                            (CU2.view model.cuLvl2
-                                model.optionsOrder
-                            )
-                        ]
+            Route.Session2 _ activity ->
+                case activity of
+                    Route.TopSession2 ->
+                        viewSessionInstructions model.sessions "session2" "translation"
 
-                    Route.Translation ->
+                    Route.Meaning2 ->
                         [ Html.Styled.map Translation
                             (Translation.view
                                 { task = model.translationTask
@@ -380,34 +374,36 @@ body model =
                             )
                         ]
 
-                    Route.Spelling ->
+                    Route.Spelling2 ->
                         [ Html.Styled.map Spelling2 (Scrabble.viewScrabbleTask model) ]
 
-                    Route.TopSession2 ->
-                        viewSessionInstructions model.sessions "session2" "translation"
-
-            Route.Session3 _ task ->
-                case task of
-                    Route.CU3 ->
-                        [ Html.Styled.map CU3 <| CU3.view model.cu3
+                    Route.Context2 ->
+                        [ Html.Styled.map CU2
+                            (CU2.view model.cuLvl2
+                                model.optionsOrder
+                            )
                         ]
 
-                    Route.Synonym ->
+            Route.Session3 _ activity ->
+                case activity of
+                    Route.TopSession3 ->
+                        viewSessionInstructions model.sessions "session3" "synonym"
+
+                    Route.Meaning3 ->
                         List.map (Html.Styled.map Synonym) <| Synonym.viewTask model.synonymTask
 
                     Route.Spelling3 ->
-                        [ Html.Styled.map Spelling3 <| Spelling3.view model.spelling3
-                        ]
+                        [ Html.Styled.map Spelling3 <| Spelling3.view model.spelling3 ]
 
-                    Route.TopSession3 ->
-                        viewSessionInstructions model.sessions "session3" "synonym"
+                    Route.Context3 ->
+                        [ Html.Styled.map CU3 <| CU3.view model.cu3 ]
 
             Route.Posttest _ task _ ->
                 case task of
                     Route.CloudWords ->
                         List.map (Html.Styled.map WordCloud) (CloudWords.view model)
 
-            Route.Pretest _ task _ ->
+            Route.Pretest _ subPage _ ->
                 case model.userCanParticipate of
                     RemoteData.NotAsked ->
                         [ View.loading ]
@@ -424,7 +420,7 @@ body model =
                                 [ text reason ]
 
                             Yes ->
-                                case task of
+                                case subPage of
                                     Route.EmailSent ->
                                         [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
 
@@ -718,12 +714,13 @@ changeRouteTo route model =
             ( newModel, Cmd.none )
 
         Route.UserCode maybeDate ->
-          let
-              userCodeModel =
-                newModel.userCode
-              newUserCodeModel =
-                { userCodeModel | date = maybeDate }
-          in
+            let
+                userCodeModel =
+                    newModel.userCode
+
+                newUserCodeModel =
+                    { userCodeModel | date = maybeDate }
+            in
             ( { newModel | userCode = newUserCodeModel }, Cmd.none )
 
 
