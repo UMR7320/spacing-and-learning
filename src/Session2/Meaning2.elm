@@ -1,14 +1,14 @@
 module Session2.Meaning2 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Random
 import Random.List
 import Task
@@ -68,10 +68,10 @@ initState =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity Trial State
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session2 "Meaning 2")
+        (ActivityInfo.activityInfo info Session2 "Meaning 2")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

@@ -1,6 +1,6 @@
 module Pretest.Version exposing (Version(..), fromString, toString, toSession)
 
-import ExperimentInfo
+import ActivityInfo
 
 type Version
     = PreTest
@@ -31,23 +31,23 @@ fromString version =
 
 -- version and session should probably be merged, but the pages are not well organized
 -- so this is non-trivial
-toSession : Version -> ExperimentInfo.Session
+toSession : Version -> ActivityInfo.Session
 toSession version =
     case version of
         PreTest ->
-            ExperimentInfo.Pretest
+            ActivityInfo.Pretest
 
         PostTest ->
-            ExperimentInfo.Posttest
+            ActivityInfo.Posttest
 
         PostTestDiff ->
-            ExperimentInfo.PosttestDiff
+            ActivityInfo.PosttestDiff
 
         Surprise ->
-            ExperimentInfo.PosttestDiffSurprise
+            ActivityInfo.PosttestDiffSurprise
 
-        Unknown val ->
-            ExperimentInfo.OtherSession
+        Unknown _ ->
+            ActivityInfo.OtherSession
 
 
 toString : Version -> String

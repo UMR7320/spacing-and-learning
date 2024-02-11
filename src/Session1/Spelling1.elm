@@ -1,7 +1,7 @@
 module Session1.Spelling1 exposing (..)
 
 import Data exposing (decodeRecords)
-import ExperimentInfo exposing (Session(..))
+import ActivityInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, h2, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
@@ -56,7 +56,7 @@ iniState =
 
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session1 "Spelling 1")
+        (ActivityInfo.activityInfo info Session1 "Spelling 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         iniState

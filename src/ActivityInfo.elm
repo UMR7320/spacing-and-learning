@@ -1,15 +1,16 @@
-module ExperimentInfo exposing (..)
+module ActivityInfo exposing (..)
 
 import Data
 import Dict
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
+import Task exposing (Task)
 
 
-getInfos : (Result Http.Error (List Activity) -> msg) -> Cmd msg
+getInfos : (Result Http.Error (List ActivityInfo) -> msg) -> Cmd msg
 getInfos toMsg =
-    Data.getTrialsFromServer_ "tasks" "allActivitysGrid" toMsg decode
+    Data.getTrialsFromServer_ "tasks" "allActivityInfosGrid" toMsg decode
 
 
 type Session
@@ -23,6 +24,7 @@ type Session
     | OtherSession
 
 
+sessionToString : Session -> String
 sessionToString str =
     case str of
         Session1 ->
@@ -57,6 +59,7 @@ type Type_
     | Other
 
 
+typeToString : Type_ -> String
 typeToString t =
     case t of
         Sens ->
@@ -87,7 +90,7 @@ toDict newInfos =
         |> Dict.fromList
 
 
-activityInfo : List Activity -> Session -> String -> Result String Activity
+activityInfo : List ActivityInfo -> Session -> String -> Result String ActivityInfo
 activityInfo infos session name =
     infos
         |> List.filter (\task -> task.session == session && task.name == name)
@@ -95,7 +98,7 @@ activityInfo infos session name =
         |> Result.fromMaybe ("Could not find " ++ name ++ " info for session " ++ sessionToString session)
 
 
-type alias Activity =
+type alias ActivityInfo =
     { uid : String
     , session : Session
     , type_ : Type_
@@ -112,7 +115,7 @@ type alias Activity =
     }
 
 
-decode : Decode.Decoder (List Activity)
+decode : Decode.Decoder (List ActivityInfo)
 decode =
     let
         mapToSession : String -> Decode.Decoder Session
@@ -158,7 +161,7 @@ decode =
                     Decode.succeed Other
 
         decoder =
-            Decode.succeed Activity
+            Decode.succeed ActivityInfo
                 |> required "id" Decode.string
                 |> custom (Decode.field "Session" Decode.string |> Decode.andThen mapToSession)
                 |> custom (Decode.field "Type" Decode.string |> Decode.andThen mapToType_)
@@ -176,6 +179,7 @@ decode =
     Data.decodeRecords decoder
 
 
+getRecords : Task Http.Error (List ActivityInfo)
 getRecords =
     Http.task
         { method = "GET"

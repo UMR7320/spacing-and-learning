@@ -1,15 +1,15 @@
 module Session1.Presentation exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (Session(..), ActivityInfo)
 import Data
 import Dict exposing (Dict)
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, li, span, text, ul)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
-import Activity exposing (Activity)
 import Ports
 import Set
 import Task
@@ -113,7 +113,7 @@ viewTrial trial data =
 type Msg
     = UserClickedNextTrial
     | NextTrial Time.Posix
-    | UserClickedStartMain (List Trial) ExperimentInfo.Activity
+    | UserClickedStartMain (List Trial) ActivityInfo
     | UserToggleElementOfEntry String
     | UserClickedStartAudio String
     | UserClickedStartTraining
@@ -272,10 +272,10 @@ type alias State =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity Trial State
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session1 "Words to learn")
+        (ActivityInfo.activityInfo info Session1 "Words to learn")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

@@ -1,7 +1,7 @@
 module Pretest.SentenceCompletion exposing (..)
 
 import Data
-import ExperimentInfo
+import ActivityInfo exposing (ActivityInfo)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A
 import Html.Styled.Events as E
@@ -227,7 +227,7 @@ type Msg
     = UserClickedToggleFeedback
     | UserClickedNextTrial
     | NextTrial Time.Posix
-    | UserClickedStartMain ExperimentInfo.Activity (List Trial)
+    | UserClickedStartMain ActivityInfo (List Trial)
     | UserClickedSaveData
     | UserUpdatedField Field String
     | RuntimeReordedAmorces Field

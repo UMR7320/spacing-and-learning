@@ -1,13 +1,11 @@
 module Session1.Session exposing (..)
 
-import Data
-import Dict
-import ExperimentInfo
-import Http
 import Activity
+import ActivityInfo exposing (ActivityInfo)
+import Data
+import Http
 import Random
 import Random.List exposing (shuffle)
-import RemoteData
 import Session exposing (Session(..))
 import Session1.Context1 as Context1 exposing (Context1)
 import Session1.Meaning1 as Meaning1 exposing (Meaning1)
@@ -17,7 +15,7 @@ import Task.Parallel as Para
 
 
 type alias Session1 =
-    Session (Para.State5 Msg (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List Presentation.Trial) (List ExperimentInfo.Activity))
+    Session (Para.State5 Msg (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List Presentation.Trial) (List ActivityInfo))
 
 
 type alias Model superModel =
@@ -27,7 +25,6 @@ type alias Model superModel =
         , meaning1 : Meaning1
         , spelling1 : Spelling1
         , context1 : Context1
-        , infos : RemoteData.RemoteData Http.Error (Dict.Dict String ExperimentInfo.Activity)
     }
 
 
@@ -36,19 +33,19 @@ type alias ShuffledSession1 =
     , spelling1 : List Spelling1.Trial
     , context1 : List Context1.Trial
     , presentation : List Presentation.Trial
-    , infos_ : List ExperimentInfo.Activity
+    , infos : List ActivityInfo
     }
 
 
 type Msg
     = ServerRespondedWithSomeData LoadingMsg
     | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllData (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List Presentation.Trial) (List ExperimentInfo.Activity)
+    | ServerRespondedWithAllData (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List Presentation.Trial) (List ActivityInfo)
     | StartSession ShuffledSession1
 
 
 type alias LoadingMsg =
-    Para.Msg5 (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List Presentation.Trial) (List ExperimentInfo.Activity)
+    Para.Msg5 (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List Presentation.Trial) (List ActivityInfo)
 
 
 getAll =
@@ -57,7 +54,7 @@ getAll =
         , task2 = Spelling1.getRecords
         , task3 = Context1.getRecords
         , task4 = Presentation.getRecords
-        , task5 = ExperimentInfo.getRecords
+        , task5 = ActivityInfo.getRecords
         , onUpdates = ServerRespondedWithSomeData
         , onFailure = ServerRespondedWithSomeError
         , onSuccess = ServerRespondedWithAllData
@@ -88,22 +85,22 @@ update msg model =
             , Cmd.none
             )
 
-        ServerRespondedWithAllData meaning1 spelling1 context1 presentation infos_ ->
+        ServerRespondedWithAllData meaning1 spelling1 context1 presentation infos ->
             let
                 randomize =
-                    Random.generate StartSession (Random.map5 ShuffledSession1 (shuffle meaning1) (shuffle spelling1) (shuffle context1) (shuffle presentation) (Random.constant infos_))
+                    Random.generate StartSession (Random.map5 ShuffledSession1 (shuffle meaning1) (shuffle spelling1) (shuffle context1) (shuffle presentation) (Random.constant infos))
             in
             ( model
             , randomize
             )
 
-        StartSession ({ infos_ } as tasks) ->
+        StartSession ({ infos } as tasks) ->
             ( { model
                 | session1 = Ready
-                , presentation = Presentation.start infos_ tasks.presentation
-                , meaning1 = Meaning1.start infos_ tasks.meaning1
-                , spelling1 = Spelling1.start infos_ tasks.spelling1
-                , context1 = Context1.start infos_ tasks.context1
+                , presentation = Presentation.start infos tasks.presentation
+                , meaning1 = Meaning1.start infos tasks.meaning1
+                , spelling1 = Spelling1.start infos tasks.spelling1
+                , context1 = Context1.start infos tasks.context1
               }
             , Cmd.none
             )

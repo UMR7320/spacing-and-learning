@@ -1,7 +1,6 @@
 module Activity exposing (..)
 
-import ExperimentInfo
-import Html.Styled as Html
+import ActivityInfo exposing (ActivityInfo)
 import Time
 
 
@@ -26,16 +25,12 @@ type alias Data trial state =
     , state : state
     , feedback : Bool
     , history : List ( trial, state, Time.Posix )
-    , infos : ExperimentInfo.Activity
+    , infos : ActivityInfo
     }
 
 
 type alias Info =
-    Result String ExperimentInfo.Activity
-
-
-type alias ViewConfig trial state msg =
-    { activity : Activity trial state, instructions : List (Html.Html msg) }
+    Result String ActivityInfo
 
 
 update : s -> Activity t s -> Activity t s

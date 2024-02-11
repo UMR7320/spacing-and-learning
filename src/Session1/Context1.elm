@@ -1,14 +1,14 @@
 module Session1.Context1 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Random
 import Random.List
 import Task
@@ -53,10 +53,10 @@ defaultTrial =
     Trial "defaultuid" "defaulttarger" "defaultWrittenWord" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity Trial State
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session1 "Context 1")
+        (ActivityInfo.activityInfo info Session1 "Context 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
@@ -170,7 +170,7 @@ type Msg
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
-    | UserClickedStartMain (List Trial) ExperimentInfo.Activity
+    | UserClickedStartMain (List Trial) ActivityInfo
     | UserClickedSaveData
     | UserClickedStartTraining
     | RuntimeShuffledOptionsOrder (List Int)

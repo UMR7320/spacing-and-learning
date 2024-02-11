@@ -1,7 +1,8 @@
 module Pretest.VKS exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo)
 import Data
-import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A exposing (class, controls, src, type_)
 import Html.Styled.Events as E
@@ -9,7 +10,6 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Pretest.Version exposing (Version(..))
 import Random
 import Task
@@ -54,10 +54,10 @@ type alias VKS =
     Activity Trial Answer
 
 
-toActivity : List ExperimentInfo.Activity -> List Trial -> Version -> Activity Trial Answer
+toActivity : List ActivityInfo -> List Trial -> Version -> Activity Trial Answer
 toActivity infos trials version =
     Activity.startIntro
-        (ExperimentInfo.activityInfo infos (Pretest.Version.toSession version) "LexLearn verbs")
+        (ActivityInfo.activityInfo infos (Pretest.Version.toSession version) "LexLearn verbs")
         []
         trials
         emptyAnswer

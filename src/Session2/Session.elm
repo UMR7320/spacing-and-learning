@@ -1,9 +1,9 @@
 module Session2.Session exposing (..)
 
-import Data
-import ExperimentInfo
-import Http
 import Activity
+import ActivityInfo exposing (ActivityInfo)
+import Data
+import Http
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -15,18 +15,18 @@ import Task.Parallel as Para
 
 
 type alias Session2 =
-    Session.Session (Para.State4 Msg (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ExperimentInfo.Activity))
+    Session.Session (Para.State4 Msg (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ActivityInfo))
 
 
 type Msg
-    = ServerRespondedWithSomeData (Para.Msg4 (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ExperimentInfo.Activity))
-    | ServerRespondedWithAllData (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ExperimentInfo.Activity)
+    = ServerRespondedWithSomeData (Para.Msg4 (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ActivityInfo))
+    | ServerRespondedWithAllData (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ActivityInfo)
     | ServerRespondedWithSomeError Http.Error
     | StartSession ShuffledSession2
 
 
 type alias ShuffledSession2 =
-    { cu : List Context2.Trial, spelling : List Spelling2.Trial, translation : List Meaning2.Trial, infos : List ExperimentInfo.Activity }
+    { cu : List Context2.Trial, spelling : List Spelling2.Trial, translation : List Meaning2.Trial, infos : List ActivityInfo }
 
 
 getAll =
@@ -34,7 +34,7 @@ getAll =
         { task1 = Context2.getRecords
         , task2 = Spelling2.getRecords
         , task3 = Meaning2.getRecords
-        , task4 = ExperimentInfo.getRecords
+        , task4 = ActivityInfo.getRecords
         , onUpdates = ServerRespondedWithSomeData
         , onFailure = ServerRespondedWithSomeError
         , onSuccess = ServerRespondedWithAllData

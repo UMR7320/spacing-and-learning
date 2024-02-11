@@ -1,14 +1,14 @@
 module Session3.Meaning3 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data exposing (decodeRecords)
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, h4, p, span, text)
 import Html.Styled.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Task
 import Time
 import View
@@ -56,10 +56,10 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity Trial State
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session3 "Meaning 3")
+        (ActivityInfo.activityInfo info Session3 "Meaning 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

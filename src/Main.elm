@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Activity
+import ActivityInfo exposing (ActivityInfo)
 import Browser
 import Browser.Navigation as Nav
 import Data exposing (UserCanParticipate(..))
@@ -8,7 +9,6 @@ import Date
 import Dict
 import DnDList
 import DnDList.Groups exposing (Model)
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (checked, class, href, type_)
 import Html.Styled.Events
@@ -72,7 +72,7 @@ type alias Model =
     , spr : SPR
     , sentenceCompletion : SentenceCompletion
     , vks : { task : VKS, showVideo : Bool }
-    , yesno : YesNo
+    , yesNo : YesNo
 
     -- Session 1
     , session1 : Session1
@@ -98,7 +98,7 @@ type alias Model =
     , cloudWords : CloudWords.CloudWords
 
     -- Shared
-    , infos : RemoteData Http.Error (Dict.Dict String ExperimentInfo.Activity)
+    , activitiesInfos : RemoteData Http.Error (List ActivityInfo)
     , email : String
     , user : Maybe String
     , errorTracking : List Http.Error
@@ -150,7 +150,7 @@ defaultModel key route backgroundQuestionnaireUrl =
     , pretest = NotAsked
     , sentenceCompletion = Activity.NotStarted
     , vks = { task = Activity.NotStarted, showVideo = False }
-    , yesno = Activity.NotStarted
+    , yesNo = Activity.NotStarted
 
     -- POSTEST
     , cloudWords = CloudWords.Loading
@@ -161,7 +161,7 @@ defaultModel key route backgroundQuestionnaireUrl =
     -- SHARED
     , user = Nothing
     , optionsOrder = [ 0, 1, 2, 3 ]
-    , infos = RemoteData.Loading
+    , activitiesInfos = RemoteData.Loading
     , errorTracking = []
     , email = ""
     , currentDate = Nothing
@@ -243,7 +243,11 @@ init backgroundQuestionnaireUrl url key =
                 , spelling2 = Activity.Loading
                 , user = Just userid
               }
-            , Cmd.batch [ cmd, Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos ]
+            , Cmd.batch
+                [ cmd
+                , Cmd.map Session2 fetchSession2
+                , Session.getInfos ServerRespondedWithSessionsInfos
+                ]
             )
 
         Route.Session3 userid _ ->
@@ -254,7 +258,11 @@ init backgroundQuestionnaireUrl url key =
                 , context3 = Activity.Loading
                 , user = Just userid
               }
-            , Cmd.batch [ cmd, Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
+            , Cmd.batch
+                [ cmd
+                , Cmd.map Session3 fetchSession3
+                , Session.getInfos ServerRespondedWithSessionsInfos
+                ]
             )
 
         Route.Pretest userid _ v ->
@@ -273,7 +281,7 @@ init backgroundQuestionnaireUrl url key =
                 , sentenceCompletion = Activity.Loading
                 , vks = updatedVks
                 , acceptability = Activity.Loading
-                , yesno = Activity.Loading
+                , yesNo = Activity.Loading
                 , user = Just userid
                 , version = v
                 , pretest = Loading loadingStatePretest
@@ -282,6 +290,7 @@ init backgroundQuestionnaireUrl url key =
             , Cmd.batch
                 [ cmd
                 , Cmd.map Pretest fetchSessionPretest
+                , Session.getInfos ServerRespondedWithSessionsInfos
                 , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
                 , Data.getGeneralParameters GotGeneralParameters
                 , Data.getCanUserParticipate userid GotCanUserParticipate
@@ -414,6 +423,9 @@ body model =
 
                             Yes ->
                                 case subPage of
+                                    Route.TopPretest ->
+                                        viewSessionInstructions model.sessions "pretest" "pretest/yes-no"
+
                                     Route.EmailSent ->
                                         [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
 
@@ -433,7 +445,7 @@ body model =
                                         List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptability)
 
                                     Route.YesNo ->
-                                        List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
+                                        List.map (Html.Styled.map YesNo) (YesNo.view model.yesNo)
 
                                     Route.Calendar _ group ->
                                         case model.generalParameters of
@@ -510,7 +522,7 @@ viewSessionInstructions remoteData sessionName url =
                     [ div [ class "instructions" ]
                         [ div [ class "pb-8" ]
                             [ View.fromMarkdown v.instructions ]
-                        , a [ href url ] [ View.button { isDisabled = False, message = NoOp, txt = "Start the first activity" } ]
+                        , a [ href url ] [ View.button { isDisabled = False, message = NoOp, txt = "C'est parti !" } ]
                         ]
                     ]
 
@@ -681,6 +693,14 @@ changeRouteTo route model =
 
         Route.NotFound ->
             ( newModel, Cmd.none )
+
+        Route.Pretest _ Route.YesNo _ ->
+            ( newModel
+            , Cmd.batch
+                [ Cmd.map YesNo YesNo.getRecords
+                , Ports.disableAlertOnExit ()
+                ]
+            )
 
         Route.Pretest _ _ _ ->
             ( newModel, Ports.enableAlertOnExit () )

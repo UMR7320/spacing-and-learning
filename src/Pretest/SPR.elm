@@ -1,10 +1,10 @@
 module Pretest.SPR exposing (..)
 
 import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo)
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (Key)
 import Data exposing (decodeRecords)
-import ExperimentInfo
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as Attr
 import Http
@@ -23,7 +23,7 @@ import View exposing (unclickableButton)
 
 
 type alias Pretest =
-    Para.State2 Msg (List Trial) (List ExperimentInfo.Activity)
+    Para.State2 Msg (List Trial) (List ActivityInfo)
 
 
 type alias SPR =
@@ -236,7 +236,7 @@ viewActivity data trial endTrialMsg =
 type Msg
     = NoOp
     | ServerRespondedWithLastRecords (Result.Result Http.Error (List ()))
-    | StartMain ExperimentInfo.Activity (List Trial)
+    | StartMain ActivityInfo (List Trial)
     | TimestampedMsg TimedMsg (Maybe Time.Posix)
     | UserClickedNextTrial Answer
     | NextTrial Answer Time.Posix

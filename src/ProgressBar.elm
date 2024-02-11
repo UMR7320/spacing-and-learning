@@ -42,7 +42,7 @@ viewPretest activity model =
         PreTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 5" ]
-                [ viewItem "General Vocabulary" YesNo model.yesno activity
+                [ viewItem "General Vocabulary" YesNo model.yesNo activity
                 , viewItem "LexLearn verbs" VKS model.vks.task activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity

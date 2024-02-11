@@ -1,15 +1,15 @@
 module Session3.Context3 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Delay
-import ExperimentInfo exposing (Session(..))
 import Html.Styled as Html exposing (div, label, text)
 import Html.Styled.Attributes exposing (class, classList)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Ports
 import Random
 import Random.List
@@ -81,10 +81,10 @@ initState =
     State "DefaultUid" "" (Listening 3) False False
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity Trial State
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session3 "Context 3")
+        (ActivityInfo.activityInfo info Session3 "Context 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

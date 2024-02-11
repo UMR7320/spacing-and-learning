@@ -1,14 +1,14 @@
 module Session1.Meaning1 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data exposing (decodeRecords)
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, p, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Random
 import Random.List
 import Task
@@ -57,10 +57,10 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity Trial State
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session1 "Meaning 1")
+        (ActivityInfo.activityInfo info Session1 "Meaning 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

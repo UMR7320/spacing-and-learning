@@ -1,8 +1,8 @@
 module Pretest.Pretest exposing (..)
 
 import Activity
+import ActivityInfo exposing (ActivityInfo)
 import Data
-import ExperimentInfo
 import Http
 import List.Extra
 import Pretest.Acceptability as Acceptability exposing (Acceptability, ErrorBlock)
@@ -10,7 +10,6 @@ import Pretest.SPR as SPR
 import Pretest.SentenceCompletion as SentenceCompletion exposing (SentenceCompletion)
 import Pretest.VKS as VKS exposing (VKS)
 import Pretest.Version exposing (Version)
-import Pretest.YesNo as YesNo exposing (YesNo)
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -23,21 +22,20 @@ import Task.Parallel as Para
 
 
 type alias Pretest =
-    Session.Session (Para.State6 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Activity) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial))
+    Session.Session (Para.State5 Msg (List SPR.Trial) (List SentenceCompletion.Trial) (List ActivityInfo) (List VKS.Trial) (List Acceptability.Trial))
 
 
 type alias ParaMsg =
-    Para.Msg6 (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Activity) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
+    Para.Msg5 (List SPR.Trial) (List SentenceCompletion.Trial) (List ActivityInfo) (List VKS.Trial) (List Acceptability.Trial)
 
 
 type alias ShuffledPretest =
     { spr : List SPR.Trial
     , sc : List SentenceCompletion.Trial
-    , infos : List ExperimentInfo.Activity
+    , infos : List ActivityInfo
     , vks : List VKS.Trial
     , acceptability :
         Result ( ErrorBlock, List Acceptability.Trial ) (List (List Acceptability.Trial))
-    , yn : List YesNo.Trial
     }
 
 
@@ -48,7 +46,6 @@ type alias Model superModel =
         , pretest : Pretest
         , vks : { task : VKS, showVideo : Bool }
         , acceptability : Acceptability
-        , yesno : YesNo
         , version : Version
         , user : Maybe String
     }
@@ -61,7 +58,7 @@ type alias Model superModel =
 type Msg
     = ServerRespondedWithSomePretestData ParaMsg
     | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ExperimentInfo.Activity) (List VKS.Trial) (List Acceptability.Trial) (List YesNo.Trial)
+    | ServerRespondedWithAllPretestData (List SPR.Trial) (List SentenceCompletion.Trial) (List ActivityInfo) (List VKS.Trial) (List Acceptability.Trial)
     | StartPretest ShuffledPretest
 
 
@@ -73,7 +70,7 @@ update msg model =
                 ( updte, cmd ) =
                     case model.pretest of
                         Session.Loading downloadState ->
-                            Para.update6 downloadState downloaded |> Tuple.mapFirst Session.Loading
+                            Para.update5 downloadState downloaded |> Tuple.mapFirst Session.Loading
 
                         _ ->
                             ( model.pretest, Cmd.none )
@@ -97,10 +94,10 @@ update msg model =
             , Cmd.none
             )
 
-        ServerRespondedWithAllPretestData sprtrials sctrials infos vksTrials aTrials yn ->
+        ServerRespondedWithAllPretestData sprtrials sctrials infos vksTrials aTrials ->
             let
                 randomize =
-                    Random.generate StartPretest (Random.Extra.map6 ShuffledPretest (shuffle sprtrials) (shuffle sctrials) (Random.constant infos) (shuffle vksTrials) generateOrganizedTrials (Random.constant yn))
+                    Random.generate StartPretest (Random.map5 ShuffledPretest (shuffle sprtrials) (shuffle sctrials) (Random.constant infos) (shuffle vksTrials) generateOrganizedTrials)
 
                 generateOrganizedTrials =
                     Random.List.shuffle aTrials
@@ -149,7 +146,7 @@ update msg model =
             in
             ( model, randomize )
 
-        StartPretest { spr, sc, vks, infos, acceptability, yn } ->
+        StartPretest { spr, sc, vks, infos, acceptability } ->
             case acceptability of
                 Result.Ok shuffledTrials ->
                     if List.filter (\block -> List.length block < 4) shuffledTrials == [ [] ] then
@@ -161,15 +158,14 @@ update msg model =
                                 { task = VKS.toActivity infos (List.filter (not << .isTraining) vks) model.version
                                 , showVideo = False
                                 }
-                            , yesno = YesNo.init infos yn
                           }
                         , Cmd.none
                         )
 
                     else
-                        update (ServerRespondedWithAllPretestData spr sc infos vks (List.concat shuffledTrials) yn) model
+                        update (ServerRespondedWithAllPretestData spr sc infos vks (List.concat shuffledTrials)) model
 
-                Result.Err reason ->
+                Result.Err _ ->
                     ( { model | acceptability = Activity.Err "Error trying to build blocks" }, Cmd.none )
 
 
@@ -178,13 +174,12 @@ update msg model =
 
 
 attempt version =
-    Para.attempt6
+    Para.attempt5
         { task1 = SPR.getRecords version
         , task2 = SentenceCompletion.getRecords
-        , task3 = ExperimentInfo.getRecords
+        , task3 = ActivityInfo.getRecords
         , task4 = VKS.getRecords
         , task5 = Acceptability.getRecords
-        , task6 = YesNo.getRecords
         , onUpdates = ServerRespondedWithSomePretestData
         , onFailure = ServerRespondedWithSomeError
         , onSuccess = ServerRespondedWithAllPretestData

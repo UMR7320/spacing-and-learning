@@ -1,15 +1,15 @@
 module Session2.Context2 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Delay
-import ExperimentInfo exposing (Session(..))
 import Html.Styled as Html exposing (div, text)
 import Html.Styled.Attributes exposing (class)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Ports
 import Random
 import Random.List
@@ -72,10 +72,10 @@ defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity Trial State
 start info trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session2 "Context 2")
+        (ActivityInfo.activityInfo info Session2 "Context 2")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState
@@ -127,7 +127,7 @@ viewTrial optionsOrder { mainTrials, current, state, feedback } trial =
                                 div [ class "text-4xl" ] [ text "😐" ]
 
                               else
-                                div [ class "text-4xl" ] [ text "\u{1F914}" ]
+                                div [ class "text-4xl" ] [ text "🤔" ]
                             , text (trial.speakerName ++ " ")
                             ]
                         , if trial.responseType == Speech then
@@ -201,7 +201,7 @@ type Msg
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
-    | UserClickedStartMain (List Trial) ExperimentInfo.Activity
+    | UserClickedStartMain (List Trial) ActivityInfo
     | UserClickedSaveData
     | UserClickedAudio String
     | RuntimeShuffledOptionsOrder (List Int)

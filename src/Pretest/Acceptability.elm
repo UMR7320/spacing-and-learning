@@ -1,11 +1,11 @@
 module Pretest.Acceptability exposing (..)
 
 import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo)
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (Key, pushUrl)
 import Data exposing (decodeRecords)
 import Delay
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, height, src, width)
 import Http
@@ -127,10 +127,10 @@ newLoop =
     { initState | step = Start }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Version -> Activity Trial State
+start : List ActivityInfo -> List Trial -> Version -> Activity Trial State
 start info trials version =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info (Pretest.Version.toSession version) "Listening test")
+        (ActivityInfo.activityInfo info (Pretest.Version.toSession version) "Listening test")
         (List.filter (\datum -> datum.trialType == Training) trials)
         (List.filter (\datum -> datum.trialType /= Training) trials)
         initState

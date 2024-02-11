@@ -2,7 +2,7 @@ module Session3.Spelling3 exposing (..)
 
 import Data
 import Delay
-import ExperimentInfo exposing (Session(..))
+import ActivityInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, input, label, text)
 import Html.Styled.Attributes exposing (class, for, id, value)
 import Html.Styled.Events exposing (onInput)
@@ -15,6 +15,7 @@ import Ports
 import Task
 import Time
 import View
+import ActivityInfo exposing (ActivityInfo)
 
 
 
@@ -59,10 +60,10 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
-start info trials =
+start : List ActivityInfo -> List Trial -> Activity Trial State
+start infos trials =
     Activity.startIntro
-        (ExperimentInfo.activityInfo info Session3 "Spelling 3")
+        (ActivityInfo.activityInfo infos Session3 "Spelling 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
         initState

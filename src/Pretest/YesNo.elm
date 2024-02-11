@@ -1,54 +1,29 @@
 module Pretest.YesNo exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Browser.Events exposing (onKeyDown)
 import Data
-import ExperimentInfo exposing (Session(..))
+import ActivityInfo exposing (ActivityInfo)
 import Html.Styled exposing (Html, div, kbd, p, text)
 import Html.Styled.Attributes exposing (class)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
+import RemoteData exposing (RemoteData)
+import Route exposing (PretestRoute(..))
 import Task
 import Time
 import View exposing (unclickableButton)
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "yes_no"
-                , view_ = "all"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials
-        , timeout = Just 5000
-        }
 
-
-decodeAcceptabilityTrials : Decode.Decoder (List Trial)
-decodeAcceptabilityTrials =
-    let
-        decoder =
-            Decode.succeed Trial
-                |> required "id" Decode.string
-                |> required "ItemName" Decode.string
-                |> optional "Exists" Decode.bool False
-    in
-    Data.decodeRecords decoder
+-- MODEL
 
 
 type alias State =
     { evaluation : Maybe Bool }
-
-
-initState =
-    { evaluation = Nothing }
 
 
 type alias Trial =
@@ -62,16 +37,53 @@ type alias YesNo =
     Activity Trial State
 
 
+type alias Model a =
+    { a
+        | yesNo : YesNo
+        , user : Maybe String
+        , activitiesInfos : RemoteData Http.Error (List ActivityInfo)
+    }
+
+
+initState : State
+initState =
+    { evaluation = Nothing }
+
+
+
+-- UPDATE
+
+
+type Msg
+    = NoOp
+    | GotTrials (RemoteData Http.Error (List Trial))
+    | UserClickedStartActivity
+    | UserPressedButton (Maybe Bool)
+    | NextTrial (Maybe Bool) Time.Posix
+    | UserClickedSaveData
+    | ServerRespondedWithUpdatedUser (Result Http.Error String)
+
+
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model, Cmd.none )
+
+        GotTrials (RemoteData.Failure _) ->
+            ( model, Cmd.none )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedStartActivity ->
-            ( { model | yesno = Activity.startMain model.yesno initState }, Cmd.none )
+            ( { model | yesNo = Activity.startMain model.yesNo initState }, Cmd.none )
 
         UserPressedButton maybeBool ->
             ( model, Task.perform (NextTrial maybeBool) Time.now )
 
         NextTrial maybeBool timestamp ->
-            ( { model | yesno = Activity.update { evaluation = maybeBool } model.yesno |> Activity.next timestamp initState }, Cmd.none )
+            ( { model | yesNo = Activity.update { evaluation = maybeBool } model.yesNo |> Activity.next timestamp initState }, Cmd.none )
 
         UserClickedSaveData ->
             let
@@ -79,7 +91,7 @@ update msg model =
                     model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
                 totalScore =
-                    Activity.getHistory model.yesno
+                    Activity.getHistory model.yesNo
                         |> Data.splitIn 20
                         |> List.map
                             (\block ->
@@ -107,15 +119,15 @@ update msg model =
                 responseDecoder =
                     Decode.field "id" Decode.string
             in
-            ( { model | yesno = Activity.Loading }, updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder )
+            ( { model | yesNo = Activity.Loading }, updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder )
 
         ServerRespondedWithUpdatedUser (Result.Err reason) ->
-            ( { model | yesno = Activity.Err (Data.buildErrorMessage reason) }, Cmd.none )
+            ( { model | yesNo = Activity.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
-        ServerRespondedWithUpdatedUser id ->
-            ( { model | yesno = Activity.NotStarted }, Cmd.none )
+        ServerRespondedWithUpdatedUser _ ->
+            ( { model | yesNo = Activity.NotStarted }, Cmd.none )
 
-        _ ->
+        NoOp ->
             ( model, Cmd.none )
 
 
@@ -129,6 +141,7 @@ vocabularyScore hits falseAlarms =
     (toFloat hits * 100.0 * correctionFactor falseAlarms hits) |> round
 
 
+weighted : Int -> Float
 weighted x =
     case x of
         0 ->
@@ -165,6 +178,7 @@ weighted x =
             30
 
 
+countHitsAndFalseAlarms : List ( Trial, State, c ) -> ( Int, Int )
 countHitsAndFalseAlarms =
     List.foldl
         (\( word, answer, _ ) ( hits, falseAlarms ) ->
@@ -179,15 +193,6 @@ countHitsAndFalseAlarms =
                 ( hits, falseAlarms )
         )
         ( 0, 0 )
-
-
-type Msg
-    = NoOp
-    | UserClickedStartActivity
-    | UserPressedButton (Maybe Bool)
-    | NextTrial (Maybe Bool) Time.Posix
-    | UserClickedSaveData
-    | ServerRespondedWithUpdatedUser (Result Http.Error String)
 
 
 updateVocabularyScore : Http.Body -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
@@ -206,6 +211,10 @@ updateVocabularyScore payload callbackMsg decoder =
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+
+-- VIEW
 
 
 view : YesNo -> List (Html Msg)
@@ -261,11 +270,6 @@ keyDecoder =
     Decode.map toEvaluation (Decode.field "key" Decode.string)
 
 
-
---toEvaluation : String -> Msg
---toEvaluation : String -> Msg
-
-
 toEvaluation : String -> Msg
 toEvaluation x =
     case x of
@@ -279,8 +283,9 @@ toEvaluation x =
             NoOp
 
 
+subscriptions : Model a -> Sub Msg
 subscriptions model =
-    case model.yesno of
+    case model.yesNo of
         Activity.Running Activity.Main _ ->
             Sub.batch [ onKeyDown keyDecoder ]
 
@@ -288,12 +293,42 @@ subscriptions model =
             Sub.none
 
 
+init : List ActivityInfo -> List Trial -> Activity Trial State
 init infos trials =
     let
         info =
             infos
-                |> List.filter (\task -> task.session == Pretest && task.name == "General vocabulary")
+                |> List.filter (\task -> task.session == Pretest && task.name == "YesNo")
                 |> List.head
                 |> Result.fromMaybe "Could not find Yes/No infos"
     in
     Activity.startIntro info [] trials initState
+
+
+
+-- HTTP
+
+
+getRecords : Cmd Msg
+getRecords =
+    Http.get
+        { url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "yes_no"
+                , view_ = "all"
+                }
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeYesNoTrials
+        }
+
+
+decodeYesNoTrials : Decode.Decoder (List Trial)
+decodeYesNoTrials =
+    let
+        decoder =
+            Decode.succeed Trial
+                |> required "id" Decode.string
+                |> required "ItemName" Decode.string
+                |> optional "Exists" Decode.bool False
+    in
+    Data.decodeRecords decoder

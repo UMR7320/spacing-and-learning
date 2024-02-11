@@ -66,7 +66,8 @@ type Session3Activity
 
 
 type PretestRoute
-    = GeneralInfos
+    = TopPretest
+    | GeneralInfos
     | EmailSent
     | SPR
     | SentenceCompletion
@@ -102,7 +103,8 @@ parser =
                 </> string
                 </> s "pretest"
                 </> oneOf
-                        [ map SPR (s "spr")
+                        [ map TopPretest top
+                        , map SPR (s "spr")
                         , map GeneralInfos (s "informations")
                         , map EmailSent (s "email-sent")
                         , map SentenceCompletion (s "sentence-completion")

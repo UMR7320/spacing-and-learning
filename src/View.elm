@@ -33,7 +33,6 @@ module View exposing
 import Css
 import Css.Global
 import Css.Transitions
-import ExperimentInfo
 import Html.Attributes as A
 import Html.Styled exposing (..)
 import Html.Styled.Attributes
@@ -41,7 +40,6 @@ import Html.Styled.Attributes
         ( attribute
         , checked
         , class
-        , css
         , href
         , id
         , name
@@ -55,7 +53,7 @@ import Html.Styled.Attributes
 import Html.Styled.Events exposing (onClick, onInput)
 import Icons
 import Markdown
-import String.Interpolate exposing (interpolate)
+import String.Interpolate
 
 
 shuffledOptions :

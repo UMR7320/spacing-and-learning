@@ -1,8 +1,9 @@
 module Session2.Spelling2 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import DnDList
-import ExperimentInfo exposing (Session(..))
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
@@ -12,7 +13,6 @@ import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Ports
 import Task
 import Time
@@ -68,7 +68,7 @@ defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") False ""
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Activity.Activity Trial State
+start : List ActivityInfo -> List Trial -> Activity.Activity Trial State
 start info trials =
     let
         nextTrial =
@@ -79,7 +79,7 @@ start info trials =
     case nextTrial of
         Just x ->
             Activity.startIntro
-                (ExperimentInfo.activityInfo info Session2 "Spelling 2")
+                (ActivityInfo.activityInfo info Session2 "Spelling 2")
                 (List.filter .isTraining trials)
                 (List.filter (not << .isTraining) trials)
                 { initState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord }
