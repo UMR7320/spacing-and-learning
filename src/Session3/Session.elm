@@ -9,17 +9,17 @@ import Random.List exposing (shuffle)
 import RemoteData
 import Session
 import Session2.Session exposing (Msg(..))
-import Session3.CU3 as CU
-import Session3.Spelling3 as Spelling
-import Session3.Synonym as Synonym
+import Session3.Context3 as Context3
+import Session3.Meaning3 as Meaning3
+import Session3.Spelling3 as Spelling3
 import Task.Parallel as Para
 
 
 attempt =
     Para.attempt4
-        { task1 = CU.getRecords
-        , task2 = Spelling.getRecords
-        , task3 = Synonym.getRecords
+        { task1 = Context3.getRecords
+        , task2 = Spelling3.getRecords
+        , task3 = Meaning3.getRecords
         , task4 = ExperimentInfo.getRecords
         , onUpdates = ServerRespondedWithSomeSession3Data
         , onFailure = ServerRespondedWithSomeError
@@ -28,18 +28,22 @@ attempt =
 
 
 type alias ShuffledSession3 =
-    { cu : List CU.Trial, spelling : List Spelling.Trial, synonym : List Synonym.Trial, infos : List ExperimentInfo.Activity }
+    { context3 : List Context3.Trial
+    , spelling3 : List Spelling3.Trial
+    , meaning3 : List Meaning3.Trial
+    , infos : List ExperimentInfo.Activity
+    }
 
 
 type Msg
-    = ServerRespondedWithSomeSession3Data (Para.Msg4 (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Activity))
-    | ServerRespondedWithAllSession3Data (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Activity)
+    = ServerRespondedWithSomeSession3Data (Para.Msg4 (List Context3.Trial) (List Spelling3.Trial) (List Meaning3.Trial) (List ExperimentInfo.Activity))
+    | ServerRespondedWithAllSession3Data (List Context3.Trial) (List Spelling3.Trial) (List Meaning3.Trial) (List ExperimentInfo.Activity)
     | ServerRespondedWithSomeError Http.Error
     | StartSession ShuffledSession3
 
 
 type alias Session3 =
-    Session.Session (Para.State4 Msg (List CU.Trial) (List Spelling.Trial) (List Synonym.Trial) (List ExperimentInfo.Activity))
+    Session.Session (Para.State4 Msg (List Context3.Trial) (List Spelling3.Trial) (List Meaning3.Trial) (List ExperimentInfo.Activity))
 
 
 update msg model =
@@ -56,10 +60,10 @@ update msg model =
             in
             ( { model | session3 = updte }, cmd )
 
-        ServerRespondedWithAllSession3Data cu spelling synonym infos ->
+        ServerRespondedWithAllSession3Data context3 spelling3 meaning3 infos ->
             let
                 randomize =
-                    Random.generate StartSession (Random.map4 ShuffledSession3 (shuffle cu) (shuffle spelling) (shuffle synonym) (Random.constant infos))
+                    Random.generate StartSession (Random.map4 ShuffledSession3 (shuffle context3) (shuffle spelling3) (shuffle meaning3) (Random.constant infos))
             in
             ( model
             , randomize
@@ -67,18 +71,18 @@ update msg model =
 
         ServerRespondedWithSomeError error ->
             ( { model
-                | cu3 = Logic.Err (Data.buildErrorMessage error)
+                | context3 = Logic.Err (Data.buildErrorMessage error)
                 , spelling3 = Logic.Err (Data.buildErrorMessage error)
-                , synonymTask = Logic.Err (Data.buildErrorMessage error)
+                , meaning3 = Logic.Err (Data.buildErrorMessage error)
               }
             , Cmd.none
             )
 
-        StartSession { cu, spelling, synonym, infos } ->
+        StartSession { context3, spelling3, meaning3, infos } ->
             ( { model
-                | synonymTask = Synonym.start infos synonym
-                , spelling3 = Spelling.start infos spelling
-                , cu3 = CU.start infos cu
+                | meaning3 = Meaning3.start infos meaning3
+                , spelling3 = Spelling3.start infos spelling3
+                , context3 = Context3.start infos context3
                 , session3 = Session.Ready
                 , infos = RemoteData.Success (ExperimentInfo.toDict infos)
               }

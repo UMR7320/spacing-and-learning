@@ -1,13 +1,8 @@
-module Session2.Translation exposing (..)
+module Session2.Meaning2 exposing (..)
 
 import Data
 import ExperimentInfo exposing (Session(..))
-import Html.Styled
-    exposing
-        ( Html
-        , div
-        , text
-        )
+import Html.Styled exposing ( Html , div , text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
@@ -166,7 +161,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | translationTask = Logic.next timestamp initState model.translationTask }
+                    { model | meaning2 = Logic.next timestamp initState model.meaning2 }
             in
             ( newModel
             , Cmd.batch
@@ -176,16 +171,16 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | translationTask = Logic.toggle model.translationTask }, Cmd.none )
+            ( { model | meaning2 = Logic.toggle model.meaning2 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | translationTask = Logic.update { uid = "", userAnswer = newChoice } model.translationTask }, Cmd.none )
+            ( { model | meaning2 = Logic.update { uid = "", userAnswer = newChoice } model.meaning2 }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | translationTask = Logic.startTraining model.translationTask }, Cmd.none )
+            ( { model | meaning2 = Logic.startTraining model.meaning2 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | translationTask = Logic.startMain model.translationTask initState }, Cmd.none )
+            ( { model | meaning2 = Logic.startMain model.meaning2 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
@@ -244,7 +239,7 @@ decodeTrials =
 saveData model =
     let
         history =
-            Logic.getHistory model.translationTask
+            Logic.getHistory model.meaning2
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

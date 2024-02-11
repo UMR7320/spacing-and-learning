@@ -1,4 +1,4 @@
-module Session3.Synonym exposing (..)
+module Session3.Meaning3 exposing (..)
 
 import Data exposing (decodeRecords)
 import ExperimentInfo exposing (Session(..))
@@ -9,7 +9,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
-import Session1.ContextUnderstanding exposing (Msg(..))
 import Task
 import Time
 import View
@@ -157,8 +156,8 @@ update msg model =
     case msg of
         UserClickedFeedback ->
             ( { model
-                | synonymTask =
-                    model.synonymTask
+                | meaning3 =
+                    model.meaning3
                         |> Logic.toggle
               }
             , Cmd.none
@@ -166,8 +165,8 @@ update msg model =
 
         UserChangedInput newChoice ->
             ( { model
-                | synonymTask =
-                    model.synonymTask
+                | meaning3 =
+                    model.meaning3
                         |> Logic.update { uid = "", userAnswer = newChoice }
               }
             , Cmd.none
@@ -180,8 +179,8 @@ update msg model =
             let
                 newModel =
                     { model
-                        | synonymTask =
-                            model.synonymTask |> Logic.next timestamp initState
+                        | meaning3 =
+                            model.meaning3 |> Logic.next timestamp initState
                     }
             in
             ( newModel
@@ -196,13 +195,13 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartMainloop ->
-            ( { model | synonymTask = Logic.startMain model.synonymTask initState }, Cmd.none )
+            ( { model | meaning3 = Logic.startMain model.meaning3 initState }, Cmd.none )
 
         ServerRespondedWithLastRecords _ ->
             ( model, Cmd.none )
 
         UserCLickedStartTraining ->
-            ( { model | synonymTask = Logic.startTraining model.synonymTask }, Cmd.none )
+            ( { model | meaning3 = Logic.startTraining model.meaning3 }, Cmd.none )
 
 
 
@@ -253,7 +252,7 @@ getRecords =
 saveData model =
     let
         history =
-            Logic.getHistory model.synonymTask
+            Logic.getHistory model.meaning3
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

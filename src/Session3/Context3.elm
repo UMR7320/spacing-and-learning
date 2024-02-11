@@ -1,4 +1,4 @@
-module Session3.CU3 exposing (..)
+module Session3.Context3 exposing (..)
 
 import Data
 import Delay
@@ -13,7 +13,6 @@ import Logic
 import Ports
 import Random
 import Random.List
-import Session3.Spelling3 exposing (Msg(..))
 import Task
 import Time
 import View
@@ -229,7 +228,7 @@ type Msg
 update msg model =
     let
         prevState =
-            Logic.getState model.cu3 |> Maybe.withDefault initState
+            Logic.getState model.context3 |> Maybe.withDefault initState
     in
     case msg of
         UserClickedNextTrial ->
@@ -238,7 +237,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | cu3 = Logic.next timestamp initState model.cu3 }
+                    { model | context3 = Logic.next timestamp initState model.context3 }
             in
             ( newModel
             , Cmd.batch
@@ -249,13 +248,13 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | cu3 = Logic.toggle model.cu3 }, Cmd.none )
+            ( { model | context3 = Logic.toggle model.context3 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | cu3 = Logic.startMain model.cu3 initState }, Cmd.none )
+            ( { model | context3 = Logic.startMain model.context3 initState }, Cmd.none )
 
         UserChangedInput new ->
-            ( { model | cu3 = Logic.update { prevState | userAnswer = new } model.cu3 }, Cmd.none )
+            ( { model | context3 = Logic.update { prevState | userAnswer = new } model.context3 }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
@@ -265,21 +264,21 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | cu3 = Logic.startTraining model.cu3 }, Cmd.none )
+            ( { model | context3 = Logic.startTraining model.context3 }, Cmd.none )
 
         RuntimeShuffledOptionsOrder ls ->
             ( { model | optionsOrder = ls }, Cmd.none )
 
         UserClickedAudio speaker2Time url ->
             ( { model
-                | cu3 =
+                | context3 =
                     Logic.update
                         { prevState
                             | step = decrement prevState.step
                             , showSpeaker1 = True
                             , showSpeaker2 = False
                         }
-                        model.cu3
+                        model.context3
               }
             , if prevState.step /= Listening 0 then
                 Cmd.batch
@@ -293,10 +292,10 @@ update msg model =
 
         ShowSpeaker2 ->
             ( { model
-                | cu3 =
+                | context3 =
                     Logic.update
                         { prevState | showSpeaker1 = False, showSpeaker2 = True }
-                        model.cu3
+                        model.context3
               }
             , Cmd.none
             )
@@ -363,7 +362,7 @@ getRecords =
 saveData model =
     let
         history =
-            Logic.getHistory model.cu3
+            Logic.getHistory model.context3
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

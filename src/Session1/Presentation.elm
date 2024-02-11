@@ -3,7 +3,7 @@ module Session1.Presentation exposing (..)
 import Data
 import Dict exposing (Dict)
 import ExperimentInfo exposing (Session(..))
-import Html.Styled exposing (Html, div, li, p, span, text, ul)
+import Html.Styled exposing (Html, div, li, span, text, ul)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http exposing (Error)
@@ -11,7 +11,6 @@ import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Logic
 import Ports
-import Session3.Synonym exposing (Msg(..))
 import Set
 import Task
 import Time

@@ -1,14 +1,8 @@
-module Session1.Meaning exposing (..)
+module Session1.Meaning1 exposing (..)
 
 import Data exposing (decodeRecords)
 import ExperimentInfo exposing (Session(..))
-import Html.Styled
-    exposing
-        ( Html
-        , div
-        , p
-        , text
-        )
+import Html.Styled exposing (Html, div, p, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, bool, string)
@@ -17,7 +11,6 @@ import Json.Encode as Encode
 import Logic
 import Random
 import Random.List
-import Session2.Translation exposing (Msg(..))
 import Task
 import Time
 import View
@@ -27,7 +20,7 @@ import View
 -- MODEL
 
 
-type alias Meaning =
+type alias Meaning1 =
     Logic.Activity Trial State
 
 
@@ -181,7 +174,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | meaning = Logic.next timestamp initState model.meaning }
+                    { model | meaning1 = Logic.next timestamp initState model.meaning1 }
             in
             ( newModel
             , Cmd.batch
@@ -191,13 +184,13 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | meaning = Logic.toggle model.meaning }, Cmd.none )
+            ( { model | meaning1 = Logic.toggle model.meaning1 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | meaning = Logic.update { uid = "", userAnswer = newChoice } model.meaning }, Cmd.none )
+            ( { model | meaning1 = Logic.update { uid = "", userAnswer = newChoice } model.meaning1 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | meaning = Logic.startMain model.meaning initState }, Cmd.none )
+            ( { model | meaning1 = Logic.startMain model.meaning1 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         SaveDataMsg ->
@@ -207,7 +200,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | meaning = Logic.startTraining model.meaning }, Cmd.none )
+            ( { model | meaning1 = Logic.startTraining model.meaning1 }, Cmd.none )
 
         RuntimeShuffledOptionsOrder newOrder ->
             ( { model | optionsOrder = newOrder }, Cmd.none )
@@ -259,7 +252,7 @@ getTrialsFromServer callbackMsg =
 saveData model =
     let
         history =
-            Logic.getHistory model.meaning
+            Logic.getHistory model.meaning1
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

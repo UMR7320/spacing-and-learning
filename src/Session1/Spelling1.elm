@@ -1,4 +1,4 @@
-module Session1.Spelling exposing (..)
+module Session1.Spelling1 exposing (..)
 
 import Data exposing (decodeRecords)
 import ExperimentInfo exposing (Session(..))
@@ -12,8 +12,6 @@ import Logic
 import Ports
 import Random
 import Random.List
-import Session2.CU2 exposing (Step(..))
-import Session3.Synonym exposing (Msg(..))
 import Task
 import Time
 import View
@@ -36,7 +34,7 @@ type Step
     | Answering
 
 
-type alias Spelling =
+type alias Spelling1 =
     Logic.Activity Trial State
 
 
@@ -181,13 +179,13 @@ type Msg
 update msg model =
     let
         currentSpellingState =
-            Logic.getState model.spellingLvl1 |> Maybe.withDefault iniState
+            Logic.getState model.spelling1 |> Maybe.withDefault iniState
     in
     case msg of
         UserClickedFeedback ->
             ( { model
-                | spellingLvl1 =
-                    model.spellingLvl1
+                | spelling1 =
+                    model.spelling1
                         |> Logic.toggle
               }
             , Cmd.none
@@ -195,8 +193,8 @@ update msg model =
 
         UserClickedRadioButton newChoice ->
             ( { model
-                | spellingLvl1 =
-                    Logic.update { currentSpellingState | userAnswer = newChoice } model.spellingLvl1
+                | spelling1 =
+                    Logic.update { currentSpellingState | userAnswer = newChoice } model.spelling1
               }
             , Cmd.none
             )
@@ -207,7 +205,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | spellingLvl1 = Logic.next timestamp iniState model.spellingLvl1 }
+                    { model | spelling1 = Logic.next timestamp iniState model.spelling1 }
             in
             ( newModel
             , Cmd.batch
@@ -220,22 +218,22 @@ update msg model =
             ( { model | optionsOrder = newOrder }, Cmd.none )
 
         UserClickedStartMainloop ->
-            ( { model | spellingLvl1 = Logic.startMain model.spellingLvl1 iniState }, Cmd.none )
+            ( { model | spelling1 = Logic.startMain model.spelling1 iniState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSavedData ->
             ( model, Cmd.none )
 
         UserClickedPlayAudio url ->
-            ( { model | spellingLvl1 = Logic.update { currentSpellingState | remainingListenings = currentSpellingState.remainingListenings - 1 } model.spellingLvl1 }, Ports.playAudio url )
+            ( { model | spelling1 = Logic.update { currentSpellingState | remainingListenings = currentSpellingState.remainingListenings - 1 } model.spelling1 }, Ports.playAudio url )
 
         UserClickedStartTraining ->
-            ( { model | spellingLvl1 = Logic.startTraining model.spellingLvl1 }, Cmd.none )
+            ( { model | spelling1 = Logic.startTraining model.spelling1 }, Cmd.none )
 
         AudioEnded { eventType } ->
             case eventType of
                 "SoundEnded" ->
-                    ( { model | spellingLvl1 = Logic.update { currentSpellingState | step = Answering } model.spellingLvl1 }, Cmd.none )
+                    ( { model | spelling1 = Logic.update { currentSpellingState | step = Answering } model.spelling1 }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -249,7 +247,7 @@ update msg model =
 
 
 subscriptions model =
-    case model.spellingLvl1 of
+    case model.spelling1 of
         Logic.Running _ { state } ->
             case state.step of
                 ListeningFirstTime ->
@@ -315,7 +313,7 @@ getTrialsFromServer callbackMsg =
 saveData model =
     let
         history =
-            Logic.getHistory model.spellingLvl1
+            Logic.getHistory model.spelling1
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

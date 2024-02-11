@@ -8,32 +8,32 @@ import Random
 import Random.Extra
 import Random.List exposing (shuffle)
 import Session
-import Session2.CU2 as CU2
-import Session2.Spelling as Scrabble
-import Session2.Translation as Translation
+import Session2.Context2 as Context2
+import Session2.Meaning2 as Meaning2
+import Session2.Spelling2 as Spelling2
 import Task.Parallel as Para
 
 
 type alias Session2 =
-    Session.Session (Para.State4 Msg (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Activity))
+    Session.Session (Para.State4 Msg (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ExperimentInfo.Activity))
 
 
 type Msg
-    = ServerRespondedWithSomeData (Para.Msg4 (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Activity))
-    | ServerRespondedWithAllData (List CU2.Trial) (List Scrabble.Trial) (List Translation.Trial) (List ExperimentInfo.Activity)
+    = ServerRespondedWithSomeData (Para.Msg4 (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ExperimentInfo.Activity))
+    | ServerRespondedWithAllData (List Context2.Trial) (List Spelling2.Trial) (List Meaning2.Trial) (List ExperimentInfo.Activity)
     | ServerRespondedWithSomeError Http.Error
     | StartSession ShuffledSession2
 
 
 type alias ShuffledSession2 =
-    { cu : List CU2.Trial, spelling : List Scrabble.Trial, translation : List Translation.Trial, infos : List ExperimentInfo.Activity }
+    { cu : List Context2.Trial, spelling : List Spelling2.Trial, translation : List Meaning2.Trial, infos : List ExperimentInfo.Activity }
 
 
 getAll =
     Para.attempt4
-        { task1 = CU2.getRecords
-        , task2 = Scrabble.getRecords
-        , task3 = Translation.getRecords
+        { task1 = Context2.getRecords
+        , task2 = Spelling2.getRecords
+        , task3 = Meaning2.getRecords
         , task4 = ExperimentInfo.getRecords
         , onUpdates = ServerRespondedWithSomeData
         , onFailure = ServerRespondedWithSomeError
@@ -62,7 +62,7 @@ update msg model =
                     spelling
                         |> List.map
                             (\trial ->
-                                Random.map5 Scrabble.Trial
+                                Random.map5 Spelling2.Trial
                                     (Random.constant trial.uid)
                                     (trial.writtenWord
                                         |> String.toList
@@ -90,9 +90,9 @@ update msg model =
 
         ServerRespondedWithSomeError reason ->
             ( { model
-                | translationTask = Logic.Err (Data.buildErrorMessage reason)
-                , cuLvl2 = Logic.Err (Data.buildErrorMessage reason)
-                , scrabbleTask = Logic.Err (Data.buildErrorMessage reason)
+                | meaning2 = Logic.Err (Data.buildErrorMessage reason)
+                , context2 = Logic.Err (Data.buildErrorMessage reason)
+                , spelling2 = Logic.Err (Data.buildErrorMessage reason)
                 , session2 = Session.Error (Data.buildErrorMessage reason)
               }
             , Cmd.none
@@ -100,9 +100,9 @@ update msg model =
 
         StartSession { cu, spelling, translation, infos } ->
             ( { model
-                | translationTask = Translation.start infos translation
-                , cuLvl2 = CU2.start infos cu
-                , scrabbleTask = Scrabble.start infos spelling
+                | meaning2 = Meaning2.start infos translation
+                , context2 = Context2.start infos cu
+                , spelling2 = Spelling2.start infos spelling
                 , session2 = Session.Ready
               }
             , Cmd.none

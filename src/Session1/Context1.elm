@@ -1,4 +1,4 @@
-module Session1.ContextUnderstanding exposing (..)
+module Session1.Context1 exposing (..)
 
 import Data
 import ExperimentInfo exposing (Session(..))
@@ -39,7 +39,7 @@ type alias State =
     }
 
 
-type alias CU =
+type alias Context1 =
     Logic.Activity Trial State
 
 
@@ -185,7 +185,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | cu1 = Logic.next timestamp initState model.cu1 }
+                    { model | context1 = Logic.next timestamp initState model.context1 }
             in
             ( newModel
             , Cmd.batch
@@ -195,20 +195,20 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | cu1 = Logic.toggle model.cu1 }, Cmd.none )
+            ( { model | context1 = Logic.toggle model.context1 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | cu1 = Logic.update { uid = "", userAnswer = newChoice } model.cu1 }, Cmd.none )
+            ( { model | context1 = Logic.update { uid = "", userAnswer = newChoice } model.context1 }, Cmd.none )
 
         UserClickedStartMain _ _ ->
-            ( { model | cu1 = Logic.startMain model.cu1 initState }, Cmd.none )
+            ( { model | context1 = Logic.startMain model.context1 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | cu1 = Logic.startTraining model.cu1 }, Cmd.none )
+            ( { model | context1 = Logic.startTraining model.context1 }, Cmd.none )
 
         RuntimeShuffledOptionsOrder newOrder ->
             ( { model | optionsOrder = newOrder }, Cmd.none )
@@ -263,7 +263,7 @@ getRecords =
 saveData model =
     let
         history =
-            Logic.getHistory model.cu1
+            Logic.getHistory model.context1
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

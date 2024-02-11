@@ -47,7 +47,7 @@ type alias Model superModel =
         , sentenceCompletion : SentenceCompletion.SentenceCompletion
         , pretest : Pretest
         , vks : { task : Logic.Activity VKS.Trial VKS.Answer, showVideo : Bool }
-        , acceptabilityTask : Logic.Activity Acceptability.Trial Acceptability.State
+        , acceptability : Logic.Activity Acceptability.Trial Acceptability.State
         , yesno : YesNo.YN
         , version : Version
         , user : Maybe String
@@ -92,7 +92,7 @@ update msg model =
                 | spr = Logic.Err (Data.buildErrorMessage err)
                 , sentenceCompletion = Logic.Err (Data.buildErrorMessage err)
                 , vks = updatedVks
-                , acceptabilityTask = Logic.Err (Data.buildErrorMessage err)
+                , acceptability = Logic.Err (Data.buildErrorMessage err)
               }
             , Cmd.none
             )
@@ -154,7 +154,7 @@ update msg model =
                 Result.Ok shuffledTrials ->
                     if List.filter (\block -> List.length block < 4) shuffledTrials == [ [] ] then
                         ( { model
-                            | acceptabilityTask = Acceptability.start infos (List.concat shuffledTrials) model.version
+                            | acceptability = Acceptability.start infos (List.concat shuffledTrials) model.version
                             , spr = SPR.init infos spr model.version
                             , sentenceCompletion = SentenceCompletion.init infos sc model.version
                             , vks =
@@ -170,7 +170,7 @@ update msg model =
                         update (ServerRespondedWithAllPretestData spr sc infos vks (List.concat shuffledTrials) yn) model
 
                 Result.Err reason ->
-                    ( { model | acceptabilityTask = Logic.Err "Error trying to build blocks" }, Cmd.none )
+                    ( { model | acceptability = Logic.Err "Error trying to build blocks" }, Cmd.none )
 
 
 

@@ -12,7 +12,6 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
 import Ports
-import Session1.Presentation exposing (Msg(..))
 import Task
 import Time
 import View

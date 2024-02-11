@@ -13,8 +13,8 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import List.Extra
 import Logic
-import Pretest.Version exposing (Version(..))
 import Ports
+import Pretest.Version exposing (Version(..))
 import Task
 import Time
 import View
@@ -85,7 +85,7 @@ type Evaluation
 
 type alias Model supraModel =
     { supraModel
-        | acceptabilityTask : Logic.Activity Trial State
+        | acceptability : Logic.Activity Trial State
         , endAcceptabilityDuration : Int
         , key : Key
         , user : Maybe String
@@ -273,13 +273,13 @@ update : Msg -> Model supraModel -> ( Model supraModel, Cmd Msg )
 update msg model =
     let
         pState =
-            Logic.getState model.acceptabilityTask |> Maybe.withDefault initState
+            Logic.getState model.acceptability |> Maybe.withDefault initState
 
         toNextStep int step =
             Delay.after int (NextStepCinematic step)
 
         trial =
-            Logic.getTrial model.acceptabilityTask |> Maybe.withDefault dumbTrial
+            Logic.getTrial model.acceptability |> Maybe.withDefault dumbTrial
     in
     case msg of
         NextStepCinematic step ->
@@ -289,16 +289,16 @@ update msg model =
             case step of
                 Listening ->
                     ( { model
-                        | acceptabilityTask =
-                            Logic.update { pState | step = Listening } model.acceptabilityTask
+                        | acceptability =
+                            Logic.update { pState | step = Listening } model.acceptability
                       }
                     , Delay.after 500 (PlayAudio trial.audio.url)
                     )
 
                 Answering ->
                     ( { model
-                        | acceptabilityTask =
-                            Logic.update { pState | step = Answering } model.acceptabilityTask
+                        | acceptability =
+                            Logic.update { pState | step = Answering } model.acceptability
                       }
                     , Delay.after trial.timeout (UserPressedButton Nothing)
                     )
@@ -307,8 +307,8 @@ update msg model =
                     let
                         newModel =
                             { model
-                                | acceptabilityTask =
-                                    Logic.update { pState | step = End } model.acceptabilityTask
+                                | acceptability =
+                                    Logic.update { pState | step = End } model.acceptability
                                         |> Logic.next timestamp pState
                             }
                     in
@@ -321,8 +321,8 @@ update msg model =
 
                 Start ->
                     ( { model
-                        | acceptabilityTask =
-                            Logic.update newLoop model.acceptabilityTask
+                        | acceptability =
+                            Logic.update newLoop model.acceptability
                       }
                     , Delay.after 0 (PlayAudio beep)
                     )
@@ -343,14 +343,14 @@ update msg model =
 
         UserPressedButtonWithTimestamp maybeBool timestamp ->
             ( { model
-                | acceptabilityTask =
+                | acceptability =
                     Logic.update
                         { pState
                             | step = End
                             , evaluation = maybeBoolToEvaluation maybeBool
                             , userAnsweredAt = Just timestamp
                         }
-                        model.acceptabilityTask
+                        model.acceptability
               }
             , toNextStep model.endAcceptabilityDuration End
             )
@@ -358,26 +358,26 @@ update msg model =
         AudioEnded ( name, timestamp ) ->
             if name == beep then
                 ( { model
-                    | acceptabilityTask =
-                        Logic.update { pState | beepEndedAt = Just timestamp } model.acceptabilityTask
+                    | acceptability =
+                        Logic.update { pState | beepEndedAt = Just timestamp } model.acceptability
                   }
                 , Cmd.none
                 )
 
             else
                 ( { model
-                    | acceptabilityTask =
-                        Logic.update { pState | audioEndedAt = Just timestamp } model.acceptabilityTask
+                    | acceptability =
+                        Logic.update { pState | audioEndedAt = Just timestamp } model.acceptability
                   }
                 , toNextStep 0 Answering
                 )
 
         AudioStarted ( name, timestamp ) ->
             if name == beep then
-                ( { model | acceptabilityTask = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptabilityTask }, toNextStep 0 Listening )
+                ( { model | acceptability = Logic.update { pState | beepStartedAt = Just timestamp } model.acceptability }, toNextStep 0 Listening )
 
             else
-                ( { model | acceptabilityTask = Logic.update { pState | audioStartedAt = Just timestamp } model.acceptabilityTask }
+                ( { model | acceptability = Logic.update { pState | audioStartedAt = Just timestamp } model.acceptability }
                 , Cmd.none
                 )
 
@@ -385,7 +385,7 @@ update msg model =
             ( model, Cmd.batch [ pushUrl model.key "start" ] )
 
         StartMain ->
-            ( { model | acceptabilityTask = Logic.startMain model.acceptabilityTask initState, endAcceptabilityDuration = 500 }, toNextStep 0 Init )
+            ( { model | acceptability = Logic.startMain model.acceptability initState, endAcceptabilityDuration = 500 }, toNextStep 0 Init )
 
         UserClickedEndActivity ->
             ( model, pushUrl model.key "end" )
@@ -394,7 +394,7 @@ update msg model =
             ( model, Ports.playAudio url )
 
         UserClickedStartTraining ->
-            ( { model | acceptabilityTask = Logic.startTraining model.acceptabilityTask }, Cmd.none )
+            ( { model | acceptability = Logic.startTraining model.acceptability }, Cmd.none )
 
         HistoryWasSaved _ ->
             ( model, Cmd.none )
@@ -410,7 +410,7 @@ update msg model =
 subscriptions model =
     let
         acceptabilityState =
-            Logic.getState model.acceptabilityTask
+            Logic.getState model.acceptability
 
         listenToInput : Sub Msg
         listenToInput =
@@ -428,7 +428,7 @@ subscriptions model =
                 Nothing ->
                     Sub.none
     in
-    case model.acceptabilityTask of
+    case model.acceptability of
         Logic.Running Logic.Training _ ->
             Sub.batch [ listenToInput, Ports.audioEnded toAcceptabilityMessage ]
 
@@ -563,7 +563,7 @@ decodeAcceptabilityTrials =
 saveData model =
     let
         history =
-            Logic.getHistory model.acceptabilityTask
+            Logic.getHistory model.acceptability
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"

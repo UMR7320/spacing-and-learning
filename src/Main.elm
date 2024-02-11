@@ -28,19 +28,19 @@ import ProgressBar
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Activity(..), Session2Activity(..))
 import Session exposing (Session(..))
-import Session1.ContextUnderstanding as CU1
-import Session1.Meaning as Meaning
+import Session1.Context1 as Context1
+import Session1.Meaning1 as Meaning1
 import Session1.Presentation as Presentation
 import Session1.Session as Session1
-import Session1.Spelling as SpellingLvl1
-import Session2.CU2 as CU2
+import Session1.Spelling1 as Spelling1
+import Session2.Context2 as Context2
+import Session2.Meaning2 as Meaning2
 import Session2.Session as Session2
-import Session2.Spelling as Scrabble
-import Session2.Translation as Translation
-import Session3.CU3 as CU3
+import Session2.Spelling2 as Spelling2
+import Session3.Context3 as Context3
+import Session3.Meaning3 as Meaning3
 import Session3.Session as Session3
 import Session3.Spelling3 as Spelling3
-import Session3.Synonym as Synonym
 import Task
 import Time
 import Url exposing (Url)
@@ -67,34 +67,32 @@ type alias Model =
     , dnd : DnDList.Model
 
     -- PreTest
-    , acceptabilityTask : Logic.Activity Acceptability.Trial Acceptability.State
-    , spr : SPR.SPR
     , pretest : Pretest.Pretest
+    , acceptability : Logic.Activity Acceptability.Trial Acceptability.State
+    , spr : SPR.SPR
     , sentenceCompletion : SentenceCompletion.SentenceCompletion
     , vks : { task : Logic.Activity VKS.Trial VKS.Answer, showVideo : Bool }
     , yesno : Logic.Activity YesNo.Trial YesNo.State
 
     -- Session 1
     , session1 : Session1.Session1
-    , meaning : Logic.Activity Meaning.Trial Meaning.State
-    , spellingLvl1 : Logic.Activity SpellingLvl1.Trial SpellingLvl1.State
-
-    --cu1 stands for context-understanding-1
-    , cu1 : Logic.Activity CU1.Trial CU1.State
     , presentation : Logic.Activity Presentation.Trial Presentation.State
+    , meaning1 : Logic.Activity Meaning1.Trial Meaning1.State
+    , spelling1 : Logic.Activity Spelling1.Trial Spelling1.State
+    , context1 : Logic.Activity Context1.Trial Context1.State
     , endAcceptabilityDuration : Int
 
     -- Session 2
-    , translationTask : Logic.Activity Translation.Trial Translation.State
-    , scrabbleTask : Logic.Activity Scrabble.Trial Scrabble.State
-    , cuLvl2 : Logic.Activity CU2.Trial CU2.State
     , session2 : Session2.Session2
+    , meaning2 : Logic.Activity Meaning2.Trial Meaning2.State
+    , spelling2 : Logic.Activity Spelling2.Trial Spelling2.State
+    , context2 : Logic.Activity Context2.Trial Context2.State
 
     -- Session 3
-    , spelling3 : Logic.Activity Spelling3.Trial Spelling3.State
-    , cu3 : Logic.Activity CU3.Trial CU3.State
-    , synonymTask : Logic.Activity Synonym.Trial Synonym.State
     , session3 : Session3.Session3
+    , meaning3 : Logic.Activity Meaning3.Trial Meaning3.State
+    , spelling3 : Logic.Activity Spelling3.Trial Spelling3.State
+    , context3 : Logic.Activity Context3.Trial Context3.State
 
     -- PostTest
     , cloudWords : CloudWords.CloudWords
@@ -122,29 +120,29 @@ defaultModel : Nav.Key -> Route.Route -> String -> Model
 defaultModel key route backgroundQuestionnaireUrl =
     { key = key
     , route = route
-    , dnd = Scrabble.system.model
+    , dnd = Spelling2.system.model
 
     -- SESSION 1
-    , meaning = Logic.NotStarted
-    , spellingLvl1 = Logic.NotStarted
-    , cu1 = Logic.Loading
-    , presentation = Logic.NotStarted
     , session1 = NotAsked
+    , presentation = Logic.NotStarted
+    , meaning1 = Logic.NotStarted
+    , spelling1 = Logic.NotStarted
+    , context1 = Logic.Loading
 
     -- SESSION 2
-    , translationTask = Logic.NotStarted
-    , cuLvl2 = Logic.NotStarted
-    , scrabbleTask = Logic.NotStarted
     , session2 = NotAsked
+    , meaning2 = Logic.NotStarted
+    , spelling2 = Logic.NotStarted
+    , context2 = Logic.NotStarted
 
     -- SESSION 3
-    , synonymTask = Logic.NotStarted
-    , spelling3 = Logic.NotStarted
-    , cu3 = Logic.NotStarted
     , session3 = NotAsked
+    , meaning3 = Logic.NotStarted
+    , spelling3 = Logic.NotStarted
+    , context3 = Logic.NotStarted
 
     -- PILOTE
-    , acceptabilityTask = Logic.NotStarted
+    , acceptability = Logic.NotStarted
     , endAcceptabilityDuration = 6000
 
     -- PRETEST
@@ -199,13 +197,12 @@ init backgroundQuestionnaireUrl url key =
     case route of
         Route.Session1 userId _ ->
             ( { model
-                | -- SESSION 1
-                  meaning = Logic.Loading
-                , spellingLvl1 = Logic.Loading
-                , cu1 = Logic.Loading
+                | session1 = Loading loadingStateSession1
                 , presentation = Logic.Loading
+                , meaning1 = Logic.Loading
+                , spelling1 = Logic.Loading
+                , context1 = Logic.Loading
                 , user = Just userId
-                , session1 = Loading loadingStateSession1
               }
             , Cmd.batch
                 [ cmd
@@ -216,50 +213,46 @@ init backgroundQuestionnaireUrl url key =
 
         Route.Home ->
             ( { model
-                | -- SESSION 1
-                  meaning = Logic.Loading
-                , spellingLvl1 = Logic.Loading
-                , cu1 = Logic.Loading
+                | session1 = Loading loadingStateSession1
                 , presentation = Logic.Loading
+                , meaning1 = Logic.Loading
+                , spelling1 = Logic.Loading
+                , context1 = Logic.Loading
                 , user = Nothing
-                , session1 = Loading loadingStateSession1
               }
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
             )
 
         Route.TermsAndConditions ->
             ( { model
-                | -- SESSION 1
-                  meaning = Logic.Loading
-                , spellingLvl1 = Logic.Loading
-                , cu1 = Logic.Loading
+                | session1 = Loading loadingStateSession1
                 , presentation = Logic.Loading
+                , meaning1 = Logic.Loading
+                , spelling1 = Logic.Loading
+                , context1 = Logic.Loading
                 , user = Nothing
-                , session1 = Loading loadingStateSession1
               }
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
             )
 
         Route.Session2 userid _ ->
             ( { model
-                | -- SESSION 2
-                  translationTask = Logic.Loading
-                , cuLvl2 = Logic.Loading
-                , scrabbleTask = Logic.Loading
+                | session2 = Loading loadingStateSession2
+                , meaning2 = Logic.Loading
+                , context2 = Logic.Loading
+                , spelling2 = Logic.Loading
                 , user = Just userid
-                , session2 = Loading loadingStateSession2
               }
             , Cmd.batch [ cmd, Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
 
         Route.Session3 userid _ ->
             ( { model
-                | -- SESSION 3
-                  synonymTask = Logic.Loading
+                | session3 = Loading loadingStateSession3
+                , meaning3 = Logic.Loading
                 , spelling3 = Logic.Loading
-                , cu3 = Logic.Loading
+                , context3 = Logic.Loading
                 , user = Just userid
-                , session3 = Loading loadingStateSession3
               }
             , Cmd.batch [ cmd, Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
             )
@@ -279,7 +272,7 @@ init backgroundQuestionnaireUrl url key =
                 | spr = Logic.Loading
                 , sentenceCompletion = Logic.Loading
                 , vks = updatedVks
-                , acceptabilityTask = Logic.Loading
+                , acceptability = Logic.Loading
                 , yesno = Logic.Loading
                 , user = Just userid
                 , version = v
@@ -337,24 +330,24 @@ body model =
                         [ Html.Styled.map Presentation (Presentation.view model.presentation) ]
 
                     Route.Meaning1 ->
-                        [ Html.Styled.map Meaning <|
-                            Meaning.view
-                                { task = model.meaning
+                        [ Html.Styled.map Meaning1 <|
+                            Meaning1.view
+                                { task = model.meaning1
                                 , optionsOrder = model.optionsOrder
                                 }
                         ]
 
                     Route.Spelling1 ->
                         [ Html.Styled.map Spelling1
-                            (SpellingLvl1.view model.spellingLvl1
+                            (Spelling1.view model.spelling1
                                 model.optionsOrder
                             )
                         ]
 
                     Route.Context1 ->
-                        [ Html.Styled.map CU1
-                            (CU1.view
-                                { task = model.cu1
+                        [ Html.Styled.map Context1
+                            (Context1.view
+                                { task = model.context1
                                 , optionsOrder = model.optionsOrder
                                 }
                             )
@@ -366,20 +359,20 @@ body model =
                         viewSessionInstructions model.sessions "session2" "translation"
 
                     Route.Meaning2 ->
-                        [ Html.Styled.map Translation
-                            (Translation.view
-                                { task = model.translationTask
+                        [ Html.Styled.map Meaning2
+                            (Meaning2.view
+                                { task = model.meaning2
                                 , optionsOrder = model.optionsOrder
                                 }
                             )
                         ]
 
                     Route.Spelling2 ->
-                        [ Html.Styled.map Spelling2 (Scrabble.viewScrabbleActivity model) ]
+                        [ Html.Styled.map Spelling2 (Spelling2.viewScrabbleActivity model) ]
 
                     Route.Context2 ->
-                        [ Html.Styled.map CU2
-                            (CU2.view model.cuLvl2
+                        [ Html.Styled.map Context2
+                            (Context2.view model.context2
                                 model.optionsOrder
                             )
                         ]
@@ -390,13 +383,13 @@ body model =
                         viewSessionInstructions model.sessions "session3" "synonym"
 
                     Route.Meaning3 ->
-                        List.map (Html.Styled.map Synonym) <| Synonym.viewActivity model.synonymTask
+                        List.map (Html.Styled.map Meaning3) <| Meaning3.viewActivity model.meaning3
 
                     Route.Spelling3 ->
                         [ Html.Styled.map Spelling3 <| Spelling3.view model.spelling3 ]
 
                     Route.Context3 ->
-                        [ Html.Styled.map CU3 <| CU3.view model.cu3 ]
+                        [ Html.Styled.map Context3 <| Context3.view model.context3 ]
 
             Route.Posttest _ task _ ->
                 case task of
@@ -437,7 +430,7 @@ body model =
                                         List.map (Html.Styled.map VKS) (VKS.view model.vks)
 
                                     Route.Acceptability _ ->
-                                        List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptabilityTask)
+                                        List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptability)
 
                                     Route.YesNo ->
                                         List.map (Html.Styled.map YesNo) (YesNo.view model.yesno)
@@ -604,22 +597,21 @@ viewCalendar model group generalParameters =
                                 Date.add Date.Days generalParameters.retentionIntervalSurprise s3
                         in
                         div [ class "flow" ]
-                            ([ p [] [ text "You need to be available at least one hour on each of these days" ] ]
-                                ++ [ datesToBook ]
-                                ++ [ View.button
-                                        { message =
-                                            UserConfirmedPreferedDates
-                                                { s1 = Date.toIsoString s1
-                                                , s2 = Date.toIsoString s2
-                                                , s3 = Date.toIsoString s3
-                                                , s4 = Date.toIsoString s4
-                                                , s5 = Date.toIsoString s5
-                                                }
-                                        , txt = "Continue"
-                                        , isDisabled = False
+                            [ p [] [ text "You need to be available at least one hour on each of these days" ]
+                            , datesToBook
+                            , View.button
+                                { message =
+                                    UserConfirmedPreferedDates
+                                        { s1 = Date.toIsoString s1
+                                        , s2 = Date.toIsoString s2
+                                        , s3 = Date.toIsoString s3
+                                        , s4 = Date.toIsoString s4
+                                        , s5 = Date.toIsoString s5
                                         }
-                                   ]
-                            )
+                                , txt = "Continue"
+                                , isDisabled = False
+                                }
+                            ]
                 ]
             ]
 
@@ -653,21 +645,21 @@ type Msg
     | VKS VKS.Msg
     | YesNo YesNo.Msg
       -- Session 1
-    | CU1 CU1.Msg
-    | Presentation Presentation.Msg
-    | Meaning Meaning.Msg
-    | Spelling1 SpellingLvl1.Msg
     | Session1 Session1.Msg
+    | Presentation Presentation.Msg
+    | Context1 Context1.Msg
+    | Meaning1 Meaning1.Msg
+    | Spelling1 Spelling1.Msg
       -- Session 2
-    | CU2 CU2.CU2Msg
-    | Spelling2 Scrabble.Msg
-    | Translation Translation.Msg
     | Session2 Session2.Msg
+    | Meaning2 Meaning2.Msg
+    | Spelling2 Spelling2.Msg
+    | Context2 Context2.Msg
       -- Session 3
-    | CU3 CU3.Msg
-    | Spelling3 Spelling3.Msg
-    | Synonym Synonym.Msg
     | Session3 Session3.Msg
+    | Meaning3 Meaning3.Msg
+    | Spelling3 Spelling3.Msg
+    | Context3 Context3.Msg
       -- WordCloud
     | WordCloud CloudWords.Msg
       -- User Code
@@ -780,45 +772,45 @@ update msg model =
         PlaysoundInJS url ->
             ( model, Ports.playAudio url )
 
+        Presentation submsg ->
+            Presentation.update submsg model
+                |> updateWith Presentation
+
+        Meaning1 submsg ->
+            Meaning1.update submsg model
+                |> updateWith Meaning1
+
+        Meaning2 submsg ->
+            Meaning2.update submsg model
+                |> updateWith Meaning2
+
+        Meaning3 submsg ->
+            Meaning3.update submsg model
+                |> updateWith Meaning3
+
         Spelling1 submsg ->
-            SpellingLvl1.update submsg model
+            Spelling1.update submsg model
                 |> updateWith Spelling1
 
-        CU2 submsg ->
-            CU2.update submsg model
-                |> updateWith CU2
-
         Spelling2 submsg ->
-            Scrabble.update submsg model
+            Spelling2.update submsg model
                 |> updateWith Spelling2
-
-        CU1 submsg ->
-            CU1.update submsg model
-                |> updateWith CU1
-
-        CU3 submsg ->
-            CU3.update submsg model
-                |> updateWith CU3
 
         Spelling3 submsg ->
             Spelling3.update submsg model
                 |> updateWith Spelling3
 
-        Presentation submsg ->
-            Presentation.update submsg model
-                |> updateWith Presentation
+        Context1 submsg ->
+            Context1.update submsg model
+                |> updateWith Context1
 
-        Synonym submsg ->
-            Synonym.update submsg model
-                |> updateWith Synonym
+        Context2 submsg ->
+            Context2.update submsg model
+                |> updateWith Context2
 
-        Meaning submsg ->
-            Meaning.update submsg model
-                |> updateWith Meaning
-
-        Translation submsg ->
-            Translation.update submsg model
-                |> updateWith Translation
+        Context3 submsg ->
+            Context3.update submsg model
+                |> updateWith Context3
 
         YesNo submsg ->
             YesNo.update submsg model
@@ -908,10 +900,12 @@ update msg model =
                 |> updateWith UserCode
 
 
+updateWith : (a -> msg) -> ( b, Cmd a ) -> ( b, Cmd msg )
 updateWith subMsg ( model, subCmd ) =
     ( model, Cmd.map subMsg subCmd )
 
 
+decodeNewUser : Decode.Decoder String
 decodeNewUser =
     Decode.field "id" Decode.string
 
@@ -919,11 +913,11 @@ decodeNewUser =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map Spelling2 (Scrabble.subscriptions model)
+        [ Sub.map Spelling2 (Spelling2.subscriptions model)
         , Sub.map SPR (SPR.subscriptions model.spr)
         , Sub.map Acceptability (Acceptability.subscriptions model)
         , Sub.map YesNo (YesNo.subscriptions model)
-        , Sub.map Spelling1 (SpellingLvl1.subscriptions model)
+        , Sub.map Spelling1 (Spelling1.subscriptions model)
         ]
 
 

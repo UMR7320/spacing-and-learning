@@ -46,7 +46,7 @@ viewPretest activity model =
                 , viewItem "LexLearn verbs" VKS model.vks.task activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
+                , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
 
         PostTest ->
@@ -58,7 +58,7 @@ viewPretest activity model =
                 , div [] [ text "How was it?" ]
                 , viewItem "LexLearn verbs" VKS model.vks.task activity
                 , viewItem "Reading test" SPR model.spr activity
-                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
+                , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
 
         PostTestDiff ->
@@ -67,7 +67,7 @@ viewPretest activity model =
                 [ viewItem "LexLearn verbs" VKS model.vks.task activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
+                , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
 
         Surprise ->
@@ -76,7 +76,7 @@ viewPretest activity model =
                 [ viewItem "LexLearn verbs" VKS model.vks.task activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Listening test" (isAcceptability activity) model.acceptabilityTask True
+                , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
 
         Unknown _ ->
@@ -87,9 +87,9 @@ viewSession1 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 5" ]
         [ viewItem "Presentation" Presentation model.presentation activity
-        , viewItem "Meaning" Meaning1 model.meaning activity
-        , viewItem "Spelling" Spelling1 model.spellingLvl1 activity
-        , viewItem "Context" Context1 model.cu1 activity
+        , viewItem "Meaning" Meaning1 model.meaning1 activity
+        , viewItem "Spelling" Spelling1 model.spelling1 activity
+        , viewItem "Context" Context1 model.context1 activity
         , div [ classList [ ( "active", False ) ] ] [ text "How was it?" ]
         ]
 
@@ -97,9 +97,9 @@ viewSession1 activity model =
 viewSession2 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 4" ]
-        [ viewItem "Meaning" Meaning2 model.translationTask activity
-        , viewItem "Spelling" Spelling2 model.scrabbleTask activity
-        , viewItem "Context" Context2 model.cuLvl2 activity
+        [ viewItem "Meaning" Meaning2 model.meaning2 activity
+        , viewItem "Spelling" Spelling2 model.spelling2 activity
+        , viewItem "Context" Context2 model.context2 activity
         , div [] [ text "How was it?" ]
         ]
 
@@ -107,9 +107,9 @@ viewSession2 activity model =
 viewSession3 activity model =
     div
         [ class "progress-bar", attribute "style" "--count: 7" ]
-        [ viewItem "Meaning" Meaning3 model.synonymTask activity
+        [ viewItem "Meaning" Meaning3 model.meaning3 activity
         , viewItem "Spelling" Spelling3 model.spelling3 activity
-        , viewItem "Context" Context3 model.cu3 activity
+        , viewItem "Context" Context3 model.context3 activity
         , div [] [ text "How was it?" ]
         , div [] [ text "LexLearn verbs" ]
         , div [] [ text "Reading test" ]

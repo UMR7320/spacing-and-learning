@@ -1,4 +1,4 @@
-module Session2.Spelling exposing (..)
+module Session2.Spelling2 exposing (..)
 
 import Data
 import DnDList
@@ -14,7 +14,6 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Logic
 import Ports
-import Session1.Spelling exposing (Step(..))
 import Task
 import Time
 import View
@@ -89,7 +88,7 @@ start info trials =
 --VIEW
 
 
-viewScrabbleActivity : { a | scrabbleTask : Logic.Activity Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
+viewScrabbleActivity : { a | spelling2 : Logic.Activity Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
 viewScrabbleActivity model =
     let
         viewLetters scrambledLetters =
@@ -102,7 +101,7 @@ viewScrabbleActivity model =
                 [ Html.Styled.Events.onClick (PlayAudio url), class "col-start-2 col-span-4 h-8 w-8" ]
                 [ fromUnstyled <| Icons.music ]
     in
-    case model.scrabbleTask of
+    case model.spelling2 of
         Logic.NotStarted ->
             text "Not Asked"
 
@@ -300,7 +299,7 @@ type Msg
 update msg model =
     let
         currentScrabbleState =
-            case Logic.getState model.scrabbleTask of
+            case Logic.getState model.spelling2 of
                 Just x ->
                     x
 
@@ -315,7 +314,7 @@ update msg model =
             in
             ( { model
                 | dnd = dnd
-                , scrabbleTask = Logic.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.scrabbleTask
+                , spelling2 = Logic.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.spelling2
               }
             , system.commands dnd
             )
@@ -324,14 +323,14 @@ update msg model =
             ( model, Ports.playAudio url )
 
         UserClickedFeedbackButton ->
-            ( { model | scrabbleTask = Logic.toggle model.scrabbleTask }, Cmd.none )
+            ( { model | spelling2 = Logic.toggle model.spelling2 }, Cmd.none )
 
         UserClickedNextTrial maybeNextTrial ->
             ( model, Task.perform (NextTrial maybeNextTrial) Time.now )
 
         NextTrial maybeNextTrial timestamp ->
             let
-                scrabbleTask =
+                spelling2 =
                     case maybeNextTrial of
                         Just nextTrial ->
                             Logic.next
@@ -342,13 +341,13 @@ update msg model =
                                     , remainingListenings = 3
                                     , step = ListeningFirstTime
                                 }
-                                model.scrabbleTask
+                                model.spelling2
 
                         Nothing ->
-                            Logic.next timestamp currentScrabbleState model.scrabbleTask
+                            Logic.next timestamp currentScrabbleState model.spelling2
 
                 newModel =
-                    { model | scrabbleTask = scrabbleTask }
+                    { model | spelling2 = spelling2 }
             in
             ( newModel
             , saveData newModel
@@ -364,21 +363,21 @@ update msg model =
         UserClickedStartMainloop trials ->
             case trials of
                 [] ->
-                    ( { model | scrabbleTask = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
+                    ( { model | spelling2 = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
 
                 x :: _ ->
-                    ( { model | scrabbleTask = Logic.startMain model.scrabbleTask { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
+                    ( { model | spelling2 = Logic.startMain model.spelling2 { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | scrabbleTask = Logic.startTraining model.scrabbleTask }, Cmd.none )
+            ( { model | spelling2 = Logic.startTraining model.spelling2 }, Cmd.none )
 
         UserClickedStartAudio url ->
-            ( { model | scrabbleTask = Logic.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.scrabbleTask }, Ports.playAudio url )
+            ( { model | spelling2 = Logic.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.spelling2 }, Ports.playAudio url )
 
         AudioEnded { eventType } ->
             case eventType of
                 "SoundEnded" ->
-                    ( { model | scrabbleTask = Logic.update { currentScrabbleState | step = Answering } model.scrabbleTask }, Cmd.none )
+                    ( { model | spelling2 = Logic.update { currentScrabbleState | step = Answering } model.spelling2 }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -402,7 +401,7 @@ toKeyedItem letters =
 
 
 subscriptions model =
-    case model.scrabbleTask of
+    case model.spelling2 of
         Logic.Running _ { state } ->
             case state.step of
                 ListeningFirstTime ->
@@ -514,7 +513,7 @@ decodeTranslationInput =
 saveData model =
     let
         history =
-            Logic.getHistory model.scrabbleTask
+            Logic.getHistory model.spelling2
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

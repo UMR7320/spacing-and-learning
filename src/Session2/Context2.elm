@@ -1,4 +1,4 @@
-module Session2.CU2 exposing (..)
+module Session2.Context2 exposing (..)
 
 import Data
 import Delay
@@ -13,8 +13,6 @@ import Logic
 import Ports
 import Random
 import Random.List
-import Session1.Meaning exposing (Msg(..))
-import Session3.CU3 exposing (Msg(..))
 import Task
 import Time
 import View
@@ -194,7 +192,7 @@ smallAudio txt =
 -- UPDATE
 
 
-type CU2Msg
+type Msg
     = UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
@@ -211,7 +209,7 @@ type CU2Msg
 update msg model =
     let
         prevState =
-            Logic.getState model.cuLvl2 |> Maybe.withDefault initState
+            Logic.getState model.context2 |> Maybe.withDefault initState
     in
     case msg of
         UserClickedNextTrial ->
@@ -220,7 +218,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | cuLvl2 = Logic.next timestamp initState model.cuLvl2 }
+                    { model | context2 = Logic.next timestamp initState model.context2 }
             in
             ( newModel
             , Cmd.batch
@@ -230,13 +228,13 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | cuLvl2 = Logic.toggle model.cuLvl2 }, Cmd.none )
+            ( { model | context2 = Logic.toggle model.context2 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | cuLvl2 = Logic.update { prevState | userAnswer = newChoice } model.cuLvl2 }, Cmd.none )
+            ( { model | context2 = Logic.update { prevState | userAnswer = newChoice } model.context2 }, Cmd.none )
 
         UserClickedStartMain _ _ ->
-            ( { model | cuLvl2 = Logic.startMain model.cuLvl2 initState }, Cmd.none )
+            ( { model | context2 = Logic.startMain model.context2 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
@@ -246,7 +244,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedAudio url ->
-            ( { model | cuLvl2 = Logic.update { prevState | step = decrement prevState.step } model.cuLvl2 }
+            ( { model | context2 = Logic.update { prevState | step = decrement prevState.step } model.context2 }
             , if prevState.step /= Listening 0 then
                 Ports.playAudio url
 
@@ -258,10 +256,10 @@ update msg model =
             ( { model | optionsOrder = ls }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | cuLvl2 = Logic.startTraining model.cuLvl2 }, Cmd.none )
+            ( { model | context2 = Logic.startTraining model.context2 }, Cmd.none )
 
         UserClickedStartAnswering ->
-            ( { model | cuLvl2 = Logic.update { prevState | step = Answering } model.cuLvl2 }, Cmd.none )
+            ( { model | context2 = Logic.update { prevState | step = Answering } model.context2 }, Cmd.none )
 
 
 decrement : Step -> Step
@@ -333,7 +331,7 @@ decodeTranslationInput =
 saveData model =
     let
         history =
-            Logic.getHistory model.cuLvl2
+            Logic.getHistory model.context2
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =
@@ -367,7 +365,7 @@ updateHistoryEncoder userId history =
 
 
 historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder userId history =
+historyEncoder _ history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
         [ ( "CU2", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
