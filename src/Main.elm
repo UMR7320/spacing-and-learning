@@ -17,30 +17,30 @@ import Json.Encode as Encode
 import Logic
 import Ports
 import PostTests.CloudWords as CloudWords
-import Pretest.Acceptability as Acceptability
+import Pretest.Acceptability as Acceptability exposing (Acceptability)
 import Pretest.Pretest as Pretest
-import Pretest.SPR as SPR
-import Pretest.SentenceCompletion as SentenceCompletion
-import Pretest.VKS as VKS
+import Pretest.SPR as SPR exposing (SPR)
+import Pretest.SentenceCompletion as SentenceCompletion exposing (SentenceCompletion)
+import Pretest.VKS as VKS exposing (VKS)
 import Pretest.Version exposing (Version(..))
-import Pretest.YesNo as YesNo
+import Pretest.YesNo as YesNo exposing (YesNo)
 import ProgressBar
 import RemoteData exposing (RemoteData)
 import Route exposing (Route(..), Session1Activity(..), Session2Activity(..))
 import Session exposing (Session(..))
-import Session1.Context1 as Context1
-import Session1.Meaning1 as Meaning1
-import Session1.Presentation as Presentation
-import Session1.Session as Session1
-import Session1.Spelling1 as Spelling1
-import Session2.Context2 as Context2
-import Session2.Meaning2 as Meaning2
-import Session2.Session as Session2
-import Session2.Spelling2 as Spelling2
-import Session3.Context3 as Context3
-import Session3.Meaning3 as Meaning3
-import Session3.Session as Session3
-import Session3.Spelling3 as Spelling3
+import Session1.Context1 as Context1 exposing (Context1)
+import Session1.Meaning1 as Meaning1 exposing (Meaning1)
+import Session1.Presentation as Presentation exposing (Presentation)
+import Session1.Session as Session1 exposing (Session1)
+import Session1.Spelling1 as Spelling1 exposing (Spelling1)
+import Session2.Context2 as Context2 exposing (Context2)
+import Session2.Meaning2 as Meaning2 exposing (Meaning2)
+import Session2.Session as Session2 exposing (Session2)
+import Session2.Spelling2 as Spelling2 exposing (Spelling2)
+import Session3.Context3 as Context3 exposing (Context3)
+import Session3.Meaning3 as Meaning3 exposing (Meaning3)
+import Session3.Session as Session3 exposing (Session3)
+import Session3.Spelling3 as Spelling3 exposing (Spelling3)
 import Task
 import Time
 import Url exposing (Url)
@@ -68,31 +68,31 @@ type alias Model =
 
     -- PreTest
     , pretest : Pretest.Pretest
-    , acceptability : Logic.Activity Acceptability.Trial Acceptability.State
-    , spr : SPR.SPR
-    , sentenceCompletion : SentenceCompletion.SentenceCompletion
-    , vks : { task : Logic.Activity VKS.Trial VKS.Answer, showVideo : Bool }
-    , yesno : Logic.Activity YesNo.Trial YesNo.State
+    , acceptability : Acceptability
+    , spr : SPR
+    , sentenceCompletion : SentenceCompletion
+    , vks : { task : VKS, showVideo : Bool }
+    , yesno : YesNo
 
     -- Session 1
-    , session1 : Session1.Session1
-    , presentation : Logic.Activity Presentation.Trial Presentation.State
-    , meaning1 : Logic.Activity Meaning1.Trial Meaning1.State
-    , spelling1 : Logic.Activity Spelling1.Trial Spelling1.State
-    , context1 : Logic.Activity Context1.Trial Context1.State
+    , session1 : Session1
+    , presentation : Presentation
+    , meaning1 : Meaning1
+    , spelling1 : Spelling1
+    , context1 : Context1
     , endAcceptabilityDuration : Int
 
     -- Session 2
-    , session2 : Session2.Session2
-    , meaning2 : Logic.Activity Meaning2.Trial Meaning2.State
-    , spelling2 : Logic.Activity Spelling2.Trial Spelling2.State
-    , context2 : Logic.Activity Context2.Trial Context2.State
+    , session2 : Session2
+    , meaning2 : Meaning2
+    , spelling2 : Spelling2
+    , context2 : Context2
 
     -- Session 3
-    , session3 : Session3.Session3
-    , meaning3 : Logic.Activity Meaning3.Trial Meaning3.State
-    , spelling3 : Logic.Activity Spelling3.Trial Spelling3.State
-    , context3 : Logic.Activity Context3.Trial Context3.State
+    , session3 : Session3
+    , meaning3 : Meaning3
+    , spelling3 : Spelling3
+    , context3 : Context3
 
     -- PostTest
     , cloudWords : CloudWords.CloudWords

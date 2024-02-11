@@ -52,7 +52,14 @@ initState =
 
 
 type alias Trial =
-    { id : String, word : String, exists : Bool }
+    { id : String
+    , word : String
+    , exists : Bool
+    }
+
+
+type alias YesNo =
+    Logic.Activity Trial State
 
 
 update msg model =
@@ -285,13 +292,12 @@ subscriptions model =
             Sub.none
 
 
-
 init infos trials =
     let
         info =
             infos
-            |> List.filter (\task -> task.session == Pretest && task.name == "General vocabulary")
-            |> List.head
-            |> Result.fromMaybe "Could not find Yes/No infos"
+                |> List.filter (\task -> task.session == Pretest && task.name == "General vocabulary")
+                |> List.head
+                |> Result.fromMaybe "Could not find Yes/No infos"
     in
     Logic.startIntro info [] trials initState

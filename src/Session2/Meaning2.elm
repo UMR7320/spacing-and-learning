@@ -2,7 +2,7 @@ module Session2.Meaning2 exposing (..)
 
 import Data
 import ExperimentInfo exposing (Session(..))
-import Html.Styled exposing ( Html , div , text)
+import Html.Styled exposing (Html, div, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
@@ -41,6 +41,10 @@ type alias State =
     { uid : String
     , userAnswer : String
     }
+
+
+type alias Meaning2 =
+    Logic.Activity Trial State
 
 
 defaultTrial : Trial

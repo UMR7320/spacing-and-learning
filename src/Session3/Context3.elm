@@ -53,6 +53,10 @@ type Step
     = Listening Int
 
 
+type alias Context3 =
+    Logic.Activity Trial State
+
+
 defaultTrial : Trial
 defaultTrial =
     { uid = ""

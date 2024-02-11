@@ -41,6 +41,10 @@ type alias State =
     }
 
 
+type alias Spelling2 =
+    Logic.Activity Trial State
+
+
 type Step
     = ListeningFirstTime
     | Answering

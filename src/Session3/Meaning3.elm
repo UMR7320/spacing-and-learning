@@ -35,6 +35,10 @@ type alias State =
     }
 
 
+type alias Meaning3 =
+    Logic.Activity Trial State
+
+
 initState : State
 initState =
     State "DefaultUserUID" ""

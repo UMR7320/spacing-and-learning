@@ -58,6 +58,10 @@ type alias State =
     }
 
 
+type alias Context2 =
+    Logic.Activity Trial State
+
+
 initState : State
 initState =
     State "" (Listening 3)

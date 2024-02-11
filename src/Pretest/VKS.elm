@@ -23,7 +23,7 @@ import View
 
 type alias Model superModel =
     { superModel
-        | vks : { task : Logic.Activity Trial Answer, showVideo : Bool }
+        | vks : { task : VKS, showVideo : Bool }
         , user : Maybe String
         , version : Version
     }
@@ -48,6 +48,10 @@ type alias Answer =
     , definition : String
     , usage : String
     }
+
+
+type alias VKS =
+    Logic.Activity Trial Answer
 
 
 type alias SC =

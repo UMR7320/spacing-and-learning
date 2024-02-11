@@ -41,6 +41,10 @@ type Step
     | Answering
 
 
+type alias Spelling3 =
+    Logic.Activity Trial State
+
+
 initState : State
 initState =
     State "DefaultUid" "" (Listening 3)

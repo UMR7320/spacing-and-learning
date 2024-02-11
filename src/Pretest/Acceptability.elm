@@ -83,9 +83,13 @@ type Evaluation
     | EvaluationTimeOut
 
 
+type alias Acceptability =
+    Logic.Activity Trial State
+
+
 type alias Model supraModel =
     { supraModel
-        | acceptability : Logic.Activity Trial State
+        | acceptability : Acceptability
         , endAcceptabilityDuration : Int
         , key : Key
         , user : Maybe String
