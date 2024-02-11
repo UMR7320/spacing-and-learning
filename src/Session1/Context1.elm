@@ -8,7 +8,7 @@ import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Random
 import Random.List
 import Task
@@ -40,7 +40,7 @@ type alias State =
 
 
 type alias Context1 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 initState : State
@@ -53,9 +53,9 @@ defaultTrial =
     Trial "defaultuid" "defaulttarger" "defaultWrittenWord" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session1 "Context 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -66,16 +66,16 @@ start info trials =
 -- VIEW
 
 
-view : { task : Logic.Activity Trial State, optionsOrder : List comparable } -> Html Msg
+view : { task : Activity Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             div [] [ text reason ]
 
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.current of
                 Just trial ->
                     let
@@ -108,7 +108,7 @@ view task =
                 Nothing ->
                     View.introToMain (UserClickedStartMain data.mainTrials data.infos)
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
                     let
@@ -139,10 +139,10 @@ view task =
                 Nothing ->
                     View.end data.infos.end UserClickedSaveData "../post-tests/cw?session=S1"
 
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
 
@@ -185,7 +185,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | context1 = Logic.next timestamp initState model.context1 }
+                    { model | context1 = Activity.next timestamp initState model.context1 }
             in
             ( newModel
             , Cmd.batch
@@ -195,20 +195,20 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | context1 = Logic.toggle model.context1 }, Cmd.none )
+            ( { model | context1 = Activity.toggle model.context1 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | context1 = Logic.update { uid = "", userAnswer = newChoice } model.context1 }, Cmd.none )
+            ( { model | context1 = Activity.update { uid = "", userAnswer = newChoice } model.context1 }, Cmd.none )
 
         UserClickedStartMain _ _ ->
-            ( { model | context1 = Logic.startMain model.context1 initState }, Cmd.none )
+            ( { model | context1 = Activity.startMain model.context1 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | context1 = Logic.startTraining model.context1 }, Cmd.none )
+            ( { model | context1 = Activity.startTraining model.context1 }, Cmd.none )
 
         RuntimeShuffledOptionsOrder newOrder ->
             ( { model | optionsOrder = newOrder }, Cmd.none )
@@ -263,7 +263,7 @@ getRecords =
 saveData model =
     let
         history =
-            Logic.getHistory model.context1
+            Activity.getHistory model.context1
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

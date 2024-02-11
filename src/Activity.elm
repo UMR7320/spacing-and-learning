@@ -1,4 +1,4 @@
-module Logic exposing (..)
+module Activity exposing (..)
 
 import ExperimentInfo
 import Html.Styled as Html

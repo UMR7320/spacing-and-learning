@@ -9,7 +9,7 @@ import Html.Styled.Events
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
-import Logic
+import Activity exposing (Activity)
 import Ports
 import Set
 import Task
@@ -22,7 +22,7 @@ type Entry
 
 
 type alias Presentation =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
@@ -61,25 +61,25 @@ entries d e t msg toggledEntries =
             )
 
 
-view : Logic.Activity Trial State -> Html Msg
+view : Activity Trial State -> Html Msg
 view task =
     case task of
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             div [] [ text reason ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             viewTrialOrEnd data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             viewTrialOrEnd data (View.end data.infos.end NoOp "meaning")
 
 
@@ -172,7 +172,7 @@ initState =
 
 
 type alias Model superModel =
-    { superModel | presentation : Logic.Activity Trial State }
+    { superModel | presentation : Activity Trial State }
 
 
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
@@ -182,15 +182,15 @@ update msg model =
             ( model, Task.perform NextTrial Time.now )
 
         NextTrial timestamp ->
-            ( { model | presentation = Logic.next timestamp initState model.presentation }, Cmd.none )
+            ( { model | presentation = Activity.next timestamp initState model.presentation }, Cmd.none )
 
         UserClickedStartMain _ _ ->
-            ( { model | presentation = Logic.startMain model.presentation initState }, Cmd.none )
+            ( { model | presentation = Activity.startMain model.presentation initState }, Cmd.none )
 
         UserToggleElementOfEntry id ->
             let
                 prevState =
-                    Logic.getState model.presentation
+                    Activity.getState model.presentation
 
                 updateEntry state =
                     Dict.map
@@ -207,7 +207,7 @@ update msg model =
                 Just state ->
                     ( { model
                         | presentation =
-                            Logic.update
+                            Activity.update
                                 { state
                                     | toggledEntries =
                                         updateEntry state
@@ -224,17 +224,17 @@ update msg model =
         UserClickedStartAudio url ->
             let
                 prevState =
-                    Logic.getState model.presentation
+                    Activity.getState model.presentation
             in
             case prevState of
                 Nothing ->
                     ( model, Cmd.none )
 
                 Just state ->
-                    ( { model | presentation = Logic.update { state | clickedEntries = Set.insert "audio" state.clickedEntries } model.presentation }, Ports.playAudio url )
+                    ( { model | presentation = Activity.update { state | clickedEntries = Set.insert "audio" state.clickedEntries } model.presentation }, Ports.playAudio url )
 
         UserClickedStartTraining ->
-            ( { model | presentation = Logic.startTraining model.presentation }, Cmd.none )
+            ( { model | presentation = Activity.startTraining model.presentation }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -272,9 +272,9 @@ type alias State =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session1 "Words to learn")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)

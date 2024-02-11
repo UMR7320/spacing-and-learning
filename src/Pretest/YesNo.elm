@@ -9,7 +9,7 @@ import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Task
 import Time
 import View exposing (unclickableButton)
@@ -59,19 +59,19 @@ type alias Trial =
 
 
 type alias YesNo =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 update msg model =
     case msg of
         UserClickedStartActivity ->
-            ( { model | yesno = Logic.startMain model.yesno initState }, Cmd.none )
+            ( { model | yesno = Activity.startMain model.yesno initState }, Cmd.none )
 
         UserPressedButton maybeBool ->
             ( model, Task.perform (NextTrial maybeBool) Time.now )
 
         NextTrial maybeBool timestamp ->
-            ( { model | yesno = Logic.update { evaluation = maybeBool } model.yesno |> Logic.next timestamp initState }, Cmd.none )
+            ( { model | yesno = Activity.update { evaluation = maybeBool } model.yesno |> Activity.next timestamp initState }, Cmd.none )
 
         UserClickedSaveData ->
             let
@@ -79,7 +79,7 @@ update msg model =
                     model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
                 totalScore =
-                    Logic.getHistory model.yesno
+                    Activity.getHistory model.yesno
                         |> Data.splitIn 20
                         |> List.map
                             (\block ->
@@ -107,13 +107,13 @@ update msg model =
                 responseDecoder =
                     Decode.field "id" Decode.string
             in
-            ( { model | yesno = Logic.Loading }, updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder )
+            ( { model | yesno = Activity.Loading }, updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder )
 
         ServerRespondedWithUpdatedUser (Result.Err reason) ->
-            ( { model | yesno = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
+            ( { model | yesno = Activity.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
         ServerRespondedWithUpdatedUser id ->
-            ( { model | yesno = Logic.NotStarted }, Cmd.none )
+            ( { model | yesno = Activity.NotStarted }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -208,28 +208,24 @@ updateVocabularyScore payload callbackMsg decoder =
         }
 
 
-type alias YN =
-    Logic.Activity Trial State
-
-
-view : YN -> List (Html Msg)
+view : YesNo -> List (Html Msg)
 view task =
     case task of
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             [ text "C'est Bon!" ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             [ View.loading ]
 
-        Logic.Running step data ->
+        Activity.Running step data ->
             case step of
-                Logic.Instructions ->
+                Activity.Instructions ->
                     [ View.unsafeInstructions data.infos UserClickedStartActivity ]
 
-                Logic.Training ->
+                Activity.Training ->
                     []
 
-                Logic.Main ->
+                Activity.Main ->
                     case data.current of
                         Just trial ->
                             [ div []
@@ -256,7 +252,7 @@ view task =
                         Nothing ->
                             [ View.end data.infos.end UserClickedSaveData "vks" ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             [ p [] [ text reason ] ]
 
 
@@ -285,7 +281,7 @@ toEvaluation x =
 
 subscriptions model =
     case model.yesno of
-        Logic.Running Logic.Main _ ->
+        Activity.Running Activity.Main _ ->
             Sub.batch [ onKeyDown keyDecoder ]
 
         _ ->
@@ -300,4 +296,4 @@ init infos trials =
                 |> List.head
                 |> Result.fromMaybe "Could not find Yes/No infos"
     in
-    Logic.startIntro info [] trials initState
+    Activity.startIntro info [] trials initState

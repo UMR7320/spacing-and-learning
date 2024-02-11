@@ -1,16 +1,16 @@
 module Pretest.Pretest exposing (..)
 
+import Activity
 import Data
 import ExperimentInfo
 import Http
 import List.Extra
-import Logic
-import Pretest.Version exposing (Version)
-import Pretest.Acceptability as Acceptability exposing (ErrorBlock)
+import Pretest.Acceptability as Acceptability exposing (Acceptability, ErrorBlock)
 import Pretest.SPR as SPR
-import Pretest.SentenceCompletion as SentenceCompletion
-import Pretest.VKS as VKS
-import Pretest.YesNo as YesNo
+import Pretest.SentenceCompletion as SentenceCompletion exposing (SentenceCompletion)
+import Pretest.VKS as VKS exposing (VKS)
+import Pretest.Version exposing (Version)
+import Pretest.YesNo as YesNo exposing (YesNo)
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -44,11 +44,11 @@ type alias ShuffledPretest =
 type alias Model superModel =
     { superModel
         | spr : SPR.SPR
-        , sentenceCompletion : SentenceCompletion.SentenceCompletion
+        , sentenceCompletion : SentenceCompletion
         , pretest : Pretest
-        , vks : { task : Logic.Activity VKS.Trial VKS.Answer, showVideo : Bool }
-        , acceptability : Logic.Activity Acceptability.Trial Acceptability.State
-        , yesno : YesNo.YN
+        , vks : { task : VKS, showVideo : Bool }
+        , acceptability : Acceptability
+        , yesno : YesNo
         , version : Version
         , user : Maybe String
     }
@@ -86,13 +86,13 @@ update msg model =
                     model.vks
 
                 updatedVks =
-                    { vks | task = Logic.Err (Data.buildErrorMessage err) }
+                    { vks | task = Activity.Err (Data.buildErrorMessage err) }
             in
             ( { model
-                | spr = Logic.Err (Data.buildErrorMessage err)
-                , sentenceCompletion = Logic.Err (Data.buildErrorMessage err)
+                | spr = Activity.Err (Data.buildErrorMessage err)
+                , sentenceCompletion = Activity.Err (Data.buildErrorMessage err)
                 , vks = updatedVks
-                , acceptability = Logic.Err (Data.buildErrorMessage err)
+                , acceptability = Activity.Err (Data.buildErrorMessage err)
               }
             , Cmd.none
             )
@@ -170,7 +170,7 @@ update msg model =
                         update (ServerRespondedWithAllPretestData spr sc infos vks (List.concat shuffledTrials) yn) model
 
                 Result.Err reason ->
-                    ( { model | acceptability = Logic.Err "Error trying to build blocks" }, Cmd.none )
+                    ( { model | acceptability = Activity.Err "Error trying to build blocks" }, Cmd.none )
 
 
 

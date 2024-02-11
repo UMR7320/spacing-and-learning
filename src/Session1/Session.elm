@@ -4,7 +4,7 @@ import Data
 import Dict
 import ExperimentInfo
 import Http
-import Logic
+import Activity
 import Random
 import Random.List exposing (shuffle)
 import RemoteData
@@ -81,9 +81,9 @@ update msg model =
 
         ServerRespondedWithSomeError error ->
             ( { model
-                | meaning1 = Logic.Err (Data.buildErrorMessage error)
-                , context1 = Logic.Err (Data.buildErrorMessage error)
-                , spelling1 = Logic.Err (Data.buildErrorMessage error)
+                | meaning1 = Activity.Err (Data.buildErrorMessage error)
+                , context1 = Activity.Err (Data.buildErrorMessage error)
+                , spelling1 = Activity.Err (Data.buildErrorMessage error)
               }
             , Cmd.none
             )

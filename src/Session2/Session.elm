@@ -3,7 +3,7 @@ module Session2.Session exposing (..)
 import Data
 import ExperimentInfo
 import Http
-import Logic
+import Activity
 import Random
 import Random.Extra
 import Random.List exposing (shuffle)
@@ -90,9 +90,9 @@ update msg model =
 
         ServerRespondedWithSomeError reason ->
             ( { model
-                | meaning2 = Logic.Err (Data.buildErrorMessage reason)
-                , context2 = Logic.Err (Data.buildErrorMessage reason)
-                , spelling2 = Logic.Err (Data.buildErrorMessage reason)
+                | meaning2 = Activity.Err (Data.buildErrorMessage reason)
+                , context2 = Activity.Err (Data.buildErrorMessage reason)
+                , spelling2 = Activity.Err (Data.buildErrorMessage reason)
                 , session2 = Session.Error (Data.buildErrorMessage reason)
               }
             , Cmd.none

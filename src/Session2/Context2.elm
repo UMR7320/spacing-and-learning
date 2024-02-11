@@ -9,7 +9,7 @@ import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Ports
 import Random
 import Random.List
@@ -59,7 +59,7 @@ type alias State =
 
 
 type alias Context2 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 initState : State
@@ -72,9 +72,9 @@ defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session2 "Context 2")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -87,22 +87,22 @@ start info trials =
 
 view exp optionsOrder =
     case exp of
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             div [] [ text reason ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             viewTrialOrEnd optionsOrder data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             viewTrialOrEnd optionsOrder data (View.end data.infos.end UserClickedSaveData "../post-tests/cw?session=S2")
 
 
@@ -213,7 +213,7 @@ type Msg
 update msg model =
     let
         prevState =
-            Logic.getState model.context2 |> Maybe.withDefault initState
+            Activity.getState model.context2 |> Maybe.withDefault initState
     in
     case msg of
         UserClickedNextTrial ->
@@ -222,7 +222,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | context2 = Logic.next timestamp initState model.context2 }
+                    { model | context2 = Activity.next timestamp initState model.context2 }
             in
             ( newModel
             , Cmd.batch
@@ -232,13 +232,13 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | context2 = Logic.toggle model.context2 }, Cmd.none )
+            ( { model | context2 = Activity.toggle model.context2 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | context2 = Logic.update { prevState | userAnswer = newChoice } model.context2 }, Cmd.none )
+            ( { model | context2 = Activity.update { prevState | userAnswer = newChoice } model.context2 }, Cmd.none )
 
         UserClickedStartMain _ _ ->
-            ( { model | context2 = Logic.startMain model.context2 initState }, Cmd.none )
+            ( { model | context2 = Activity.startMain model.context2 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
@@ -248,7 +248,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedAudio url ->
-            ( { model | context2 = Logic.update { prevState | step = decrement prevState.step } model.context2 }
+            ( { model | context2 = Activity.update { prevState | step = decrement prevState.step } model.context2 }
             , if prevState.step /= Listening 0 then
                 Ports.playAudio url
 
@@ -260,10 +260,10 @@ update msg model =
             ( { model | optionsOrder = ls }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | context2 = Logic.startTraining model.context2 }, Cmd.none )
+            ( { model | context2 = Activity.startTraining model.context2 }, Cmd.none )
 
         UserClickedStartAnswering ->
-            ( { model | context2 = Logic.update { prevState | step = Answering } model.context2 }, Cmd.none )
+            ( { model | context2 = Activity.update { prevState | step = Answering } model.context2 }, Cmd.none )
 
 
 decrement : Step -> Step
@@ -335,7 +335,7 @@ decodeTranslationInput =
 saveData model =
     let
         history =
-            Logic.getHistory model.context2
+            Activity.getHistory model.context2
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

@@ -10,7 +10,7 @@ import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Ports
 import Task
 import Time
@@ -42,7 +42,7 @@ type Step
 
 
 type alias Spelling3 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 initState : State
@@ -59,9 +59,9 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session3 "Spelling 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -72,16 +72,16 @@ start info trials =
 --VIEW
 
 
-view : Logic.Activity Trial State -> Html Msg
+view : Activity Trial State -> Html Msg
 view exp =
     case exp of
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Logic.Running Logic.Training ({ current, state, feedback, history } as data) ->
+        Activity.Running Activity.Training ({ current, state, feedback, history } as data) ->
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center flow" ]
@@ -110,7 +110,7 @@ view exp =
                 _ ->
                     div [] []
 
-        Logic.Running Logic.Main ({ current, state, feedback } as data) ->
+        Activity.Running Activity.Main ({ current, state, feedback } as data) ->
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center " ]
@@ -139,10 +139,10 @@ view exp =
                 _ ->
                     div [] []
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
 
@@ -180,7 +180,7 @@ type Msg
 update msg model =
     let
         prevState =
-            Logic.getState model.spelling3 |> Maybe.withDefault initState
+            Activity.getState model.spelling3 |> Maybe.withDefault initState
     in
     case msg of
         UserClickedNextTrial ->
@@ -189,21 +189,21 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | spelling3 = Logic.next timestamp initState model.spelling3 }
+                    { model | spelling3 = Activity.next timestamp initState model.spelling3 }
             in
             ( newModel, saveData newModel )
 
         UserClickedToggleFeedback ->
-            ( { model | spelling3 = Logic.toggle model.spelling3 }, Cmd.none )
+            ( { model | spelling3 = Activity.toggle model.spelling3 }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | spelling3 = Logic.startTraining model.spelling3 }, Cmd.none )
+            ( { model | spelling3 = Activity.startTraining model.spelling3 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | spelling3 = Logic.startMain model.spelling3 initState }, Cmd.none )
+            ( { model | spelling3 = Activity.startMain model.spelling3 initState }, Cmd.none )
 
         UserChangedInput new ->
-            ( { model | spelling3 = Logic.update { prevState | userAnswer = new } model.spelling3 }, Cmd.none )
+            ( { model | spelling3 = Activity.update { prevState | userAnswer = new } model.spelling3 }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
@@ -213,7 +213,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedPlayAudio url ->
-            ( { model | spelling3 = Logic.update { prevState | step = decrement prevState.step } model.spelling3 }
+            ( { model | spelling3 = Activity.update { prevState | step = decrement prevState.step } model.spelling3 }
             , if prevState.step /= Listening 0 then
                 Ports.playAudio url
 
@@ -222,7 +222,7 @@ update msg model =
             )
 
         UserClickedStartAnswering ->
-            ( { model | spelling3 = Logic.update { prevState | step = Answering } model.spelling3 }, Cmd.none )
+            ( { model | spelling3 = Activity.update { prevState | step = Answering } model.spelling3 }, Cmd.none )
 
 
 decrement : Step -> Step
@@ -276,7 +276,7 @@ getRecords =
 saveData model =
     let
         history =
-            Logic.getHistory model.spelling3
+            Activity.getHistory model.spelling3
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

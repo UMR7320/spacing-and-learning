@@ -8,7 +8,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Task
 import Time
 import View
@@ -36,7 +36,7 @@ type alias State =
 
 
 type alias Meaning3 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 initState : State
@@ -56,9 +56,9 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session3 "Meaning 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -91,23 +91,23 @@ trainingWheels trialn radical target =
             div [] []
 
 
-viewActivity : Logic.Activity Trial State -> List (Html Msg)
+viewActivity : Activity.Activity Trial State -> List (Html Msg)
 viewActivity experiment =
     case experiment of
-        Logic.Err reason ->
+        Activity.Err reason ->
             [ h4 [] [ p [] [ text ("Failure" ++ reason) ] ]
             ]
 
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             [ text "I'm not started yet." ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             [ View.loading ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             [ View.instructions data.infos UserCLickedStartTraining ]
 
-        Logic.Running Logic.Training task ->
+        Activity.Running Activity.Training task ->
             case task.current of
                 Just x ->
                     [ div [ class "flow" ]
@@ -123,7 +123,7 @@ viewActivity experiment =
                 Nothing ->
                     [ View.introToMain <| UserClickedStartMainloop ]
 
-        Logic.Running Logic.Main task ->
+        Activity.Running Activity.Main task ->
             case task.current of
                 Just x ->
                     [ div [ class "flow" ]
@@ -162,7 +162,7 @@ update msg model =
             ( { model
                 | meaning3 =
                     model.meaning3
-                        |> Logic.toggle
+                        |> Activity.toggle
               }
             , Cmd.none
             )
@@ -171,7 +171,7 @@ update msg model =
             ( { model
                 | meaning3 =
                     model.meaning3
-                        |> Logic.update { uid = "", userAnswer = newChoice }
+                        |> Activity.update { uid = "", userAnswer = newChoice }
               }
             , Cmd.none
             )
@@ -184,7 +184,7 @@ update msg model =
                 newModel =
                     { model
                         | meaning3 =
-                            model.meaning3 |> Logic.next timestamp initState
+                            model.meaning3 |> Activity.next timestamp initState
                     }
             in
             ( newModel
@@ -199,13 +199,13 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartMainloop ->
-            ( { model | meaning3 = Logic.startMain model.meaning3 initState }, Cmd.none )
+            ( { model | meaning3 = Activity.startMain model.meaning3 initState }, Cmd.none )
 
         ServerRespondedWithLastRecords _ ->
             ( model, Cmd.none )
 
         UserCLickedStartTraining ->
-            ( { model | meaning3 = Logic.startTraining model.meaning3 }, Cmd.none )
+            ( { model | meaning3 = Activity.startTraining model.meaning3 }, Cmd.none )
 
 
 
@@ -256,7 +256,7 @@ getRecords =
 saveData model =
     let
         history =
-            Logic.getHistory model.meaning3
+            Activity.getHistory model.meaning3
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

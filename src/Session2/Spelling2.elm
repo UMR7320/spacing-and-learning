@@ -12,7 +12,7 @@ import Icons
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Ports
 import Task
 import Time
@@ -42,7 +42,7 @@ type alias State =
 
 
 type alias Spelling2 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 type Step
@@ -68,7 +68,7 @@ defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") False ""
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity.Activity Trial State
 start info trials =
     let
         nextTrial =
@@ -78,21 +78,21 @@ start info trials =
     in
     case nextTrial of
         Just x ->
-            Logic.startIntro
+            Activity.startIntro
                 (ExperimentInfo.activityInfo info Session2 "Spelling 2")
                 (List.filter .isTraining trials)
                 (List.filter (not << .isTraining) trials)
                 { initState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord }
 
         Nothing ->
-            Logic.Err "I tried to initate the state with the first trial but I couldn't find a first trial. Please report this error."
+            Activity.Err "I tried to initate the state with the first trial but I couldn't find a first trial. Please report this error."
 
 
 
 --VIEW
 
 
-viewScrabbleActivity : { a | spelling2 : Logic.Activity Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
+viewScrabbleActivity : { a | spelling2 : Activity.Activity Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
 viewScrabbleActivity model =
     let
         viewLetters scrambledLetters =
@@ -106,13 +106,13 @@ viewScrabbleActivity model =
                 [ fromUnstyled <| Icons.music ]
     in
     case model.spelling2 of
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             text "Not Asked"
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             View.instructions data.infos UserClickedStartTraining
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.current of
                 Just currentTrial ->
                     div [ class "flex flex-col items-center justify-center" ]
@@ -157,7 +157,7 @@ viewScrabbleActivity model =
                 Nothing ->
                     View.end data.infos.end UserClickedSaveData "context-understanding"
 
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.current of
                 Just currentTrial ->
                     div [ class "flex flex-col items-center" ]
@@ -202,10 +202,10 @@ viewScrabbleActivity model =
                 Nothing ->
                     View.introToMain (UserClickedStartMainloop data.mainTrials)
 
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             text reason
 
 
@@ -303,7 +303,7 @@ type Msg
 update msg model =
     let
         currentScrabbleState =
-            case Logic.getState model.spelling2 of
+            case Activity.getState model.spelling2 of
                 Just x ->
                     x
 
@@ -318,7 +318,7 @@ update msg model =
             in
             ( { model
                 | dnd = dnd
-                , spelling2 = Logic.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.spelling2
+                , spelling2 = Activity.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.spelling2
               }
             , system.commands dnd
             )
@@ -327,7 +327,7 @@ update msg model =
             ( model, Ports.playAudio url )
 
         UserClickedFeedbackButton ->
-            ( { model | spelling2 = Logic.toggle model.spelling2 }, Cmd.none )
+            ( { model | spelling2 = Activity.toggle model.spelling2 }, Cmd.none )
 
         UserClickedNextTrial maybeNextTrial ->
             ( model, Task.perform (NextTrial maybeNextTrial) Time.now )
@@ -337,7 +337,7 @@ update msg model =
                 spelling2 =
                     case maybeNextTrial of
                         Just nextTrial ->
-                            Logic.next
+                            Activity.next
                                 timestamp
                                 { currentScrabbleState
                                     | userAnswer = nextTrial.writtenWord
@@ -348,7 +348,7 @@ update msg model =
                                 model.spelling2
 
                         Nothing ->
-                            Logic.next timestamp currentScrabbleState model.spelling2
+                            Activity.next timestamp currentScrabbleState model.spelling2
 
                 newModel =
                     { model | spelling2 = spelling2 }
@@ -367,21 +367,21 @@ update msg model =
         UserClickedStartMainloop trials ->
             case trials of
                 [] ->
-                    ( { model | spelling2 = Logic.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
+                    ( { model | spelling2 = Activity.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
 
                 x :: _ ->
-                    ( { model | spelling2 = Logic.startMain model.spelling2 { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
+                    ( { model | spelling2 = Activity.startMain model.spelling2 { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | spelling2 = Logic.startTraining model.spelling2 }, Cmd.none )
+            ( { model | spelling2 = Activity.startTraining model.spelling2 }, Cmd.none )
 
         UserClickedStartAudio url ->
-            ( { model | spelling2 = Logic.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.spelling2 }, Ports.playAudio url )
+            ( { model | spelling2 = Activity.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.spelling2 }, Ports.playAudio url )
 
         AudioEnded { eventType } ->
             case eventType of
                 "SoundEnded" ->
-                    ( { model | spelling2 = Logic.update { currentScrabbleState | step = Answering } model.spelling2 }, Cmd.none )
+                    ( { model | spelling2 = Activity.update { currentScrabbleState | step = Answering } model.spelling2 }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -406,7 +406,7 @@ toKeyedItem letters =
 
 subscriptions model =
     case model.spelling2 of
-        Logic.Running _ { state } ->
+        Activity.Running _ { state } ->
             case state.step of
                 ListeningFirstTime ->
                     Sub.batch [ Ports.audioEnded AudioEnded ]
@@ -517,7 +517,7 @@ decodeTranslationInput =
 saveData model =
     let
         history =
-            Logic.getHistory model.spelling2
+            Activity.getHistory model.spelling2
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

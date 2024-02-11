@@ -1,5 +1,6 @@
 module Pretest.SPR exposing (..)
 
+import Activity exposing (Activity)
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (Key)
 import Data exposing (decodeRecords)
@@ -10,7 +11,6 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (custom, optional, required)
 import Json.Encode as Encode
-import Logic
 import Pretest.Version exposing (Version(..))
 import Task
 import Task.Parallel as Para
@@ -27,12 +27,12 @@ type alias Pretest =
 
 
 type alias SPR =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 type alias Spr model =
     { model
-        | spr : Logic.Activity Trial State
+        | spr : SPR
         , user : Maybe String
         , version : Version
         , key : Key
@@ -113,25 +113,25 @@ initState =
 init infos trials version =
     let
         info =
-           infos
-           |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "Reading test")
-           |> List.head
-           |> Result.fromMaybe ("Could not find SPR info for version " ++ Pretest.Version.toString version)
+            infos
+                |> List.filter (\task -> task.session == Pretest.Version.toSession version && task.name == "Reading test")
+                |> List.head
+                |> Result.fromMaybe ("Could not find SPR info for version " ++ Pretest.Version.toString version)
     in
-    Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
+    Activity.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
 
 
 -- VIEW
 
 
-view : Logic.Activity Trial State -> List (Html.Styled.Html Msg)
+view : Activity Trial State -> List (Html.Styled.Html Msg)
 view task =
     case task of
-        Logic.Loading ->
+        Activity.Loading ->
             [ View.loading ]
 
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.current of
                 Just trial ->
                     [ viewActivity data trial UserConfirmedChoice ]
@@ -147,7 +147,7 @@ view task =
                         ]
                     ]
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
                     [ viewActivity data trial UserClickedNextTrial ]
@@ -164,13 +164,13 @@ view task =
                         ]
                     ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             [ text ("I encountered the following error: " ++ reason) ]
 
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             [ p [] [ text "Thanks for your participation!" ] ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             [ View.unsafeInstructions data.infos UserClickedStartTraining ]
 
 
@@ -255,14 +255,14 @@ update : Msg -> Spr model -> ( Spr model, Cmd Msg )
 update msg model =
     let
         prevState =
-            Logic.getState model.spr |> Maybe.withDefault initState
+            Activity.getState model.spr |> Maybe.withDefault initState
 
         currentTrial =
-            Logic.getTrial model.spr
+            Activity.getTrial model.spr
     in
     case msg of
         UserConfirmedChoice answer ->
-            ( { model | spr = model.spr |> Logic.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
+            ( { model | spr = model.spr |> Activity.update { prevState | step = Feedback, answer = answer } }, Cmd.none )
 
         UserClickedNextTrial newAnswer ->
             ( model, Task.perform (NextTrial newAnswer) Time.now )
@@ -273,14 +273,14 @@ update msg model =
                     { model
                         | spr =
                             model.spr
-                                |> Logic.update { prevState | answer = newAnswer }
-                                |> Logic.next timestamp initState
+                                |> Activity.update { prevState | answer = newAnswer }
+                                |> Activity.next timestamp initState
                     }
             in
             ( newModel, saveData newModel )
 
         UserClickedSaveData ->
-            ( { model | spr = Logic.Loading }
+            ( { model | spr = Activity.Loading }
             , if model.version == PostTest then
                 Browser.Navigation.pushUrl model.key "acceptability/instructions"
 
@@ -289,13 +289,13 @@ update msg model =
             )
 
         ServerRespondedWithLastRecords (Result.Ok _) ->
-            ( { model | spr = Logic.NotStarted }, Cmd.none )
+            ( { model | spr = Activity.NotStarted }, Cmd.none )
 
         ServerRespondedWithLastRecords (Result.Err reason) ->
-            ( { model | spr = Logic.Err (Data.buildErrorMessage reason) }, Cmd.none )
+            ( { model | spr = Activity.Err (Data.buildErrorMessage reason) }, Cmd.none )
 
         StartMain _ _ ->
-            ( { model | spr = Logic.startMain model.spr initState }, Cmd.none )
+            ( { model | spr = Activity.startMain model.spr initState }, Cmd.none )
 
         TimestampedMsg subMsg timestamp ->
             case subMsg of
@@ -312,7 +312,7 @@ update msg model =
                                             model.spr
 
                                         x :: xs ->
-                                            Logic.update
+                                            Activity.update
                                                 { prevState
                                                     | step = SPR (Reading "bla)")
                                                     , currentSegment = Just (TaggedSegmentStarted x (Maybe.withDefault (Time.millisToPosix 0) timestamp))
@@ -327,7 +327,7 @@ update msg model =
                         | spr =
                             case prevState.remainingSegments of
                                 [] ->
-                                    Logic.update
+                                    Activity.update
                                         { prevState
                                             | step = Question
                                             , seenSegments =
@@ -345,7 +345,7 @@ update msg model =
                                         model.spr
 
                                 x :: _ ->
-                                    Logic.update
+                                    Activity.update
                                         { prevState
                                             | step = SPR (Reading "blo")
                                             , currentSegment = Just (TaggedSegmentStarted x (Maybe.withDefault (Time.millisToPosix 0) timestamp))
@@ -370,7 +370,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | spr = Logic.startTraining model.spr }, Cmd.none )
+            ( { model | spr = Activity.startTraining model.spr }, Cmd.none )
 
         HistoryWasSaved _ ->
             ( model, Cmd.none )
@@ -391,10 +391,10 @@ updateWithTime msg timestamp prevModel newModel =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Logic.Activity Trial State -> Sub Msg
+subscriptions : Activity Trial State -> Sub Msg
 subscriptions task =
     case task of
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.state.step of
                 SPR step ->
                     case step of
@@ -410,7 +410,7 @@ subscriptions task =
                 Question ->
                     onKeyDown decodeYesNoUnsureInTraining
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.state.step of
                 SPR step ->
                     case step of
@@ -505,7 +505,7 @@ getRecords version =
                             "Pretest"
 
                         PostTest ->
-                                    "Post-test"
+                            "Post-test"
 
                         PostTestDiff ->
                             "Post-test 2"
@@ -557,7 +557,7 @@ paragraphToTaggedSegments str =
 saveData model =
     let
         history =
-            Logic.getHistory model.spr
+            Activity.getHistory model.spr
                 |> List.filter (\( trial, _, timestamp ) -> not trial.isTraining)
 
         userId =
@@ -619,8 +619,8 @@ historyEncoder version userId history =
 historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
 historyItemEncoder ( { id, identifier, expectedAnswer, isGrammatical }, { answer, seenSegments }, timestamp ) =
     Encode.object
-        [ ("trialId", Encode.string id)
-        , ("identifier", Encode.string identifier)
+        [ ( "trialId", Encode.string id )
+        , ( "identifier", Encode.string identifier )
         , ( "answer", Encode.string (answerToString answer) )
         , ( "isGrammatical", Encode.bool isGrammatical )
         , ( "expectedAnswer", Encode.string expectedAnswer )

@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Activity
 import Browser
 import Browser.Navigation as Nav
 import Data exposing (UserCanParticipate(..))
@@ -14,7 +15,6 @@ import Html.Styled.Events
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Logic
 import Ports
 import PostTests.CloudWords as CloudWords
 import Pretest.Acceptability as Acceptability exposing (Acceptability)
@@ -124,33 +124,33 @@ defaultModel key route backgroundQuestionnaireUrl =
 
     -- SESSION 1
     , session1 = NotAsked
-    , presentation = Logic.NotStarted
-    , meaning1 = Logic.NotStarted
-    , spelling1 = Logic.NotStarted
-    , context1 = Logic.Loading
+    , presentation = Activity.NotStarted
+    , meaning1 = Activity.NotStarted
+    , spelling1 = Activity.NotStarted
+    , context1 = Activity.Loading
 
     -- SESSION 2
     , session2 = NotAsked
-    , meaning2 = Logic.NotStarted
-    , spelling2 = Logic.NotStarted
-    , context2 = Logic.NotStarted
+    , meaning2 = Activity.NotStarted
+    , spelling2 = Activity.NotStarted
+    , context2 = Activity.NotStarted
 
     -- SESSION 3
     , session3 = NotAsked
-    , meaning3 = Logic.NotStarted
-    , spelling3 = Logic.NotStarted
-    , context3 = Logic.NotStarted
+    , meaning3 = Activity.NotStarted
+    , spelling3 = Activity.NotStarted
+    , context3 = Activity.NotStarted
 
     -- PILOTE
-    , acceptability = Logic.NotStarted
+    , acceptability = Activity.NotStarted
     , endAcceptabilityDuration = 6000
 
     -- PRETEST
-    , spr = Logic.NotStarted
+    , spr = Activity.NotStarted
     , pretest = NotAsked
-    , sentenceCompletion = Logic.NotStarted
-    , vks = { task = Logic.NotStarted, showVideo = False }
-    , yesno = Logic.NotStarted
+    , sentenceCompletion = Activity.NotStarted
+    , vks = { task = Activity.NotStarted, showVideo = False }
+    , yesno = Activity.NotStarted
 
     -- POSTEST
     , cloudWords = CloudWords.Loading
@@ -198,10 +198,10 @@ init backgroundQuestionnaireUrl url key =
         Route.Session1 userId _ ->
             ( { model
                 | session1 = Loading loadingStateSession1
-                , presentation = Logic.Loading
-                , meaning1 = Logic.Loading
-                , spelling1 = Logic.Loading
-                , context1 = Logic.Loading
+                , presentation = Activity.Loading
+                , meaning1 = Activity.Loading
+                , spelling1 = Activity.Loading
+                , context1 = Activity.Loading
                 , user = Just userId
               }
             , Cmd.batch
@@ -214,10 +214,10 @@ init backgroundQuestionnaireUrl url key =
         Route.Home ->
             ( { model
                 | session1 = Loading loadingStateSession1
-                , presentation = Logic.Loading
-                , meaning1 = Logic.Loading
-                , spelling1 = Logic.Loading
-                , context1 = Logic.Loading
+                , presentation = Activity.Loading
+                , meaning1 = Activity.Loading
+                , spelling1 = Activity.Loading
+                , context1 = Activity.Loading
                 , user = Nothing
               }
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
@@ -226,10 +226,10 @@ init backgroundQuestionnaireUrl url key =
         Route.TermsAndConditions ->
             ( { model
                 | session1 = Loading loadingStateSession1
-                , presentation = Logic.Loading
-                , meaning1 = Logic.Loading
-                , spelling1 = Logic.Loading
-                , context1 = Logic.Loading
+                , presentation = Activity.Loading
+                , meaning1 = Activity.Loading
+                , spelling1 = Activity.Loading
+                , context1 = Activity.Loading
                 , user = Nothing
               }
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
@@ -238,9 +238,9 @@ init backgroundQuestionnaireUrl url key =
         Route.Session2 userid _ ->
             ( { model
                 | session2 = Loading loadingStateSession2
-                , meaning2 = Logic.Loading
-                , context2 = Logic.Loading
-                , spelling2 = Logic.Loading
+                , meaning2 = Activity.Loading
+                , context2 = Activity.Loading
+                , spelling2 = Activity.Loading
                 , user = Just userid
               }
             , Cmd.batch [ cmd, Cmd.map Session2 fetchSession2, Session.getInfos ServerRespondedWithSessionsInfos ]
@@ -249,9 +249,9 @@ init backgroundQuestionnaireUrl url key =
         Route.Session3 userid _ ->
             ( { model
                 | session3 = Loading loadingStateSession3
-                , meaning3 = Logic.Loading
-                , spelling3 = Logic.Loading
-                , context3 = Logic.Loading
+                , meaning3 = Activity.Loading
+                , spelling3 = Activity.Loading
+                , context3 = Activity.Loading
                 , user = Just userid
               }
             , Cmd.batch [ cmd, Cmd.map Session3 fetchSession3, Session.getInfos ServerRespondedWithSessionsInfos ]
@@ -266,14 +266,14 @@ init backgroundQuestionnaireUrl url key =
                     model.vks
 
                 updatedVks =
-                    { vks | task = Logic.Loading }
+                    { vks | task = Activity.Loading }
             in
             ( { model
-                | spr = Logic.Loading
-                , sentenceCompletion = Logic.Loading
+                | spr = Activity.Loading
+                , sentenceCompletion = Activity.Loading
                 , vks = updatedVks
-                , acceptability = Logic.Loading
-                , yesno = Logic.Loading
+                , acceptability = Activity.Loading
+                , yesno = Activity.Loading
                 , user = Just userid
                 , version = v
                 , pretest = Loading loadingStatePretest

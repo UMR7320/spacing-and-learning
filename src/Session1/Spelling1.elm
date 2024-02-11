@@ -8,7 +8,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Ports
 import Random
 import Random.List
@@ -35,7 +35,7 @@ type Step
 
 
 type alias Spelling1 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 type alias Trial =
@@ -55,7 +55,7 @@ iniState =
 
 
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session1 "Spelling 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -101,22 +101,22 @@ viewActivity data currentTrial optionsOrder =
     ]
 
 
-view : Logic.Activity Trial State -> List Int -> Html Msg
+view : Activity Trial State -> List Int -> Html Msg
 view exp optionsOrder =
     case exp of
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             text "I'm not started yet"
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             div [ class "flex flex-col items-center" ] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             text <| "Error: " ++ reason
 
-        Logic.Running Logic.Training ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
+        Activity.Running Activity.Training ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just x ->
                     div [ class "w-full flex flex-col justify-center items-center" ] <|
@@ -129,7 +129,7 @@ view exp optionsOrder =
                 Nothing ->
                     View.introToMain UserClickedStartMainloop
 
-        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
+        Activity.Running Activity.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col justify-center items-center" ]
@@ -179,14 +179,14 @@ type Msg
 update msg model =
     let
         currentSpellingState =
-            Logic.getState model.spelling1 |> Maybe.withDefault iniState
+            Activity.getState model.spelling1 |> Maybe.withDefault iniState
     in
     case msg of
         UserClickedFeedback ->
             ( { model
                 | spelling1 =
                     model.spelling1
-                        |> Logic.toggle
+                        |> Activity.toggle
               }
             , Cmd.none
             )
@@ -194,7 +194,7 @@ update msg model =
         UserClickedRadioButton newChoice ->
             ( { model
                 | spelling1 =
-                    Logic.update { currentSpellingState | userAnswer = newChoice } model.spelling1
+                    Activity.update { currentSpellingState | userAnswer = newChoice } model.spelling1
               }
             , Cmd.none
             )
@@ -205,7 +205,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | spelling1 = Logic.next timestamp iniState model.spelling1 }
+                    { model | spelling1 = Activity.next timestamp iniState model.spelling1 }
             in
             ( newModel
             , Cmd.batch
@@ -218,22 +218,22 @@ update msg model =
             ( { model | optionsOrder = newOrder }, Cmd.none )
 
         UserClickedStartMainloop ->
-            ( { model | spelling1 = Logic.startMain model.spelling1 iniState }, Cmd.none )
+            ( { model | spelling1 = Activity.startMain model.spelling1 iniState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSavedData ->
             ( model, Cmd.none )
 
         UserClickedPlayAudio url ->
-            ( { model | spelling1 = Logic.update { currentSpellingState | remainingListenings = currentSpellingState.remainingListenings - 1 } model.spelling1 }, Ports.playAudio url )
+            ( { model | spelling1 = Activity.update { currentSpellingState | remainingListenings = currentSpellingState.remainingListenings - 1 } model.spelling1 }, Ports.playAudio url )
 
         UserClickedStartTraining ->
-            ( { model | spelling1 = Logic.startTraining model.spelling1 }, Cmd.none )
+            ( { model | spelling1 = Activity.startTraining model.spelling1 }, Cmd.none )
 
         AudioEnded { eventType } ->
             case eventType of
                 "SoundEnded" ->
-                    ( { model | spelling1 = Logic.update { currentSpellingState | step = Answering } model.spelling1 }, Cmd.none )
+                    ( { model | spelling1 = Activity.update { currentSpellingState | step = Answering } model.spelling1 }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -248,7 +248,7 @@ update msg model =
 
 subscriptions model =
     case model.spelling1 of
-        Logic.Running _ { state } ->
+        Activity.Running _ { state } ->
             case state.step of
                 ListeningFirstTime ->
                     Sub.batch [ Ports.audioEnded AudioEnded ]
@@ -313,7 +313,7 @@ getTrialsFromServer callbackMsg =
 saveData model =
     let
         history =
-            Logic.getHistory model.spelling1
+            Activity.getHistory model.spelling1
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

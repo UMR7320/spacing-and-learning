@@ -9,7 +9,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Pretest.Version exposing (Version(..))
 import Random
 import Task
@@ -45,12 +45,12 @@ type alias State =
 
 
 type alias SentenceCompletion =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 type alias Model superModel =
     { superModel
-        | sentenceCompletion : Logic.Activity Trial State
+        | sentenceCompletion : Activity Trial State
         , user : Maybe String
         , version : Version
     }
@@ -64,7 +64,7 @@ init infos trials version =
            |> List.head
            |> Result.fromMaybe ("Could not find SPR info for version " ++ Pretest.Version.toString version)
     in
-    Logic.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
+    Activity.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
 
 initState =
@@ -78,7 +78,7 @@ initState =
 view : SentenceCompletion -> List (Html Msg)
 view task =
     case task of
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.current of
                 Just trial ->
                     [ div [ A.class "flex flex-col items-center" ]
@@ -138,7 +138,7 @@ view task =
                         ]
                     ]
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
                     [ div [ A.class "flex flex-col w-full items-center" ]
@@ -190,16 +190,16 @@ view task =
                 Nothing ->
                     [ View.end data.infos.end UserClickedSaveData "acceptability/instructions" ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             [ text reason ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             [ View.loading ]
 
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             [ text "C'est tout bon!" ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             [ View.instructions data.infos UserClickedStartTraining ]
 
 
@@ -239,11 +239,11 @@ update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     let
         prevState =
-            Logic.getState model.sentenceCompletion |> Maybe.withDefault initState
+            Activity.getState model.sentenceCompletion |> Maybe.withDefault initState
     in
     case msg of
         RuntimeReordedAmorces field ->
-            ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | order = field } }, Cmd.none )
+            ( { model | sentenceCompletion = model.sentenceCompletion |> Activity.update { prevState | order = field } }, Cmd.none )
 
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
@@ -252,8 +252,8 @@ update msg model =
             ( { model
                 | sentenceCompletion =
                     model.sentenceCompletion
-                        |> Logic.toggle
-                        |> Logic.next timestamp initState
+                        |> Activity.toggle
+                        |> Activity.next timestamp initState
               }
             , Cmd.batch
                 [ Random.generate
@@ -264,24 +264,24 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | sentenceCompletion = Logic.toggle model.sentenceCompletion }, Cmd.none )
+            ( { model | sentenceCompletion = Activity.toggle model.sentenceCompletion }, Cmd.none )
 
         UserClickedStartMain _ _ ->
-            ( { model | sentenceCompletion = Logic.startMain model.sentenceCompletion initState }, Cmd.none )
+            ( { model | sentenceCompletion = Activity.startMain model.sentenceCompletion initState }, Cmd.none )
 
         UserUpdatedField fieldId new ->
             case fieldId of
                 FirstProduction ->
-                    ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | firstProduction = new } }, Cmd.none )
+                    ( { model | sentenceCompletion = model.sentenceCompletion |> Activity.update { prevState | firstProduction = new } }, Cmd.none )
 
                 SecondProduction ->
-                    ( { model | sentenceCompletion = model.sentenceCompletion |> Logic.update { prevState | secondProduction = new } }, Cmd.none )
+                    ( { model | sentenceCompletion = model.sentenceCompletion |> Activity.update { prevState | secondProduction = new } }, Cmd.none )
 
         UserClickedSaveData ->
-            ( { model | sentenceCompletion = Logic.Loading }, Cmd.none )
+            ( { model | sentenceCompletion = Activity.Loading }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | sentenceCompletion = Logic.startTraining model.sentenceCompletion }, Cmd.none )
+            ( { model | sentenceCompletion = Activity.startTraining model.sentenceCompletion }, Cmd.none )
 
         HistoryWasSaved _ ->
             ( model, Cmd.none )
@@ -326,7 +326,7 @@ decodeAcceptabilityTrials =
 saveData model =
     let
         history =
-            Logic.getHistory model.sentenceCompletion
+            Activity.getHistory model.sentenceCompletion
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"

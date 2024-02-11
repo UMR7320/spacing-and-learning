@@ -3,7 +3,7 @@ module ProgressBar exposing (..)
 import Css
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Html exposing (..)
-import Logic
+import Activity
 import Pretest.Version exposing (Version(..))
 import Route exposing (..)
 
@@ -123,7 +123,7 @@ viewItem name activity task currentActivity =
         [ div []
             [ text name
             , case task of
-                Logic.Running _ data ->
+                Activity.Running _ data ->
                     viewActivityProgressBar data
 
                 _ ->

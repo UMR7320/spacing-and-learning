@@ -8,7 +8,7 @@ import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Random
 import Random.List
 import Task
@@ -44,7 +44,7 @@ type alias State =
 
 
 type alias Meaning2 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 defaultTrial : Trial
@@ -68,9 +68,9 @@ initState =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session2 "Meaning 2")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -81,10 +81,10 @@ start info trials =
 -- VIEW
 
 
-view : { task : Logic.Activity Trial State, optionsOrder : List comparable } -> Html Msg
+view : { task : Activity.Activity Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
@@ -95,7 +95,7 @@ view task =
                 Nothing ->
                     View.introToMain UserClickedStartMain
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
@@ -105,16 +105,16 @@ view task =
                 Nothing ->
                     View.end data.infos.end UserClickedSaveData "spelling"
 
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             div [] [ text "The experiment is not started yet" ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             div [] [ text reason ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
 
@@ -165,7 +165,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | meaning2 = Logic.next timestamp initState model.meaning2 }
+                    { model | meaning2 = Activity.next timestamp initState model.meaning2 }
             in
             ( newModel
             , Cmd.batch
@@ -175,16 +175,16 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | meaning2 = Logic.toggle model.meaning2 }, Cmd.none )
+            ( { model | meaning2 = Activity.toggle model.meaning2 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | meaning2 = Logic.update { uid = "", userAnswer = newChoice } model.meaning2 }, Cmd.none )
+            ( { model | meaning2 = Activity.update { uid = "", userAnswer = newChoice } model.meaning2 }, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | meaning2 = Logic.startTraining model.meaning2 }, Cmd.none )
+            ( { model | meaning2 = Activity.startTraining model.meaning2 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | meaning2 = Logic.startMain model.meaning2 initState }, Cmd.none )
+            ( { model | meaning2 = Activity.startMain model.meaning2 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
@@ -243,7 +243,7 @@ decodeTrials =
 saveData model =
     let
         history =
-            Logic.getHistory model.meaning2
+            Activity.getHistory model.meaning2
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

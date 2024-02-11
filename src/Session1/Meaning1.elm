@@ -8,7 +8,7 @@ import Http
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Random
 import Random.List
 import Task
@@ -21,7 +21,7 @@ import View
 
 
 type alias Meaning1 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 type alias Trial =
@@ -57,9 +57,9 @@ defaultTrial =
     }
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session1 "Meaning 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -75,16 +75,16 @@ initState =
 -- VIEW
 
 
-view : { task : Logic.Activity Trial State, optionsOrder : List comparable } -> Html Msg
+view : { task : Activity Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             div [] [ text reason ]
 
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
@@ -112,7 +112,7 @@ view task =
                 Nothing ->
                     View.introToMain UserClickedStartMain
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center " ]
@@ -139,10 +139,10 @@ view task =
                 Nothing ->
                     View.end data.infos.end SaveDataMsg "spelling"
 
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             div [] [ text "I did not start yet." ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             View.instructions data.infos UserClickedStartTraining
 
 
@@ -174,7 +174,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | meaning1 = Logic.next timestamp initState model.meaning1 }
+                    { model | meaning1 = Activity.next timestamp initState model.meaning1 }
             in
             ( newModel
             , Cmd.batch
@@ -184,13 +184,13 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | meaning1 = Logic.toggle model.meaning1 }, Cmd.none )
+            ( { model | meaning1 = Activity.toggle model.meaning1 }, Cmd.none )
 
         UserClickedRadioButton newChoice ->
-            ( { model | meaning1 = Logic.update { uid = "", userAnswer = newChoice } model.meaning1 }, Cmd.none )
+            ( { model | meaning1 = Activity.update { uid = "", userAnswer = newChoice } model.meaning1 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | meaning1 = Logic.startMain model.meaning1 initState }, Cmd.none )
+            ( { model | meaning1 = Activity.startMain model.meaning1 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         SaveDataMsg ->
@@ -200,7 +200,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | meaning1 = Logic.startTraining model.meaning1 }, Cmd.none )
+            ( { model | meaning1 = Activity.startTraining model.meaning1 }, Cmd.none )
 
         RuntimeShuffledOptionsOrder newOrder ->
             ( { model | optionsOrder = newOrder }, Cmd.none )
@@ -252,7 +252,7 @@ getTrialsFromServer callbackMsg =
 saveData model =
     let
         history =
-            Logic.getHistory model.meaning1
+            Activity.getHistory model.meaning1
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

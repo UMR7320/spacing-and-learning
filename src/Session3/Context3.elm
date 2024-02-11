@@ -9,7 +9,7 @@ import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Ports
 import Random
 import Random.List
@@ -54,7 +54,7 @@ type Step
 
 
 type alias Context3 =
-    Logic.Activity Trial State
+    Activity Trial State
 
 
 defaultTrial : Trial
@@ -81,9 +81,9 @@ initState =
     State "DefaultUid" "" (Listening 3) False False
 
 
-start : List ExperimentInfo.Activity -> List Trial -> Logic.Activity Trial State
+start : List ExperimentInfo.Activity -> List Trial -> Activity Trial State
 start info trials =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo info Session3 "Context 3")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
@@ -96,19 +96,19 @@ start info trials =
 
 view exp =
     case exp of
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             div [] [ text "Activity is not started yet." ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             View.loading
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Logic.Running Logic.Training { current, state, feedback } ->
+        Activity.Running Activity.Training { current, state, feedback } ->
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     let
@@ -125,7 +125,7 @@ view exp =
                 ( Nothing, _ ) ->
                     View.introToMain UserClickedStartMain
 
-        Logic.Running Logic.Main ({ mainTrials, current, state, feedback, history } as data) ->
+        Activity.Running Activity.Main ({ mainTrials, current, state, feedback, history } as data) ->
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     let
@@ -232,7 +232,7 @@ type Msg
 update msg model =
     let
         prevState =
-            Logic.getState model.context3 |> Maybe.withDefault initState
+            Activity.getState model.context3 |> Maybe.withDefault initState
     in
     case msg of
         UserClickedNextTrial ->
@@ -241,7 +241,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | context3 = Logic.next timestamp initState model.context3 }
+                    { model | context3 = Activity.next timestamp initState model.context3 }
             in
             ( newModel
             , Cmd.batch
@@ -252,13 +252,13 @@ update msg model =
             )
 
         UserClickedToggleFeedback ->
-            ( { model | context3 = Logic.toggle model.context3 }, Cmd.none )
+            ( { model | context3 = Activity.toggle model.context3 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | context3 = Logic.startMain model.context3 initState }, Cmd.none )
+            ( { model | context3 = Activity.startMain model.context3 initState }, Cmd.none )
 
         UserChangedInput new ->
-            ( { model | context3 = Logic.update { prevState | userAnswer = new } model.context3 }, Cmd.none )
+            ( { model | context3 = Activity.update { prevState | userAnswer = new } model.context3 }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSaveData ->
@@ -268,7 +268,7 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | context3 = Logic.startTraining model.context3 }, Cmd.none )
+            ( { model | context3 = Activity.startTraining model.context3 }, Cmd.none )
 
         RuntimeShuffledOptionsOrder ls ->
             ( { model | optionsOrder = ls }, Cmd.none )
@@ -276,7 +276,7 @@ update msg model =
         UserClickedAudio speaker2Time url ->
             ( { model
                 | context3 =
-                    Logic.update
+                    Activity.update
                         { prevState
                             | step = decrement prevState.step
                             , showSpeaker1 = True
@@ -297,7 +297,7 @@ update msg model =
         ShowSpeaker2 ->
             ( { model
                 | context3 =
-                    Logic.update
+                    Activity.update
                         { prevState | showSpeaker1 = False, showSpeaker2 = True }
                         model.context3
               }
@@ -366,7 +366,7 @@ getRecords =
 saveData model =
     let
         history =
-            Logic.getHistory model.context3
+            Activity.getHistory model.context3
                 |> List.filter (\( trial, _, _ ) -> not trial.isTraining)
 
         userId =

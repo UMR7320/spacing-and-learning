@@ -9,7 +9,7 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
-import Logic
+import Activity exposing (Activity)
 import Pretest.Version exposing (Version(..))
 import Random
 import Task
@@ -51,16 +51,12 @@ type alias Answer =
 
 
 type alias VKS =
-    Logic.Activity Trial Answer
+    Activity Trial Answer
 
 
-type alias SC =
-    Logic.Activity Trial Answer
-
-
-toActivity : List ExperimentInfo.Activity -> List Trial -> Version -> Logic.Activity Trial Answer
+toActivity : List ExperimentInfo.Activity -> List Trial -> Version -> Activity Trial Answer
 toActivity infos trials version =
-    Logic.startIntro
+    Activity.startIntro
         (ExperimentInfo.activityInfo infos (Pretest.Version.toSession version) "LexLearn verbs")
         []
         trials
@@ -79,10 +75,10 @@ emptyAnswer =
 -- VIEW
 
 
-view : { task : SC, showVideo : Bool } -> List (Html Msg)
+view : { task : VKS, showVideo : Bool } -> List (Html Msg)
 view vks =
     case vks.task of
-        Logic.Running Logic.Training data ->
+        Activity.Running Activity.Training data ->
             case data.current of
                 Just _ ->
                     [ text "vks" ]
@@ -98,7 +94,7 @@ view vks =
                         ]
                     ]
 
-        Logic.Running Logic.Main data ->
+        Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
                     [ div [ A.class "flex flex-col items-center flow" ]
@@ -169,16 +165,16 @@ view vks =
                 Nothing ->
                     [ View.end data.infos.end UserClickedSaveData "spr" ]
 
-        Logic.Err reason ->
+        Activity.Err reason ->
             [ text reason ]
 
-        Logic.Loading ->
+        Activity.Loading ->
             [ View.loading ]
 
-        Logic.NotStarted ->
+        Activity.NotStarted ->
             [ text "C'est tout bon!" ]
 
-        Logic.Running Logic.Instructions data ->
+        Activity.Running Activity.Instructions data ->
             if vks.showVideo then
                 [ div
                     [ class "flow" ]
@@ -221,7 +217,7 @@ update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     let
         prevAnswer =
-            Logic.getState model.vks.task |> Maybe.withDefault emptyAnswer
+            Activity.getState model.vks.task |> Maybe.withDefault emptyAnswer
 
         vks =
             model.vks
@@ -234,7 +230,7 @@ update msg model =
             ( model, Cmd.none )
 
         RuntimeReordedAmorces _ ->
-            ( { model | vks = updateTask (Logic.update prevAnswer) }, Cmd.none )
+            ( { model | vks = updateTask (Activity.update prevAnswer) }, Cmd.none )
 
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
@@ -242,7 +238,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | vks = updateTask (Logic.toggle >> Logic.next timestamp emptyAnswer) }
+                    { model | vks = updateTask (Activity.toggle >> Activity.next timestamp emptyAnswer) }
             in
             ( newModel
             , Cmd.batch
@@ -262,7 +258,7 @@ update msg model =
             let
                 -- gross hack
                 flippedStartMain a b =
-                    Logic.startMain b a
+                    Activity.startMain b a
             in
             ( { model | vks = updateTask (flippedStartMain emptyAnswer) }, Cmd.none )
 
@@ -270,27 +266,27 @@ update msg model =
             case fieldId of
                 Definition ->
                     ( { model
-                        | vks = updateTask (Logic.update { prevAnswer | definition = new })
+                        | vks = updateTask (Activity.update { prevAnswer | definition = new })
                       }
                     , Cmd.none
                     )
 
                 Sentence ->
                     ( { model
-                        | vks = updateTask (Logic.update { prevAnswer | usage = new })
+                        | vks = updateTask (Activity.update { prevAnswer | usage = new })
                       }
                     , Cmd.none
                     )
 
         UserClickedNewKnowledge str ->
             ( { model
-                | vks = updateTask (Logic.update { prevAnswer | knowledge = familiarityFromString str })
+                | vks = updateTask (Activity.update { prevAnswer | knowledge = familiarityFromString str })
               }
             , Cmd.none
             )
 
         UserClickedSaveData ->
-            ( { model | vks = updateTask (always Logic.Loading) }, Cmd.none )
+            ( { model | vks = updateTask (always Activity.Loading) }, Cmd.none )
 
 
 
@@ -379,7 +375,7 @@ updateHistoryEncoder version userId history =
 saveData model =
     let
         history =
-            Logic.getHistory model.vks.task
+            Activity.getHistory model.vks.task
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"

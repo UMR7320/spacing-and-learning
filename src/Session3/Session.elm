@@ -3,7 +3,7 @@ module Session3.Session exposing (..)
 import Data
 import ExperimentInfo
 import Http
-import Logic
+import Activity
 import Random
 import Random.List exposing (shuffle)
 import RemoteData
@@ -71,9 +71,9 @@ update msg model =
 
         ServerRespondedWithSomeError error ->
             ( { model
-                | context3 = Logic.Err (Data.buildErrorMessage error)
-                , spelling3 = Logic.Err (Data.buildErrorMessage error)
-                , meaning3 = Logic.Err (Data.buildErrorMessage error)
+                | context3 = Activity.Err (Data.buildErrorMessage error)
+                , spelling3 = Activity.Err (Data.buildErrorMessage error)
+                , meaning3 = Activity.Err (Data.buildErrorMessage error)
               }
             , Cmd.none
             )
