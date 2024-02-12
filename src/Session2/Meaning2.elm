@@ -77,6 +77,17 @@ start info trials =
         initState
 
 
+infoLoaded : List ActivityInfo -> Meaning2 -> Meaning2
+infoLoaded infos =
+    Activity.infoLoaded
+        Session2
+        "Meaning 2"
+        infos
+        initState
+
+
+
+
 
 -- VIEW
 
@@ -105,7 +116,7 @@ view task =
                 Nothing ->
                     View.end data.infos.end UserClickedSaveData "spelling"
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
         Activity.NotStarted ->

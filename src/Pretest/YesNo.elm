@@ -2,11 +2,10 @@ module Pretest.YesNo exposing (..)
 
 import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
-import Browser.Events exposing (onKeyDown)
 import Data
-import ActivityInfo exposing (ActivityInfo)
-import Html.Styled exposing (Html, div, kbd, p, text)
+import Html.Styled exposing (Html, button, div, p, text)
 import Html.Styled.Attributes exposing (class)
+import Html.Styled.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (..)
@@ -15,7 +14,7 @@ import RemoteData exposing (RemoteData)
 import Route exposing (PretestRoute(..))
 import Task
 import Time
-import View exposing (unclickableButton)
+import View
 
 
 
@@ -30,6 +29,7 @@ type alias Trial =
     { id : String
     , word : String
     , exists : Bool
+    , isTraining : Bool
     }
 
 
@@ -58,17 +58,20 @@ type Msg
     = NoOp
     | GotTrials (RemoteData Http.Error (List Trial))
     | UserClickedStartActivity
-    | UserPressedButton (Maybe Bool)
-    | NextTrial (Maybe Bool) Time.Posix
+    | UserPressedButton Bool
+    | NextTrial Bool Time.Posix
     | UserClickedSaveData
     | ServerRespondedWithUpdatedUser (Result Http.Error String)
+    | HistoryWasSaved (Result Http.Error String)
 
 
 update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     case msg of
         GotTrials (RemoteData.Success trials) ->
-            ( model, Cmd.none )
+            ( { model | yesNo = Activity.trialsLoaded trials initState model.yesNo }
+            , Cmd.none
+            )
 
         GotTrials (RemoteData.Failure _) ->
             ( model, Cmd.none )
@@ -79,11 +82,17 @@ update msg model =
         UserClickedStartActivity ->
             ( { model | yesNo = Activity.startMain model.yesNo initState }, Cmd.none )
 
-        UserPressedButton maybeBool ->
-            ( model, Task.perform (NextTrial maybeBool) Time.now )
+        UserPressedButton bool ->
+            ( model, Task.perform (NextTrial bool) Time.now )
 
-        NextTrial maybeBool timestamp ->
-            ( { model | yesNo = Activity.update { evaluation = maybeBool } model.yesNo |> Activity.next timestamp initState }, Cmd.none )
+        NextTrial bool timestamp ->
+            ( { model
+                | yesNo =
+                    Activity.update { evaluation = Just bool } model.yesNo
+                        |> Activity.next timestamp initState
+              }
+            , saveHistory model
+            )
 
         UserClickedSaveData ->
             let
@@ -91,17 +100,7 @@ update msg model =
                     model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
 
                 totalScore =
-                    Activity.getHistory model.yesNo
-                        |> Data.splitIn 20
-                        |> List.map
-                            (\block ->
-                                let
-                                    ( hits, falseAlarms ) =
-                                        countHitsAndFalseAlarms block
-                                in
-                                vocabularyScore hits falseAlarms
-                            )
-                        |> List.sum
+                    computeLexTaleScore (Activity.getHistory model.yesNo)
 
                 encode =
                     Encode.list
@@ -110,7 +109,7 @@ update msg model =
                                 [ ( "id", Encode.string userId )
                                 , ( "fields"
                                   , Encode.object
-                                        [ ( "YesNo", Encode.int score ) ]
+                                        [ ( "YesNo", Encode.float score ) ]
                                   )
                                 ]
                         )
@@ -119,7 +118,9 @@ update msg model =
                 responseDecoder =
                     Decode.field "id" Decode.string
             in
-            ( { model | yesNo = Activity.Loading }, updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder )
+            ( { model | yesNo = Activity.Loading Nothing Nothing }
+            , updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder
+            )
 
         ServerRespondedWithUpdatedUser (Result.Err reason) ->
             ( { model | yesNo = Activity.Err (Data.buildErrorMessage reason) }, Cmd.none )
@@ -127,8 +128,32 @@ update msg model =
         ServerRespondedWithUpdatedUser _ ->
             ( { model | yesNo = Activity.NotStarted }, Cmd.none )
 
+        -- Ignore errors because we don't want to interrupt the activity
+        HistoryWasSaved _ ->
+            ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
+
+
+{-| <https://www.lextale.com/scoring.html>
+-}
+computeLexTaleScore : List ( Trial, State, Time.Posix ) -> Float
+computeLexTaleScore history =
+    let
+        wordsCorrectCount =
+            history
+                |> List.filter (\( word, answer, _ ) -> word.exists && answer.evaluation == Just True)
+                |> List.length
+                |> toFloat
+
+        nonWordCorrectCount =
+            history
+                |> List.filter (\( word, answer, _ ) -> not word.exists && answer.evaluation == Just False)
+                |> List.length
+                |> toFloat
+    in
+    (wordsCorrectCount * 40 / 100 + nonWordCorrectCount * 20 / 100) / 2
 
 
 correctionFactor : Int -> Int -> Float
@@ -223,7 +248,7 @@ view task =
         Activity.NotStarted ->
             [ text "C'est Bon!" ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             [ View.loading ]
 
         Activity.Running step data ->
@@ -237,23 +262,15 @@ view task =
                 Activity.Main ->
                     case data.current of
                         Just trial ->
-                            [ div []
-                                [ div [ class "text-3xl font-bold italic my-6 text-center" ] [ text trial.word ]
+                            [ div [ class " yes-no" ]
+                                [ div [ class "text-3xl font-bold italic my-8 text-center" ] [ text trial.word ]
                                 , div [ class "yes-no-buttons" ]
-                                    [ unclickableButton
-                                        "bg-gray-300"
-                                        [ kbd
-                                            []
-                                            [ text "f" ]
-                                        , text " = I don't know or I'm not sure"
-                                        ]
-                                    , unclickableButton
-                                        "bg-green-500 text-white"
-                                        [ kbd
-                                            []
-                                            [ text "j" ]
-                                        , text "I know this word"
-                                        ]
+                                    [ button
+                                        [ onClick (UserPressedButton False) ]
+                                        [ text "No" ]
+                                    , button
+                                        [ onClick (UserPressedButton True) ]
+                                        [ text "Yes" ]
                                     ]
                                 ]
                             ]
@@ -263,34 +280,6 @@ view task =
 
         Activity.Err reason ->
             [ p [] [ text reason ] ]
-
-
-keyDecoder : Decode.Decoder Msg
-keyDecoder =
-    Decode.map toEvaluation (Decode.field "key" Decode.string)
-
-
-toEvaluation : String -> Msg
-toEvaluation x =
-    case x of
-        "j" ->
-            UserPressedButton (Just True)
-
-        "f" ->
-            UserPressedButton (Just False)
-
-        _ ->
-            NoOp
-
-
-subscriptions : Model a -> Sub Msg
-subscriptions model =
-    case model.yesNo of
-        Activity.Running Activity.Main _ ->
-            Sub.batch [ onKeyDown keyDecoder ]
-
-        _ ->
-            Sub.none
 
 
 init : List ActivityInfo -> List Trial -> Activity Trial State
@@ -303,6 +292,15 @@ init infos trials =
                 |> Result.fromMaybe "Could not find Yes/No infos"
     in
     Activity.startIntro info [] trials initState
+
+
+infoLoaded : List ActivityInfo -> YesNo -> YesNo
+infoLoaded infos =
+    Activity.infoLoaded
+        Pretest
+        "YesNo"
+        infos
+        initState
 
 
 
@@ -330,5 +328,60 @@ decodeYesNoTrials =
                 |> required "id" Decode.string
                 |> required "ItemName" Decode.string
                 |> optional "Exists" Decode.bool False
+                |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder
+
+
+saveHistory : Model a -> Cmd Msg
+saveHistory model =
+    let
+        history =
+            Activity.getHistory model.yesNo
+
+        userId =
+            model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
+
+        payload =
+            updateHistoryEncoder userId history
+    in
+    Http.request
+        { method = "PATCH"
+        , headers = []
+        , url = Data.buildQuery { app = Data.apps.spacing, base = "users", view_ = "YesNo_output" }
+        , body = Http.jsonBody payload
+        , expect = Http.expectJson HistoryWasSaved (Decode.succeed "OK")
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateHistoryEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
+updateHistoryEncoder userId history =
+    -- The Netflify function that receives PATCH requests only works with arrays
+    Encode.list
+        (\_ ->
+            Encode.object
+                [ ( "id", Encode.string userId )
+                , ( "fields", historyEncoder history )
+                ]
+        )
+        [ ( userId, history ) ]
+
+
+historyEncoder : List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder history =
+    Encode.object
+        -- airtable does not support JSON columns, so we save giant JSON strings
+        [ ( "YesNo_answers", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
+        ]
+
+
+historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
+historyItemEncoder ( { id, exists }, { evaluation }, timestamp ) =
+    Encode.object
+        [ ( "trialId", Encode.string id )
+        , ( "wordExists", Encode.bool exists )
+        , ( "evaluation", Maybe.map Encode.bool evaluation |> Maybe.withDefault Encode.null )
+        , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
+        ]

@@ -65,6 +65,15 @@ start info trials =
         initState
 
 
+infoLoaded : List ActivityInfo -> Meaning3 -> Meaning3
+infoLoaded infos =
+    Activity.infoLoaded
+        Session3
+        "Meaning 3"
+        infos
+        initState
+
+
 
 -- VIEW
 
@@ -101,7 +110,7 @@ viewActivity experiment =
         Activity.NotStarted ->
             [ text "I'm not started yet." ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             [ View.loading ]
 
         Activity.Running Activity.Instructions data ->

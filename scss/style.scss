@@ -491,7 +491,21 @@ input {
 @media (min-width: 40ch) {
   .yes-no-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 5rem 5rem;
+    justify-content: center;
+    gap: 4rem;
+  }
+  .yes-no-buttons button:first-child {
+    @apply bg-red-700;
+  }
+  .yes-no-buttons button:first-child:hover {
+    @apply bg-red-500;
+  }
+  .yes-no-buttons button:nth-child(2) {
+    @apply bg-green-700;
+  }
+  .yes-no-buttons button:nth-child(2):hover {
+    @apply bg-green-500;
   }
 }
 

@@ -1,7 +1,7 @@
 module Session1.Spelling1 exposing (..)
 
 import Data exposing (decodeRecords)
-import ActivityInfo exposing (Session(..))
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Html.Styled exposing (Html, div, h2, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
@@ -49,8 +49,8 @@ type alias Trial =
     }
 
 
-iniState : State
-iniState =
+initState : State
+initState =
     State "DefaultTrialUID" "" 3 ListeningFirstTime
 
 
@@ -59,7 +59,17 @@ start info trials =
         (ActivityInfo.activityInfo info Session1 "Spelling 1")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
-        iniState
+        initState
+
+
+infoLoaded : List ActivityInfo -> Spelling1 -> Spelling1
+infoLoaded infos =
+    Activity.infoLoaded
+        Session1
+        "Spelling 1"
+        infos
+        initState
+
 
 
 
@@ -104,7 +114,7 @@ viewActivity data currentTrial optionsOrder =
 view : Activity Trial State -> List Int -> Html Msg
 view exp optionsOrder =
     case exp of
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
         Activity.NotStarted ->
@@ -179,7 +189,7 @@ type Msg
 update msg model =
     let
         currentSpellingState =
-            Activity.getState model.spelling1 |> Maybe.withDefault iniState
+            Activity.getState model.spelling1 |> Maybe.withDefault initState
     in
     case msg of
         UserClickedFeedback ->
@@ -205,7 +215,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | spelling1 = Activity.next timestamp iniState model.spelling1 }
+                    { model | spelling1 = Activity.next timestamp initState model.spelling1 }
             in
             ( newModel
             , Cmd.batch
@@ -218,7 +228,7 @@ update msg model =
             ( { model | optionsOrder = newOrder }, Cmd.none )
 
         UserClickedStartMainloop ->
-            ( { model | spelling1 = Activity.startMain model.spelling1 iniState }, Cmd.none )
+            ( { model | spelling1 = Activity.startMain model.spelling1 initState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         UserClickedSavedData ->

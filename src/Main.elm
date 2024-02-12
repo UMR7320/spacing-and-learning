@@ -127,7 +127,7 @@ defaultModel key route backgroundQuestionnaireUrl =
     , presentation = Activity.NotStarted
     , meaning1 = Activity.NotStarted
     , spelling1 = Activity.NotStarted
-    , context1 = Activity.Loading
+    , context1 = Activity.NotStarted
 
     -- SESSION 2
     , session2 = NotAsked
@@ -190,18 +190,24 @@ init backgroundQuestionnaireUrl url key =
         ( loadingStateSession3, fetchSession3 ) =
             Session3.attempt
 
-        ( model, cmd ) =
+        ( model, routeCmd ) =
             defaultModel key route backgroundQuestionnaireUrl
                 |> changeRouteTo route
+
+        cmd =
+            Cmd.batch
+                [ routeCmd
+                , Task.attempt (RemoteData.fromResult >> ServerRespondedWithActivitiesInfos) ActivityInfo.getRecords
+                ]
     in
     case route of
         Route.Session1 userId _ ->
             ( { model
                 | session1 = Loading loadingStateSession1
-                , presentation = Activity.Loading
-                , meaning1 = Activity.Loading
-                , spelling1 = Activity.Loading
-                , context1 = Activity.Loading
+                , presentation = Activity.loading
+                , meaning1 = Activity.loading
+                , spelling1 = Activity.loading
+                , context1 = Activity.loading
                 , user = Just userId
               }
             , Cmd.batch
@@ -214,10 +220,10 @@ init backgroundQuestionnaireUrl url key =
         Route.Home ->
             ( { model
                 | session1 = Loading loadingStateSession1
-                , presentation = Activity.Loading
-                , meaning1 = Activity.Loading
-                , spelling1 = Activity.Loading
-                , context1 = Activity.Loading
+                , presentation = Activity.loading
+                , meaning1 = Activity.loading
+                , spelling1 = Activity.loading
+                , context1 = Activity.loading
                 , user = Nothing
               }
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
@@ -226,10 +232,10 @@ init backgroundQuestionnaireUrl url key =
         Route.TermsAndConditions ->
             ( { model
                 | session1 = Loading loadingStateSession1
-                , presentation = Activity.Loading
-                , meaning1 = Activity.Loading
-                , spelling1 = Activity.Loading
-                , context1 = Activity.Loading
+                , presentation = Activity.loading
+                , meaning1 = Activity.loading
+                , spelling1 = Activity.loading
+                , context1 = Activity.loading
                 , user = Nothing
               }
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
@@ -238,9 +244,9 @@ init backgroundQuestionnaireUrl url key =
         Route.Session2 userid _ ->
             ( { model
                 | session2 = Loading loadingStateSession2
-                , meaning2 = Activity.Loading
-                , context2 = Activity.Loading
-                , spelling2 = Activity.Loading
+                , meaning2 = Activity.loading
+                , context2 = Activity.loading
+                , spelling2 = Activity.loading
                 , user = Just userid
               }
             , Cmd.batch
@@ -253,9 +259,9 @@ init backgroundQuestionnaireUrl url key =
         Route.Session3 userid _ ->
             ( { model
                 | session3 = Loading loadingStateSession3
-                , meaning3 = Activity.Loading
-                , spelling3 = Activity.Loading
-                , context3 = Activity.Loading
+                , meaning3 = Activity.loading
+                , spelling3 = Activity.loading
+                , context3 = Activity.loading
                 , user = Just userid
               }
             , Cmd.batch
@@ -274,14 +280,14 @@ init backgroundQuestionnaireUrl url key =
                     model.vks
 
                 updatedVks =
-                    { vks | task = Activity.Loading }
+                    { vks | task = Activity.loading }
             in
             ( { model
-                | spr = Activity.Loading
-                , sentenceCompletion = Activity.Loading
+                | spr = Activity.loading
+                , sentenceCompletion = Activity.loading
                 , vks = updatedVks
-                , acceptability = Activity.Loading
-                , yesNo = Activity.Loading
+                , acceptability = Activity.loading
+                , yesNo = Activity.loading
                 , user = Just userid
                 , version = v
                 , pretest = Loading loadingStatePretest
@@ -290,10 +296,8 @@ init backgroundQuestionnaireUrl url key =
             , Cmd.batch
                 [ cmd
                 , Cmd.map Pretest fetchSessionPretest
-                , Session.getInfos ServerRespondedWithSessionsInfos
                 , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
                 , Data.getGeneralParameters GotGeneralParameters
-                , Data.getCanUserParticipate userid GotCanUserParticipate
                 ]
             )
 
@@ -301,10 +305,10 @@ init backgroundQuestionnaireUrl url key =
             ( { model | user = Just userId }, cmd )
 
         Route.CalendarUpdated ->
-            ( { model | route = CalendarUpdated }, Cmd.none )
+            ( { model | route = CalendarUpdated }, cmd )
 
         Route.UserCode _ ->
-            ( model, Cmd.none )
+            ( model, cmd )
 
         NotFound ->
             ( { model | route = NotFound }, cmd )
@@ -646,6 +650,7 @@ type Msg
     | UserClickedChoseNewDate Date.Date
     | UserConfirmedPreferedDates { s1 : String, s2 : String, s3 : String, s4 : String, s5 : String }
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
+    | ServerRespondedWithActivitiesInfos (RemoteData Http.Error (List ActivityInfo))
     | GotGeneralParameters (RemoteData Http.Error Data.GeneralParameters)
     | GotCanUserParticipate (RemoteData Http.Error UserCanParticipate)
     | NoOp
@@ -693,6 +698,15 @@ changeRouteTo route model =
 
         Route.NotFound ->
             ( newModel, Cmd.none )
+
+        Route.Pretest userId Route.TopPretest _ ->
+            ( newModel
+            , Cmd.batch
+                [ Session.getInfos ServerRespondedWithSessionsInfos
+                , Data.getCanUserParticipate userId GotCanUserParticipate
+                , Ports.enableAlertOnExit ()
+                ]
+            )
 
         Route.Pretest _ Route.YesNo _ ->
             ( newModel
@@ -905,6 +919,53 @@ update msg model =
         ServerRespondedWithSessionsInfos result ->
             ( { model | sessions = result }, Cmd.none )
 
+        ServerRespondedWithActivitiesInfos (RemoteData.Success infos) ->
+            ( { model
+                | presentation = Presentation.infoLoaded infos model.presentation
+                , meaning1 = Meaning1.infoLoaded infos model.meaning1
+                , meaning2 = Meaning2.infoLoaded infos model.meaning2
+                , meaning3 = Meaning3.infoLoaded infos model.meaning3
+                , spelling1 = Spelling1.infoLoaded infos model.spelling1
+                , spelling2 = Spelling2.infoLoaded infos model.spelling2
+                , spelling3 = Spelling3.infoLoaded infos model.spelling3
+                , context1 = Context1.infoLoaded infos model.context1
+                , context2 = Context2.infoLoaded infos model.context2
+                , context3 = Context3.infoLoaded infos model.context3
+                , acceptability = Acceptability.infoLoaded infos model.version model.acceptability
+                , spr = SPR.infoLoaded infos model.version model.spr
+                , sentenceCompletion = SentenceCompletion.infoLoaded infos model.version model.sentenceCompletion
+                , yesNo = YesNo.infoLoaded infos model.yesNo
+              }
+            , Cmd.none
+            )
+
+        ServerRespondedWithActivitiesInfos (RemoteData.Failure error) ->
+            let
+                _ =
+                    Debug.log "error" error
+            in
+            ( { model
+                | presentation = Activity.Err "Error loading the activity information"
+                , meaning1 = Activity.Err "Error loading the activity information"
+                , spelling1 = Activity.Err "Error loading the activity information"
+                , context1 = Activity.Err "Error loading the activity information"
+                , meaning2 = Activity.Err "Error loading the activity information"
+                , spelling2 = Activity.Err "Error loading the activity information"
+                , context2 = Activity.Err "Error loading the activity information"
+                , meaning3 = Activity.Err "Error loading the activity information"
+                , spelling3 = Activity.Err "Error loading the activity information"
+                , context3 = Activity.Err "Error loading the activity information"
+                , acceptability = Activity.Err "Error loading the activity information"
+                , spr = Activity.Err "Error loading the activity information"
+                , sentenceCompletion = Activity.Err "Error loading the activity information"
+                , yesNo = Activity.Err "Error loading the activity information"
+              }
+            , Cmd.none
+            )
+
+        ServerRespondedWithActivitiesInfos _ ->
+            ( model, Cmd.none )
+
         GotGeneralParameters parameters ->
             ( { model | generalParameters = parameters }
             , Cmd.none
@@ -936,7 +997,6 @@ subscriptions model =
         [ Sub.map Spelling2 (Spelling2.subscriptions model)
         , Sub.map SPR (SPR.subscriptions model.spr)
         , Sub.map Acceptability (Acceptability.subscriptions model)
-        , Sub.map YesNo (YesNo.subscriptions model)
         , Sub.map Spelling1 (Spelling1.subscriptions model)
         ]
 

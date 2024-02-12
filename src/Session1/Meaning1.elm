@@ -66,6 +66,15 @@ start info trials =
         initState
 
 
+infoLoaded : List ActivityInfo -> Meaning1 -> Meaning1
+infoLoaded infos =
+    Activity.infoLoaded
+        Session1
+        "Meaning 1"
+        infos
+        initState
+
+
 initState : State
 initState =
     State "DefaultTrialUID" ""
@@ -78,7 +87,7 @@ initState =
 view : { task : Activity Trial State, optionsOrder : List comparable } -> Html Msg
 view task =
     case task.task of
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
         Activity.Err reason ->

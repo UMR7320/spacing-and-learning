@@ -69,6 +69,14 @@ start infos trials =
         initState
 
 
+infoLoaded : List ActivityInfo -> Spelling3 -> Spelling3
+infoLoaded infos =
+    Activity.infoLoaded
+        Session3
+        "Spelling 3"
+        infos
+        initState
+
 
 --VIEW
 
@@ -143,7 +151,7 @@ view exp =
         Activity.Err reason ->
             div [] [ text <| "I stumbled into an error : " ++ reason ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
 

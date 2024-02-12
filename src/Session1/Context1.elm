@@ -62,6 +62,15 @@ start info trials =
         initState
 
 
+infoLoaded : List ActivityInfo -> Context1 -> Context1
+infoLoaded infos =
+    Activity.infoLoaded
+        Session1
+        "Context 1"
+        infos
+        initState
+
+
 
 -- VIEW
 
@@ -139,7 +148,7 @@ view task =
                 Nothing ->
                     View.end data.infos.end UserClickedSaveData "../post-tests/cw?session=S1"
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
         Activity.Running Activity.Instructions data ->

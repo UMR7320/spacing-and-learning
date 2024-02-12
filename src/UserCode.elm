@@ -95,7 +95,7 @@ subUpdate msg model key =
                 )
 
         CodeChecked (Success (OK userId session)) ->
-            ( model
+            ( { model | code = "", response = NotAsked }
             , pushUrl key ("/user/" ++ userId ++ "/" ++ session)
             )
 

@@ -15,6 +15,7 @@ import Random
 import Task
 import Time
 import View
+import Route exposing (PretestRoute(..))
 
 
 
@@ -69,6 +70,19 @@ init infos trials version =
 
 initState =
     { firstProduction = "", secondProduction = "", order = FirstProduction }
+
+
+
+infoLoaded : List ActivityInfo -> Version -> SentenceCompletion -> SentenceCompletion
+infoLoaded infos version =
+    Activity.infoLoaded
+        (Pretest.Version.toSession version)
+        "Listening Test"
+        infos
+        initState
+
+
+
 
 
 
@@ -193,7 +207,7 @@ view task =
         Activity.Err reason ->
             [ text reason ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             [ View.loading ]
 
         Activity.NotStarted ->
@@ -278,7 +292,7 @@ update msg model =
                     ( { model | sentenceCompletion = model.sentenceCompletion |> Activity.update { prevState | secondProduction = new } }, Cmd.none )
 
         UserClickedSaveData ->
-            ( { model | sentenceCompletion = Activity.Loading }, Cmd.none )
+            ( { model | sentenceCompletion = Activity.Loading Nothing Nothing }, Cmd.none )
 
         UserClickedStartTraining ->
             ( { model | sentenceCompletion = Activity.startTraining model.sentenceCompletion }, Cmd.none )

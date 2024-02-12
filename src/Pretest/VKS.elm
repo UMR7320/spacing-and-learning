@@ -168,7 +168,7 @@ view vks =
         Activity.Err reason ->
             [ text reason ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             [ View.loading ]
 
         Activity.NotStarted ->
@@ -286,7 +286,7 @@ update msg model =
             )
 
         UserClickedSaveData ->
-            ( { model | vks = updateTask (always Activity.Loading) }, Cmd.none )
+            ( { model | vks = updateTask (always (Activity.Loading Nothing Nothing)) }, Cmd.none )
 
 
 

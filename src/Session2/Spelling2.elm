@@ -88,6 +88,15 @@ start info trials =
             Activity.Err "I tried to initate the state with the first trial but I couldn't find a first trial. Please report this error."
 
 
+infoLoaded : List ActivityInfo -> Spelling2 -> Spelling2
+infoLoaded infos =
+    Activity.infoLoaded
+        Session2
+        "Spelling 2"
+        infos
+        initState
+
+
 
 --VIEW
 
@@ -202,7 +211,7 @@ viewScrabbleActivity model =
                 Nothing ->
                     View.introToMain (UserClickedStartMainloop data.mainTrials)
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
         Activity.Err reason ->

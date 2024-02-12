@@ -1,7 +1,7 @@
 module Session1.Presentation exposing (..)
 
 import Activity exposing (Activity)
-import ActivityInfo exposing (Session(..), ActivityInfo)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Dict exposing (Dict)
 import Html.Styled exposing (Html, div, li, span, text, ul)
@@ -73,7 +73,7 @@ view task =
         Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
         Activity.Running Activity.Training data ->
@@ -120,13 +120,8 @@ type Msg
     | NoOp
 
 
-getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "Presentation" msgHandler decodeTranslationInput
-
-
-decodeTranslationInput : Decoder (List Trial)
-decodeTranslationInput =
+decodePresentationInput : Decoder (List Trial)
+decodePresentationInput =
     let
         decoder =
             Decode.succeed Trial
@@ -154,7 +149,7 @@ getRecords =
                 , view_ = "Presentation"
                 }
         , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
+        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodePresentationInput
         , timeout = Just 5000
         }
 
@@ -278,4 +273,13 @@ start info trials =
         (ActivityInfo.activityInfo info Session1 "Words to learn")
         (List.filter (\datum -> datum.isTraining) trials)
         (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+infoLoaded : List ActivityInfo -> Presentation -> Presentation
+infoLoaded infos =
+    Activity.infoLoaded
+        Session1
+        "Words to learn"
+        infos
         initState

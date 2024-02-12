@@ -33,6 +33,7 @@ type alias Trial =
     , audio : Data.AudioFile
     , feedback : String
     , timeout : Int
+    , isTraining : Bool
     }
 
 
@@ -97,7 +98,8 @@ type alias Model supraModel =
     }
 
 
-dumbTrial =
+dummyTrial : Trial
+dummyTrial =
     { uid = "dumbId"
     , sentence = "dumbSentence"
     , sentenceType = EmbeddedQuestion
@@ -106,6 +108,7 @@ dumbTrial =
     , audio = Data.AudioFile "" ""
     , feedback = "String"
     , timeout = 5000
+    , isTraining = False
     }
 
 
@@ -133,6 +136,15 @@ start info trials version =
         (ActivityInfo.activityInfo info (Pretest.Version.toSession version) "Listening test")
         (List.filter (\datum -> datum.trialType == Training) trials)
         (List.filter (\datum -> datum.trialType /= Training) trials)
+        initState
+
+
+infoLoaded : List ActivityInfo -> Version -> Acceptability -> Acceptability
+infoLoaded infos version =
+    Activity.infoLoaded
+        (Pretest.Version.toSession version)
+        "Listening Test"
+        infos
         initState
 
 
@@ -201,7 +213,7 @@ view task =
                         _ ->
                             [ prompt ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             [ View.loading ]
 
         Activity.NotStarted ->
@@ -283,7 +295,7 @@ update msg model =
             Delay.after int (NextStepCinematic step)
 
         trial =
-            Activity.getTrial model.acceptability |> Maybe.withDefault dumbTrial
+            Activity.getTrial model.acceptability |> Maybe.withDefault dummyTrial
     in
     case msg of
         NextStepCinematic step ->
@@ -520,6 +532,7 @@ decodeAcceptabilityTrials =
                 |> required "Acceptability Audio" Data.decodeAudioFiles
                 |> optional "Acceptability Feedback" Decode.string "no feedback"
                 |> required "Timeout" Decode.int
+                |> optional "isTraining" Decode.bool False
 
         toTrialTypeDecoder str =
             case str of

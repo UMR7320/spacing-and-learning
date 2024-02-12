@@ -1,14 +1,18 @@
 module Activity exposing (..)
 
-import ActivityInfo exposing (ActivityInfo)
+import ActivityInfo exposing (ActivityInfo, Session)
 import Time
 
 
+type alias Trial a =
+    { a | isTraining : Bool }
+
+
 type Activity trial state
-    = Running Step (Data trial state)
+    = NotStarted
+    | Loading (Maybe ActivityInfo) (Maybe (List trial))
+    | Running Step (Data trial state)
     | Err String
-    | Loading
-    | NotStarted
 
 
 type Step
@@ -29,8 +33,54 @@ type alias Data trial state =
     }
 
 
-type alias Info =
-    Result String ActivityInfo
+loading : Activity t s
+loading =
+    Loading Nothing Nothing
+
+
+infoLoaded : Session -> String -> List ActivityInfo -> s -> Activity (Trial t) s -> Activity (Trial t) s
+infoLoaded session activityName infos initialState activity =
+    case ActivityInfo.activityInfo infos session activityName of
+        Ok info ->
+            case activity of
+                NotStarted ->
+                    Loading (Just info) Nothing
+
+                Loading Nothing Nothing ->
+                    Loading (Just info) Nothing
+
+                Loading Nothing (Just trials) ->
+                    startIntro
+                        (Ok info)
+                        (List.filter (\trial -> trial.isTraining) trials)
+                        (List.filter (\trial -> not trial.isTraining) trials)
+                        initialState
+
+                _ ->
+                    activity
+
+        Result.Err error ->
+            Err error
+
+
+trialsLoaded : List (Trial t) -> s -> Activity (Trial t) s -> Activity (Trial t) s
+trialsLoaded trials initialState activity =
+    case activity of
+        NotStarted ->
+            Loading Nothing (Just trials)
+
+        Loading Nothing Nothing ->
+            Loading Nothing (Just trials)
+
+        Loading (Just activityInfo) Nothing ->
+            startIntro
+                (Ok activityInfo)
+                (List.filter (\datum -> datum.isTraining) trials)
+                (List.filter (\datum -> not datum.isTraining) trials)
+                initialState
+
+        _ ->
+            activity
 
 
 update : s -> Activity t s -> Activity t s
@@ -47,7 +97,7 @@ type alias Identified state =
     { state | uid : String }
 
 
-next : Time.Posix -> s -> Activity t s -> Activity t s
+next : Time.Posix -> s -> Activity (Trial t) s -> Activity (Trial t) s
 next timestamp resetedState activity =
     case activity of
         Running Training data ->
@@ -151,7 +201,7 @@ next timestamp resetedState activity =
 
 {-| Init the activity with infos, trainingTrials, mainTrials and the initial state
 -}
-startIntro : Info -> List t -> List t -> s -> Activity t s
+startIntro : Result String ActivityInfo -> List (Trial t) -> List (Trial t) -> s -> Activity (Trial t) s
 startIntro info trainingTrials mainTrials initStat =
     case info of
         Result.Ok info_ ->
@@ -276,7 +326,7 @@ getState activity =
             Nothing
 
 
-getTrial : Activity t s -> Maybe t
+getTrial : Activity (Trial t) s -> Maybe (Trial t)
 getTrial activity =
     case activity of
         Running _ { current } ->
@@ -286,7 +336,7 @@ getTrial activity =
             Nothing
 
 
-getHistory : Activity t s -> List ( t, s, Time.Posix )
+getHistory : Activity (Trial t) s -> List ( Trial t, s, Time.Posix )
 getHistory activity =
     case activity of
         Running _ { history } ->

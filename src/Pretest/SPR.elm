@@ -22,16 +22,12 @@ import View exposing (unclickableButton)
 -- MODEL
 
 
-type alias Pretest =
-    Para.State2 Msg (List Trial) (List ActivityInfo)
-
-
 type alias SPR =
     Activity Trial State
 
 
-type alias Spr model =
-    { model
+type alias Model supraModel =
+    { supraModel
         | spr : SPR
         , user : Maybe String
         , version : Version
@@ -121,6 +117,16 @@ init infos trials version =
     Activity.startIntro info (List.filter (\trial -> trial.isTraining) trials) (List.filter (\trial -> not trial.isTraining) trials) initState
 
 
+infoLoaded : List ActivityInfo -> Version -> SPR -> SPR
+infoLoaded infos version =
+    Activity.infoLoaded
+        (Pretest.Version.toSession version)
+        "Listening Test"
+        infos
+        initState
+
+
+
 
 -- VIEW
 
@@ -128,7 +134,7 @@ init infos trials version =
 view : Activity Trial State -> List (Html.Styled.Html Msg)
 view task =
     case task of
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             [ View.loading ]
 
         Activity.Running Activity.Training data ->
@@ -251,7 +257,7 @@ type TimedMsg
     | UserPressedSpaceToReadNextSegment
 
 
-update : Msg -> Spr model -> ( Spr model, Cmd Msg )
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     let
         prevState =
@@ -280,7 +286,7 @@ update msg model =
             ( newModel, saveData newModel )
 
         UserClickedSaveData ->
-            ( { model | spr = Activity.Loading }
+            ( { model | spr = Activity.Loading Nothing Nothing }
             , if model.version == PostTest then
                 Browser.Navigation.pushUrl model.key "acceptability/instructions"
 

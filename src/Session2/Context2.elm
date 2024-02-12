@@ -81,6 +81,15 @@ start info trials =
         initState
 
 
+infoLoaded : List ActivityInfo -> Context2 -> Context2
+infoLoaded infos =
+    Activity.infoLoaded
+        Session2
+        "Context 2"
+        infos
+        initState
+
+
 
 -- VIEW
 
@@ -90,7 +99,7 @@ view exp optionsOrder =
         Activity.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
-        Activity.Loading ->
+        Activity.Loading _ _ ->
             View.loading
 
         Activity.Err reason ->

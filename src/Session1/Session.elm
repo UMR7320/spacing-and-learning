@@ -81,6 +81,7 @@ update msg model =
                 | meaning1 = Activity.Err (Data.buildErrorMessage error)
                 , context1 = Activity.Err (Data.buildErrorMessage error)
                 , spelling1 = Activity.Err (Data.buildErrorMessage error)
+                , presentation = Activity.Err (Data.buildErrorMessage error)
               }
             , Cmd.none
             )
