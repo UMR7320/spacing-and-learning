@@ -80,7 +80,7 @@ view task =
             viewTrialOrEnd data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
         Activity.Running Activity.Main data ->
-            viewTrialOrEnd data (View.end data.infos.end NoOp "meaning")
+            viewTrialOrEnd data (View.end data.infos.end NoOp (Just "meaning"))
 
 
 viewTrialOrEnd data endView =

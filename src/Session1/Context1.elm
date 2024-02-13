@@ -146,7 +146,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end UserClickedSaveData "../post-tests/cw?session=S1"
+                    View.end data.infos.end UserClickedSaveData (Just "../post-tests/cw?session=S1")
 
         Activity.Loading _ _ ->
             View.loading

@@ -84,7 +84,7 @@ subUpdate : Msg -> Model -> Key -> ( Model, Cmd Msg )
 subUpdate msg model key =
     case msg of
         CodeUpdated newCode ->
-            if String.length newCode == 4 then
+            if String.length newCode >= 4 then
                 ( { model | code = newCode, response = Loading }
                 , checkUserCode newCode model.date CodeChecked
                 )

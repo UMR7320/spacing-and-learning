@@ -1,7 +1,7 @@
 module Pretest.VKS exposing (..)
 
 import Activity exposing (Activity)
-import ActivityInfo exposing (ActivityInfo)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Html.Styled exposing (..)
 import Html.Styled.Attributes as A exposing (class, controls, src, type_)
@@ -12,6 +12,8 @@ import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Pretest.Version exposing (Version(..))
 import Random
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
 import Task
 import Time
 import View
@@ -69,6 +71,15 @@ emptyAnswer =
     , definition = ""
     , usage = ""
     }
+
+
+infoLoaded : List ActivityInfo -> VKS -> VKS
+infoLoaded infos =
+    Activity.infoLoaded
+        Pretest
+        "VKS"
+        infos
+        emptyAnswer
 
 
 
@@ -163,7 +174,7 @@ view vks =
                     ]
 
                 Nothing ->
-                    [ View.end data.infos.end UserClickedSaveData "spr" ]
+                    [ View.end data.infos.end UserClickedSaveData Nothing ]
 
         Activity.Err reason ->
             [ text reason ]
@@ -198,6 +209,8 @@ view vks =
 
 type Msg
     = UserClickedNextTrial
+    | GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
     | NextTrial Time.Posix
     | UserClickedStartMain
     | UserClickedShowVideo
@@ -226,6 +239,22 @@ update msg model =
             { vks | task = f vks.task }
     in
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | vks = updateTask (Activity.trialsLoaded trials emptyAnswer) }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model | vks = updateTask (always (Activity.Err (Debug.toString error))) }, Cmd.none )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         HistoryWasSaved _ ->
             ( model, Cmd.none )
 
@@ -293,24 +322,21 @@ update msg model =
 -- HTTP
 
 
+getRecords : Cmd Msg
 getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
+    Http.get
+        { url =
             Data.buildQuery
                 { app = Data.apps.spacing
                 , base = "input"
                 , view_ = "Meaning"
                 }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeAcceptabilityTrials
-        , timeout = Just 5000
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeVKSTrials
         }
 
 
-decodeAcceptabilityTrials : Decode.Decoder (List Trial)
-decodeAcceptabilityTrials =
+decodeVKSTrials : Decode.Decoder (List Trial)
+decodeVKSTrials =
     let
         decoder =
             Decode.succeed Trial
@@ -321,8 +347,8 @@ decodeAcceptabilityTrials =
     Data.decodeRecords decoder
 
 
-historyEncoder : Version -> String -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
-historyEncoder version userId history =
+historyEncoder : Version -> List ( Trial, Answer, Time.Posix ) -> Encode.Value
+historyEncoder version history =
     let
         answerField =
             case version of
@@ -366,7 +392,7 @@ updateHistoryEncoder version userId history =
         (\_ ->
             Encode.object
                 [ ( "id", Encode.string userId )
-                , ( "fields", historyEncoder version userId history )
+                , ( "fields", historyEncoder version history )
                 ]
         )
         [ ( version, userId, history ) ]

@@ -146,7 +146,7 @@ viewActivity experiment =
                     ]
 
                 Nothing ->
-                    [ View.end task.infos.end SaveDataMsg "spelling" ]
+                    [ View.end task.infos.end SaveDataMsg (Just "spelling") ]
 
 
 

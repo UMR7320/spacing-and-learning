@@ -276,7 +276,7 @@ view task =
                             ]
 
                         Nothing ->
-                            [ View.end data.infos.end UserClickedSaveData "vks" ]
+                            [ View.end data.infos.end UserClickedSaveData (Just "vks") ]
 
         Activity.Err reason ->
             [ p [] [ text reason ] ]

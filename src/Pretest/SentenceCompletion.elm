@@ -202,7 +202,7 @@ view task =
                     ]
 
                 Nothing ->
-                    [ View.end data.infos.end UserClickedSaveData "acceptability/instructions" ]
+                    [ View.end data.infos.end UserClickedSaveData (Just "acceptability/instructions") ]
 
         Activity.Err reason ->
             [ text reason ]

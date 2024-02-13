@@ -700,7 +700,7 @@ changeRouteTo route model =
             ( newModel, Cmd.none )
 
         Route.Pretest userId Route.TopPretest _ ->
-            ( newModel
+            ( { newModel | user = Just userId }
             , Cmd.batch
                 [ Session.getInfos ServerRespondedWithSessionsInfos
                 , Data.getCanUserParticipate userId GotCanUserParticipate
@@ -708,10 +708,18 @@ changeRouteTo route model =
                 ]
             )
 
-        Route.Pretest _ Route.YesNo _ ->
-            ( newModel
+        Route.Pretest userId Route.YesNo _ ->
+            ( { newModel | user = Just userId }
             , Cmd.batch
                 [ Cmd.map YesNo YesNo.getRecords
+                , Ports.disableAlertOnExit ()
+                ]
+            )
+
+        Route.Pretest userId Route.VKS _ ->
+            ( { newModel | user = Just userId }
+            , Cmd.batch
+                [ Cmd.map VKS VKS.getRecords
                 , Ports.disableAlertOnExit ()
                 ]
             )
@@ -920,6 +928,13 @@ update msg model =
             ( { model | sessions = result }, Cmd.none )
 
         ServerRespondedWithActivitiesInfos (RemoteData.Success infos) ->
+            let
+                vks =
+                    model.vks
+
+                updatedVks =
+                    { vks | task = VKS.infoLoaded infos vks.task }
+            in
             ( { model
                 | presentation = Presentation.infoLoaded infos model.presentation
                 , meaning1 = Meaning1.infoLoaded infos model.meaning1
@@ -935,6 +950,7 @@ update msg model =
                 , spr = SPR.infoLoaded infos model.version model.spr
                 , sentenceCompletion = SentenceCompletion.infoLoaded infos model.version model.sentenceCompletion
                 , yesNo = YesNo.infoLoaded infos model.yesNo
+                , vks = updatedVks
               }
             , Cmd.none
             )

@@ -146,7 +146,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end SaveDataMsg "spelling"
+                    View.end data.infos.end SaveDataMsg (Just "spelling")
 
         Activity.NotStarted ->
             div [] [ text "I did not start yet." ]

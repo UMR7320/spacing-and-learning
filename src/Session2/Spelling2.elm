@@ -164,7 +164,7 @@ viewScrabbleActivity model =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end UserClickedSaveData "context-understanding"
+                    View.end data.infos.end UserClickedSaveData (Just "context-understanding")
 
         Activity.Running Activity.Training data ->
             case data.current of

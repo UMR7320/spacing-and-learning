@@ -114,7 +114,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end UserClickedSaveData "spelling"
+                    View.end data.infos.end UserClickedSaveData (Just "spelling")
 
         Activity.Loading _ _ ->
             View.loading

@@ -126,19 +126,25 @@ unsafeInstructions infos msgToTraining =
         ]
 
 
+end : String -> msg -> Maybe String -> Html msg
 end endInfo saveDataMsg linkToNextTask =
     div [ class "endInfo" ]
         [ div []
             [ fromMarkdown endInfo
-            , div [ class "mt-8" ]
-                [ a [ href linkToNextTask ]
-                    [ button
-                        { message = saveDataMsg
-                        , isDisabled = False
-                        , txt = "Continue"
-                        }
-                    ]
-                ]
+            , case linkToNextTask of
+                Just url ->
+                    div [ class "mt-8" ]
+                        [ a [ href url ]
+                            [ button
+                                { message = saveDataMsg
+                                , isDisabled = False
+                                , txt = "Continue"
+                                }
+                            ]
+                        ]
+
+                Nothing ->
+                    text ""
             ]
         ]
 
