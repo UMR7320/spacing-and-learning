@@ -98,31 +98,7 @@ parser =
         [ map Home top
         , map TermsAndConditions (s "terms-and-conditions")
         , map CalendarUpdated (s "calendar-updated")
-        , map Pretest
-            (s "user"
-                </> string
-                </> s "pretest"
-                </> oneOf
-                        [ map TopPretest top
-                        , map SPR (s "spr")
-                        , map GeneralInfos (s "informations")
-                        , map EmailSent (s "email-sent")
-                        , map SentenceCompletion (s "sentence-completion")
-                        , map VKS (s "vks")
-                        , map YesNo (s "yes-no")
-                        , map (Calendar False) (s "calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
-                        , map (Calendar True) (s "update-calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
-                        , map Acceptability
-                            (s "acceptability"
-                                </> oneOf
-                                        [ map AcceptabilityInstructions (s "instructions")
-                                        , map AcceptabilityStart (s "start")
-                                        , map AcceptabilityEnd (s "end")
-                                        ]
-                            )
-                        ]
-                <?> Query.map (Maybe.withDefault "pre" >> Pretest.Version.fromString) (Query.string "version")
-            )
+        , map Pretest (s "user" </> string </> s "pretest" </> pretestRouteParser)
         , map Session1
             (s "user"
                 </> string
@@ -171,6 +147,30 @@ parser =
         --  , map BlogQuery (s "blog" <?> Query.string "q")
         --  Learn more: https://guide.elm-lang.org/webapps/url_parsing.html
         ]
+
+
+pretestRouteParser : Parser (PretestRoute -> Version -> b) b
+pretestRouteParser =
+    oneOf
+        [ map TopPretest top
+        , map SPR (s "spr")
+        , map GeneralInfos (s "informations")
+        , map EmailSent (s "email-sent")
+        , map SentenceCompletion (s "sentence-completion")
+        , map VKS (s "vks")
+        , map YesNo (s "yes-no")
+        , map (Calendar False) (s "calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
+        , map (Calendar True) (s "update-calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])
+        , map Acceptability
+            (s "acceptability"
+                </> oneOf
+                        [ map AcceptabilityInstructions (s "instructions")
+                        , map AcceptabilityStart (s "start")
+                        , map AcceptabilityEnd (s "end")
+                        ]
+            )
+        ]
+        <?> Query.map (Maybe.withDefault "pre" >> Pretest.Version.fromString) (Query.string "version")
 
 
 
