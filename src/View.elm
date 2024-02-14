@@ -110,8 +110,7 @@ loading =
 
 instructions infos msgToTraining =
     div [ class "instructions" ]
-        [ h1 [] [ text infos.name ]
-        , div [ class "pb-8" ] [ fromMarkdown infos.instructions ]
+        [ div [ class "pb-8" ] [ fromMarkdown infos.instructions ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
         ]
 
@@ -120,8 +119,7 @@ instructions infos msgToTraining =
 -}
 unsafeInstructions infos msgToTraining =
     div [ class "instructions" ]
-        [ h1 [] [ text infos.name ]
-        , div [ class "pb-8" ] [ fromUnsafeMarkdown infos.instructions ]
+        [ div [ class "pb-8" ] [ fromUnsafeMarkdown infos.instructions ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
         ]
 
