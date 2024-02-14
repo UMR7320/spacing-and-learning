@@ -699,33 +699,43 @@ changeRouteTo route model =
         Route.NotFound ->
             ( newModel, Cmd.none )
 
-        Route.Pretest userId Route.TopPretest _ ->
-            ( { newModel | user = Just userId }
-            , Cmd.batch
-                [ Session.getInfos ServerRespondedWithSessionsInfos
-                , Data.getCanUserParticipate userId GotCanUserParticipate
-                , Ports.enableAlertOnExit ()
-                ]
-            )
+        Route.Pretest userId pretestRoute _ ->
+            let
+                ( updatedModel, cmd ) =
+                    ( { newModel | user = Just userId }
+                    , Data.getCanUserParticipate userId GotCanUserParticipate
+                    )
+            in
+            case pretestRoute of
+                Route.TopPretest ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ cmd
+                        , Session.getInfos ServerRespondedWithSessionsInfos
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
 
-        Route.Pretest userId Route.YesNo _ ->
-            ( { newModel | user = Just userId }
-            , Cmd.batch
-                [ Cmd.map YesNo YesNo.getRecords
-                , Ports.disableAlertOnExit ()
-                ]
-            )
+                Route.YesNo ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ cmd
+                        , Cmd.map YesNo YesNo.getRecords
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
 
-        Route.Pretest userId Route.VKS _ ->
-            ( { newModel | user = Just userId }
-            , Cmd.batch
-                [ Cmd.map VKS VKS.getRecords
-                , Ports.disableAlertOnExit ()
-                ]
-            )
+                Route.VKS ->
+                    ( { newModel | user = Just userId }
+                    , Cmd.batch
+                        [ cmd
+                        , Cmd.map VKS VKS.getRecords
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
 
-        Route.Pretest _ _ _ ->
-            ( newModel, Ports.enableAlertOnExit () )
+                _ ->
+                    ( updatedModel, cmd )
 
         Route.Session1 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
