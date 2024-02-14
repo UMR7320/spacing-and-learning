@@ -250,7 +250,11 @@ update msg model =
             )
 
         GotTrials (RemoteData.Failure error) ->
-            ( { model | vks = updateTask (always (Activity.Err (Debug.toString error))) }, Cmd.none )
+            ( { model
+                | vks = updateTask (always (Activity.Err (Data.buildErrorMessage error)))
+              }
+            , Cmd.none
+            )
 
         GotTrials _ ->
             ( model, Cmd.none )

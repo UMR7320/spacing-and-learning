@@ -956,10 +956,6 @@ update msg model =
             )
 
         ServerRespondedWithActivitiesInfos (RemoteData.Failure error) ->
-            let
-                _ =
-                    Debug.log "error" error
-            in
             ( { model
                 | presentation = Activity.Err "Error loading the activity information"
                 , meaning1 = Activity.Err "Error loading the activity information"
