@@ -73,7 +73,12 @@ update msg model =
             , Cmd.none
             )
 
-        GotTrials (RemoteData.Failure _) ->
+        GotTrials (RemoteData.Failure (Http.BadBody error)) ->
+            ( { model | yesNo = Activity.Err error }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
             ( model, Cmd.none )
 
         GotTrials _ ->
