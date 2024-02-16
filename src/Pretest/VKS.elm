@@ -120,7 +120,7 @@ view vks =
                                     , E.onInput UserClickedNewKnowledge
                                     ]
                                     []
-                                , span [ class "p-2" ] [ text "I don’t remember having seen this verb before" ]
+                                , span [ class "p-2" ] [ text "Je n'ai jamais vu ce verbe" ]
                                 ]
                             , Html.Styled.label []
                                 [ Html.Styled.input
@@ -130,7 +130,7 @@ view vks =
                                     , E.onInput UserClickedNewKnowledge
                                     ]
                                     []
-                                , span [ class "p-2" ] [ text "I have seen this verb before, but I don’t know what it means" ]
+                                , span [ class "p-2" ] [ text "J'ai déjà vu ce verbe mais je ne sais pas le traduire" ]
                                 ]
                             , Html.Styled.label []
                                 [ Html.Styled.input
@@ -140,25 +140,33 @@ view vks =
                                     , E.onInput UserClickedNewKnowledge
                                     ]
                                     []
-                                , span [ class "p-2" ] [ text "I have seen this verb before, and I think I know what it means" ]
+                                , span [ class "p-2" ] [ text "J'ai déjà vu ce verbe et je sais le traduire" ]
                                 ]
                             ]
                         , if data.state.knowledge == Known then
                             Html.Styled.fieldset [ class "flex flex-col p-2" ]
                                 [ label [ class "flex flex-col p-2" ]
-                                    [ text "What does this verb mean? Give definitions, synonyms, and/or translations, as many as you can."
-                                    , input [ class "border-2", E.onInput (UserUpdatedField Definition) ] []
+                                    [ text "Voici ma traduction :"
+                                    , input
+                                        [ class "border-2 p-2 mt-2"
+                                        , E.onInput (UserUpdatedField Definition)
+                                        ]
+                                        []
                                     ]
                                 , label [ class "flex flex-col p-2" ]
-                                    [ text "Please use this verb in a sentence. The sentence should show that you know what the word means."
-                                    , textarea [ class "border-2", E.onInput (UserUpdatedField Sentence) ] []
+                                    [ text "Je sais aussi utiliser ce verbe dans une phrase. Voici ma phrase :"
+                                    , textarea
+                                        [ class "border-2 p-2 mt-2"
+                                        , E.onInput (UserUpdatedField Sentence)
+                                        ]
+                                        []
                                     ]
                                 ]
 
                           else
                             text ""
                         , View.button
-                            { txt = "Next Item"
+                            { txt = "Continue"
                             , message = UserClickedNextTrial
                             , isDisabled =
                                 if data.state.knowledge == Known && List.all String.isEmpty [ data.state.definition ] then
