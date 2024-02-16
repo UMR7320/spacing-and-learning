@@ -43,7 +43,7 @@ viewPretest activity model =
             div
                 [ class "progress-bar", attribute "style" "--count: 5" ]
                 [ viewItem "General Vocabulary" YesNo model.yesNo activity
-                , viewItem "LexLearn verbs" VKS model.vks.task activity
+                , viewItem "LexLearn verbs" VKS model.vks activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptability True
@@ -56,7 +56,7 @@ viewPretest activity model =
                 , div [] [ text "Spelling" ]
                 , div [] [ text "Context" ]
                 , div [] [ text "How was it?" ]
-                , viewItem "LexLearn verbs" VKS model.vks.task activity
+                , viewItem "LexLearn verbs" VKS model.vks activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
@@ -64,7 +64,7 @@ viewPretest activity model =
         PostTestDiff ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ viewItem "LexLearn verbs" VKS model.vks.task activity
+                [ viewItem "LexLearn verbs" VKS model.vks activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptability True
@@ -73,7 +73,7 @@ viewPretest activity model =
         Surprise ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ viewItem "LexLearn verbs" VKS model.vks.task activity
+                [ viewItem "LexLearn verbs" VKS model.vks activity
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptability True

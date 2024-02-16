@@ -4,7 +4,7 @@ import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Html.Styled exposing (..)
-import Html.Styled.Attributes as A exposing (class, controls, src, type_)
+import Html.Styled.Attributes as A exposing (class, type_)
 import Html.Styled.Events as E
 import Http
 import Json.Decode as Decode
@@ -25,7 +25,7 @@ import View
 
 type alias Model superModel =
     { superModel
-        | vks : { task : VKS, showVideo : Bool }
+        | vks : VKS
         , user : Maybe String
         , version : Version
     }
@@ -86,9 +86,9 @@ infoLoaded infos =
 -- VIEW
 
 
-view : { task : VKS, showVideo : Bool } -> List (Html Msg)
+view : VKS -> List (Html Msg)
 view vks =
-    case vks.task of
+    case vks of
         Activity.Running Activity.Training data ->
             case data.current of
                 Just _ ->
@@ -194,21 +194,7 @@ view vks =
             [ text "C'est tout bon!" ]
 
         Activity.Running Activity.Instructions data ->
-            if vks.showVideo then
-                [ div
-                    [ class "flow" ]
-                    [ p [] [ text "Watch the video to understand how this activity works:" ]
-                    , video [ controls True, src "/vks.mp4" ] []
-                    , View.button
-                        { message = UserClickedStartMain
-                        , txt = "Start the activity"
-                        , isDisabled = False
-                        }
-                    ]
-                ]
-
-            else
-                [ View.instructions data.infos UserClickedShowVideo ]
+            [ View.instructions data.infos UserClickedStartMain ]
 
 
 
@@ -221,7 +207,6 @@ type Msg
     | GotRandomizedTrials (List Trial)
     | NextTrial Time.Posix
     | UserClickedStartMain
-    | UserClickedShowVideo
     | UserClickedSaveData
     | UserUpdatedField Field String
     | RuntimeReordedAmorces Field
@@ -238,13 +223,7 @@ update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     let
         prevAnswer =
-            Activity.getState model.vks.task |> Maybe.withDefault emptyAnswer
-
-        vks =
-            model.vks
-
-        updateTask f =
-            { vks | task = f vks.task }
+            Activity.getState model.vks |> Maybe.withDefault emptyAnswer
     in
     case msg of
         GotTrials (RemoteData.Success trials) ->
@@ -253,13 +232,13 @@ update msg model =
             )
 
         GotRandomizedTrials trials ->
-            ( { model | vks = updateTask (Activity.trialsLoaded trials emptyAnswer) }
+            ( { model | vks = Activity.trialsLoaded trials emptyAnswer model.vks }
             , Cmd.none
             )
 
         GotTrials (RemoteData.Failure error) ->
             ( { model
-                | vks = updateTask (always (Activity.Err (Data.buildErrorMessage error)))
+                | vks = Activity.Err (Data.buildErrorMessage error)
               }
             , Cmd.none
             )
@@ -271,7 +250,7 @@ update msg model =
             ( model, Cmd.none )
 
         RuntimeReordedAmorces _ ->
-            ( { model | vks = updateTask (Activity.update prevAnswer) }, Cmd.none )
+            ( { model | vks = Activity.update prevAnswer model.vks }, Cmd.none )
 
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
@@ -279,7 +258,7 @@ update msg model =
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | vks = updateTask (Activity.toggle >> Activity.next timestamp emptyAnswer) }
+                    { model | vks = (Activity.toggle >> Activity.next timestamp emptyAnswer) model.vks }
             in
             ( newModel
             , Cmd.batch
@@ -288,46 +267,39 @@ update msg model =
                 ]
             )
 
-        UserClickedShowVideo ->
-            let
-                updatedVks =
-                    { vks | showVideo = True }
-            in
-            ( { model | vks = updatedVks }, Cmd.none )
-
         UserClickedStartMain ->
             let
                 -- gross hack
                 flippedStartMain a b =
                     Activity.startMain b a
             in
-            ( { model | vks = updateTask (flippedStartMain emptyAnswer) }, Cmd.none )
+            ( { model | vks = flippedStartMain emptyAnswer model.vks }, Cmd.none )
 
         UserUpdatedField fieldId new ->
             case fieldId of
                 Definition ->
                     ( { model
-                        | vks = updateTask (Activity.update { prevAnswer | definition = new })
+                        | vks = Activity.update { prevAnswer | definition = new } model.vks
                       }
                     , Cmd.none
                     )
 
                 Sentence ->
                     ( { model
-                        | vks = updateTask (Activity.update { prevAnswer | usage = new })
+                        | vks = Activity.update { prevAnswer | usage = new } model.vks
                       }
                     , Cmd.none
                     )
 
         UserClickedNewKnowledge str ->
             ( { model
-                | vks = updateTask (Activity.update { prevAnswer | knowledge = familiarityFromString str })
+                | vks = Activity.update { prevAnswer | knowledge = familiarityFromString str } model.vks
               }
             , Cmd.none
             )
 
         UserClickedSaveData ->
-            ( { model | vks = updateTask (always (Activity.Loading Nothing Nothing)) }, Cmd.none )
+            ( { model | vks = Activity.Loading Nothing Nothing }, Cmd.none )
 
 
 
@@ -410,10 +382,11 @@ updateHistoryEncoder version userId history =
         [ ( version, userId, history ) ]
 
 
+saveData : Model a -> Cmd Msg
 saveData model =
     let
         history =
-            Activity.getHistory model.vks.task
+            Activity.getHistory model.vks
 
         userId =
             model.user |> Maybe.withDefault "recd18l2IBRQNI05y"

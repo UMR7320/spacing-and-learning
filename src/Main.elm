@@ -71,7 +71,7 @@ type alias Model =
     , acceptability : Acceptability
     , spr : SPR
     , sentenceCompletion : SentenceCompletion
-    , vks : { task : VKS, showVideo : Bool }
+    , vks : VKS
     , yesNo : YesNo
 
     -- Session 1
@@ -149,7 +149,7 @@ defaultModel key route backgroundQuestionnaireUrl =
     , spr = Activity.NotStarted
     , pretest = NotAsked
     , sentenceCompletion = Activity.NotStarted
-    , vks = { task = Activity.NotStarted, showVideo = False }
+    , vks = Activity.NotStarted
     , yesNo = Activity.NotStarted
 
     -- POSTEST
@@ -275,17 +275,11 @@ init backgroundQuestionnaireUrl url key =
             let
                 ( loadingStatePretest, fetchSessionPretest ) =
                     Pretest.attempt v
-
-                vks =
-                    model.vks
-
-                updatedVks =
-                    { vks | task = Activity.loading }
             in
             ( { model
                 | spr = Activity.loading
                 , sentenceCompletion = Activity.loading
-                , vks = updatedVks
+                , vks = Activity.loading
                 , acceptability = Activity.loading
                 , yesNo = Activity.loading
                 , user = Just userid
@@ -938,13 +932,6 @@ update msg model =
             ( { model | sessions = result }, Cmd.none )
 
         ServerRespondedWithActivitiesInfos (RemoteData.Success infos) ->
-            let
-                vks =
-                    model.vks
-
-                updatedVks =
-                    { vks | task = VKS.infoLoaded infos vks.task }
-            in
             ( { model
                 | presentation = Presentation.infoLoaded infos model.presentation
                 , meaning1 = Meaning1.infoLoaded infos model.meaning1
@@ -960,12 +947,12 @@ update msg model =
                 , spr = SPR.infoLoaded infos model.version model.spr
                 , sentenceCompletion = SentenceCompletion.infoLoaded infos model.version model.sentenceCompletion
                 , yesNo = YesNo.infoLoaded infos model.yesNo
-                , vks = updatedVks
+                , vks = VKS.infoLoaded infos model.vks
               }
             , Cmd.none
             )
 
-        ServerRespondedWithActivitiesInfos (RemoteData.Failure error) ->
+        ServerRespondedWithActivitiesInfos (RemoteData.Failure _) ->
             ( { model
                 | presentation = Activity.Err "Error loading the activity information"
                 , meaning1 = Activity.Err "Error loading the activity information"
