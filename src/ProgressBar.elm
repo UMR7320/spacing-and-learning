@@ -41,12 +41,9 @@ viewPretest activity model =
     case model.version of
         PreTest ->
             div
-                [ class "progress-bar", attribute "style" "--count: 5" ]
-                [ viewItem "General Vocabulary" YesNo model.yesNo activity
-                , viewItem "LexLearn verbs" VKS model.vks activity
-                , viewItem "Reading test" SPR model.spr activity
-                , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Listening test" (isAcceptability activity) model.acceptability True
+                [ class "progress-bar", attribute "style" "--count: 2" ]
+                [ viewItem "Premier Quizz" YesNo model.yesNo activity
+                , viewItem "Deuxième Quizz" VKS model.vks activity
                 ]
 
         PostTest ->
