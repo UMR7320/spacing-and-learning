@@ -57,7 +57,8 @@ initState =
 type Msg
     = NoOp
     | GotTrials (RemoteData Http.Error (List Trial))
-    | UserClickedStartActivity
+    | UserClickedStartTraining
+    | UserClickedStartMain
     | UserPressedButton Bool
     | NextTrial Bool Time.Posix
     | UserClickedSaveData
@@ -78,13 +79,18 @@ update msg model =
             , Cmd.none
             )
 
-        GotTrials (RemoteData.Failure error) ->
-            ( model, Cmd.none )
+        GotTrials (RemoteData.Failure _) ->
+            ( { model | yesNo = Activity.Err "Failed to fetch trials" }
+            , Cmd.none
+            )
 
         GotTrials _ ->
             ( model, Cmd.none )
 
-        UserClickedStartActivity ->
+        UserClickedStartTraining ->
+            ( { model | yesNo = Activity.startTraining model.yesNo }, Cmd.none )
+
+        UserClickedStartMain ->
             ( { model | yesNo = Activity.startMain model.yesNo initState }, Cmd.none )
 
         UserPressedButton bool ->
@@ -259,44 +265,36 @@ view task =
         Activity.Running step data ->
             case step of
                 Activity.Instructions ->
-                    [ View.unsafeInstructions data.infos UserClickedStartActivity ]
+                    [ View.unsafeInstructions data.infos UserClickedStartTraining ]
 
                 Activity.Training ->
-                    []
+                    data.current
+                        |> Maybe.map viewTrial
+                        |> Maybe.withDefault [ View.introToMain UserClickedStartMain ]
 
                 Activity.Main ->
-                    case data.current of
-                        Just trial ->
-                            [ div [ class " yes-no" ]
-                                [ div [ class "text-3xl font-bold italic my-8 text-center" ] [ text trial.word ]
-                                , div [ class "yes-no-buttons" ]
-                                    [ button
-                                        [ onClick (UserPressedButton False) ]
-                                        [ text "No" ]
-                                    , button
-                                        [ onClick (UserPressedButton True) ]
-                                        [ text "Yes" ]
-                                    ]
-                                ]
-                            ]
-
-                        Nothing ->
-                            [ View.end data.infos.end UserClickedSaveData (Just "vks") ]
+                    data.current
+                        |> Maybe.map viewTrial
+                        |> Maybe.withDefault [ View.end data.infos.end UserClickedSaveData (Just "vks") ]
 
         Activity.Err reason ->
             [ p [] [ text reason ] ]
 
 
-init : List ActivityInfo -> List Trial -> Activity Trial State
-init infos trials =
-    let
-        info =
-            infos
-                |> List.filter (\task -> task.session == Pretest && task.name == "YesNo")
-                |> List.head
-                |> Result.fromMaybe "Could not find Yes/No infos"
-    in
-    Activity.startIntro info [] trials initState
+viewTrial : Trial -> List (Html Msg)
+viewTrial trial =
+    [ div [ class " yes-no" ]
+        [ div [ class "text-3xl font-bold italic my-8 text-center" ] [ text trial.word ]
+        , div [ class "yes-no-buttons" ]
+            [ button
+                [ onClick (UserPressedButton False) ]
+                [ text "No" ]
+            , button
+                [ onClick (UserPressedButton True) ]
+                [ text "Yes" ]
+            ]
+        ]
+    ]
 
 
 infoLoaded : List ActivityInfo -> YesNo -> YesNo
