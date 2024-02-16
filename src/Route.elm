@@ -95,7 +95,8 @@ type PosttestActivity
 parser : Parser (Route -> a) a
 parser =
     oneOf
-        [ map Home top
+        -- [ map Home top
+        [ map UserCode (top <?> Query.string "date")
         , map TermsAndConditions (s "terms-and-conditions")
         , map CalendarUpdated (s "calendar-updated")
         , map Pretest (s "user" </> string </> s "pretest" </> pretestRouteParser)

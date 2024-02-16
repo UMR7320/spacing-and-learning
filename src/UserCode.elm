@@ -1,13 +1,14 @@
 module UserCode exposing (..)
 
 import Browser.Navigation exposing (Key, pushUrl)
-import Html.Styled exposing (code, div, form, input, text)
-import Html.Styled.Attributes exposing (value)
+import Html.Styled exposing (code, div, form, h1, input, p, text)
+import Html.Styled.Attributes exposing (class, placeholder, style, value)
 import Html.Styled.Events exposing (onInput)
 import Http
 import Json.Decode exposing (Decoder, andThen, bool, field, map, map2, string)
 import RemoteData exposing (RemoteData(..))
 import Url.Builder
+import Html.Styled.Attributes exposing (autofocus)
 
 
 
@@ -40,23 +41,37 @@ emptyModel =
 
 view : Model -> List (Html.Styled.Html Msg)
 view model =
-    [ form
-        []
-        [ input
-            [ value model.code
-            , onInput CodeUpdated
+    [ div
+        [ class "flex flex-col" ]
+        [ h1 [] [ text "Bienvenue 😀" ]
+        , div
+            [ class "mb-5" ]
+            [ p [] [ text "Bonjour et bienvenue sur la plateforme LexLearn Collège." ]
+            , p [] [ text "Entre ton code pour commencer l'activité." ]
             ]
+        , form
             []
+            [ input
+                [ class "text-3xl p-4 border-2 border-gray-600 rounded"
+                , style "width" "8ch"
+                , value model.code
+                , autofocus True
+                , onInput CodeUpdated
+                ]
+                []
+            ]
+        , case model.response of
+            Success (KO reason) ->
+                div [ class "text-red-600 mt-2" ] [ text reason ]
+
+            Loading ->
+                div
+                [ class "mt-2" ]
+                [ text "Chargement" ]
+
+            _ ->
+                text ""
         ]
-    , case model.response of
-        Success (KO reason) ->
-            div [] [ text reason ]
-
-        Loading ->
-            div [] [ text "Chargement" ]
-
-        _ ->
-            text ""
     ]
 
 
