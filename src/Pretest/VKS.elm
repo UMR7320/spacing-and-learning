@@ -49,6 +49,7 @@ type alias Answer =
     { knowledge : Familiarity
     , definition : String
     , usage : String
+    , error : Maybe String
     }
 
 
@@ -70,6 +71,7 @@ emptyAnswer =
     { knowledge = NoAnswer
     , definition = ""
     , usage = ""
+    , error = Nothing
     }
 
 
@@ -108,78 +110,7 @@ view vks =
         Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
-                    [ div [ A.class "flex flex-col items-center flow" ]
-                        [ div [ class "text-3xl font-bold italic my-6" ] [ text ("to " ++ trial.verb) ]
-                        , Html.Styled.fieldset [ class "flex flex-col m-2 flow" ]
-                            [ Html.Styled.label []
-                                [ Html.Styled.input
-                                    [ type_ "radio"
-                                    , A.id "ns"
-                                    , A.value "NeverSeen"
-                                    , A.checked (data.state.knowledge == NeverSeen)
-                                    , E.onInput UserClickedNewKnowledge
-                                    ]
-                                    []
-                                , span [ class "p-2" ] [ text "Je n'ai jamais vu ce verbe" ]
-                                ]
-                            , Html.Styled.label []
-                                [ Html.Styled.input
-                                    [ type_ "radio"
-                                    , A.value "PreviouslySeen"
-                                    , A.checked (data.state.knowledge == PreviouslySeen)
-                                    , E.onInput UserClickedNewKnowledge
-                                    ]
-                                    []
-                                , span [ class "p-2" ] [ text "J'ai déjà vu ce verbe mais je ne sais pas le traduire" ]
-                                ]
-                            , Html.Styled.label []
-                                [ Html.Styled.input
-                                    [ type_ "radio"
-                                    , A.value "Known"
-                                    , A.checked (data.state.knowledge == Known)
-                                    , E.onInput UserClickedNewKnowledge
-                                    ]
-                                    []
-                                , span [ class "p-2" ] [ text "J'ai déjà vu ce verbe et je sais le traduire" ]
-                                ]
-                            ]
-                        , if data.state.knowledge == Known then
-                            Html.Styled.fieldset [ class "flex flex-col p-2" ]
-                                [ label [ class "flex flex-col p-2" ]
-                                    [ text "Voici ma traduction :"
-                                    , input
-                                        [ class "border-2 p-2 mt-2"
-                                        , E.onInput (UserUpdatedField Definition)
-                                        ]
-                                        []
-                                    ]
-                                , label [ class "flex flex-col p-2" ]
-                                    [ text "Je sais aussi utiliser ce verbe dans une phrase. Voici ma phrase :"
-                                    , textarea
-                                        [ class "border-2 p-2 mt-2"
-                                        , E.onInput (UserUpdatedField Sentence)
-                                        ]
-                                        []
-                                    ]
-                                ]
-
-                          else
-                            text ""
-                        , View.button
-                            { txt = "Continue"
-                            , message = UserClickedNextTrial
-                            , isDisabled =
-                                if data.state.knowledge == Known && List.all String.isEmpty [ data.state.definition ] then
-                                    True
-
-                                else if data.state.knowledge == NoAnswer then
-                                    True
-
-                                else
-                                    False
-                            }
-                        ]
-                    ]
+                    viewTrial trial data
 
                 Nothing ->
                     [ View.end data.infos.end UserClickedSaveData Nothing ]
@@ -195,6 +126,83 @@ view vks =
 
         Activity.Running Activity.Instructions data ->
             [ View.instructions data.infos UserClickedStartMain ]
+
+
+viewTrial : Trial -> Activity.Data Trial Answer -> List (Html Msg)
+viewTrial trial data =
+    [ div [ A.class "flex flex-col items-center flow" ]
+        [ div [ class "text-3xl font-bold italic my-6" ] [ text ("to " ++ trial.verb) ]
+        , Html.Styled.fieldset [ class "flex flex-col m-2 flow" ]
+            [ Html.Styled.label []
+                [ Html.Styled.input
+                    [ type_ "radio"
+                    , A.id "ns"
+                    , A.value "NeverSeen"
+                    , A.checked (data.state.knowledge == NeverSeen)
+                    , E.onInput UserClickedNewKnowledge
+                    ]
+                    []
+                , span [ class "p-2" ] [ text "Je n'ai jamais vu ce verbe" ]
+                ]
+            , Html.Styled.label []
+                [ Html.Styled.input
+                    [ type_ "radio"
+                    , A.value "PreviouslySeen"
+                    , A.checked (data.state.knowledge == PreviouslySeen)
+                    , E.onInput UserClickedNewKnowledge
+                    ]
+                    []
+                , span [ class "p-2" ] [ text "J'ai déjà vu ce verbe mais je ne sais pas le traduire" ]
+                ]
+            , Html.Styled.label []
+                [ Html.Styled.input
+                    [ type_ "radio"
+                    , A.value "Known"
+                    , A.checked (data.state.knowledge == Known)
+                    , E.onInput UserClickedNewKnowledge
+                    ]
+                    []
+                , span [ class "p-2" ] [ text "J'ai déjà vu ce verbe et je sais le traduire" ]
+                ]
+            ]
+        , if data.state.knowledge == Known then
+            Html.Styled.fieldset [ class "flex flex-col p-2" ]
+                [ label
+                    [ class "flex flex-col" ]
+                    [ text "Voici ma traduction :"
+                    , input
+                        [ class "border-2 p-2 mt-2"
+                        , E.onInput (UserUpdatedField Definition)
+                        ]
+                        []
+                    ]
+                , case data.state.error of
+                    Just error ->
+                        div
+                            [ class "text-red-600" ]
+                            [ text error ]
+
+                    Nothing ->
+                        text ""
+                , label [ class "flex flex-col mt-4" ]
+                    [ text "Je sais aussi utiliser ce verbe dans une phrase. Voici ma phrase :"
+                    , textarea
+                        [ class "border-2 p-2 mt-2"
+                        , E.onInput (UserUpdatedField Sentence)
+                        ]
+                        []
+                    ]
+                ]
+
+          else
+            text ""
+        , View.button
+            { txt = "Continue"
+            , message = UserClickedNextTrial
+            , isDisabled = data.state.knowledge == NoAnswer
+            }
+        ]
+    ]
 
 
 
@@ -253,7 +261,15 @@ update msg model =
             ( { model | vks = Activity.update prevAnswer model.vks }, Cmd.none )
 
         UserClickedNextTrial ->
-            ( model, Task.perform NextTrial Time.now )
+            if prevAnswer.knowledge == Known && String.isEmpty prevAnswer.definition then
+                ( { model
+                    | vks = Activity.update { prevAnswer | error = Just "Ce champ est obligatoire" } model.vks
+                  }
+                , Cmd.none
+                )
+
+            else
+                ( model, Task.perform NextTrial Time.now )
 
         NextTrial timestamp ->
             let
@@ -279,7 +295,10 @@ update msg model =
             case fieldId of
                 Definition ->
                     ( { model
-                        | vks = Activity.update { prevAnswer | definition = new } model.vks
+                        | vks =
+                            Activity.update
+                                { prevAnswer | definition = new, error = Nothing }
+                                model.vks
                       }
                     , Cmd.none
                     )
@@ -293,7 +312,13 @@ update msg model =
 
         UserClickedNewKnowledge str ->
             ( { model
-                | vks = Activity.update { prevAnswer | knowledge = familiarityFromString str } model.vks
+                | vks =
+                    Activity.update
+                        { prevAnswer
+                            | knowledge = familiarityFromString str
+                            , error = Nothing
+                        }
+                        model.vks
               }
             , Cmd.none
             )
