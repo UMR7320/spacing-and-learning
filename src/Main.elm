@@ -442,8 +442,8 @@ body model =
                                     Route.Acceptability _ ->
                                         List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptability)
 
-                                    Route.YesNo ->
-                                        List.map (Html.Styled.map YesNo) (YesNo.view model.yesNo)
+                                    Route.YesNo page ->
+                                        List.map (Html.Styled.map YesNo) (YesNo.view model.yesNo page)
 
                                     Route.Calendar _ group ->
                                         case model.generalParameters of
@@ -710,7 +710,7 @@ changeRouteTo route model =
                         ]
                     )
 
-                Route.YesNo ->
+                Route.YesNo _ ->
                     ( updatedModel
                     , Cmd.batch
                         [ cmd

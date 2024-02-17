@@ -1,9 +1,9 @@
 module ProgressBar exposing (..)
 
+import Activity
 import Css
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Html exposing (..)
-import Activity
 import Pretest.Version exposing (Version(..))
 import Route exposing (..)
 
@@ -42,7 +42,7 @@ viewPretest activity model =
         PreTest ->
             div
                 [ class "progress-bar", attribute "style" "--count: 2" ]
-                [ viewItem "Premier Quizz" YesNo model.yesNo activity
+                [ viewItem "Premier Quizz" (isYesNo activity) model.yesNo True
                 , viewItem "Deuxième Quizz" VKS model.vks activity
                 ]
 
@@ -164,6 +164,15 @@ viewWordCloud session =
 
         _ ->
             text ""
+
+
+isYesNo activity =
+    case activity of
+        YesNo _ ->
+            True
+
+        _ ->
+            False
 
 
 isAcceptability activity =

@@ -28,7 +28,8 @@
   },
   "scripts": {
     "start": "npm run assets && parcel index.html output.html",
-    "assets": "npm run build-img",
+    "assets": "npm run copy-static && npm run build-img",
+    "copy-static": "cp -r static dist/",
     "build-img": "parcel build img/*",
     "build": "npm run assets && parcel build index.html output.html --no-cache",
     "test": "elm-test",

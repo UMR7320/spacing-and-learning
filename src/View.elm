@@ -1,34 +1,4 @@
-module View exposing
-    ( audioButton
-    , bold
-    , button
-    , end
-    , floatingLabel
-    , fromMarkdown
-    , fromUnsafeMarkdown
-    , genericNeutralFeedback
-    , genericSingleChoiceFeedback
-    , header
-    , instructions
-    , introToMain
-    , loading
-    , mainEl
-    , navOut
-    , navigationButton
-    , notFound
-    , pct
-    , radio
-    , readOnlyAmorce
-    , sentenceInSynonym
-    , shuffledOptions
-    , textAreaWithReadonlyAmorce
-    , textField
-    , tooltip
-    , trainingWheelsGeneric
-    , unclickableButton
-    , unsafeInstructions
-    , viewTraining
-    )
+module View exposing (..)
 
 import Css
 import Css.Global
@@ -121,6 +91,17 @@ unsafeInstructions infos msgToTraining =
     div [ class "instructions" ]
         [ div [ class "pb-8" ] [ fromUnsafeMarkdown infos.instructions ]
         , button { message = msgToTraining, txt = "Continue", isDisabled = False }
+        ]
+
+
+unsafeInstructionsWithLink infos link =
+    div [ class "instructions" ]
+        [ div [ class "pb-8" ] [ fromUnsafeMarkdown infos.instructions ]
+        , a
+            [ href link
+            , class "button"
+            ]
+            [ text "Continue" ]
         ]
 
 

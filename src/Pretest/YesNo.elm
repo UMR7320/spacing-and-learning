@@ -2,16 +2,17 @@ module Pretest.YesNo exposing (..)
 
 import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
+import Browser.Navigation exposing (Key, pushUrl)
 import Data
-import Html.Styled exposing (Html, button, div, p, text)
-import Html.Styled.Attributes exposing (class)
+import Html.Styled exposing (Html, a, button, div, p, text, video)
+import Html.Styled.Attributes exposing (class, controls, href, src)
 import Html.Styled.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import RemoteData exposing (RemoteData)
-import Route exposing (PretestRoute(..))
+import Route exposing (PretestRoute(..), YesNoRoute(..))
 import Task
 import Time
 import View
@@ -42,6 +43,7 @@ type alias Model a =
         | yesNo : YesNo
         , user : Maybe String
         , activitiesInfos : RemoteData Http.Error (List ActivityInfo)
+        , key : Key
     }
 
 
@@ -88,7 +90,9 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedStartTraining ->
-            ( { model | yesNo = Activity.startTraining model.yesNo }, Cmd.none )
+            ( { model | yesNo = Activity.startTraining model.yesNo }
+            , pushUrl model.key "instructions"
+            )
 
         UserClickedStartMain ->
             ( { model | yesNo = Activity.startMain model.yesNo initState }, Cmd.none )
@@ -104,9 +108,10 @@ update msg model =
               }
             , case model.yesNo of
                 Activity.Running Activity.Main _ ->
-                  saveHistory model
+                    saveHistory model
+
                 _ ->
-                  Cmd.none
+                    Cmd.none
             )
 
         UserClickedSaveData ->
@@ -257,9 +262,42 @@ updateVocabularyScore payload callbackMsg decoder =
 -- VIEW
 
 
-view : YesNo -> List (Html Msg)
-view task =
-    case task of
+view : YesNo -> YesNoRoute -> List (Html Msg)
+view activity page =
+    case page of
+        Activity ->
+            viewActivity activity
+
+        Video ->
+            [ div
+                [ class "flow" ]
+                [ p [] [ text "Regarde cette vidéo explicative :" ]
+                , video [ controls True, src "/yesNo.mp4" ] []
+                , View.button
+                    { message = UserClickedStartTraining
+                    , txt = "Démarrer l'activité"
+                    , isDisabled = False
+                    }
+                ]
+            ]
+
+        TrainingInstructions ->
+            [ div [ class "endInfo" ]
+                [ div []
+                    [ div [ class "pb-8" ] [ text "Commençons par 4 exemples" ]
+                    , a
+                        [ href "."
+                        , class "button"
+                        ]
+                        [ text "Continue" ]
+                    ]
+                ]
+            ]
+
+
+viewActivity : YesNo -> List (Html Msg)
+viewActivity activity =
+    case activity of
         Activity.NotStarted ->
             [ text "C'est Bon!" ]
 
@@ -269,7 +307,7 @@ view task =
         Activity.Running step data ->
             case step of
                 Activity.Instructions ->
-                    [ View.unsafeInstructions data.infos UserClickedStartTraining ]
+                    [ View.unsafeInstructionsWithLink data.infos "yes-no/video" ]
 
                 Activity.Training ->
                     data.current
