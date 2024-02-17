@@ -102,7 +102,11 @@ update msg model =
                     Activity.update { evaluation = Just bool } model.yesNo
                         |> Activity.next timestamp initState
               }
-            , saveHistory model
+            , case model.yesNo of
+                Activity.Running Activity.Main _ ->
+                  saveHistory model
+                _ ->
+                  Cmd.none
             )
 
         UserClickedSaveData ->

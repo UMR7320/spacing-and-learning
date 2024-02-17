@@ -102,35 +102,32 @@ next timestamp resetedState activity =
     case activity of
         Running Training data ->
             case data.trainingTrials of
-                x :: y :: z :: zs ->
+                _ :: y :: z :: zs ->
                     Running Training
                         { data
                             | trainingTrials = y :: z :: zs
                             , current = Just y
                             , next = Just z
-                            , history = ( x, data.state, timestamp ) :: data.history
                             , feedback = not data.feedback
                             , state = resetedState
                         }
 
-                [ last ] ->
-                    Running Training
-                        { data
-                            | trainingTrials = []
-                            , current = Nothing
-                            , next = Nothing
-                            , history = ( last, data.state, timestamp ) :: data.history
-                            , feedback = not data.feedback
-                            , state = resetedState
-                        }
-
-                [ x, y ] ->
+                [ _, y ] ->
                     Running Training
                         { data
                             | trainingTrials = [ y ]
                             , current = Just y
                             , next = Nothing
-                            , history = ( x, data.state, timestamp ) :: data.history
+                            , feedback = not data.feedback
+                            , state = resetedState
+                        }
+
+                [ _ ] ->
+                    Running Training
+                        { data
+                            | trainingTrials = []
+                            , current = Nothing
+                            , next = Nothing
                             , feedback = not data.feedback
                             , state = resetedState
                         }
