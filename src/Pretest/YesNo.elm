@@ -273,7 +273,7 @@ view activity page =
                 [ p [] [ text "Regarde cette vidéo explicative :" ]
                 , video
                     [ controls True
-                    , src "/static/yesNo.mp4"
+                    , src "/yesNo.mp4"
                     , class "border-2"
                     ]
                     []

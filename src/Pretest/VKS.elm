@@ -103,7 +103,7 @@ view vks page =
                 [ p [] [ text "Regarde cette vidéo explicative :" ]
                 , video
                     [ controls True
-                    , src "/static/vks.mp4"
+                    , src "/vks.mp4"
                     , class "border-2"
                     ]
                     []
