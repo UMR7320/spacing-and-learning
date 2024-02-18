@@ -108,8 +108,8 @@ view vks page =
                     ]
                     []
                 , View.button
-                    { message = UserClickedStartTraining
-                    , txt = "Démarrer l'activité"
+                    { message = UserClickedStartMain
+                    , txt = "Je commence mon quizz"
                     , isDisabled = False
                     }
                 ]
@@ -324,7 +324,9 @@ update msg model =
             )
 
         UserClickedStartMain ->
-            ( { model | vks = Activity.startMain model.vks emptyAnswer }, Cmd.none )
+            ( { model | vks = Activity.startMain model.vks emptyAnswer }
+            , pushUrl model.key "../vks"
+            )
 
         UserUpdatedField fieldId new ->
             case fieldId of

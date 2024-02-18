@@ -95,7 +95,9 @@ update msg model =
             )
 
         UserClickedStartMain ->
-            ( { model | yesNo = Activity.startMain model.yesNo initState }, Cmd.none )
+            ( { model | yesNo = Activity.startMain model.yesNo initState }
+            , pushUrl model.key "../yes-no"
+            )
 
         UserPressedButton bool ->
             ( model, Task.perform (NextTrial bool) Time.now )
@@ -278,8 +280,8 @@ view activity page =
                     ]
                     []
                 , View.button
-                    { message = UserClickedStartTraining
-                    , txt = "Démarrer l'activité"
+                    { message = UserClickedStartMain
+                    , txt = "Je commence mon quizz"
                     , isDisabled = False
                     }
                 ]
