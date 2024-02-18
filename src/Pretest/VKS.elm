@@ -101,7 +101,12 @@ view vks page =
             [ div
                 [ class "flow" ]
                 [ p [] [ text "Regarde cette vidéo explicative :" ]
-                , video [ controls True, src "/vks.mp4" ] []
+                , video
+                    [ controls True
+                    , src "/static/vks.mp4"
+                    , class "border-2"
+                    ]
+                    []
                 , View.button
                     { message = UserClickedStartTraining
                     , txt = "Démarrer l'activité"
@@ -115,7 +120,7 @@ view vks page =
                 [ div []
                     [ div [ class "pb-8" ] [ text "Commençons par quelques exemples" ]
                     , a
-                        [ href "."
+                        [ href "../vks"
                         , class "button"
                         ]
                         [ text "Continue" ]

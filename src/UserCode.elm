@@ -2,13 +2,12 @@ module UserCode exposing (..)
 
 import Browser.Navigation exposing (Key, pushUrl)
 import Html.Styled exposing (code, div, form, h1, input, p, text)
-import Html.Styled.Attributes exposing (class, placeholder, style, value)
+import Html.Styled.Attributes exposing (autofocus, class, placeholder, style, value)
 import Html.Styled.Events exposing (onInput)
 import Http
 import Json.Decode exposing (Decoder, andThen, bool, field, map, map2, string)
 import RemoteData exposing (RemoteData(..))
 import Url.Builder
-import Html.Styled.Attributes exposing (autofocus)
 
 
 
@@ -42,7 +41,7 @@ emptyModel =
 view : Model -> List (Html.Styled.Html Msg)
 view model =
     [ div
-        [ class "flex flex-col" ]
+        []
         [ h1 [] [ text "Bienvenue 😀" ]
         , div
             [ class "mb-5" ]
@@ -66,11 +65,11 @@ view model =
 
             Loading ->
                 div
-                [ class "mt-2" ]
-                [ text "Chargement" ]
+                    [ class "mt-2" ]
+                    [ text "Chargement" ]
 
             _ ->
-                text ""
+                div [ class "mt-2" ] [ text " " ]
         ]
     ]
 

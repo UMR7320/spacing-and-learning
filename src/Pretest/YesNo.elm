@@ -271,7 +271,12 @@ view activity page =
             [ div
                 [ class "flow" ]
                 [ p [] [ text "Regarde cette vidéo explicative :" ]
-                , video [ controls True, src "/yesNo.mp4" ] []
+                , video
+                    [ controls True
+                    , src "/static/yesNo.mp4"
+                    , class "border-2"
+                    ]
+                    []
                 , View.button
                     { message = UserClickedStartTraining
                     , txt = "Démarrer l'activité"
@@ -285,7 +290,7 @@ view activity page =
                 [ div []
                     [ div [ class "pb-8" ] [ text "Commençons par 4 exemples" ]
                     , a
-                        [ href "."
+                        [ href "../yes-no"
                         , class "button"
                         ]
                         [ text "Continue" ]
@@ -325,7 +330,7 @@ viewActivity activity =
 viewTrial : Trial -> List (Html Msg)
 viewTrial trial =
     [ div [ class " yes-no" ]
-        [ div [ class "text-3xl font-bold italic my-8 text-center" ] [ text trial.word ]
+        [ div [ class "text-3xl font-bold italic mb-8 text-center" ] [ text trial.word ]
         , div [ class "yes-no-buttons" ]
             [ button
                 [ onClick (UserPressedButton False) ]

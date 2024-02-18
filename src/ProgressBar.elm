@@ -34,7 +34,7 @@ view model =
             viewWordCloud session
 
         _ ->
-            text ""
+            div [] [ text "" ]
 
 
 viewPretest activity model =

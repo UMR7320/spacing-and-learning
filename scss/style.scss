@@ -4,10 +4,14 @@
 
 body {
   @apply font-sans text-gray-800;
-
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
   overflow-y: scroll;
+
+}
+
+body > div:first-child {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
 }
 
 nav {
@@ -29,12 +33,14 @@ main {
   padding-bottom: 2rem;
   padding-right: 1rem;
   padding-left: 1rem;
+
+  display: grid;
+  place-items: center;
 }
 
-@media (min-width: 40ch) {
+@media (min-width: 70ch) {
   main {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
+    margin-top: -7rem;
   }
 }
 
