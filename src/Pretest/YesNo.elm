@@ -106,12 +106,11 @@ update msg model =
                     Activity.update { evaluation = Just bool } model.yesNo
                         |> Activity.next timestamp initState
               }
-            , case model.yesNo of
-                Activity.Running Activity.Main _ ->
-                    saveHistory model
+            , if Activity.isRunningMain model.yesNo then
+                saveHistory model
 
-                _ ->
-                    Cmd.none
+              else
+                Cmd.none
             )
 
         UserClickedSaveData ->
@@ -265,10 +264,10 @@ updateVocabularyScore payload callbackMsg decoder =
 view : YesNo -> YesNoRoute -> List (Html Msg)
 view activity page =
     case page of
-        Activity ->
+        YesNoActivity ->
             viewActivity activity
 
-        Video ->
+        YesNoVideo ->
             [ div
                 [ class "flow" ]
                 [ p [] [ text "Regarde cette vidéo explicative :" ]
@@ -281,7 +280,7 @@ view activity page =
                 ]
             ]
 
-        TrainingInstructions ->
+        YesNoTrainingInstructions ->
             [ div [ class "endInfo" ]
                 [ div []
                     [ div [ class "pb-8" ] [ text "Commençons par 4 exemples" ]

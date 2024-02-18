@@ -436,8 +436,8 @@ body model =
                                     Route.GeneralInfos ->
                                         []
 
-                                    Route.VKS ->
-                                        List.map (Html.Styled.map VKS) (VKS.view model.vks)
+                                    Route.VKS page ->
+                                        List.map (Html.Styled.map VKS) (VKS.view model.vks page)
 
                                     Route.Acceptability _ ->
                                         List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptability)
@@ -719,8 +719,8 @@ changeRouteTo route model =
                         ]
                     )
 
-                Route.VKS ->
-                    ( { newModel | user = Just userId }
+                Route.VKS _ ->
+                    ( updatedModel
                     , Cmd.batch
                         [ cmd
                         , Cmd.map VKS VKS.getRecords

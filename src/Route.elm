@@ -7,6 +7,7 @@ module Route exposing
     , Session1Activity(..)
     , Session2Activity(..)
     , Session3Activity(..)
+    , VKSRoute(..)
     , YesNoRoute(..)
     , fromUrl
     )
@@ -72,7 +73,7 @@ type PretestRoute
     | EmailSent
     | SPR
     | SentenceCompletion
-    | VKS
+    | VKS VKSRoute
     | Acceptability AcceptabilityRoute
     | YesNo YesNoRoute
     | Calendar Bool Group
@@ -84,9 +85,15 @@ type Group
 
 
 type YesNoRoute
-    = Video
-    | TrainingInstructions
-    | Activity
+    = YesNoVideo
+    | YesNoTrainingInstructions
+    | YesNoActivity
+
+
+type VKSRoute
+    = VKSVideo
+    | VKSTrainingInstructions
+    | VKSActivity
 
 
 type AcceptabilityRoute
@@ -165,13 +172,20 @@ pretestRouteParser =
         , map GeneralInfos (s "informations")
         , map EmailSent (s "email-sent")
         , map SentenceCompletion (s "sentence-completion")
-        , map VKS (s "vks")
+        , map VKS
+            (s "vks"
+                </> oneOf
+                        [ map VKSActivity top
+                        , map VKSVideo (s "video")
+                        , map VKSTrainingInstructions (s "instructions")
+                        ]
+            )
         , map YesNo
             (s "yes-no"
                 </> oneOf
-                        [ map Activity top
-                        , map Video (s "video")
-                        , map TrainingInstructions (s "instructions")
+                        [ map YesNoActivity top
+                        , map YesNoVideo (s "video")
+                        , map YesNoTrainingInstructions (s "instructions")
                         ]
             )
         , map (Calendar False) (s "calendar" </> oneOf [ map Massed (s "m"), map Distributed (s "d") ])

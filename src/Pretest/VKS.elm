@@ -2,9 +2,10 @@ module Pretest.VKS exposing (..)
 
 import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
+import Browser.Navigation exposing (Key, pushUrl)
 import Data
 import Html.Styled exposing (..)
-import Html.Styled.Attributes as A exposing (class, type_)
+import Html.Styled.Attributes as A exposing (class, controls, href, src, type_)
 import Html.Styled.Events as E
 import Http
 import Json.Decode as Decode
@@ -14,6 +15,7 @@ import Pretest.Version exposing (Version(..))
 import Random
 import Random.List exposing (shuffle)
 import RemoteData exposing (RemoteData)
+import Route exposing (VKSRoute(..))
 import Task
 import Time
 import View
@@ -28,6 +30,7 @@ type alias Model superModel =
         | vks : VKS
         , user : Maybe String
         , version : Version
+        , key : Key
     }
 
 
@@ -88,32 +91,51 @@ infoLoaded infos =
 -- VIEW
 
 
-view : VKS -> List (Html Msg)
-view vks =
-    case vks of
-        Activity.Running Activity.Training data ->
-            case data.current of
-                Just _ ->
-                    [ text "vks" ]
+view : VKS -> VKSRoute -> List (Html Msg)
+view vks page =
+    case page of
+        VKSActivity ->
+            viewActivity vks
 
-                Nothing ->
-                    [ div [ A.class "flex flex-col items-center" ]
-                        [ View.fromMarkdown data.infos.introToMain
-                        , View.button
-                            { message = UserClickedStartMain
-                            , txt = "Start"
-                            , isDisabled = False
-                            }
+        VKSVideo ->
+            [ div
+                [ class "flow" ]
+                [ p [] [ text "Regarde cette vidéo explicative :" ]
+                , video [ controls True, src "/vks.mp4" ] []
+                , View.button
+                    { message = UserClickedStartTraining
+                    , txt = "Démarrer l'activité"
+                    , isDisabled = False
+                    }
+                ]
+            ]
+
+        VKSTrainingInstructions ->
+            [ div [ class "endInfo" ]
+                [ div []
+                    [ div [ class "pb-8" ] [ text "Commençons par quelques exemples" ]
+                    , a
+                        [ href "."
+                        , class "button"
                         ]
+                        [ text "Continue" ]
                     ]
+                ]
+            ]
+
+
+viewActivity : VKS -> List (Html Msg)
+viewActivity activity =
+    case activity of
+        Activity.Running Activity.Training data ->
+            data.current
+                |> Maybe.map (viewTrial data)
+                |> Maybe.withDefault [ View.introToMain UserClickedStartMain ]
 
         Activity.Running Activity.Main data ->
-            case data.current of
-                Just trial ->
-                    viewTrial trial data
-
-                Nothing ->
-                    [ View.end data.infos.end UserClickedSaveData Nothing ]
+            data.current
+                |> Maybe.map (viewTrial data)
+                |> Maybe.withDefault [ View.end data.infos.end UserClickedSaveData Nothing ]
 
         Activity.Err reason ->
             [ text reason ]
@@ -125,11 +147,11 @@ view vks =
             [ text "C'est tout bon!" ]
 
         Activity.Running Activity.Instructions data ->
-            [ View.instructions data.infos UserClickedStartMain ]
+            [ View.unsafeInstructionsWithLink data.infos "vks/video" ]
 
 
-viewTrial : Trial -> Activity.Data Trial Answer -> List (Html Msg)
-viewTrial trial data =
+viewTrial : Activity.Data Trial Answer -> Trial -> List (Html Msg)
+viewTrial data trial =
     [ div [ A.class "flex flex-col items-center flow" ]
         [ div [ class "text-3xl font-bold italic my-6" ] [ text ("to " ++ trial.verb) ]
         , Html.Styled.fieldset [ class "flex flex-col m-2 flow" ]
@@ -214,6 +236,7 @@ type Msg
     | GotTrials (RemoteData Http.Error (List Trial))
     | GotRandomizedTrials (List Trial)
     | NextTrial Time.Posix
+    | UserClickedStartTraining
     | UserClickedStartMain
     | UserClickedSaveData
     | UserUpdatedField Field String
@@ -263,7 +286,10 @@ update msg model =
         UserClickedNextTrial ->
             if prevAnswer.knowledge == Known && String.isEmpty prevAnswer.definition then
                 ( { model
-                    | vks = Activity.update { prevAnswer | error = Just "Ce champ est obligatoire" } model.vks
+                    | vks =
+                        Activity.update
+                            { prevAnswer | error = Just "Ce champ est obligatoire" }
+                            model.vks
                   }
                 , Cmd.none
                 )
@@ -279,17 +305,21 @@ update msg model =
             ( newModel
             , Cmd.batch
                 [ Random.generate RuntimeReordedAmorces (Random.uniform Definition [ Sentence ])
-                , saveData newModel
+                , if Activity.isRunningMain newModel.vks then
+                    saveData newModel
+
+                  else
+                    Cmd.none
                 ]
             )
 
+        UserClickedStartTraining ->
+            ( { model | vks = Activity.startTraining model.vks }
+            , pushUrl model.key "instructions"
+            )
+
         UserClickedStartMain ->
-            let
-                -- gross hack
-                flippedStartMain a b =
-                    Activity.startMain b a
-            in
-            ( { model | vks = flippedStartMain emptyAnswer model.vks }, Cmd.none )
+            ( { model | vks = Activity.startMain model.vks emptyAnswer }, Cmd.none )
 
         UserUpdatedField fieldId new ->
             case fieldId of

@@ -313,6 +313,16 @@ toggle activity =
             Err "I tried to toggle the feedback but the task is still loading. Please report this error."
 
 
+isRunningMain : Activity t s -> Bool
+isRunningMain activity =
+    case activity of
+        Running Main _ ->
+            True
+
+        _ ->
+            False
+
+
 getState : Activity t s -> Maybe s
 getState activity =
     case activity of

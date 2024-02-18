@@ -43,7 +43,7 @@ viewPretest activity model =
             div
                 [ class "progress-bar", attribute "style" "--count: 2" ]
                 [ viewItem "Premier Quizz" (isYesNo activity) model.yesNo True
-                , viewItem "Deuxième Quizz" VKS model.vks activity
+                , viewItem "Deuxième Quizz" (isVKS activity) model.vks True
                 ]
 
         PostTest ->
@@ -53,7 +53,7 @@ viewPretest activity model =
                 , div [] [ text "Spelling" ]
                 , div [] [ text "Context" ]
                 , div [] [ text "How was it?" ]
-                , viewItem "LexLearn verbs" VKS model.vks activity
+                , viewItem "LexLearn verbs" (isVKS activity) model.vks True
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
@@ -61,7 +61,7 @@ viewPretest activity model =
         PostTestDiff ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ viewItem "LexLearn verbs" VKS model.vks activity
+                [ viewItem "LexLearn verbs" (isVKS activity) model.vks True
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptability True
@@ -70,7 +70,7 @@ viewPretest activity model =
         Surprise ->
             div
                 [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ viewItem "LexLearn verbs" VKS model.vks activity
+                [ viewItem "LexLearn verbs" (isVKS activity) model.vks True
                 , viewItem "Reading test" SPR model.spr activity
                 , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
                 , viewItem "Listening test" (isAcceptability activity) model.acceptability True
@@ -174,6 +174,13 @@ isYesNo activity =
         _ ->
             False
 
+isVKS activity =
+    case activity of
+        VKS _ ->
+            True
+
+        _ ->
+            False
 
 isAcceptability activity =
     case activity of
