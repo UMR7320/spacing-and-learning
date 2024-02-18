@@ -157,7 +157,7 @@ viewActivity activity =
 
 viewTrial : Activity.Data Trial Answer -> Trial -> List (Html Msg)
 viewTrial data trial =
-    [ div [ A.class "flex flex-col items-center flow" ]
+    [ div [ A.class "vks flex flex-col items-center flow" ]
         [ div [ class "text-3xl font-bold italic my-6" ] [ text ("to " ++ trial.verb) ]
         , Html.Styled.fieldset [ class "flex flex-col m-2 flow" ]
             [ Html.Styled.label []

@@ -378,7 +378,8 @@ radio value isChecked isCorrect feedbackMode msg =
 
 introToMain : msg -> Html msg
 introToMain msg =
-    div [ class "grid place-items-center" ]
+    div
+        []
         [ p [ class "pt-16 mb-8" ] [ text "Now you understand the activity, let's try our target words." ]
         , button
             { message = msg

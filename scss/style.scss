@@ -38,12 +38,9 @@ main {
   place-items: center;
 }
 
-@media (min-width: 70ch) {
-  main {
-    margin-top: -7rem;
-  }
+main > div {
+  min-height: 20rem;
 }
-
 h1 {
   @apply font-bold text-3xl text-gray-800;
   @apply mb-4;
@@ -251,12 +248,6 @@ input {
   .shuffled-options > label > div {
     margin: 0;
   }
-}
-
-.endInfo {
-  min-height: 60vh;
-  display: grid;
-  place-items: center;
 }
 
 .endInfo > div {
@@ -551,6 +542,10 @@ input {
 
 .sentence-in-synonym > div {
   margin-top: 0.5rem;
+}
+
+.vks {
+  min-height: 40rem;
 }
 
 .progress-bar {
