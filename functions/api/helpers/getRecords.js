@@ -53,7 +53,7 @@ const outputRequest = async event => {
     throw Error("You can't access users' table(please?)");
   }
   const options = {
-    api_key: process.env.API_KEY,
+    token: process.env.API_KEY,
     view
   };
   if (event.queryStringParameters.pageSize) {
@@ -63,9 +63,8 @@ const outputRequest = async event => {
     options.offset = event.queryStringParameters.offset;
   }
   const learningData = await getJson(
-    `https://api.airtable.com/v0/${
-      event.queryStringParameters.app
-    }/${table}?${queryString.stringify(options)}`
+    `https://api.airtable.com/v0/${event.queryStringParameters.app}/${table}?${queryString.stringify(options)}`,
+    { headers: { Authorization: `Bearer ${process.env.API_KEY}` } }
   );
 
   learningData.records = learningData.records.map(datum => ({

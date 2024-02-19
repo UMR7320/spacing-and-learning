@@ -1,9 +1,9 @@
 const https = require("https");
 
-const getJson = url => {
+const getJson = (url, options) => {
   return new Promise((resolve, reject) => {
     https
-      .get(url, resp => {
+      .get(url, options, resp => {
         let data = "";
 
         resp.on("data", chunk => {

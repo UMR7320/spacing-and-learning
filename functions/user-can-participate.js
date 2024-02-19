@@ -1,5 +1,4 @@
 const Airtable = require("airtable");
-const getJson = require("./api/helpers/getJson");
 const getRecords = require("./api/helpers/getRecords");
 
 Airtable.configure({
