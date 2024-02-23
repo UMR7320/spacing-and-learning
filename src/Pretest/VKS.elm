@@ -38,6 +38,7 @@ type alias Trial =
     { id : String
     , verb : String
     , isTraining : Bool
+    , isExperimental : Bool
     }
 
 
@@ -264,7 +265,7 @@ update msg model =
     case msg of
         GotTrials (RemoteData.Success trials) ->
             ( model
-            , Random.generate GotRandomizedTrials (shuffle trials)
+            , Random.generate GotRandomizedTrials (shuffle (List.filter .isExperimental trials))
             )
 
         GotRandomizedTrials trials ->
@@ -389,6 +390,7 @@ decodeVKSTrials =
                 |> required "id" Decode.string
                 |> required "Word_Text" Decode.string
                 |> optional "isTraining" Decode.bool False
+                |> optional "isExperimental" Decode.bool False
     in
     Data.decodeRecords decoder
 
