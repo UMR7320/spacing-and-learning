@@ -201,22 +201,6 @@ init backgroundQuestionnaireUrl url key =
                 ]
     in
     case route of
-        Route.Session1 userId _ ->
-            ( { model
-                | session1 = Loading loadingStateSession1
-                , presentation = Activity.loading
-                , meaning1 = Activity.loading
-                , spelling1 = Activity.loading
-                , context1 = Activity.loading
-                , user = Just userId
-              }
-            , Cmd.batch
-                [ cmd
-                , Cmd.map Session1 fetchSession1
-                , Session.getInfos ServerRespondedWithSessionsInfos
-                ]
-            )
-
         Route.Home ->
             ( { model
                 | session1 = Loading loadingStateSession1
@@ -239,6 +223,46 @@ init backgroundQuestionnaireUrl url key =
                 , user = Nothing
               }
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
+            )
+
+        Route.Pretest userid _ v ->
+            let
+                ( loadingStatePretest, fetchSessionPretest ) =
+                    Pretest.attempt v
+            in
+            ( { model
+                | spr = Activity.loading
+                , sentenceCompletion = Activity.loading
+                , vks = Activity.loading
+                , acceptability = Activity.loading
+                , yesNo = Activity.loading
+                , user = Just userid
+                , version = v
+                , pretest = Loading loadingStatePretest
+                , userCanParticipate = RemoteData.Loading
+              }
+            , Cmd.batch
+                [ cmd
+                , Cmd.map Pretest fetchSessionPretest
+                , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
+                , Data.getGeneralParameters GotGeneralParameters
+                ]
+            )
+
+        Route.Session1 userId _ ->
+            ( { model
+                | session1 = Loading loadingStateSession1
+                , presentation = Activity.loading
+                , meaning1 = Activity.loading
+                , spelling1 = Activity.loading
+                , context1 = Activity.loading
+                , user = Just userId
+              }
+            , Cmd.batch
+                [ cmd
+                , Cmd.map Session1 fetchSession1
+                , Session.getInfos ServerRespondedWithSessionsInfos
+                ]
             )
 
         Route.Session2 userid _ ->
@@ -268,30 +292,6 @@ init backgroundQuestionnaireUrl url key =
                 [ cmd
                 , Cmd.map Session3 fetchSession3
                 , Session.getInfos ServerRespondedWithSessionsInfos
-                ]
-            )
-
-        Route.Pretest userid _ v ->
-            let
-                ( loadingStatePretest, fetchSessionPretest ) =
-                    Pretest.attempt v
-            in
-            ( { model
-                | spr = Activity.loading
-                , sentenceCompletion = Activity.loading
-                , vks = Activity.loading
-                , acceptability = Activity.loading
-                , yesNo = Activity.loading
-                , user = Just userid
-                , version = v
-                , pretest = Loading loadingStatePretest
-                , userCanParticipate = RemoteData.Loading
-              }
-            , Cmd.batch
-                [ cmd
-                , Cmd.map Pretest fetchSessionPretest
-                , Task.perform GotCurrentTime (Task.map2 Tuple.pair Time.here Time.now)
-                , Data.getGeneralParameters GotGeneralParameters
                 ]
             )
 
@@ -331,7 +331,7 @@ body model =
             Route.Session1 _ activity ->
                 case activity of
                     Route.TopSession1 ->
-                        viewSessionInstructions model.sessions "session1" "presentation"
+                        viewSessionInstructions model.sessions "session1" "session1/presentation"
 
                     Route.Presentation ->
                         [ Html.Styled.map Presentation (Presentation.view model.presentation) ]
@@ -706,7 +706,6 @@ changeRouteTo route model =
                     , Cmd.batch
                         [ cmd
                         , Session.getInfos ServerRespondedWithSessionsInfos
-                        , Ports.enableAlertOnExit ()
                         ]
                     )
 
@@ -731,8 +730,32 @@ changeRouteTo route model =
                 _ ->
                     ( updatedModel, cmd )
 
-        Route.Session1 _ _ ->
-            ( newModel, Ports.enableAlertOnExit () )
+        Route.Session1 userId session1Activity ->
+            let
+                ( updatedModel, cmd ) =
+                    ( { newModel | user = Just userId }
+                    , Data.getCanUserParticipate userId GotCanUserParticipate
+                    )
+            in
+            case session1Activity of
+                Route.TopSession1 ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ cmd
+                        , Session.getInfos ServerRespondedWithSessionsInfos
+                        ]
+                    )
+                Route.Presentation ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ cmd
+                        , Cmd.map Presentation Presentation.getRecords
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
+
+                _ ->
+                    ( updatedModel, cmd )
 
         Route.Session2 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )

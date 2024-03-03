@@ -11,7 +11,7 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Random
 import Random.List
-import Task
+import Task exposing (Task)
 import Time
 import View
 
@@ -40,20 +40,6 @@ type alias Trial =
 type alias State =
     { uid : String
     , userAnswer : String
-    }
-
-
-defaultTrial : Trial
-defaultTrial =
-    { uid = "MISSING"
-    , writtenWord = "MISSING"
-    , target = "MISSING"
-    , distractor1 = "MISSING"
-    , distractor2 = "MISSING"
-    , distractor3 = "MISSING"
-    , feedbackCorrect = "MISSING"
-    , feedbackIncorrect = "MISSING"
-    , isTraining = False
     }
 
 
@@ -219,6 +205,7 @@ update msg model =
 -- HTTP
 
 
+getRecords : Task Http.Error (List Trial)
 getRecords =
     Http.task
         { method = "GET"
@@ -227,7 +214,7 @@ getRecords =
             Data.buildQuery
                 { app = Data.apps.spacing
                 , base = "input"
-                , view_ = "Presentation"
+                , view_ = "Meaning"
                 }
         , body = Http.emptyBody
         , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeMeaningInput
@@ -243,9 +230,9 @@ decodeMeaningInput =
                 |> required "UID" string
                 |> required "Word_Text" string
                 |> required "Definition" string
-                |> optional "Distractor_1_Meaning" string "MISSING"
-                |> optional "Distractor_2_Meaning" string "MISSING"
-                |> optional "Distractor_3_Meaning" string "MISSING"
+                |> required "Distractor_1_Meaning" string
+                |> required "Distractor_2_Meaning" string
+                |> required "Distractor_3_Meaning" string
                 |> required "Feedback_Incorrect_Meaning" string
                 |> required "Feedback_Correct_Meaning" string
                 |> optional "isTraining" bool False

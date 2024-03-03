@@ -7,14 +7,21 @@ import Dict exposing (Dict)
 import Html.Styled exposing (Html, div, li, span, text, ul)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
-import Http exposing (Error)
+import Http
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Ports
-import Set
+import Random
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
+import Set exposing (Set)
 import Task
 import Time
 import View
+
+
+
+-- MODEL
 
 
 type Entry
@@ -25,8 +32,57 @@ type alias Presentation =
     Activity Trial State
 
 
+type alias Trial =
+    { uid : String
+    , text : String
+    , definition : String
+    , example : String
+    , translation1 : String
+    , translation2 : String
+    , audio : Data.AudioFile
+    , isTraining : Bool
+    }
+
+
+type alias State =
+    { uid : String
+    , toggledEntries : Dict String Bool
+    , clickedEntries : Set String
+    }
+
+
+initialState : State
+initialState =
+    { uid = ""
+    , toggledEntries = Dict.empty
+    , clickedEntries = Set.empty
+    }
+
+
+start : List ActivityInfo -> List Trial -> Activity Trial State
+start info trials =
+    Activity.startIntro
+        (ActivityInfo.activityInfo info Session1 "Words to learn")
+        (List.filter (\datum -> datum.isTraining) trials)
+        (List.filter (\datum -> not datum.isTraining) trials)
+        initState
+
+
+infoLoaded : List ActivityInfo -> Presentation -> Presentation
+infoLoaded infos =
+    Activity.infoLoaded
+        Session1
+        "Words to learn"
+        infos
+        initState
+
+
+
+-- VIEW
+
+
 viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
-viewEntry key { txt, elements } toggledEntries =
+viewEntry key { elements } toggledEntries =
     if Dict.get key toggledEntries |> Maybe.withDefault False then
         elements |> List.map (\el -> li [] [ text el ]) |> ul []
 
@@ -110,48 +166,20 @@ viewTrial trial data =
         ]
 
 
+
+-- UPDATE
+
+
 type Msg
-    = UserClickedNextTrial
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedStartMain (List Trial) ActivityInfo
     | UserToggleElementOfEntry String
     | UserClickedStartAudio String
     | UserClickedStartTraining
     | NoOp
-
-
-decodePresentationInput : Decoder (List Trial)
-decodePresentationInput =
-    let
-        decoder =
-            Decode.succeed Trial
-                |> required "UID" string
-                |> required "Word_Text" string
-                |> required "Definition" string
-                |> required "Example" string
-                |> required "Translation_1" string
-                |> optional "Translation_2" string "missing"
-                |> required "Word_Audio" Data.decodeAudioFiles
-                |> optional "isTraining" bool False
-    in
-    Data.decodeRecords decoder
-
-
-getRecords : Task.Task Error (List Trial)
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodePresentationInput
-        , timeout = Just 5000
-        }
 
 
 initState : State
@@ -173,6 +201,26 @@ type alias Model superModel =
 update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | presentation = Activity.trialsLoaded trials initialState model.presentation }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model
+                | presentation = Activity.Err (Data.buildErrorMessage error)
+              }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
 
@@ -235,51 +283,35 @@ update msg model =
             ( model, Cmd.none )
 
 
-defaultTrial : Trial
-defaultTrial =
-    { uid = "String"
-    , text = "String"
-    , definition = "String"
-    , example = "String"
-    , translation1 = "String"
-    , translation2 = "String"
-    , audio = Data.AudioFile "" ""
-    , isTraining = False
-    }
+
+-- HTTP
 
 
-type alias Trial =
-    { uid : String
-    , text : String
-    , definition : String
-    , example : String
-    , translation1 : String
-    , translation2 : String
-    , audio : Data.AudioFile
-    , isTraining : Bool
-    }
+decodePresentationInput : Decoder (List Trial)
+decodePresentationInput =
+    let
+        decoder =
+            Decode.succeed Trial
+                |> required "UID" string
+                |> required "Word_Text" string
+                |> required "Definition" string
+                |> required "Example" string
+                |> required "Translation_1" string
+                |> optional "Translation_2" string "missing"
+                |> required "Word_Audio" Data.decodeAudioFiles
+                |> optional "isTraining" bool False
+    in
+    Data.decodeRecords decoder
 
 
-type alias State =
-    { uid : String
-    , toggledEntries : Dict String Bool
-    , clickedEntries : Set.Set String
-    }
-
-
-start : List ActivityInfo -> List Trial -> Activity Trial State
-start info trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo info Session1 "Words to learn")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
-
-
-infoLoaded : List ActivityInfo -> Presentation -> Presentation
-infoLoaded infos =
-    Activity.infoLoaded
-        Session1
-        "Words to learn"
-        infos
-        initState
+getRecords : Cmd Msg
+getRecords =
+    Http.get
+        { url =
+            Data.buildQuery
+                { app = Data.apps.spacing
+                , base = "input"
+                , view_ = "all"
+                }
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodePresentationInput
+        }
