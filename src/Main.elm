@@ -754,6 +754,14 @@ changeRouteTo route model =
                         ]
                     )
 
+                ( Route.Meaning1, RemoteData.Success (Yes group) ) ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ Cmd.map Meaning1 (Meaning1.getRecords group)
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
+
                 _ ->
                     ( updatedModel, Cmd.none )
 

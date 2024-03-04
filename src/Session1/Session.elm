@@ -8,27 +8,24 @@ import Random
 import Random.List exposing (shuffle)
 import Session exposing (Session(..))
 import Session1.Context1 as Context1 exposing (Context1)
-import Session1.Meaning1 as Meaning1 exposing (Meaning1)
 import Session1.Spelling1 as Spelling1 exposing (Spelling1)
 import Task.Parallel as Para
 
 
 type alias Session1 =
-    Session (Para.State4 Msg (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List ActivityInfo))
+    Session (Para.State3 Msg (List Spelling1.Trial) (List Context1.Trial) (List ActivityInfo))
 
 
 type alias Model superModel =
     { superModel
         | session1 : Session1
-        , meaning1 : Meaning1
         , spelling1 : Spelling1
         , context1 : Context1
     }
 
 
 type alias ShuffledSession1 =
-    { meaning1 : List Meaning1.Trial
-    , spelling1 : List Spelling1.Trial
+    { spelling1 : List Spelling1.Trial
     , context1 : List Context1.Trial
     , infos : List ActivityInfo
     }
@@ -37,20 +34,19 @@ type alias ShuffledSession1 =
 type Msg
     = ServerRespondedWithSomeData LoadingMsg
     | ServerRespondedWithSomeError Http.Error
-    | ServerRespondedWithAllData (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List ActivityInfo)
+    | ServerRespondedWithAllData (List Spelling1.Trial) (List Context1.Trial) (List ActivityInfo)
     | StartSession ShuffledSession1
 
 
 type alias LoadingMsg =
-    Para.Msg4 (List Meaning1.Trial) (List Spelling1.Trial) (List Context1.Trial) (List ActivityInfo)
+    Para.Msg3 (List Spelling1.Trial) (List Context1.Trial) (List ActivityInfo)
 
 
 getAll =
-    Para.attempt4
-        { task1 = Meaning1.getRecords
-        , task2 = Spelling1.getRecords
-        , task3 = Context1.getRecords
-        , task4 = ActivityInfo.getRecords
+    Para.attempt3
+        { task1 = Spelling1.getRecords
+        , task2 = Context1.getRecords
+        , task3 = ActivityInfo.getRecords
         , onUpdates = ServerRespondedWithSomeData
         , onFailure = ServerRespondedWithSomeError
         , onSuccess = ServerRespondedWithAllData
@@ -65,7 +61,7 @@ update msg model =
                 ( updte, cmd ) =
                     case model.session1 of
                         Loading downloadState ->
-                            Para.update4 downloadState downloadMsg |> Tuple.mapFirst Loading
+                            Para.update3 downloadState downloadMsg |> Tuple.mapFirst Loading
 
                         _ ->
                             ( model.session1, Cmd.none )
@@ -74,17 +70,16 @@ update msg model =
 
         ServerRespondedWithSomeError error ->
             ( { model
-                | meaning1 = Activity.Err (Data.buildErrorMessage error)
-                , context1 = Activity.Err (Data.buildErrorMessage error)
+                | context1 = Activity.Err (Data.buildErrorMessage error)
                 , spelling1 = Activity.Err (Data.buildErrorMessage error)
               }
             , Cmd.none
             )
 
-        ServerRespondedWithAllData meaning1 spelling1 context1 infos ->
+        ServerRespondedWithAllData spelling1 context1 infos ->
             let
                 randomize =
-                    Random.generate StartSession (Random.map4 ShuffledSession1 (shuffle meaning1) (shuffle spelling1) (shuffle context1) (Random.constant infos))
+                    Random.generate StartSession (Random.map3 ShuffledSession1 (shuffle spelling1) (shuffle context1) (Random.constant infos))
             in
             ( model
             , randomize
@@ -93,7 +88,6 @@ update msg model =
         StartSession ({ infos } as tasks) ->
             ( { model
                 | session1 = Ready
-                , meaning1 = Meaning1.start infos tasks.meaning1
                 , spelling1 = Spelling1.start infos tasks.spelling1
                 , context1 = Context1.start infos tasks.context1
               }

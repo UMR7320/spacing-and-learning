@@ -10,9 +10,11 @@ import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Random
-import Random.List
-import Task exposing (Task)
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
+import Task
 import Time
+import Url.Builder
 import View
 
 
@@ -43,13 +45,12 @@ type alias State =
     }
 
 
-start : List ActivityInfo -> List Trial -> Activity Trial State
-start info trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo info Session1 "Meaning 1")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
+type alias Model superModel =
+    { superModel
+        | meaning1 : Activity Trial State
+        , optionsOrder : List Int
+        , user : Maybe String
+    }
 
 
 infoLoaded : List ActivityInfo -> Meaning1 -> Meaning1
@@ -58,11 +59,11 @@ infoLoaded infos =
         Session1
         "Meaning 1"
         infos
-        initState
+        initialState
 
 
-initState : State
-initState =
+initialState : State
+initialState =
     State "DefaultTrialUID" ""
 
 
@@ -84,7 +85,7 @@ view task =
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
                         [ p [] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.writtenWord, View.bold trial.target ] ]
-                        , p [] [ viewQuestion ("to " ++ trial.writtenWord) (List.length data.history) ]
+                        , p [] [ viewQuestion ("to " ++ trial.writtenWord) ]
                         , div
                             [ class "w-full ", disabled data.feedback ]
                           <|
@@ -111,7 +112,7 @@ view task =
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center " ]
-                        [ viewQuestion ("to " ++ trial.writtenWord) (List.length data.history)
+                        [ viewQuestion ("to " ++ trial.writtenWord)
                         , div
                             [ class " center-items justify-center w-full mt-6 ", disabled data.feedback ]
                           <|
@@ -141,7 +142,8 @@ view task =
             View.instructions data.infos UserClickedStartTraining
 
 
-viewQuestion word trialn =
+viewQuestion : String -> Html msg
+viewQuestion word =
     div [ class "text-3xl font-bold italic my-6" ] [ text word ]
 
 
@@ -150,7 +152,9 @@ viewQuestion word trialn =
 
 
 type Msg
-    = UserClickedNextTrial
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
@@ -161,15 +165,36 @@ type Msg
     | HistoryWasSaved (Result Http.Error String)
 
 
+update : Msg -> Model superModel -> ( Model superModel, Cmd Msg )
 update msg model =
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | meaning1 = Activity.trialsLoaded trials initialState model.meaning1 }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model
+                | meaning1 = Activity.Err (Data.buildErrorMessage error)
+              }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
 
         NextTrial timestamp ->
             let
                 newModel =
-                    { model | meaning1 = Activity.next timestamp initState model.meaning1 }
+                    { model | meaning1 = Activity.next timestamp initialState model.meaning1 }
             in
             ( newModel
             , Cmd.batch
@@ -185,7 +210,7 @@ update msg model =
             ( { model | meaning1 = Activity.update { uid = "", userAnswer = newChoice } model.meaning1 }, Cmd.none )
 
         UserClickedStartMain ->
-            ( { model | meaning1 = Activity.startMain model.meaning1 initState }, Cmd.none )
+            ( { model | meaning1 = Activity.startMain model.meaning1 initialState }, Cmd.none )
 
         -- data is now saved after each "trial", so this does nothing and shoud be removed
         SaveDataMsg ->
@@ -205,20 +230,16 @@ update msg model =
 -- HTTP
 
 
-getRecords : Task Http.Error (List Trial)
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Meaning"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeMeaningInput
-        , timeout = Just 5000
+getRecords : String -> Cmd Msg
+getRecords group =
+    Http.get
+        { url =
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Meaning"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeMeaningInput
         }
 
 
@@ -245,6 +266,7 @@ getTrialsFromServer callbackMsg =
     Data.getTrialsFromServer_ "input" "Meaning" callbackMsg decodeMeaningInput
 
 
+saveData : Model superModel -> Cmd Msg
 saveData model =
     let
         history =
@@ -282,7 +304,7 @@ updateHistoryEncoder userId history =
 
 
 historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder userId history =
+historyEncoder _ history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
         [ ( "Meaning1", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
