@@ -3,7 +3,7 @@ module Session1.Spelling1 exposing (..)
 import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data exposing (decodeRecords)
-import Html.Styled exposing (Html, div, h2, p, pre, span, text)
+import Html.Styled exposing (Html, div, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode
@@ -78,6 +78,7 @@ infoLoaded infos =
 -- VIEW
 
 
+viewActivity : Activity.Data Trial State -> Trial -> List Int -> List (Html Msg)
 viewActivity data currentTrial optionsOrder =
     [ viewAudioButton data.state.remainingListenings currentTrial.audio.url
     , div
@@ -114,7 +115,7 @@ view model =
         Activity.Err reason ->
             text <| "Error: " ++ reason
 
-        Activity.Running Activity.Training ({ trainingTrials, mainTrials, current, state, feedback, history, infos } as data) ->
+        Activity.Running Activity.Training ({ current, history } as data) ->
             case current of
                 Just x ->
                     div [ class "w-full flex flex-col justify-center items-center" ] <|
@@ -127,7 +128,7 @@ view model =
                 Nothing ->
                     View.introToMain UserClickedStartMainloop
 
-        Activity.Running Activity.Main ({ mainTrials, current, state, feedback, history, infos } as data) ->
+        Activity.Running Activity.Main ({ current, infos } as data) ->
             case current of
                 Just trial ->
                     div [ class "flex flex-col justify-center items-center" ]
@@ -345,14 +346,14 @@ updateHistoryEncoder userId history =
         (\_ ->
             Encode.object
                 [ ( "id", Encode.string userId )
-                , ( "fields", historyEncoder userId history )
+                , ( "fields", historyEncoder history )
                 ]
         )
         [ ( userId, history ) ]
 
 
-historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder userId history =
+historyEncoder : List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
         [ ( "Spelling1", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
