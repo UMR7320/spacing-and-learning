@@ -200,7 +200,7 @@ type alias AudioFile =
 
 
 type UserCanParticipate
-    = Yes
+    = Yes String
     | No String
 
 
@@ -210,7 +210,7 @@ decodeUserCanParticipate =
         |> andThen
             (\userCanParticipate ->
                 if userCanParticipate then
-                    succeed Yes
+                    map Yes (field "group" string)
 
                 else
                     map No (field "reason" string)

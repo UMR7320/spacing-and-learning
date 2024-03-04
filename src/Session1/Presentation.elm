@@ -17,6 +17,7 @@ import RemoteData exposing (RemoteData)
 import Set exposing (Set)
 import Task
 import Time
+import Url.Builder
 import View
 
 
@@ -304,14 +305,14 @@ decodePresentationInput =
     Data.decodeRecords decoder
 
 
-getRecords : Cmd Msg
-getRecords =
+getRecords : String -> Cmd Msg
+getRecords group =
     Http.get
         { url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "all"
-                }
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Presentation"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
         , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodePresentationInput
         }

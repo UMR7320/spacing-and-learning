@@ -1,28 +1,21 @@
 const Airtable = require("airtable");
 const getRecords = require("./api/helpers/getRecords");
 
-Airtable.configure({
-  endpointUrl: process.env.API_URL,
-  apiKey: process.env.API_KEY
-});
+Airtable.configure({ apiKey: process.env.API_KEY });
 
 exports.handler = async (event, context) => {
-  // update Feb 2024, we're launching a new experiment without this check
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ userCanParticipate: true }),
-    headers: {
-      "Content-Type": "application/json"
-    },
-  }
   try {
     const base = Airtable.base(process.env.AIRTABLE_BASE);
     const userId = event.queryStringParameters.id;
     const currentUser = await base("users").find(userId);
+
+    /**
+    This code is from a previous experiment where we filtered potential candidates
+    on several criteria (never participated before, non-native Englidsh speaker)
+
     const users = await base("session1_users")
       .select()
       .all()
-
     const currentUserEmail = currentUser.get("Email");
     const nativeLanguages = currentUser.get("Langs learnt before school");
     const userEmails = users.map(record => record.get('email'));
@@ -63,9 +56,13 @@ exports.handler = async (event, context) => {
         },
       }
     }
+    */
     return {
       statusCode: 200,
-      body: JSON.stringify({ userCanParticipate: true }),
+      body: JSON.stringify({
+        userCanParticipate: true,
+        group: currentUser.get("Group").slice(0, 1) // transform A-3 into A
+      }),
       headers: {
         "Content-Type": "application/json"
       },

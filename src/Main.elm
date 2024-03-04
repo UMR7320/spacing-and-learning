@@ -419,7 +419,7 @@ body model =
                             No reason ->
                                 [ text reason ]
 
-                            Yes ->
+                            Yes _ ->
                                 case subPage of
                                     Route.TopPretest ->
                                         viewSessionInstructions model.sessions "pretest" "pretest/yes-no"
@@ -646,7 +646,7 @@ type Msg
     | ServerRespondedWithSessionsInfos (RemoteData Http.Error (Dict.Dict String Session.Info))
     | ServerRespondedWithActivitiesInfos (RemoteData Http.Error (List ActivityInfo))
     | GotGeneralParameters (RemoteData Http.Error Data.GeneralParameters)
-    | GotCanUserParticipate (RemoteData Http.Error UserCanParticipate)
+    | GotCanUserParticipate Route (RemoteData Http.Error UserCanParticipate)
     | NoOp
       -- PreTest
     | Acceptability Acceptability.Msg
@@ -697,7 +697,7 @@ changeRouteTo route model =
             let
                 ( updatedModel, cmd ) =
                     ( { newModel | user = Just userId }
-                    , Data.getCanUserParticipate userId GotCanUserParticipate
+                    , Data.getCanUserParticipate userId (GotCanUserParticipate route)
                     )
             in
             case pretestRoute of
@@ -732,30 +732,30 @@ changeRouteTo route model =
 
         Route.Session1 userId session1Activity ->
             let
-                ( updatedModel, cmd ) =
-                    ( { newModel | user = Just userId }
-                    , Data.getCanUserParticipate userId GotCanUserParticipate
-                    )
+                updatedModel =
+                    { newModel | user = Just userId }
             in
-            case session1Activity of
-                Route.TopSession1 ->
+            case ( session1Activity, updatedModel.userCanParticipate ) of
+                ( Route.TopSession1, _ ) ->
                     ( updatedModel
-                    , Cmd.batch
-                        [ cmd
-                        , Session.getInfos ServerRespondedWithSessionsInfos
-                        ]
+                    , Session.getInfos ServerRespondedWithSessionsInfos
                     )
-                Route.Presentation ->
+
+                ( _, RemoteData.NotAsked ) ->
+                    ( updatedModel
+                    , Data.getCanUserParticipate userId (GotCanUserParticipate route)
+                    )
+
+                ( Route.Presentation, RemoteData.Success (Yes group) ) ->
                     ( updatedModel
                     , Cmd.batch
-                        [ cmd
-                        , Cmd.map Presentation Presentation.getRecords
+                        [ Cmd.map Presentation (Presentation.getRecords group)
                         , Ports.enableAlertOnExit ()
                         ]
                     )
 
                 _ ->
-                    ( updatedModel, cmd )
+                    ( updatedModel, Cmd.none )
 
         Route.Session2 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
@@ -1003,10 +1003,9 @@ update msg model =
             , Cmd.none
             )
 
-        GotCanUserParticipate userCanParticipate ->
-            ( { model | userCanParticipate = userCanParticipate }
-            , Cmd.none
-            )
+        GotCanUserParticipate route userCanParticipate ->
+            -- re-run the initialisation of the original route now that we've logged in our user
+            changeRouteTo route { model | userCanParticipate = userCanParticipate }
 
         UserCode submsg ->
             UserCode.update submsg model
