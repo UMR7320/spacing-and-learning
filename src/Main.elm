@@ -762,6 +762,14 @@ changeRouteTo route model =
                         ]
                     )
 
+                ( Route.Spelling1, RemoteData.Success (Yes group) ) ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ Cmd.map Spelling1 (Spelling1.getRecords group)
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
+
                 _ ->
                     ( updatedModel, Cmd.none )
 

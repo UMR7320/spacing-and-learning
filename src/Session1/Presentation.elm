@@ -312,7 +312,7 @@ getRecords group =
             Url.Builder.absolute [ ".netlify", "functions", "api" ]
                 [ Url.Builder.string "base" "input"
                 , Url.Builder.string "view" "Presentation"
-                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                , Url.Builder.string "filterByFormula" ("{Class} = \"" ++ group ++ "\"")
                 ]
         , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodePresentationInput
         }

@@ -1,20 +1,23 @@
 module Session1.Spelling1 exposing (..)
 
-import Data exposing (decodeRecords)
+import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
+import Data exposing (decodeRecords)
 import Html.Styled exposing (Html, div, h2, p, pre, span, text)
 import Html.Styled.Attributes exposing (class, disabled)
 import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Ports
 import Random
 import Random.List
+import RemoteData exposing (RemoteData)
 import Task
 import Time
+import Url.Builder
 import View
+import Random.List exposing (shuffle)
 
 
 
@@ -49,17 +52,17 @@ type alias Trial =
     }
 
 
+type alias Model superModel =
+    { superModel
+        | spelling1 : Activity Trial State
+        , user : Maybe String
+        , optionsOrder : List Int
+    }
+
+
 initState : State
 initState =
     State "DefaultTrialUID" "" 3 ListeningFirstTime
-
-
-start info trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo info Session1 "Spelling 1")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
 
 
 infoLoaded : List ActivityInfo -> Spelling1 -> Spelling1
@@ -72,22 +75,7 @@ infoLoaded infos =
 
 
 
-
 -- VIEW
-
-
-viewInstructions txt =
-    div [ class "flex flex-col" ]
-        [ h2 [ class "font-bold" ] [ text "Instructions" ]
-        , p [ class "pt-8 pb-8 font-medium" ]
-            [ pre [] [ text txt ]
-            ]
-        , div [ class "text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here!" ] ]
-        ]
-
-
-trainingBox =
-    div [ class "w-full h-full border-4 border-green-500 border-rounded-lg border-dashed flex items-center justify-center flex-col" ]
 
 
 viewActivity data currentTrial optionsOrder =
@@ -153,6 +141,7 @@ view exp optionsOrder =
                     View.end infos.end UserClickedSavedData (Just "context-understanding")
 
 
+viewAudioButton : Int -> String -> Html Msg
 viewAudioButton nTimes url =
     case nTimes of
         3 ->
@@ -173,7 +162,9 @@ viewAudioButton nTimes url =
 
 
 type Msg
-    = UserClickedNextTrial
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedFeedback
     | UserClickedRadioButton String
@@ -186,12 +177,31 @@ type Msg
     | HistoryWasSaved (Result Http.Error String)
 
 
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     let
         currentSpellingState =
             Activity.getState model.spelling1 |> Maybe.withDefault initState
     in
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | spelling1 = Activity.trialsLoaded trials initState model.spelling1 }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model | spelling1 = Activity.Err (Data.buildErrorMessage error) }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedFeedback ->
             ( { model
                 | spelling1 =
@@ -256,6 +266,7 @@ update msg model =
 -- SUBSCRIPTIONS
 
 
+subscriptions : Model a -> Sub Msg
 subscriptions model =
     case model.spelling1 of
         Activity.Running _ { state } ->
@@ -277,15 +288,6 @@ subscriptions model =
 decodeTrials : Decode.Decoder (List Trial)
 decodeTrials =
     let
-        stringToBoolDecoder : String -> Decode.Decoder Bool
-        stringToBoolDecoder str =
-            case str of
-                "true" ->
-                    Decode.succeed True
-
-                _ ->
-                    Decode.succeed False
-
         decoder =
             Decode.succeed Trial
                 |> required "UID" Decode.string
@@ -299,27 +301,20 @@ decodeTrials =
     decodeRecords decoder
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTrials
-        , timeout = Just 5000
+getRecords : String -> Cmd Msg
+getRecords group =
+    Http.get
+        { url =
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Presentation"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeTrials
         }
 
 
-getTrialsFromServer : (Result Http.Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer callbackMsg =
-    Data.getTrialsFromServer_ "input" "Meaning" callbackMsg decodeTrials
-
-
+saveData : Model superModel -> Cmd Msg
 saveData model =
     let
         history =
