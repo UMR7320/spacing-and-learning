@@ -82,7 +82,7 @@ viewActivity : Activity.Data Trial State -> Trial -> List Int -> List (Html Msg)
 viewActivity data currentTrial optionsOrder =
     [ viewAudioButton data.state.remainingListenings currentTrial.audio.url
     , div
-        [ class "pt-6 center-items justify-center max-w-xl w-full mt-6 ", disabled data.feedback ]
+        [ class "spelling1 center-items justify-center", disabled data.feedback ]
         [ if data.state.step == Answering then
             div [] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton currentTrial optionsOrder
 

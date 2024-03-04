@@ -548,6 +548,11 @@ input {
   min-height: 40rem;
 }
 
+.spelling1 {
+  min-width: 50ch;
+  min-height: 25rem;
+}
+
 .progress-bar {
   display: grid;
   grid-template-columns: repeat(var(--count, 5), 1fr);
