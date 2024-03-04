@@ -1,7 +1,6 @@
 module Route exposing
     ( AcceptabilityRoute(..)
     , Group(..)
-    , PosttestActivity(..)
     , PretestRoute(..)
     , Route(..)
     , Session1Activity(..)
@@ -34,7 +33,6 @@ type Route
     | Session1 UserId Session1Activity
     | Session2 UserId Session2Activity
     | Session3 UserId Session3Activity
-    | Posttest UserId PosttestActivity (Maybe String)
     | UserCode (Maybe String)
     | TermsAndConditions
     | CalendarUpdated
@@ -51,6 +49,7 @@ type Session1Activity
     | Meaning1
     | Spelling1
     | Context1
+    | WordCloud1
 
 
 type Session2Activity
@@ -58,6 +57,7 @@ type Session2Activity
     | Meaning2
     | Spelling2
     | Context2
+    | WordCloud2
 
 
 type Session3Activity
@@ -65,6 +65,7 @@ type Session3Activity
     | Meaning3
     | Spelling3
     | Context3
+    | WordCloud3
 
 
 type PretestRoute
@@ -102,10 +103,6 @@ type AcceptabilityRoute
     | AcceptabilityEnd
 
 
-type PosttestActivity
-    = CloudWords
-
-
 parser : Parser (Route -> a) a
 parser =
     oneOf
@@ -124,6 +121,7 @@ parser =
                         , map Meaning1 (s "meaning")
                         , map Spelling1 (s "spelling")
                         , map Context1 (s "context-understanding")
+                        , map WordCloud1 (s "wordcloud")
                         ]
             )
         , map Session2
@@ -135,6 +133,7 @@ parser =
                         , map Meaning2 (s "meaning")
                         , map Spelling2 (s "spelling")
                         , map Context2 (s "context-understanding")
+                        , map WordCloud2 (s "wordcloud")
                         ]
             )
         , map Session3
@@ -146,14 +145,8 @@ parser =
                         , map Meaning3 (s "meaning")
                         , map Spelling3 (s "spelling")
                         , map Context3 (s "context-understanding")
+                        , map WordCloud3 (s "wordcloud")
                         ]
-            )
-        , map Posttest
-            (s "user"
-                </> string
-                </> s "post-tests"
-                </> oneOf [ map CloudWords (s "cw") ]
-                <?> Query.string "session"
             )
         , map UserCode (s "code" <?> Query.string "date")
 

@@ -9,10 +9,9 @@ import Html.Styled.Events
 import Http
 import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode
+import RemoteData
 import Session exposing (Session(..))
-import Session1.Session as Session1
-import Session2.Session as Session2
-import Session3.Session as Session3
+import Url.Builder
 import View
 
 
@@ -21,7 +20,7 @@ import View
 
 
 type alias InputWord =
-    { id: String
+    { id : String
     , word : String
     , isExperimental : Bool
     }
@@ -43,10 +42,6 @@ type alias Model superModel =
     { superModel
         | cloudWords : CloudWords
         , user : Maybe String
-        , session1 : Session1.Session1
-        , session2 : Session2.Session2
-        , session3 : Session3.Session3
-        , session : Maybe String
         , key : Browser.Navigation.Key
     }
 
@@ -62,16 +57,16 @@ type CloudWords
 -- VIEW
 
 
-view : Model superModel -> List (Html.Styled.Html Msg)
-view model =
+view : String -> Model superModel -> List (Html.Styled.Html Msg)
+view session model =
     case model.cloudWords of
         Loading ->
             [ text "Loading words..." ]
 
         Error error ->
             [ div
-                []
-                [ text "Failed loading words:"
+                [ class "flow" ]
+                [ div [] [ text "Failed loading words:" ]
                 , pre [ class "overflow-x-scroll" ] [ code [] [ text (Data.buildErrorMessage error) ] ]
                 ]
             ]
@@ -116,6 +111,7 @@ view model =
                 , View.button
                     { message =
                         UserClickedSaveData
+                            session
                             { knownWords = filterWords w Known
                             , maybeKnownWords = filterWords w MaybeKnown
                             , unknownWords = filterWords w NotKnown
@@ -127,10 +123,13 @@ view model =
             ]
 
         End ->
-            [ h1
+            [ div
                 []
-                [ text "This is the end of the session" ]
-            , p [] [ text "Check your calendar for your next learning session. You will receive an email with the link on the correct day." ]
+                [ h1
+                    []
+                    [ text "This is the end of the session" ]
+                , p [] [ text "Check your calendar for your next learning session. You will receive an email with the link on the correct day." ]
+                ]
             ]
 
 
@@ -149,8 +148,8 @@ type alias Payload =
 
 type Msg
     = UserToggledInCloudWords String
-    | UserClickedSaveData Payload
-    | ServerRespondedWithUpdatedUser (Result Http.Error String)
+    | UserClickedSaveData String Payload
+    | ServerRespondedWithUpdatedUser String (Result Http.Error String)
     | GotWords (Result Http.Error (List InputWord))
 
 
@@ -188,20 +187,10 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        UserClickedSaveData result ->
+        UserClickedSaveData session result ->
             let
                 userId =
                     model.user |> Maybe.withDefault "recd18l2IBRQNI05y"
-
-                session =
-                    if model.session1 /= Session.NotAsked then
-                        "S1"
-
-                    else if model.session2 /= Session.NotAsked then
-                        "S2"
-
-                    else
-                        "S3"
 
                 encode =
                     Encode.list
@@ -223,18 +212,18 @@ update msg model =
                     Decode.field "id" Decode.string
             in
             ( model
-            , updateVocabularyScore (Http.jsonBody encode) ServerRespondedWithUpdatedUser responseDecoder
+            , saveWordCloud (Http.jsonBody encode) (ServerRespondedWithUpdatedUser session) responseDecoder
             )
 
-        ServerRespondedWithUpdatedUser _ ->
-            if model.session == Just "S3" then
+        ServerRespondedWithUpdatedUser session _ ->
+            if session == "S3" then
                 ( model
                 , Browser.Navigation.load "../pretest/vks?version=post"
                 )
 
             else
                 ( { model | cloudWords = End }
-                , pushUrl model.key "cw"
+                , Cmd.none
                 )
 
 
@@ -261,15 +250,15 @@ toggle key =
 -- HTTP
 
 
-getWords : Cmd Msg
-getWords =
+getWords : String -> Cmd Msg
+getWords group =
     Http.get
         { url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "all"
-                }
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "all"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
         , expect = Http.expectJson GotWords decodeWords
         }
 
@@ -286,14 +275,17 @@ decodeWords =
         )
 
 
+
 -- Airtable is weird and diesn't include boolean properties when they're "false"
-optionalBool: String -> Decoder Bool
-optionalBool fieldName=
+
+
+optionalBool : String -> Decoder Bool
+optionalBool fieldName =
     maybe (field fieldName bool) |> map (Maybe.withDefault False)
 
 
-updateVocabularyScore : Http.Body -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
-updateVocabularyScore payload callbackMsg decoder =
+saveWordCloud : Http.Body -> (Result Http.Error a -> msg) -> Decoder a -> Cmd msg
+saveWordCloud payload callbackMsg decoder =
     Http.request
         { method = "PATCH"
         , headers = []

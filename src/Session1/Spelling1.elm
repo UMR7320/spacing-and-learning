@@ -99,9 +99,9 @@ viewActivity data currentTrial optionsOrder =
     ]
 
 
-view : Activity Trial State -> List Int -> Html Msg
-view exp optionsOrder =
-    case exp of
+view : Model a -> Html Msg
+view model =
+    case model.spelling1 of
         Activity.Loading _ _ ->
             View.loading
 
@@ -122,7 +122,7 @@ view exp optionsOrder =
                             (List.length history)
                             data.infos.trainingWheel
                             [ View.bold x.target ]
-                            :: viewActivity data x optionsOrder
+                            :: viewActivity data x model.optionsOrder
 
                 Nothing ->
                     View.introToMain UserClickedStartMainloop
@@ -134,7 +134,7 @@ view exp optionsOrder =
                         (viewActivity
                             data
                             trial
-                            optionsOrder
+                            model.optionsOrder
                         )
 
                 Nothing ->

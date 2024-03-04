@@ -31,7 +31,6 @@ import Session exposing (Session(..))
 import Session1.Context1 as Context1 exposing (Context1)
 import Session1.Meaning1 as Meaning1 exposing (Meaning1)
 import Session1.Presentation as Presentation exposing (Presentation)
-import Session1.Session as Session1 exposing (Session1)
 import Session1.Spelling1 as Spelling1 exposing (Spelling1)
 import Session2.Context2 as Context2 exposing (Context2)
 import Session2.Meaning2 as Meaning2 exposing (Meaning2)
@@ -75,7 +74,6 @@ type alias Model =
     , yesNo : YesNo
 
     -- Session 1
-    , session1 : Session1
     , presentation : Presentation
     , meaning1 : Meaning1
     , spelling1 : Spelling1
@@ -123,7 +121,6 @@ defaultModel key route backgroundQuestionnaireUrl =
     , dnd = Spelling2.system.model
 
     -- SESSION 1
-    , session1 = NotAsked
     , presentation = Activity.NotStarted
     , meaning1 = Activity.NotStarted
     , spelling1 = Activity.NotStarted
@@ -181,9 +178,6 @@ init backgroundQuestionnaireUrl url key =
         route =
             Route.fromUrl url
 
-        ( loadingStateSession1, fetchSession1 ) =
-            Session1.getAll
-
         ( loadingStateSession2, fetchSession2 ) =
             Session2.getAll
 
@@ -203,8 +197,7 @@ init backgroundQuestionnaireUrl url key =
     case route of
         Route.Home ->
             ( { model
-                | session1 = Loading loadingStateSession1
-                , presentation = Activity.loading
+                | presentation = Activity.loading
                 , meaning1 = Activity.loading
                 , spelling1 = Activity.loading
                 , context1 = Activity.loading
@@ -215,8 +208,7 @@ init backgroundQuestionnaireUrl url key =
 
         Route.TermsAndConditions ->
             ( { model
-                | session1 = Loading loadingStateSession1
-                , presentation = Activity.loading
+                | presentation = Activity.loading
                 , meaning1 = Activity.loading
                 , spelling1 = Activity.loading
                 , context1 = Activity.loading
@@ -251,8 +243,7 @@ init backgroundQuestionnaireUrl url key =
 
         Route.Session1 userId _ ->
             ( { model
-                | session1 = Loading loadingStateSession1
-                , presentation = Activity.loading
+                | presentation = Activity.loading
                 , meaning1 = Activity.loading
                 , spelling1 = Activity.loading
                 , context1 = Activity.loading
@@ -260,7 +251,6 @@ init backgroundQuestionnaireUrl url key =
               }
             , Cmd.batch
                 [ cmd
-                , Cmd.map Session1 fetchSession1
                 , Session.getInfos ServerRespondedWithSessionsInfos
                 ]
             )
@@ -294,9 +284,6 @@ init backgroundQuestionnaireUrl url key =
                 , Session.getInfos ServerRespondedWithSessionsInfos
                 ]
             )
-
-        Route.Posttest userId _ _ ->
-            ( { model | user = Just userId }, cmd )
 
         Route.CalendarUpdated ->
             ( { model | route = CalendarUpdated }, cmd )
@@ -337,28 +324,16 @@ body model =
                         [ Html.Styled.map Presentation (Presentation.view model.presentation) ]
 
                     Route.Meaning1 ->
-                        [ Html.Styled.map Meaning1 <|
-                            Meaning1.view
-                                { task = model.meaning1
-                                , optionsOrder = model.optionsOrder
-                                }
-                        ]
+                        [ Html.Styled.map Meaning1 (Meaning1.view model) ]
 
                     Route.Spelling1 ->
-                        [ Html.Styled.map Spelling1
-                            (Spelling1.view model.spelling1
-                                model.optionsOrder
-                            )
-                        ]
+                        [ Html.Styled.map Spelling1 (Spelling1.view model) ]
 
                     Route.Context1 ->
-                        [ Html.Styled.map Context1
-                            (Context1.view
-                                { task = model.context1
-                                , optionsOrder = model.optionsOrder
-                                }
-                            )
-                        ]
+                        [ Html.Styled.map Context1 (Context1.view model) ]
+
+                    Route.WordCloud1 ->
+                        List.map (Html.Styled.map WordCloud) (CloudWords.view "S1" model)
 
             Route.Session2 _ activity ->
                 case activity of
@@ -384,6 +359,9 @@ body model =
                             )
                         ]
 
+                    Route.WordCloud2 ->
+                        List.map (Html.Styled.map WordCloud) (CloudWords.view "S2" model)
+
             Route.Session3 _ activity ->
                 case activity of
                     Route.TopSession3 ->
@@ -398,10 +376,8 @@ body model =
                     Route.Context3 ->
                         [ Html.Styled.map Context3 <| Context3.view model.context3 ]
 
-            Route.Posttest _ task _ ->
-                case task of
-                    Route.CloudWords ->
-                        List.map (Html.Styled.map WordCloud) (CloudWords.view model)
+                    Route.WordCloud3 ->
+                        List.map (Html.Styled.map WordCloud) (CloudWords.view "S3" model)
 
             Route.Pretest _ subPage _ ->
                 case model.userCanParticipate of
@@ -656,7 +632,6 @@ type Msg
     | VKS VKS.Msg
     | YesNo YesNo.Msg
       -- Session 1
-    | Session1 Session1.Msg
     | Presentation Presentation.Msg
     | Context1 Context1.Msg
     | Meaning1 Meaning1.Msg
@@ -750,7 +725,7 @@ changeRouteTo route model =
                     ( updatedModel
                     , Cmd.batch
                         [ Cmd.map Presentation (Presentation.getRecords group)
-                        , Ports.enableAlertOnExit ()
+                        , Ports.disableAlertOnExit ()
                         ]
                     )
 
@@ -770,6 +745,22 @@ changeRouteTo route model =
                         ]
                     )
 
+                ( Route.Context1, RemoteData.Success (Yes group) ) ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ Cmd.map Context1 (Context1.getRecords group)
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
+
+                ( Route.WordCloud1, RemoteData.Success (Yes group) ) ->
+                    ( updatedModel
+                    , Cmd.batch
+                        [ Cmd.map WordCloud (CloudWords.getWords group)
+                        , Ports.enableAlertOnExit ()
+                        ]
+                    )
+
                 _ ->
                     ( updatedModel, Cmd.none )
 
@@ -778,14 +769,6 @@ changeRouteTo route model =
 
         Route.Session3 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
-
-        Route.Posttest _ _ session ->
-            ( { newModel | session = session }
-            , Cmd.batch
-                [ Cmd.map WordCloud CloudWords.getWords
-                , Ports.disableAlertOnExit ()
-                ]
-            )
 
         Route.CalendarUpdated ->
             ( newModel, Cmd.none )
@@ -829,10 +812,6 @@ update msg model =
         Pretest submsg ->
             Pretest.update submsg model
                 |> updateWith Pretest
-
-        Session1 submsg ->
-            Session1.update submsg model
-                |> updateWith Session1
 
         Session2 submsg ->
             Session2.update submsg model

@@ -30,9 +30,6 @@ view model =
         Session3 _ activity ->
             viewSession3 activity model
 
-        Posttest _ _ session ->
-            viewWordCloud session
-
         _ ->
             div [] [ text "" ]
 
@@ -87,7 +84,7 @@ viewSession1 activity model =
         , viewItem "Meaning" Meaning1 model.meaning1 activity
         , viewItem "Spelling" Spelling1 model.spelling1 activity
         , viewItem "Context" Context1 model.context1 activity
-        , div [ classList [ ( "active", False ) ] ] [ text "How was it?" ]
+        , div [ classList [ ( "active", activity == WordCloud1 ) ] ] [ text "How was it?" ]
         ]
 
 
@@ -97,7 +94,7 @@ viewSession2 activity model =
         [ viewItem "Meaning" Meaning2 model.meaning2 activity
         , viewItem "Spelling" Spelling2 model.spelling2 activity
         , viewItem "Context" Context2 model.context2 activity
-        , div [] [ text "How was it?" ]
+        , div [ classList [ ( "active", activity == WordCloud2 ) ] ] [ text "How was it?" ]
         ]
 
 
@@ -107,7 +104,7 @@ viewSession3 activity model =
         [ viewItem "Meaning" Meaning3 model.meaning3 activity
         , viewItem "Spelling" Spelling3 model.spelling3 activity
         , viewItem "Context" Context3 model.context3 activity
-        , div [] [ text "How was it?" ]
+        , div [ classList [ ( "active", activity == WordCloud3 ) ] ] [ text "How was it?" ]
         , div [] [ text "LexLearn verbs" ]
         , div [] [ text "Reading test" ]
         , div [] [ text "Listening test" ]
@@ -129,43 +126,6 @@ viewItem name activity task currentActivity =
         ]
 
 
-viewWordCloud session =
-    case session of
-        Just "S1" ->
-            div
-                [ class "progress-bar", attribute "style" "--count: 5" ]
-                [ div [] [ text "Presentation" ]
-                , div [] [ text "Meaning" ]
-                , div [] [ text "Spelling" ]
-                , div [] [ text "Context" ]
-                , div [ class "active" ] [ text "How was it?" ]
-                ]
-
-        Just "S2" ->
-            div
-                [ class "progress-bar", attribute "style" "--count: 4" ]
-                [ div [] [ text "Meaning" ]
-                , div [] [ text "Spelling" ]
-                , div [] [ text "Context" ]
-                , div [ class "active" ] [ text "How was it?" ]
-                ]
-
-        Just "S3" ->
-            div
-                [ class "progress-bar", attribute "style" "--count: 7" ]
-                [ div [] [ text "Meaning" ]
-                , div [] [ text "Spelling" ]
-                , div [] [ text "Context" ]
-                , div [ class "active" ] [ text "How was it?" ]
-                , div [] [ text "LexLearn verbs" ]
-                , div [] [ text "Reading test" ]
-                , div [] [ text "Listening test" ]
-                ]
-
-        _ ->
-            text ""
-
-
 isYesNo activity =
     case activity of
         YesNo _ ->
@@ -174,6 +134,7 @@ isYesNo activity =
         _ ->
             False
 
+
 isVKS activity =
     case activity of
         VKS _ ->
@@ -181,6 +142,7 @@ isVKS activity =
 
         _ ->
             False
+
 
 isAcceptability activity =
     case activity of

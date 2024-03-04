@@ -5,7 +5,7 @@ import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Html.Styled exposing (Html, div, p, span, text)
 import Html.Styled.Attributes exposing (class)
-import Http exposing (Error)
+import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
@@ -14,6 +14,10 @@ import Random.List
 import Task
 import Time
 import View
+import Url.Builder
+import RemoteData
+import RemoteData exposing (RemoteData)
+import Random.List exposing (shuffle)
 
 
 
@@ -41,6 +45,14 @@ type alias State =
 
 type alias Context1 =
     Activity Trial State
+
+
+type alias Model superModel =
+    { superModel
+        | context1 : Activity Trial State
+        , user : Maybe String
+        , optionsOrder : List Int
+    }
 
 
 initState : State
@@ -75,9 +87,9 @@ infoLoaded infos =
 -- VIEW
 
 
-view : { task : Activity Trial State, optionsOrder : List comparable } -> Html Msg
-view task =
-    case task.task of
+view : Model a -> Html Msg
+view model =
+    case model.context1 of
         Activity.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
@@ -101,7 +113,7 @@ view task =
                     in
                     div [ class "flex flex-col items-center" ]
                         [ paragraphWithInput pre data.state.userAnswer post
-                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
+                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial model.optionsOrder
                         , div [ class "col-start-2 col-span-4" ] <|
                             [ View.genericSingleChoiceFeedback
                                 { isVisible = data.feedback
@@ -134,7 +146,7 @@ view task =
                     in
                     div [ class "flex flex-col w-full items-center justify-center " ]
                         [ paragraphWithInput pre data.state.userAnswer post
-                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial task.optionsOrder
+                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial model.optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
@@ -146,7 +158,7 @@ view task =
                         ]
 
                 Nothing ->
-                    View.end data.infos.end UserClickedSaveData (Just "../post-tests/cw?session=S1")
+                    View.end data.infos.end UserClickedSaveData (Just "wordcloud")
 
         Activity.Loading _ _ ->
             View.loading
@@ -155,6 +167,7 @@ view task =
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
 
+paragraphWithInput : String -> String -> String -> Html msg
 paragraphWithInput pre userAnswer post =
     p [ class "bg-gray-200 mb-8 rounded-lg p-4" ]
         [ text pre
@@ -175,7 +188,9 @@ paragraphWithInput pre userAnswer post =
 
 
 type Msg
-    = UserClickedNextTrial
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
@@ -186,8 +201,27 @@ type Msg
     | HistoryWasSaved (Result Http.Error String)
 
 
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | context1 = Activity.trialsLoaded trials initState model.context1 }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model | context1 = Activity.Err (Data.buildErrorMessage error) }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
 
@@ -230,13 +264,8 @@ update msg model =
 -- HTTP
 
 
-getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "ContextUnderstandingLvl1" msgHandler decodeTranslationInput
-
-
-decodeTranslationInput : Decoder (List Trial)
-decodeTranslationInput =
+decodeTrials : Decoder (List Trial)
+decodeTrials =
     let
         decoder =
             Decode.succeed Trial
@@ -253,22 +282,20 @@ decodeTranslationInput =
     Data.decodeRecords decoder
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
-        , timeout = Just 5000
+getRecords : String -> Cmd Msg
+getRecords group =
+    Http.get
+        { url =
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "ContextUnderstandingLvl1"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeTrials
         }
 
 
+saveData : Model a -> Cmd Msg
 saveData model =
     let
         history =
@@ -299,14 +326,14 @@ updateHistoryEncoder userId history =
         (\_ ->
             Encode.object
                 [ ( "id", Encode.string userId )
-                , ( "fields", historyEncoder userId history )
+                , ( "fields", historyEncoder history )
                 ]
         )
         [ ( userId, history ) ]
 
 
-historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder userId history =
+historyEncoder : List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
         [ ( "CU1", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
@@ -321,11 +348,3 @@ historyItemEncoder ( { uid, infinitiveWord }, { userAnswer }, timestamp ) =
         , ( "answer", Encode.string userAnswer )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
-
-
-
--- INTERNALS
-
-
-taskId =
-    "recsN8oyy3LIC8URx"

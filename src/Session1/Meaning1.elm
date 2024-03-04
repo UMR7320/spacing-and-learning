@@ -71,9 +71,9 @@ initialState =
 -- VIEW
 
 
-view : { task : Activity Trial State, optionsOrder : List comparable } -> Html Msg
-view task =
-    case task.task of
+view : Model a -> Html Msg
+view model =
+    case model.meaning1 of
         Activity.Loading _ _ ->
             View.loading
 
@@ -94,7 +94,7 @@ view task =
                                 data.feedback
                                 UserClickedRadioButton
                                 trial
-                                task.optionsOrder
+                                model.optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
@@ -121,7 +121,7 @@ view task =
                                 data.feedback
                                 UserClickedRadioButton
                                 trial
-                                task.optionsOrder
+                                model.optionsOrder
                         , View.genericSingleChoiceFeedback
                             { isVisible = data.feedback
                             , userAnswer = data.state.userAnswer
