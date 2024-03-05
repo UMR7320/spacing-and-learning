@@ -722,44 +722,24 @@ changeRouteTo route model =
                     )
 
                 ( Route.Presentation, RemoteData.Success (Yes group) ) ->
-                    ( updatedModel
-                    , Cmd.batch
-                        [ Cmd.map Presentation (Presentation.getRecords group)
-                        , Ports.disableAlertOnExit ()
-                        ]
-                    )
+                    Presentation.init group updatedModel
+                        |> updateWith Presentation
 
                 ( Route.Meaning1, RemoteData.Success (Yes group) ) ->
-                    ( updatedModel
-                    , Cmd.batch
-                        [ Cmd.map Meaning1 (Meaning1.getRecords group)
-                        , Ports.enableAlertOnExit ()
-                        ]
-                    )
+                    Meaning1.init group updatedModel
+                        |> updateWith Meaning1
 
                 ( Route.Spelling1, RemoteData.Success (Yes group) ) ->
-                    ( updatedModel
-                    , Cmd.batch
-                        [ Cmd.map Spelling1 (Spelling1.getRecords group)
-                        , Ports.enableAlertOnExit ()
-                        ]
-                    )
+                    Spelling1.init group updatedModel
+                        |> updateWith Spelling1
 
                 ( Route.Context1, RemoteData.Success (Yes group) ) ->
-                    ( updatedModel
-                    , Cmd.batch
-                        [ Cmd.map Context1 (Context1.getRecords group)
-                        , Ports.enableAlertOnExit ()
-                        ]
-                    )
+                    Context1.init group updatedModel
+                        |> updateWith Context1
 
                 ( Route.WordCloud1, RemoteData.Success (Yes group) ) ->
-                    ( updatedModel
-                    , Cmd.batch
-                        [ Cmd.map WordCloud (CloudWords.getWords group)
-                        , Ports.enableAlertOnExit ()
-                        ]
-                    )
+                    CloudWords.init group updatedModel
+                        |> updateWith WordCloud
 
                 _ ->
                     ( updatedModel, Cmd.none )

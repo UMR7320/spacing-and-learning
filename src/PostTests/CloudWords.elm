@@ -1,6 +1,6 @@
-module PostTests.CloudWords exposing (CloudWords(..), Msg(..), Word, WordKnowledge, getWords, toggle, update, view)
+module PostTests.CloudWords exposing (..)
 
-import Browser.Navigation exposing (pushUrl)
+import Browser.Navigation
 import Data
 import Dict exposing (Dict)
 import Html.Styled exposing (code, div, h1, p, pre, span, text)
@@ -9,7 +9,7 @@ import Html.Styled.Events
 import Http
 import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode
-import RemoteData
+import Ports
 import Session exposing (Session(..))
 import Url.Builder
 import View
@@ -51,6 +51,16 @@ type CloudWords
     | Running (Dict String Word)
     | Error Http.Error
     | End
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getWords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
 
 
 

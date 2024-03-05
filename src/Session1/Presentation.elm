@@ -60,15 +60,6 @@ initialState =
     }
 
 
-start : List ActivityInfo -> List Trial -> Activity Trial State
-start info trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo info Session1 "Words to learn")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
-
-
 infoLoaded : List ActivityInfo -> Presentation -> Presentation
 infoLoaded infos =
     Activity.infoLoaded
@@ -76,6 +67,16 @@ infoLoaded infos =
         "Words to learn"
         infos
         initState
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.disableAlertOnExit ()
+        ]
+    )
 
 
 
@@ -140,6 +141,7 @@ view task =
             viewTrialOrEnd data (View.end data.infos.end NoOp (Just "meaning"))
 
 
+viewTrialOrEnd : Activity.Data Trial State -> Html Msg -> Html Msg
 viewTrialOrEnd data endView =
     case data.current of
         Just trial ->
@@ -149,6 +151,7 @@ viewTrialOrEnd data endView =
             endView
 
 
+viewTrial : Trial -> Activity.Data Trial State -> Html Msg
 viewTrial trial data =
     div [ class "full-bleed flow" ]
         [ div

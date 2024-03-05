@@ -11,13 +11,12 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Ports
 import Random
-import Random.List
+import Random.List exposing (shuffle)
 import RemoteData exposing (RemoteData)
 import Task
 import Time
 import Url.Builder
 import View
-import Random.List exposing (shuffle)
 
 
 
@@ -72,6 +71,16 @@ infoLoaded infos =
         "Spelling 1"
         infos
         initState
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
 
 
 

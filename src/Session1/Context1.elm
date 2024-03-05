@@ -9,15 +9,14 @@ import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
+import Ports
 import Random
-import Random.List
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
 import Task
 import Time
-import View
 import Url.Builder
-import RemoteData
-import RemoteData exposing (RemoteData)
-import Random.List exposing (shuffle)
+import View
 
 
 
@@ -65,15 +64,6 @@ defaultTrial =
     Trial "defaultuid" "defaulttarger" "defaultWrittenWord" "defaultText" "distractor1" "distractor2" "distractor3" "definition" False
 
 
-start : List ActivityInfo -> List Trial -> Activity Trial State
-start info trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo info Session1 "Context 1")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
-
-
 infoLoaded : List ActivityInfo -> Context1 -> Context1
 infoLoaded infos =
     Activity.infoLoaded
@@ -81,6 +71,16 @@ infoLoaded infos =
         "Context 1"
         infos
         initState
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
 
 
 

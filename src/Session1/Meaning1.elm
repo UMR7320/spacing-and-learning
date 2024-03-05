@@ -9,6 +9,7 @@ import Http
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
+import Ports
 import Random
 import Random.List exposing (shuffle)
 import RemoteData exposing (RemoteData)
@@ -65,6 +66,16 @@ infoLoaded infos =
 initialState : State
 initialState =
     State "DefaultTrialUID" ""
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
 
 
 
