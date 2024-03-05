@@ -6,16 +6,21 @@ import Data
 import DnDList
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (class)
-import Html.Styled.Events
 import Html.Styled.Keyed as Keyed
-import Http exposing (Error)
-import Icons
+import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Ports
+import Random exposing (Generator)
+import Random.Extra
+import Random.List
+import RemoteData exposing (RemoteData)
+import Route exposing (Session2Activity(..))
+import Session2.Meaning2 exposing (Msg(..), decodeTrials)
 import Task
 import Time
+import Url.Builder
 import View
 
 
@@ -58,6 +63,14 @@ type alias KeyedItem =
     ( String, Item )
 
 
+type alias Model superModel =
+    { superModel
+        | spelling2 : Spelling2
+        , user : Maybe String
+        , dnd : DnDList.Model
+    }
+
+
 initState : State
 initState =
     State "DefaultUid" "" [] 3 ListeningFirstTime
@@ -68,26 +81,6 @@ defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") False ""
 
 
-start : List ActivityInfo -> List Trial -> Activity.Activity Trial State
-start info trials =
-    let
-        nextTrial =
-            trials
-                |> List.filter .isTraining
-                |> List.head
-    in
-    case nextTrial of
-        Just x ->
-            Activity.startIntro
-                (ActivityInfo.activityInfo info Session2 "Spelling 2")
-                (List.filter .isTraining trials)
-                (List.filter (not << .isTraining) trials)
-                { initState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord }
-
-        Nothing ->
-            Activity.Err "I tried to initate the state with the first trial but I couldn't find a first trial. Please report this error."
-
-
 infoLoaded : List ActivityInfo -> Spelling2 -> Spelling2
 infoLoaded infos =
     Activity.infoLoaded
@@ -95,6 +88,16 @@ infoLoaded infos =
         "Spelling 2"
         infos
         initState
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
 
 
 
@@ -108,11 +111,6 @@ viewScrabbleActivity model =
             scrambledLetters
                 |> List.indexedMap (itemView model.dnd)
                 |> Keyed.node "div" (containerStyles (List.length scrambledLetters))
-
-        audioButton url =
-            div
-                [ Html.Styled.Events.onClick (PlayAudio url), class "col-start-2 col-span-4 h-8 w-8" ]
-                [ fromUnstyled <| Icons.music ]
     in
     case model.spelling2 of
         Activity.NotStarted ->
@@ -218,6 +216,7 @@ viewScrabbleActivity model =
             text reason
 
 
+viewAudioButton : Int -> String -> Html Msg
 viewAudioButton nTimes url =
     case nTimes of
         3 ->
@@ -296,7 +295,9 @@ ghostView dnd items =
 
 
 type Msg
-    = UserDragsLetter DnDList.Msg
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserDragsLetter DnDList.Msg
     | PlayAudio String
     | UserClickedFeedbackButton
     | UserClickedNextTrial (Maybe Trial)
@@ -309,6 +310,7 @@ type Msg
     | HistoryWasSaved (Result Http.Error String)
 
 
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     let
         currentScrabbleState =
@@ -320,6 +322,26 @@ update msg model =
                     initState
     in
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffleTrials trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | spelling2 = Activity.trialsLoaded trials initState model.spelling2 }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model
+                | spelling2 = Activity.Err (Data.buildErrorMessage error)
+              }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserDragsLetter dndmsg ->
             let
                 ( dnd, items ) =
@@ -409,10 +431,33 @@ toKeyedItem letters =
     List.map (\( lett, rec ) -> ( "key-" ++ lett ++ String.fromInt rec, lett )) (dedupe letters)
 
 
+shuffleWordLetters : String -> Generator String
+shuffleWordLetters word =
+    word
+        |> String.toList
+        |> Random.List.shuffle
+        |> Random.map String.fromList
+
+
+shuffleTrialWord : Trial -> Generator Trial
+shuffleTrialWord trial =
+    trial.writtenWord
+        |> shuffleWordLetters
+        |> Random.map (\shuffledWord -> { trial | writtenWord = shuffledWord })
+
+
+shuffleTrials : List Trial -> Generator (List Trial)
+shuffleTrials trials =
+    trials
+        |> Random.Extra.traverse shuffleTrialWord
+        |> Random.andThen Random.List.shuffle
+
+
 
 -- SUBSCRIPTIONS
 
 
+subscriptions : Model a -> Sub Msg
 subscriptions model =
     case model.spelling2 of
         Activity.Running _ { state } ->
@@ -488,29 +533,21 @@ itemStyles color =
 -- HTTP
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
-        , timeout = Just 5000
+getRecords : String -> Cmd Msg
+getRecords group =
+    Http.get
+        { url =
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Meaning"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeTrials
         }
 
 
-getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "SpellingLvl2" msgHandler decodeTranslationInput
-
-
-decodeTranslationInput : Decoder (List Trial)
-decodeTranslationInput =
+decodeTrials : Decoder (List Trial)
+decodeTrials =
     let
         decoder =
             Decode.succeed Trial
@@ -523,6 +560,7 @@ decodeTranslationInput =
     Data.decodeRecords decoder
 
 
+saveData : Model a -> Cmd Msg
 saveData model =
     let
         history =
@@ -553,14 +591,14 @@ updateHistoryEncoder userId history =
         (\_ ->
             Encode.object
                 [ ( "id", Encode.string userId )
-                , ( "fields", historyEncoder userId history )
+                , ( "fields", historyEncoder history )
                 ]
         )
         [ ( userId, history ) ]
 
 
-historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder userId history =
+historyEncoder : List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
         [ ( "Spelling2", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )

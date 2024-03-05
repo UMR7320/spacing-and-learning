@@ -8,7 +8,6 @@ import Random
 import Random.List exposing (shuffle)
 import RemoteData
 import Session
-import Session2.Session exposing (Msg(..))
 import Session3.Context3 as Context3
 import Session3.Meaning3 as Meaning3
 import Session3.Spelling3 as Spelling3

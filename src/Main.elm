@@ -34,7 +34,6 @@ import Session1.Presentation as Presentation exposing (Presentation)
 import Session1.Spelling1 as Spelling1 exposing (Spelling1)
 import Session2.Context2 as Context2 exposing (Context2)
 import Session2.Meaning2 as Meaning2 exposing (Meaning2)
-import Session2.Session as Session2 exposing (Session2)
 import Session2.Spelling2 as Spelling2 exposing (Spelling2)
 import Session3.Context3 as Context3 exposing (Context3)
 import Session3.Meaning3 as Meaning3 exposing (Meaning3)
@@ -81,7 +80,6 @@ type alias Model =
     , endAcceptabilityDuration : Int
 
     -- Session 2
-    , session2 : Session2
     , meaning2 : Meaning2
     , spelling2 : Spelling2
     , context2 : Context2
@@ -127,7 +125,6 @@ defaultModel key route backgroundQuestionnaireUrl =
     , context1 = Activity.NotStarted
 
     -- SESSION 2
-    , session2 = NotAsked
     , meaning2 = Activity.NotStarted
     , spelling2 = Activity.NotStarted
     , context2 = Activity.NotStarted
@@ -177,9 +174,6 @@ init backgroundQuestionnaireUrl url key =
     let
         route =
             Route.fromUrl url
-
-        ( loadingStateSession2, fetchSession2 ) =
-            Session2.getAll
 
         ( loadingStateSession3, fetchSession3 ) =
             Session3.attempt
@@ -257,15 +251,13 @@ init backgroundQuestionnaireUrl url key =
 
         Route.Session2 userid _ ->
             ( { model
-                | session2 = Loading loadingStateSession2
-                , meaning2 = Activity.loading
+                | meaning2 = Activity.loading
                 , context2 = Activity.loading
                 , spelling2 = Activity.loading
                 , user = Just userid
               }
             , Cmd.batch
                 [ cmd
-                , Cmd.map Session2 fetchSession2
                 , Session.getInfos ServerRespondedWithSessionsInfos
                 ]
             )
@@ -341,23 +333,13 @@ body model =
                         viewSessionInstructions model.sessions "session2" "translation"
 
                     Route.Meaning2 ->
-                        [ Html.Styled.map Meaning2
-                            (Meaning2.view
-                                { task = model.meaning2
-                                , optionsOrder = model.optionsOrder
-                                }
-                            )
-                        ]
+                        [ Html.Styled.map Meaning2 (Meaning2.view model) ]
 
                     Route.Spelling2 ->
                         [ Html.Styled.map Spelling2 (Spelling2.viewScrabbleActivity model) ]
 
                     Route.Context2 ->
-                        [ Html.Styled.map Context2
-                            (Context2.view model.context2
-                                model.optionsOrder
-                            )
-                        ]
+                        [ Html.Styled.map Context2 (Context2.view model) ]
 
                     Route.WordCloud2 ->
                         List.map (Html.Styled.map WordCloud) (CloudWords.view "S2" model)
@@ -637,7 +619,6 @@ type Msg
     | Meaning1 Meaning1.Msg
     | Spelling1 Spelling1.Msg
       -- Session 2
-    | Session2 Session2.Msg
     | Meaning2 Meaning2.Msg
     | Spelling2 Spelling2.Msg
     | Context2 Context2.Msg
@@ -744,8 +725,40 @@ changeRouteTo route model =
                 _ ->
                     ( updatedModel, Cmd.none )
 
-        Route.Session2 _ _ ->
-            ( newModel, Ports.enableAlertOnExit () )
+        Route.Session2 userId session2Activity ->
+            let
+                updatedModel =
+                    { newModel | user = Just userId }
+            in
+            case ( session2Activity, updatedModel.userCanParticipate ) of
+                ( Route.TopSession2, _ ) ->
+                    ( updatedModel
+                    , Session.getInfos ServerRespondedWithSessionsInfos
+                    )
+
+                ( _, RemoteData.NotAsked ) ->
+                    ( updatedModel
+                    , Data.getCanUserParticipate userId (GotCanUserParticipate route)
+                    )
+
+                ( Route.Meaning2, RemoteData.Success (Yes group) ) ->
+                    Meaning2.init group updatedModel
+                        |> updateWith Meaning2
+
+                ( Route.Spelling2, RemoteData.Success (Yes group) ) ->
+                    Spelling2.init group updatedModel
+                        |> updateWith Spelling2
+
+                ( Route.Context2, RemoteData.Success (Yes group) ) ->
+                    Context2.init group updatedModel
+                        |> updateWith Context2
+
+                ( Route.WordCloud2, RemoteData.Success (Yes group) ) ->
+                    CloudWords.init group updatedModel
+                        |> updateWith WordCloud
+
+                _ ->
+                    ( updatedModel, Cmd.none )
 
         Route.Session3 _ _ ->
             ( newModel, Ports.enableAlertOnExit () )
@@ -792,10 +805,6 @@ update msg model =
         Pretest submsg ->
             Pretest.update submsg model
                 |> updateWith Pretest
-
-        Session2 submsg ->
-            Session2.update submsg model
-                |> updateWith Session2
 
         Session3 submsg ->
             Session3.update submsg model

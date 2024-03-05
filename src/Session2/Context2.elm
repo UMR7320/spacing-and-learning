@@ -4,7 +4,7 @@ import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Delay
-import Html.Styled as Html exposing (div, text)
+import Html.Styled as Html exposing (Html, div, text)
 import Html.Styled.Attributes exposing (class)
 import Http exposing (Error)
 import Json.Decode as Decode exposing (Decoder, string)
@@ -12,9 +12,12 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Ports
 import Random
-import Random.List
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
+import Route exposing (Session2Activity(..))
 import Task
 import Time
+import Url.Builder
 import View
 
 
@@ -62,6 +65,14 @@ type alias Context2 =
     Activity Trial State
 
 
+type alias Model superModel =
+    { superModel
+        | context2 : Context2
+        , user : Maybe String
+        , optionsOrder : List Int
+    }
+
+
 initState : State
 initState =
     State "" (Listening 3)
@@ -70,15 +81,6 @@ initState =
 defaultTrial : Trial
 defaultTrial =
     Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
-
-
-start : List ActivityInfo -> List Trial -> Activity Trial State
-start info trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo info Session2 "Context 2")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
 
 
 infoLoaded : List ActivityInfo -> Context2 -> Context2
@@ -90,12 +92,22 @@ infoLoaded infos =
         initState
 
 
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
+
 
 -- VIEW
 
 
-view exp optionsOrder =
-    case exp of
+view : Model a -> Html Msg
+view model =
+    case model.context2 of
         Activity.NotStarted ->
             div [] [ text "experiment did not start yet" ]
 
@@ -109,12 +121,13 @@ view exp optionsOrder =
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
         Activity.Running Activity.Training data ->
-            viewTrialOrEnd optionsOrder data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
+            viewTrialOrEnd model.optionsOrder data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
         Activity.Running Activity.Main data ->
-            viewTrialOrEnd optionsOrder data (View.end data.infos.end UserClickedSaveData (Just "../post-tests/cw?session=S2"))
+            viewTrialOrEnd model.optionsOrder data (View.end data.infos.end UserClickedSaveData (Just "../post-tests/cw?session=S2"))
 
 
+viewTrialOrEnd : List Int -> Activity.Data Trial State -> Html Msg -> Html Msg
 viewTrialOrEnd optionsOrder data endView =
     case data.current of
         Just trial ->
@@ -124,7 +137,8 @@ viewTrialOrEnd optionsOrder data endView =
             endView
 
 
-viewTrial optionsOrder { mainTrials, current, state, feedback } trial =
+viewTrial : List Int -> Activity.Data Trial State -> Trial -> Html Msg
+viewTrial optionsOrder { state, feedback } trial =
     case state.step of
         Listening nTimes ->
             div []
@@ -181,6 +195,7 @@ viewTrial optionsOrder { mainTrials, current, state, feedback } trial =
                 ]
 
 
+audioButton : Trial -> Int -> Html Msg
 audioButton trial nTimes =
     div [ class "" ]
         [ if nTimes == 3 then
@@ -197,16 +212,14 @@ audioButton trial nTimes =
         ]
 
 
-smallAudio txt =
-    div [] [ text txt ]
-
-
 
 -- UPDATE
 
 
 type Msg
-    = UserClickedNextTrial
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedRadioButton String
@@ -219,12 +232,33 @@ type Msg
     | HistoryWasSaved (Result Http.Error String)
 
 
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     let
         prevState =
             Activity.getState model.context2 |> Maybe.withDefault initState
     in
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | context2 = Activity.trialsLoaded trials initState model.context2 }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model
+                | context2 = Activity.Err (Data.buildErrorMessage error)
+              }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
 
@@ -289,29 +323,21 @@ decrement step =
 -- HTTP
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
-        , timeout = Just 5000
+getRecords : String -> Cmd Msg
+getRecords group =
+    Http.get
+        { url =
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Meaning"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeTrials
         }
 
 
-getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "SpellingLvl2" msgHandler decodeTranslationInput
-
-
-decodeTranslationInput : Decoder (List Trial)
-decodeTranslationInput =
+decodeTrials : Decoder (List Trial)
+decodeTrials =
     let
         decoder =
             Decode.succeed Trial
@@ -341,6 +367,7 @@ decodeTranslationInput =
     Data.decodeRecords decoder
 
 
+saveData : Model a -> Cmd Msg
 saveData model =
     let
         history =
@@ -393,11 +420,3 @@ historyItemEncoder ( { uid, writtenWord }, { userAnswer }, timestamp ) =
         , ( "answer", Encode.string userAnswer )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]
-
-
-
--- INTERNALS
-
-
-taskId =
-    "recwxsmowpB18bpLj"
