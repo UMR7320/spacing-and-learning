@@ -33,9 +33,14 @@ type alias Data trial state =
     }
 
 
-loading : Activity t s
-loading =
-    Loading Nothing Nothing
+loading : Activity t s -> Activity t s
+loading activity =
+    case activity of
+        NotStarted ->
+            Loading Nothing Nothing
+
+        _ ->
+            activity
 
 
 infoLoaded : Session -> String -> List ActivityInfo -> s -> Activity (Trial t) s -> Activity (Trial t) s

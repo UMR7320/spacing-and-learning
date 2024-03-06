@@ -199,11 +199,11 @@ init backgroundQuestionnaireUrl url key =
                     Pretest.attempt v
             in
             ( { model
-                | spr = Activity.loading
-                , sentenceCompletion = Activity.loading
-                , vks = Activity.loading
-                , acceptability = Activity.loading
-                , yesNo = Activity.loading
+                | spr = Activity.loading model.spr
+                , sentenceCompletion = Activity.loading model.sentenceCompletion
+                , vks = Activity.loading model.vks
+                , acceptability = Activity.loading model.acceptability
+                , yesNo = Activity.loading model.yesNo
                 , user = Just userid
                 , version = v
                 , pretest = Loading loadingStatePretest

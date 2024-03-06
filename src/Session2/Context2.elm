@@ -94,12 +94,13 @@ infoLoaded infos =
 
 init : String -> Model a -> ( Model a, Cmd Msg )
 init group model =
-    ( { model | context2 = Activity.loading }
+    ( { model | context2 = Activity.loading model.context2 }
     , Cmd.batch
         [ getRecords group
         , Ports.enableAlertOnExit ()
         ]
     )
+
 
 
 -- VIEW

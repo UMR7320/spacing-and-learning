@@ -80,7 +80,7 @@ infoLoaded infos =
 
 init : String -> Model a -> ( Model a, Cmd Msg )
 init group model =
-    ( { model | meaning3 = Activity.loading }
+    ( { model | meaning3 = Activity.loading model.meaning3 }
     , Cmd.batch
         [ getRecords group
         , Ports.enableAlertOnExit ()

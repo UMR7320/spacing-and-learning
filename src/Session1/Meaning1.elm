@@ -70,7 +70,7 @@ initialState =
 
 init : String -> Model a -> ( Model a, Cmd Msg )
 init group model =
-    ( { model | meaning1 = Activity.loading }
+    ( { model | meaning1 = Activity.loading model.meaning1 }
     , Cmd.batch
         [ getRecords group
         , Ports.enableAlertOnExit ()
