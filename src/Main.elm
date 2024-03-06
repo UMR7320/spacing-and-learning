@@ -37,7 +37,6 @@ import Session2.Meaning2 as Meaning2 exposing (Meaning2)
 import Session2.Spelling2 as Spelling2 exposing (Spelling2)
 import Session3.Context3 as Context3 exposing (Context3)
 import Session3.Meaning3 as Meaning3 exposing (Meaning3)
-import Session3.Session as Session3 exposing (Session3)
 import Session3.Spelling3 as Spelling3 exposing (Spelling3)
 import Task
 import Time
@@ -85,7 +84,6 @@ type alias Model =
     , context2 : Context2
 
     -- Session 3
-    , session3 : Session3
     , meaning3 : Meaning3
     , spelling3 : Spelling3
     , context3 : Context3
@@ -130,7 +128,6 @@ defaultModel key route backgroundQuestionnaireUrl =
     , context2 = Activity.NotStarted
 
     -- SESSION 3
-    , session3 = NotAsked
     , meaning3 = Activity.NotStarted
     , spelling3 = Activity.NotStarted
     , context3 = Activity.NotStarted
@@ -174,9 +171,6 @@ init backgroundQuestionnaireUrl url key =
     let
         route =
             Route.fromUrl url
-
-        ( loadingStateSession3, fetchSession3 ) =
-            Session3.attempt
 
         ( model, routeCmd ) =
             defaultModel key route backgroundQuestionnaireUrl
@@ -264,15 +258,13 @@ init backgroundQuestionnaireUrl url key =
 
         Route.Session3 userid _ ->
             ( { model
-                | session3 = Loading loadingStateSession3
-                , meaning3 = Activity.loading
+                | meaning3 = Activity.loading
                 , spelling3 = Activity.loading
                 , context3 = Activity.loading
                 , user = Just userid
               }
             , Cmd.batch
                 [ cmd
-                , Cmd.map Session3 fetchSession3
                 , Session.getInfos ServerRespondedWithSessionsInfos
                 ]
             )
@@ -356,7 +348,7 @@ body model =
                         [ Html.Styled.map Spelling3 <| Spelling3.view model.spelling3 ]
 
                     Route.Context3 ->
-                        [ Html.Styled.map Context3 <| Context3.view model.context3 ]
+                        [ Html.Styled.map Context3 <| Context3.view model ]
 
                     Route.WordCloud3 ->
                         List.map (Html.Styled.map WordCloud) (CloudWords.view "S3" model)
@@ -623,7 +615,6 @@ type Msg
     | Spelling2 Spelling2.Msg
     | Context2 Context2.Msg
       -- Session 3
-    | Session3 Session3.Msg
     | Meaning3 Meaning3.Msg
     | Spelling3 Spelling3.Msg
     | Context3 Context3.Msg
@@ -760,8 +751,40 @@ changeRouteTo route model =
                 _ ->
                     ( updatedModel, Cmd.none )
 
-        Route.Session3 _ _ ->
-            ( newModel, Ports.enableAlertOnExit () )
+        Route.Session3 userId session3Activity ->
+            let
+                updatedModel =
+                    { newModel | user = Just userId }
+            in
+            case ( session3Activity, updatedModel.userCanParticipate ) of
+                ( Route.TopSession3, _ ) ->
+                    ( updatedModel
+                    , Session.getInfos ServerRespondedWithSessionsInfos
+                    )
+
+                ( _, RemoteData.NotAsked ) ->
+                    ( updatedModel
+                    , Data.getCanUserParticipate userId (GotCanUserParticipate route)
+                    )
+
+                ( Route.Meaning3, RemoteData.Success (Yes group) ) ->
+                    Meaning3.init group updatedModel
+                        |> updateWith Meaning3
+
+                ( Route.Spelling3, RemoteData.Success (Yes group) ) ->
+                    Spelling3.init group updatedModel
+                        |> updateWith Spelling3
+
+                ( Route.Context3, RemoteData.Success (Yes group) ) ->
+                    Context3.init group updatedModel
+                        |> updateWith Context3
+
+                ( Route.WordCloud3, RemoteData.Success (Yes group) ) ->
+                    CloudWords.init group updatedModel
+                        |> updateWith WordCloud
+
+                _ ->
+                    ( updatedModel, Cmd.none )
 
         Route.CalendarUpdated ->
             ( newModel, Cmd.none )
@@ -805,10 +828,6 @@ update msg model =
         Pretest submsg ->
             Pretest.update submsg model
                 |> updateWith Pretest
-
-        Session3 submsg ->
-            Session3.update submsg model
-                |> updateWith Session3
 
         SentenceCompletion submsg ->
             SentenceCompletion.update submsg model

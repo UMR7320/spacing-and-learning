@@ -1,21 +1,24 @@
 module Session3.Spelling3 exposing (..)
 
+import Activity exposing (Activity)
+import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Delay
-import ActivityInfo exposing (Session(..))
 import Html.Styled exposing (Html, div, input, label, text)
 import Html.Styled.Attributes exposing (class, for, id, value)
 import Html.Styled.Events exposing (onInput)
-import Http exposing (Error)
+import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
-import Activity exposing (Activity)
 import Ports
+import Random
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
 import Task
 import Time
+import Url.Builder
 import View
-import ActivityInfo exposing (ActivityInfo)
 
 
 
@@ -46,6 +49,13 @@ type alias Spelling3 =
     Activity Trial State
 
 
+type alias Model superModel =
+    { superModel
+        | spelling3 : Spelling3
+        , user : Maybe String
+    }
+
+
 initState : State
 initState =
     State "DefaultUid" "" (Listening 3)
@@ -60,15 +70,6 @@ defaultTrial =
     }
 
 
-start : List ActivityInfo -> List Trial -> Activity Trial State
-start infos trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo infos Session3 "Spelling 3")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
-
-
 infoLoaded : List ActivityInfo -> Spelling3 -> Spelling3
 infoLoaded infos =
     Activity.infoLoaded
@@ -76,6 +77,17 @@ infoLoaded infos =
         "Spelling 3"
         infos
         initState
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
+
 
 
 --VIEW
@@ -90,7 +102,7 @@ view exp =
         Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
-        Activity.Running Activity.Training ({ current, state, feedback, history } as data) ->
+        Activity.Running Activity.Training ({ current, state, feedback } as data) ->
             case ( current, state.step ) of
                 ( Just trial, Listening nTimes ) ->
                     div [ class "flex flex-col items-center flow" ]
@@ -155,6 +167,7 @@ view exp =
             View.loading
 
 
+viewLimitedTimesAudioButton : Int -> Trial -> Html Msg
 viewLimitedTimesAudioButton nTimes trial =
     if nTimes == 3 then
         View.audioButton UserClickedPlayAudio trial.audioSentence.url "Listen"
@@ -174,7 +187,9 @@ viewLimitedTimesAudioButton nTimes trial =
 
 
 type Msg
-    = UserClickedNextTrial
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
     | UserClickedStartTraining
@@ -186,12 +201,31 @@ type Msg
     | HistoryWasSaved (Result Http.Error String)
 
 
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     let
         prevState =
             Activity.getState model.spelling3 |> Maybe.withDefault initState
     in
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | spelling3 = Activity.trialsLoaded trials initState model.spelling3 }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model | spelling3 = Activity.Err (Data.buildErrorMessage error) }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedNextTrial ->
             ( model, Task.perform NextTrial Time.now )
 
@@ -248,13 +282,21 @@ decrement step =
 -- HTTP
 
 
-getTrialsFromServer : (Result Error (List Trial) -> msg) -> Cmd msg
-getTrialsFromServer msgHandler =
-    Data.getTrialsFromServer_ "input" "ContextUnderstandingLvl3" msgHandler decodeTranslationInput
+getRecords : String -> Cmd Msg
+getRecords group =
+    Http.get
+        { url =
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Meaning"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeTrials
+        }
 
 
-decodeTranslationInput : Decoder (List Trial)
-decodeTranslationInput =
+decodeTrials : Decoder (List Trial)
+decodeTrials =
     let
         decoder =
             Decode.succeed Trial
@@ -266,22 +308,7 @@ decodeTranslationInput =
     Data.decodeRecords decoder
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeTranslationInput
-        , timeout = Just 5000
-        }
-
-
+saveData : Model a -> Cmd Msg
 saveData model =
     let
         history =
@@ -312,14 +339,14 @@ updateHistoryEncoder userId history =
         (\_ ->
             Encode.object
                 [ ( "id", Encode.string userId )
-                , ( "fields", historyEncoder userId history )
+                , ( "fields", historyEncoder history )
                 ]
         )
         [ ( userId, history ) ]
 
 
-historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder userId history =
+historyEncoder : List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
         [ ( "Spelling3", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )

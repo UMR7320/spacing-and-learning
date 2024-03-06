@@ -9,8 +9,14 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
+import Ports
+import Random
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
+import Route exposing (Session3Activity(..))
 import Task
 import Time
+import Url.Builder
 import View
 
 
@@ -39,6 +45,13 @@ type alias Meaning3 =
     Activity Trial State
 
 
+type alias Model superModel =
+    { superModel
+        | meaning3 : Meaning3
+        , user : Maybe String
+    }
+
+
 initState : State
 initState =
     State "DefaultUserUID" ""
@@ -56,15 +69,6 @@ defaultTrial =
     }
 
 
-start : List ActivityInfo -> List Trial -> Activity Trial State
-start info trials =
-    Activity.startIntro
-        (ActivityInfo.activityInfo info Session3 "Meaning 3")
-        (List.filter (\datum -> datum.isTraining) trials)
-        (List.filter (\datum -> not datum.isTraining) trials)
-        initState
-
-
 infoLoaded : List ActivityInfo -> Meaning3 -> Meaning3
 infoLoaded infos =
     Activity.infoLoaded
@@ -72,6 +76,16 @@ infoLoaded infos =
         "Meaning 3"
         infos
         initState
+
+
+init : String -> Model a -> ( Model a, Cmd Msg )
+init group model =
+    ( model
+    , Cmd.batch
+        [ getRecords group
+        , Ports.enableAlertOnExit ()
+        ]
+    )
 
 
 
@@ -154,7 +168,9 @@ viewActivity experiment =
 
 
 type Msg
-    = UserClickedFeedback
+    = GotTrials (RemoteData Http.Error (List Trial))
+    | GotRandomizedTrials (List Trial)
+    | UserClickedFeedback
     | UserChangedInput String
     | UserClickedNextTrial
     | NextTrial Time.Posix
@@ -165,8 +181,27 @@ type Msg
     | HistoryWasSaved (Result Http.Error String)
 
 
+update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     case msg of
+        GotTrials (RemoteData.Success trials) ->
+            ( model
+            , Random.generate GotRandomizedTrials (shuffle trials)
+            )
+
+        GotRandomizedTrials trials ->
+            ( { model | meaning3 = Activity.trialsLoaded trials initState model.meaning3 }
+            , Cmd.none
+            )
+
+        GotTrials (RemoteData.Failure error) ->
+            ( { model | meaning3 = Activity.Err (Data.buildErrorMessage error) }
+            , Cmd.none
+            )
+
+        GotTrials _ ->
+            ( model, Cmd.none )
+
         UserClickedFeedback ->
             ( { model
                 | meaning3 =
@@ -221,18 +256,9 @@ update msg model =
 -- HTTP
 
 
-decodeSynonymTrials : Decode.Decoder (List Trial)
-decodeSynonymTrials =
+decodeTrials : Decode.Decoder (List Trial)
+decodeTrials =
     let
-        stringToBoolDecoder : String -> Decode.Decoder Bool
-        stringToBoolDecoder str =
-            case str of
-                "true" ->
-                    Decode.succeed True
-
-                _ ->
-                    Decode.succeed False
-
         decoder =
             Decode.succeed Trial
                 |> required "UID" Decode.string
@@ -246,22 +272,20 @@ decodeSynonymTrials =
     decodeRecords decoder
 
 
-getRecords =
-    Http.task
-        { method = "GET"
-        , headers = []
-        , url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Presentation"
-                }
-        , body = Http.emptyBody
-        , resolver = Http.stringResolver <| Data.handleJsonResponse <| decodeSynonymTrials
-        , timeout = Just 5000
+getRecords : String -> Cmd Msg
+getRecords group =
+    Http.get
+        { url =
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Meaning"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
+        , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeTrials
         }
 
 
+saveData : Model a -> Cmd Msg
 saveData model =
     let
         history =
@@ -292,14 +316,14 @@ updateHistoryEncoder userId history =
         (\_ ->
             Encode.object
                 [ ( "id", Encode.string userId )
-                , ( "fields", historyEncoder userId history )
+                , ( "fields", historyEncoder history )
                 ]
         )
         [ ( userId, history ) ]
 
 
-historyEncoder : String -> List ( Trial, State, Time.Posix ) -> Encode.Value
-historyEncoder userId history =
+historyEncoder : List ( Trial, State, Time.Posix ) -> Encode.Value
+historyEncoder history =
     Encode.object
         -- airtable does not support JSON columns, so we save giant JSON strings
         [ ( "Meaning3", Encode.string (Encode.encode 0 (Encode.list historyItemEncoder history)) )
