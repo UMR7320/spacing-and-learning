@@ -184,24 +184,12 @@ init backgroundQuestionnaireUrl url key =
     in
     case route of
         Route.Home ->
-            ( { model
-                | presentation = Activity.loading
-                , meaning1 = Activity.loading
-                , spelling1 = Activity.loading
-                , context1 = Activity.loading
-                , user = Nothing
-              }
+            ( model
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
             )
 
         Route.TermsAndConditions ->
-            ( { model
-                | presentation = Activity.loading
-                , meaning1 = Activity.loading
-                , spelling1 = Activity.loading
-                , context1 = Activity.loading
-                , user = Nothing
-              }
+            ( model
             , Cmd.batch [ cmd, Data.getGeneralParameters GotGeneralParameters ]
             )
 
@@ -230,13 +218,7 @@ init backgroundQuestionnaireUrl url key =
             )
 
         Route.Session1 userId _ ->
-            ( { model
-                | presentation = Activity.loading
-                , meaning1 = Activity.loading
-                , spelling1 = Activity.loading
-                , context1 = Activity.loading
-                , user = Just userId
-              }
+            ( { model | user = Just userId }
             , Cmd.batch
                 [ cmd
                 , Session.getInfos ServerRespondedWithSessionsInfos
@@ -244,12 +226,7 @@ init backgroundQuestionnaireUrl url key =
             )
 
         Route.Session2 userid _ ->
-            ( { model
-                | meaning2 = Activity.loading
-                , context2 = Activity.loading
-                , spelling2 = Activity.loading
-                , user = Just userid
-              }
+            ( { model | user = Just userid }
             , Cmd.batch
                 [ cmd
                 , Session.getInfos ServerRespondedWithSessionsInfos
@@ -257,12 +234,7 @@ init backgroundQuestionnaireUrl url key =
             )
 
         Route.Session3 userid _ ->
-            ( { model
-                | meaning3 = Activity.loading
-                , spelling3 = Activity.loading
-                , context3 = Activity.loading
-                , user = Just userid
-              }
+            ( { model | user = Just userid }
             , Cmd.batch
                 [ cmd
                 , Session.getInfos ServerRespondedWithSessionsInfos
