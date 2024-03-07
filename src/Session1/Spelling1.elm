@@ -87,16 +87,19 @@ init group model =
 -- VIEW
 
 
-viewActivity : Activity.Data Trial State -> Trial -> List Int -> List (Html Msg)
+viewActivity : Activity.Data Trial State -> Trial -> List Int -> Html Msg
 viewActivity data currentTrial optionsOrder =
-    [ viewAudioButton data.state.remainingListenings currentTrial.audio.url
-    , div
-        [ class "spelling1 center-items justify-center", disabled data.feedback ]
-        [ if data.state.step == Answering then
-            div [] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton currentTrial optionsOrder
+    div
+        [ class "multiple-choice-question" ]
+        [ div [] [ viewAudioButton data.state.remainingListenings currentTrial.audio.url ]
+        , div
+            [ class "spelling1 center-items justify-center", disabled data.feedback ]
+            [ if data.state.step == Answering then
+                View.shuffledOptions data.state data.feedback UserClickedRadioButton currentTrial optionsOrder
 
-          else
-            div [] []
+              else
+                div [] []
+            ]
         , View.genericSingleChoiceFeedback
             { isVisible = data.feedback
             , userAnswer = data.state.userAnswer
@@ -106,7 +109,6 @@ viewActivity data currentTrial optionsOrder =
             , button = View.navigationButton UserClickedFeedback UserClickedNextTrial data.feedback data.state.userAnswer
             }
         ]
-    ]
 
 
 view : Model a -> Html Msg
@@ -124,15 +126,10 @@ view model =
         Activity.Err reason ->
             text <| "Error: " ++ reason
 
-        Activity.Running Activity.Training ({ current, history } as data) ->
+        Activity.Running Activity.Training ({ current } as data) ->
             case current of
                 Just x ->
-                    div [ class "w-full flex flex-col justify-center items-center" ] <|
-                        View.trainingWheelsGeneric
-                            (List.length history)
-                            data.infos.trainingWheel
-                            [ View.bold x.target ]
-                            :: viewActivity data x model.optionsOrder
+                    viewActivity data x model.optionsOrder
 
                 Nothing ->
                     View.introToMain UserClickedStartMainloop
@@ -140,12 +137,7 @@ view model =
         Activity.Running Activity.Main ({ current, infos } as data) ->
             case current of
                 Just trial ->
-                    div [ class "flex flex-col justify-center items-center" ]
-                        (viewActivity
-                            data
-                            trial
-                            model.optionsOrder
-                        )
+                    viewActivity data trial model.optionsOrder
 
                 Nothing ->
                     View.end infos.end UserClickedSavedData (Just "context-understanding")

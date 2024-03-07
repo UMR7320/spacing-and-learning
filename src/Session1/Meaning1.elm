@@ -3,8 +3,8 @@ module Session1.Meaning1 exposing (..)
 import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data exposing (decodeRecords)
-import Html.Styled exposing (Html, div, p, text)
-import Html.Styled.Attributes exposing (class, disabled)
+import Html.Styled exposing (Html, div, text)
+import Html.Styled.Attributes exposing (class)
 import Http
 import Json.Decode as Decode exposing (Decoder, bool, string)
 import Json.Decode.Pipeline exposing (..)
@@ -85,36 +85,22 @@ init group model =
 view : Model a -> Html Msg
 view model =
     case model.meaning1 of
+        Activity.NotStarted ->
+            div [] [ text "" ]
+
         Activity.Loading _ _ ->
             View.loading
 
         Activity.Err reason ->
             div [] [ text reason ]
 
+        Activity.Running Activity.Instructions data ->
+            View.instructions data.infos UserClickedStartTraining
+
         Activity.Running Activity.Training data ->
             case data.current of
                 Just trial ->
-                    div [ class "flex flex-col items-center" ]
-                        [ p [] [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ View.bold trial.writtenWord, View.bold trial.target ] ]
-                        , p [] [ viewQuestion ("to " ++ trial.writtenWord) ]
-                        , div
-                            [ class "w-full ", disabled data.feedback ]
-                          <|
-                            View.shuffledOptions
-                                data.state
-                                data.feedback
-                                UserClickedRadioButton
-                                trial
-                                model.optionsOrder
-                        , View.genericSingleChoiceFeedback
-                            { isVisible = data.feedback
-                            , userAnswer = data.state.userAnswer
-                            , target = trial.target
-                            , feedback_Correct = ( trial.feedbackIncorrect, [] )
-                            , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
-                            }
-                        ]
+                    viewTrial model trial data
 
                 Nothing ->
                     View.introToMain UserClickedStartMain
@@ -122,40 +108,32 @@ view model =
         Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
-                    div [ class "flex flex-col items-center " ]
-                        [ viewQuestion ("to " ++ trial.writtenWord)
-                        , div
-                            [ class " center-items justify-center w-full mt-6 ", disabled data.feedback ]
-                          <|
-                            View.shuffledOptions
-                                data.state
-                                data.feedback
-                                UserClickedRadioButton
-                                trial
-                                model.optionsOrder
-                        , View.genericSingleChoiceFeedback
-                            { isVisible = data.feedback
-                            , userAnswer = data.state.userAnswer
-                            , target = trial.target
-                            , feedback_Correct = ( trial.feedbackIncorrect, [] )
-                            , feedback_Incorrect = ( trial.feedbackCorrect, [] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
-                            }
-                        ]
+                    viewTrial model trial data
 
                 Nothing ->
                     View.end data.infos.end SaveDataMsg (Just "spelling")
 
-        Activity.NotStarted ->
-            div [] [ text "I did not start yet." ]
 
-        Activity.Running Activity.Instructions data ->
-            View.instructions data.infos UserClickedStartTraining
-
-
-viewQuestion : String -> Html msg
-viewQuestion word =
-    div [ class "text-3xl font-bold italic my-6" ] [ text word ]
+viewTrial : Model a -> Trial -> Activity.Data Trial State -> Html Msg
+viewTrial model trial data =
+    div
+        [ class "multiple-choice-question" ]
+        [ div [ class "text-3xl font-bold italic" ] [ text ("to " ++ trial.writtenWord) ]
+        , View.shuffledOptions
+                data.state
+                data.feedback
+                UserClickedRadioButton
+                trial
+                model.optionsOrder
+        , View.genericSingleChoiceFeedback
+            { isVisible = data.feedback
+            , userAnswer = data.state.userAnswer
+            , target = trial.target
+            , feedback_Correct = ( trial.feedbackIncorrect, [] )
+            , feedback_Incorrect = ( trial.feedbackCorrect, [] )
+            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
+            }
+        ]
 
 
 

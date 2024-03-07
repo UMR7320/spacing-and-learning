@@ -99,32 +99,7 @@ view model =
         Activity.Running Activity.Training data ->
             case data.current of
                 Just trial ->
-                    let
-                        ( pre, post ) =
-                            case String.split "/" trial.text of
-                                x :: y :: _ ->
-                                    ( x, y )
-
-                                [ x ] ->
-                                    ( x, "defaultPost" )
-
-                                [] ->
-                                    ( "defautpre", "defaultpOst" )
-                    in
-                    div [ class "flex flex-col items-center" ]
-                        [ paragraphWithInput pre data.state.userAnswer post
-                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial model.optionsOrder
-                        , div [ class "col-start-2 col-span-4" ] <|
-                            [ View.genericSingleChoiceFeedback
-                                { isVisible = data.feedback
-                                , userAnswer = data.state.userAnswer
-                                , target = trial.target
-                                , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
-                                , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
-                                , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
-                                }
-                            ]
-                        ]
+                    viewActivity model trial data
 
                 Nothing ->
                     View.introToMain (UserClickedStartMain data.mainTrials data.infos)
@@ -132,30 +107,7 @@ view model =
         Activity.Running Activity.Main data ->
             case data.current of
                 Just trial ->
-                    let
-                        ( pre, post ) =
-                            case String.split "/" trial.text of
-                                x :: y :: _ ->
-                                    ( x, y )
-
-                                [ x ] ->
-                                    ( x, "defaultPost" )
-
-                                [] ->
-                                    ( "defautpre", "defaultpOst" )
-                    in
-                    div [ class "flex flex-col w-full items-center justify-center " ]
-                        [ paragraphWithInput pre data.state.userAnswer post
-                        , div [ class "w-full" ] <| View.shuffledOptions data.state data.feedback UserClickedRadioButton trial model.optionsOrder
-                        , View.genericSingleChoiceFeedback
-                            { isVisible = data.feedback
-                            , userAnswer = data.state.userAnswer
-                            , target = trial.target
-                            , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
-                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
-                            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
-                            }
-                        ]
+                    viewActivity model trial data
 
                 Nothing ->
                     View.end data.infos.end UserClickedSaveData (Just "wordcloud")
@@ -167,9 +119,38 @@ view model =
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
 
+viewActivity : Model a -> Trial -> Activity.Data Trial State -> Html Msg
+viewActivity model trial data =
+    let
+        ( pre, post ) =
+            case String.split "/" trial.text of
+                x :: y :: _ ->
+                    ( x, y )
+
+                [ x ] ->
+                    ( x, "defaultPost" )
+
+                [] ->
+                    ( "defautpre", "defaultpOst" )
+    in
+    div
+        [ class "multiple-choice-question" ]
+        [ div [] [ paragraphWithInput pre data.state.userAnswer post ]
+        , View.shuffledOptions data.state data.feedback UserClickedRadioButton trial model.optionsOrder
+        , View.genericSingleChoiceFeedback
+            { isVisible = data.feedback
+            , userAnswer = data.state.userAnswer
+            , target = trial.target
+            , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
+            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
+            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
+            }
+        ]
+
+
 paragraphWithInput : String -> String -> String -> Html msg
 paragraphWithInput pre userAnswer post =
-    p [ class "bg-gray-200 mb-8 rounded-lg p-4" ]
+    p [ class "bg-gray-200 rounded-sm py-4 px-6" ]
         [ text pre
         , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
             [ text <|

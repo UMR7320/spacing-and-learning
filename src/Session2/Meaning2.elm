@@ -11,13 +11,12 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Ports
 import Random
-import Random.List
+import Random.List exposing (shuffle)
 import RemoteData exposing (RemoteData)
 import Task
 import Time
 import Url.Builder
 import View
-import Random.List exposing (shuffle)
 
 
 
@@ -110,9 +109,7 @@ view model =
             case data.current of
                 Just trial ->
                     div [ class "flex flex-col items-center" ]
-                        [ View.trainingWheelsGeneric (List.length data.history) data.infos.trainingWheel [ trial.target ]
-                        , renderActivity model trial data
-                        ]
+                        [ renderActivity model trial data ]
 
                 Nothing ->
                     View.introToMain UserClickedStartMain
@@ -146,13 +143,13 @@ renderActivity model trial data =
         [ View.fromMarkdown trial.question
         , div
             [ class "w-full pt-8", disabled data.feedback ]
-          <|
-            View.shuffledOptions
+            [ View.shuffledOptions
                 data.state
                 data.feedback
                 UserClickedRadioButton
                 trial
                 model.optionsOrder
+            ]
         , View.genericSingleChoiceFeedback
             { isVisible = data.feedback
             , userAnswer = data.state.userAnswer

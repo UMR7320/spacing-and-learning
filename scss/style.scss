@@ -218,8 +218,25 @@ input {
   }
 }
 
+.multiple-choice-question {
+  display: grid;
+  grid-template-areas: "heading"
+                       "question"
+                       "feedback";
+
+  grid-template-rows: 6rem auto 10rem;
+  justify-items: center;
+}
+
+.multiple-choice-question > :first-child{
+  align-self: top;
+}
+
 @media (min-width: 70ch) {
   .shuffled-options {
+    /* prevent layout shifts going from one question to the next */
+    min-width: 50ch;
+
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 0.75rem;
@@ -546,11 +563,6 @@ input {
 
 .vks {
   min-height: 40rem;
-}
-
-.spelling1 {
-  min-width: 50ch;
-  min-height: 25rem;
 }
 
 .progress-bar {

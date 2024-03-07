@@ -10,6 +10,7 @@ import Html.Styled.Attributes
         ( attribute
         , checked
         , class
+        , classList
         , href
         , id
         , name
@@ -24,12 +25,13 @@ import Html.Styled.Events exposing (onClick, onInput)
 import Icons
 import Markdown
 import String.Interpolate
+import UserCode exposing (Msg)
 
 
 shuffledOptions :
     { a | userAnswer : String }
     -> Bool
-    -> (String -> b)
+    -> (String -> msg)
     ->
         { c
             | target : String
@@ -38,7 +40,7 @@ shuffledOptions :
             , distractor3 : String
         }
     -> List comparable
-    -> List (Html b)
+    -> Html msg
 shuffledOptions state fb radioMsg trial optionsOrder =
     let
         option id =
@@ -65,7 +67,7 @@ shuffledOptions state fb radioMsg trial optionsOrder =
                 |> List.sortBy Tuple.first
                 |> List.map Tuple.second
     in
-    [ div [ class "shuffled-options" ] (ordoredOptions ++ [ option "I don't know" ]) ]
+    div [ class "shuffled-options" ] (ordoredOptions ++ [ option "I don't know" ])
 
 
 unclickableButton color children =
@@ -158,39 +160,36 @@ genericSingleChoiceFeedback :
     -> Html msg
 genericSingleChoiceFeedback ({ feedback_Correct, feedback_Incorrect } as data) =
     div
-        [ class
-            ("w-full rounded-md p-4 "
-                ++ (if data.isVisible && data.userAnswer == data.target then
-                        "bg-green-700"
-
-                    else if data.isVisible && data.userAnswer /= data.target then
-                        "bg-gray-700"
-
-                    else if data.isVisible == False then
-                        ""
-
-                    else
-                        ""
-                   )
-            )
-        ]
+        []
         [ if data.isVisible then
-            p
-                [ class
-                    "text-white mb-4"
-                ]
-                (if data.userAnswer == data.target then
-                    [ fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct) ]
-
-                 else
-                    [ fromMarkdown <| String.Interpolate.interpolate (Tuple.first feedback_Incorrect) (Tuple.second feedback_Incorrect)
+            div
+                [ classList
+                    [ ( "rounded-sm px-6 py-4 mt-2 mb-4", True )
+                    , ( "bg-green-200", data.isVisible && data.userAnswer == data.target )
+                    , ( "bg-red-200", data.isVisible && data.userAnswer /= data.target )
                     ]
-                )
+                ]
+                [ p
+                    []
+                    [ if data.userAnswer == data.target then
+                        viewFeedback feedback_Correct
+
+                      else
+                        viewFeedback feedback_Incorrect
+                    ]
+                ]
 
           else
-            div [] []
+            text ""
         , data.button
         ]
+
+
+viewFeedback : ( String, List String ) -> Html msg
+viewFeedback ( feedback, args ) =
+    args
+        |> String.Interpolate.interpolate feedback
+        |> fromMarkdown
 
 
 genericNeutralFeedback : { isVisible : Bool, feedback_Correct : ( String, List String ), button : Html msg } -> Html msg
@@ -240,11 +239,6 @@ viewInstructions instructions_ =
             ]
         , div [ class "text-green-500 font-bold pb-2" ] [ span [] [ text "Practice here!" ] ]
         ]
-
-
-trainingWheelsGeneric : Int -> String -> List String -> Html msg
-trainingWheelsGeneric trialn pattern_ variables =
-    div [] []
 
 
 viewTraining : String -> List (Html msg) -> Html msg

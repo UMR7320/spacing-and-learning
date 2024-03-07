@@ -184,7 +184,9 @@ viewTrial optionsOrder { state, feedback } trial =
 
         Answering ->
             div [ class "flex flex-col items-center" ]
-                [ div [] <| View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder
+                [ div
+                    []
+                    [ View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder ]
                 , View.genericSingleChoiceFeedback
                     { isVisible = feedback
                     , userAnswer = state.userAnswer
