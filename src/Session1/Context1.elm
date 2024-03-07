@@ -141,7 +141,7 @@ viewActivity model trial data =
             { isVisible = data.feedback
             , userAnswer = data.state.userAnswer
             , target = trial.target
-            , feedback_Correct = ( data.infos.feedback_correct, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
+            , feedback_Correct = ( data.infos.feedback_correct, [ trial.infinitiveWord, trial.definition ] )
             , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.infinitiveWord, View.bold trial.definition ] )
             , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial data.feedback data.state.userAnswer
             }

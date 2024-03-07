@@ -335,10 +335,10 @@ radio value isChecked isCorrect feedbackMode msg =
                 ++ "border-solid border-2 px-4 py-3 mb-1 "
                 ++ (case ( feedbackMode, isChecked, isCorrect ) of
                         ( True, True, False ) ->
-                            "border-red-500"
+                            "border-red-500 bg-red-200"
 
                         ( True, True, True ) ->
-                            "border-green-500"
+                            "border-green-500 bg-green-200"
 
                         ( False, True, _ ) ->
                             "border-indigo-600"
