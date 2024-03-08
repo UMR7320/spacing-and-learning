@@ -4,7 +4,7 @@ import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
 import Html.Styled exposing (Html, div, p, span, text)
-import Html.Styled.Attributes exposing (class)
+import Html.Styled.Attributes exposing (class, classList)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
@@ -121,21 +121,9 @@ view model =
 
 viewActivity : Model a -> Trial -> Activity.Data Trial State -> Html Msg
 viewActivity model trial data =
-    let
-        ( pre, post ) =
-            case String.split "/" trial.text of
-                x :: y :: _ ->
-                    ( x, y )
-
-                [ x ] ->
-                    ( x, "defaultPost" )
-
-                [] ->
-                    ( "defautpre", "defaultpOst" )
-    in
     div
         [ class "multiple-choice-question" ]
-        [ div [] [ paragraphWithInput pre data.state.userAnswer post ]
+        [ div [] [ paragraphWithInput trial data.state.userAnswer ]
         , View.shuffledOptions data.state data.feedback UserClickedRadioButton trial model.optionsOrder
         , View.genericSingleChoiceFeedback
             { isVisible = data.feedback
@@ -148,19 +136,56 @@ viewActivity model trial data =
         ]
 
 
-paragraphWithInput : String -> String -> String -> Html msg
-paragraphWithInput pre userAnswer post =
-    p [ class "bg-gray-200 rounded-sm py-4 px-6" ]
-        [ text pre
-        , span [ class "border-4 h-2 pl-12 pr-12 font-bold" ]
-            [ text <|
-                if userAnswer == "I don't know" then
-                    "???"
+paragraphWithInput : Trial -> String -> Html msg
+paragraphWithInput trial userAnswer =
+    let
+        ( pre, post ) =
+            case String.split "/" trial.text of
+                x :: y :: _ ->
+                    ( x, y )
 
-                else
-                    userAnswer
+                [ x ] ->
+                    ( x, "" )
+
+                [] ->
+                    ( "", "" )
+
+        options =
+            [ trial.target, trial.distractor1, trial.distractor2, trial.distractor3 ]
+
+        answer =
+            if userAnswer == "I don't know" then
+                "???"
+
+            else
+                userAnswer
+
+        viewOption option =
+            div
+                [ classList
+                    [ ( "visible", option == answer )
+                    , ( "empty", String.isEmpty option )
+                    ]
+                ]
+                [ text option ]
+    in
+    p
+        [ class "bg-gray-200 rounded-sm py-4 px-6 fill-in-the-blanks" ]
+        [ div [] [ text pre ]
+        , div
+            [ class "blanks"
+            , classList
+                [ ( "right-aligned"
+                  , post
+                        |> String.toList
+                        |> List.head
+                        |> Maybe.map ((/=) ' ')
+                        |> Maybe.withDefault False
+                  )
+                ]
             ]
-        , text post
+            ([ "", "???" ] ++ options |> List.map viewOption)
+        , div [] [ text post ]
         ]
 
 

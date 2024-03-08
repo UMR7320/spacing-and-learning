@@ -267,6 +267,33 @@ input {
   }
 }
 
+.fill-in-the-blanks {
+  display: flex;
+  white-space: pre;
+}
+
+.blanks {
+  display: grid;
+  grid-template-areas: "word";
+  font-weight: bold;
+  text-align: center;
+}
+
+.blanks.right-aligned {
+  text-align: right;
+}
+
+.blanks > * {
+  grid-area: word;
+  visibility: hidden;
+}
+.blanks > .visible {
+  visibility: visible;
+}
+.blanks > .empty {
+  border-bottom: 1.5px solid;
+}
+
 .endInfo > div {
   display: flex;
   flex-direction: column;
