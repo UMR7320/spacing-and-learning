@@ -118,7 +118,7 @@ view model =
             View.loading
 
         Activity.NotStarted ->
-            text "I'm not started yet"
+            text ""
 
         Activity.Running Activity.Instructions data ->
             div [ class "flex flex-col items-center" ] [ View.instructions data.infos UserClickedStartTraining ]

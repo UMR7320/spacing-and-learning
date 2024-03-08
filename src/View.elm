@@ -337,7 +337,7 @@ radio value isChecked isCorrect feedbackMode msg =
                         ( True, True, False ) ->
                             "border-red-500 bg-red-200"
 
-                        ( True, True, True ) ->
+                        ( True, _, True ) ->
                             "border-green-500 bg-green-200"
 
                         ( False, True, _ ) ->

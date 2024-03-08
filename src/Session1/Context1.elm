@@ -91,7 +91,7 @@ view : Model a -> Html Msg
 view model =
     case model.context1 of
         Activity.NotStarted ->
-            div [] [ text "experiment did not start yet" ]
+            div [] [ text "" ]
 
         Activity.Err reason ->
             div [] [ text reason ]
