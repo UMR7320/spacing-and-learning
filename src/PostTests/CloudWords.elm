@@ -3,7 +3,7 @@ module PostTests.CloudWords exposing (..)
 import Browser.Navigation
 import Data
 import Dict exposing (Dict)
-import Html.Styled exposing (code, div, h1, p, pre, span, text)
+import Html.Styled exposing (code, div, h1, p, pre, span, text, wbr)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http
@@ -137,8 +137,8 @@ view session model =
                 []
                 [ h1
                     []
-                    [ text "This is the end of the session" ]
-                , p [] [ text "Check your calendar for your next learning session. You will receive an email with the link on the correct day." ]
+                    [ text "Bravo !" ]
+                , p [] [ text "La séance d’aujourd’hui est terminée. À bientôt, pour ta prochaine séance Lexlearn 😀" ]
                 ]
             ]
 
