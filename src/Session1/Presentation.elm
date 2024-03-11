@@ -52,12 +52,17 @@ type alias State =
     }
 
 
-initialState : State
-initialState =
-    { uid = ""
-    , toggledEntries = Dict.empty
-    , clickedEntries = Set.empty
-    }
+initState : State
+initState =
+    State "DefaultUid"
+        (Dict.fromList
+            [ ( "definition", False )
+            , ( "example", False )
+            , ( "translation", False )
+            ]
+        )
+        Set.empty
+
 
 
 infoLoaded : List ActivityInfo -> Presentation -> Presentation
@@ -85,7 +90,7 @@ init group model =
 
 viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
 viewEntry key { elements } toggledEntries =
-    if Dict.get key toggledEntries |> Maybe.withDefault False then
+    if Dict.get key (Debug.log "toggled" toggledEntries) |> Maybe.withDefault False then
         elements |> List.map (\el -> li [] [ text el ]) |> ul []
 
     else
@@ -123,7 +128,7 @@ view : Activity Trial State -> Html Msg
 view task =
     case task of
         Activity.NotStarted ->
-            div [] [ text "experiment did not start yet" ]
+            div [] [ text "" ]
 
         Activity.Err reason ->
             div [] [ text reason ]
@@ -186,17 +191,6 @@ type Msg
     | NoOp
 
 
-initState : State
-initState =
-    State "DefaultUid"
-        (Dict.fromList
-            [ ( "definition", False )
-            , ( "example", False )
-            , ( "translation", False )
-            ]
-        )
-        Set.empty
-
 
 type alias Model superModel =
     { superModel | presentation : Activity Trial State }
@@ -211,7 +205,7 @@ update msg model =
             )
 
         GotRandomizedTrials trials ->
-            ( { model | presentation = Activity.trialsLoaded trials initialState model.presentation }
+            ( { model | presentation = Activity.trialsLoaded trials initState model.presentation }
             , Cmd.none
             )
 
