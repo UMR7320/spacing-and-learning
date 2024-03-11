@@ -19,6 +19,7 @@ import Route exposing (VKSRoute(..))
 import Task
 import Time
 import View
+import Url.Builder
 
 
 
@@ -369,15 +370,15 @@ update msg model =
 -- HTTP
 
 
-getRecords : Cmd Msg
-getRecords =
+getRecords : String -> Cmd Msg
+getRecords group =
     Http.get
         { url =
-            Data.buildQuery
-                { app = Data.apps.spacing
-                , base = "input"
-                , view_ = "Meaning"
-                }
+            Url.Builder.absolute [ ".netlify", "functions", "api" ]
+                [ Url.Builder.string "base" "input"
+                , Url.Builder.string "view" "Meaning"
+                , Url.Builder.string "filterByFormula" ("{Classe} = \"" ++ group ++ "\"")
+                ]
         , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeVKSTrials
         }
 

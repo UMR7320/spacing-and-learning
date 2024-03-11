@@ -614,40 +614,38 @@ changeRouteTo route model =
 
         Route.Pretest userId pretestRoute _ ->
             let
-                ( updatedModel, cmd ) =
-                    ( { newModel | user = Just userId }
+                updatedModel =
+                    { newModel | user = Just userId }
+            in
+            case ( pretestRoute, updatedModel.userCanParticipate ) of
+                ( _, RemoteData.NotAsked ) ->
+                    ( updatedModel
                     , Data.getCanUserParticipate userId (GotCanUserParticipate route)
                     )
-            in
-            case pretestRoute of
-                Route.TopPretest ->
+
+                ( Route.TopPretest, _ ) ->
                     ( updatedModel
-                    , Cmd.batch
-                        [ cmd
-                        , Session.getInfos ServerRespondedWithSessionsInfos
-                        ]
+                    , Session.getInfos ServerRespondedWithSessionsInfos
                     )
 
-                Route.YesNo _ ->
+                ( Route.YesNo _, RemoteData.Success (Yes _) ) ->
                     ( updatedModel
                     , Cmd.batch
-                        [ cmd
-                        , Cmd.map YesNo YesNo.getRecords
+                        [ Cmd.map YesNo YesNo.getRecords
                         , Ports.enableAlertOnExit ()
                         ]
                     )
 
-                Route.VKS _ ->
+                ( Route.VKS _, RemoteData.Success (Yes group) ) ->
                     ( updatedModel
                     , Cmd.batch
-                        [ cmd
-                        , Cmd.map VKS VKS.getRecords
+                        [ Cmd.map VKS (VKS.getRecords group)
                         , Ports.enableAlertOnExit ()
                         ]
                     )
 
                 _ ->
-                    ( updatedModel, cmd )
+                    ( updatedModel, Cmd.none )
 
         Route.Session1 userId session1Activity ->
             let
