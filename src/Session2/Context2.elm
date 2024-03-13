@@ -6,7 +6,7 @@ import Data
 import Delay
 import Html.Styled as Html exposing (Html, div, text)
 import Html.Styled.Attributes exposing (class)
-import Http exposing (Error)
+import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
@@ -38,7 +38,8 @@ type alias Trial =
     { uid : String
     , writtenWord : String
     , audioSentence : Data.AudioFile
-    , context : String
+
+    -- , context : String
     , target : String
     , distractor1 : String
     , distractor2 : String
@@ -80,7 +81,19 @@ initState =
 
 defaultTrial : Trial
 defaultTrial =
-    Trial "defaultTrial" "defaultTrial" (Data.AudioFile "" "") "defautcontext" "defaulttarget" "defautdis1" "defaultdis2" "defaultdis3" "defaultfeedback" "defaultName" Speech False
+    Trial
+        "defaultTrial"
+        "defaultTrial"
+        (Data.AudioFile "" "")
+        -- "defautcontext"
+        "defaulttarget"
+        "defautdis1"
+        "defaultdis2"
+        "defaultdis3"
+        "defaultfeedback"
+        "defaultName"
+        Speech
+        False
 
 
 infoLoaded : List ActivityInfo -> Context2 -> Context2
@@ -110,7 +123,7 @@ view : Model a -> Html Msg
 view model =
     case model.context2 of
         Activity.NotStarted ->
-            div [] [ text "experiment did not start yet" ]
+            View.loading
 
         Activity.Loading _ _ ->
             View.loading
@@ -144,8 +157,8 @@ viewTrial optionsOrder { state, feedback } trial =
         Listening nTimes ->
             div []
                 [ div [ class "context-understanding-2" ]
-                    [ div [ class "p-4 bg-gray-200 rounded-lg context" ] [ View.fromMarkdown trial.context ]
-                    , div [ class "with-thought-bubble" ]
+                    -- [ div [ class "p-4 bg-gray-200 rounded-lg context" ] [ View.fromMarkdown trial.context ]
+                    [ div [ class "with-thought-bubble" ]
                         [ div [ class "avatar-with-name" ]
                             [ if trial.responseType == Speech then
                                 div [ class "text-4xl" ] [ text "😐" ]
@@ -347,7 +360,7 @@ decodeTrials =
                 |> required "UID" string
                 |> required "Word_Text" string
                 |> optional "Audio_Understanding" Data.decodeAudioFiles (Data.AudioFile "" "")
-                |> required "CU_Lvl1_Context" string
+                -- |> required "CU_Lvl1_Context" string
                 |> required "CU_Lvl2_target" string
                 |> required "CU_Lvl2_Distractor_1" string
                 |> required "CU_Lvl2_Distractor_2" string
