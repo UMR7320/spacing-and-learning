@@ -90,7 +90,7 @@ init group model =
 
 viewEntry : String -> { txt : String, elements : List String } -> Dict String Bool -> Html msg
 viewEntry key { elements } toggledEntries =
-    if Dict.get key (Debug.log "toggled" toggledEntries) |> Maybe.withDefault False then
+    if Dict.get key toggledEntries |> Maybe.withDefault False then
         elements |> List.map (\el -> li [] [ text el ]) |> ul []
 
     else
