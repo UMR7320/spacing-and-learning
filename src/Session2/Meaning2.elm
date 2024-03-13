@@ -105,30 +105,11 @@ init group model =
 view : Model a -> Html Msg
 view model =
     case model.meaning2 of
-        Activity.Running Activity.Training data ->
-            case data.current of
-                Just trial ->
-                    div [ class "flex flex-col items-center" ]
-                        [ renderActivity model trial data ]
-
-                Nothing ->
-                    View.introToMain UserClickedStartMain
-
-        Activity.Running Activity.Main data ->
-            case data.current of
-                Just trial ->
-                    div [ class "flex flex-col items-center" ]
-                        [ renderActivity model trial data
-                        ]
-
-                Nothing ->
-                    View.end data.infos.end UserClickedSaveData (Just "spelling")
+        Activity.NotStarted ->
+            View.loading
 
         Activity.Loading _ _ ->
             View.loading
-
-        Activity.NotStarted ->
-            div [] [ text "The experiment is not started yet" ]
 
         Activity.Err reason ->
             div [] [ text reason ]
@@ -136,20 +117,34 @@ view model =
         Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
+        Activity.Running Activity.Training data ->
+            case data.current of
+                Just trial ->
+                    viewTrial model trial data
 
-renderActivity : Model a -> Trial -> Activity.Data Trial State -> Html Msg
-renderActivity model trial data =
-    div [ class "w-full" ]
+                Nothing ->
+                    View.introToMain UserClickedStartMain
+
+        Activity.Running Activity.Main data ->
+            case data.current of
+                Just trial ->
+                    viewTrial model trial data
+
+                Nothing ->
+                    View.end data.infos.end UserClickedSaveData (Just "spelling")
+
+
+viewTrial : Model a -> Trial -> Activity.Data Trial State -> Html Msg
+viewTrial model trial data =
+    div
+        [ class "multiple-choice-question" ]
         [ View.fromMarkdown trial.question
-        , div
-            [ class "w-full pt-8", disabled data.feedback ]
-            [ View.shuffledOptions
-                data.state
-                data.feedback
-                UserClickedRadioButton
-                trial
-                model.optionsOrder
-            ]
+        , View.shuffledOptions
+            data.state
+            data.feedback
+            UserClickedRadioButton
+            trial
+            model.optionsOrder
         , View.genericSingleChoiceFeedback
             { isVisible = data.feedback
             , userAnswer = data.state.userAnswer

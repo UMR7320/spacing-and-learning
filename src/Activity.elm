@@ -204,7 +204,7 @@ next timestamp resetedState activity =
 {-| Init the activity with infos, trainingTrials, mainTrials and the initial state
 -}
 startIntro : Result String ActivityInfo -> List (Trial t) -> List (Trial t) -> s -> Activity (Trial t) s
-startIntro info trainingTrials mainTrials initStat =
+startIntro info trainingTrials mainTrials initState =
     case info of
         Result.Ok info_ ->
             case trainingTrials of
@@ -214,7 +214,7 @@ startIntro info trainingTrials mainTrials initStat =
                         , mainTrials = mainTrials
                         , current = Nothing
                         , next = Nothing
-                        , state = initStat
+                        , state = initState
                         , feedback = False
                         , history = []
                         , infos = info_
@@ -226,7 +226,7 @@ startIntro info trainingTrials mainTrials initStat =
                         , mainTrials = mainTrials
                         , current = Just x
                         , next = Just y
-                        , state = initStat
+                        , state = initState
                         , feedback = False
                         , history = []
                         , infos = info_
@@ -238,7 +238,7 @@ startIntro info trainingTrials mainTrials initStat =
                         , mainTrials = mainTrials
                         , current = Just x
                         , next = Nothing
-                        , state = initStat
+                        , state = initState
                         , feedback = False
                         , history = []
                         , infos = info_

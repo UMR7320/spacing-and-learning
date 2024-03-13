@@ -38,6 +38,10 @@ main {
   place-items: center;
 }
 
+main:has(.spelling2) {
+  max-width: none;
+}
+
 main > div {
   min-height: 20rem;
 }
@@ -224,7 +228,7 @@ input {
                        "question"
                        "feedback";
 
-  grid-template-rows: 6rem auto 10rem;
+  grid-template-rows: 5rem auto 10rem;
   justify-items: center;
 }
 

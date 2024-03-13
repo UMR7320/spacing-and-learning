@@ -40,7 +40,7 @@ type alias Trial =
 type alias State =
     { uid : String
     , userAnswer : String
-    , scrambledLetter : List KeyedItem
+    , scrambledLetters : List KeyedItem
     , remainingListenings : Int
     , step : Step
     }
@@ -104,116 +104,84 @@ init group model =
 --VIEW
 
 
-viewScrabbleActivity : { a | spelling2 : Activity.Activity Trial State, dnd : DnDList.Model } -> Html.Styled.Html Msg
-viewScrabbleActivity model =
-    let
-        viewLetters scrambledLetters =
-            scrambledLetters
-                |> List.indexedMap (itemView model.dnd)
-                |> Keyed.node "div" (containerStyles (List.length scrambledLetters))
-    in
+view : Model a -> Html.Styled.Html Msg
+view model =
     case model.spelling2 of
         Activity.NotStarted ->
-            text "Not Asked"
+            View.loading
+
+        Activity.Loading _ _ ->
+            View.loading
+
+        Activity.Err reason ->
+            div [] [ text reason ]
 
         Activity.Running Activity.Instructions data ->
-            View.instructions data.infos UserClickedStartTraining
+            View.instructions data.infos (UserClickedStartTraining data.trainingTrials)
 
         Activity.Running Activity.Main data ->
             case data.current of
-                Just currentTrial ->
-                    div [ class "flex flex-col items-center justify-center" ]
-                        [ viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
-                        , if data.state.step == ListeningFirstTime then
-                            div [] []
-
-                          else if not data.feedback && data.state.step == Answering then
-                            div [ class "flex flex-col items-center w-full" ]
-                                [ viewLetters data.state.scrambledLetter
-                                , ghostView model.dnd
-                                    data.state.scrambledLetter
-                                ]
-
-                          else
-                            data.state.userAnswer
-                                |> String.toList
-                                |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ])
-                                |> div (containerStyles (String.length data.state.userAnswer))
-                        , View.genericSingleChoiceFeedback
-                            { isVisible = data.feedback
-                            , userAnswer = data.state.userAnswer
-                            , target = currentTrial.target
-                            , feedback_Correct =
-                                ( data.infos.feedback_correct
-                                , [ View.bold currentTrial.target ]
-                                )
-                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-                            , button =
-                                View.navigationButton UserClickedFeedbackButton
-                                    (UserClickedNextTrial data.next)
-                                    data.feedback
-                                    (if data.state.step == ListeningFirstTime then
-                                        ""
-
-                                     else
-                                        data.state.userAnswer
-                                    )
-                            }
-                        ]
+                Just trial ->
+                    viewTrial model trial data
 
                 Nothing ->
                     View.end data.infos.end UserClickedSaveData (Just "context-understanding")
 
         Activity.Running Activity.Training data ->
             case data.current of
-                Just currentTrial ->
-                    div [ class "flex flex-col items-center" ]
-                        [ viewAudioButton data.state.remainingListenings currentTrial.audioWord.url
-                        , if data.state.step == ListeningFirstTime then
-                            div [] []
-
-                          else if not data.feedback && data.state.step == Answering then
-                            div [ class "flex flex-col items-center w-full" ]
-                                [ viewLetters data.state.scrambledLetter
-                                , ghostView model.dnd
-                                    data.state.scrambledLetter
-                                ]
-
-                          else
-                            data.state.userAnswer
-                                |> String.toList
-                                |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ])
-                                |> div (containerStyles (String.length data.state.userAnswer))
-                        , View.genericSingleChoiceFeedback
-                            { isVisible = data.feedback
-                            , userAnswer = data.state.userAnswer
-                            , target = currentTrial.target
-                            , feedback_Correct =
-                                ( data.infos.feedback_correct
-                                , [ View.bold currentTrial.target ]
-                                )
-                            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold currentTrial.target ] )
-                            , button =
-                                View.navigationButton UserClickedFeedbackButton
-                                    (UserClickedNextTrial data.next)
-                                    data.feedback
-                                    (if data.state.step == ListeningFirstTime then
-                                        ""
-
-                                     else
-                                        data.state.userAnswer
-                                    )
-                            }
-                        ]
+                Just trial ->
+                    viewTrial model trial data
 
                 Nothing ->
                     View.introToMain (UserClickedStartMainloop data.mainTrials)
 
-        Activity.Loading _ _ ->
-            View.loading
 
-        Activity.Err reason ->
-            text reason
+viewTrial : Model a -> Trial -> Activity.Data Trial State -> Html Msg
+viewTrial model trial data =
+    let
+        viewLetters scrambledLetters =
+            scrambledLetters
+                |> List.indexedMap (itemView model.dnd)
+                |> Keyed.node "div" (containerStyles (List.length scrambledLetters))
+    in
+    div [ class "spelling2 multiple-choice-question" ] -- this is not a MCQ but the layout still works...
+        [ div [] [ viewAudioButton data.state.remainingListenings trial.audioWord.url ]
+        , if data.state.step == ListeningFirstTime then
+            div [] []
+
+          else if not data.feedback && data.state.step == Answering then
+            div [ class "flex flex-col items-center w-full" ]
+                [ viewLetters data.state.scrambledLetters
+                , ghostView model.dnd
+                    data.state.scrambledLetters
+                ]
+
+          else
+            data.state.userAnswer
+                |> String.toList
+                |> List.map (\item -> div (itemStyles yellow) [ text ((String.toUpper << String.fromChar) item) ])
+                |> div (containerStyles (String.length data.state.userAnswer))
+        , View.genericSingleChoiceFeedback
+            { isVisible = data.feedback
+            , userAnswer = data.state.userAnswer
+            , target = trial.target
+            , feedback_Correct =
+                ( data.infos.feedback_correct
+                , [ View.bold trial.target ]
+                )
+            , feedback_Incorrect = ( data.infos.feedback_incorrect, [ View.bold trial.target ] )
+            , button =
+                View.navigationButton UserClickedFeedbackButton
+                    (UserClickedNextTrial data.next)
+                    data.feedback
+                    (if data.state.step == ListeningFirstTime then
+                        ""
+
+                     else
+                        data.state.userAnswer
+                    )
+            }
+        ]
 
 
 viewAudioButton : Int -> String -> Html Msg
@@ -304,7 +272,7 @@ type Msg
     | NextTrial (Maybe Trial) Time.Posix
     | UserClickedStartMainloop (List Trial)
     | UserClickedSaveData
-    | UserClickedStartTraining
+    | UserClickedStartTraining (List Trial)
     | UserClickedStartAudio String
     | AudioEnded { eventType : String, name : String, timestamp : Int }
     | HistoryWasSaved (Result Http.Error String)
@@ -314,12 +282,7 @@ update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     let
         currentScrabbleState =
-            case Activity.getState model.spelling2 of
-                Just x ->
-                    x
-
-                _ ->
-                    initState
+            Activity.getState model.spelling2 |> Maybe.withDefault initState
     in
     case msg of
         GotTrials (RemoteData.Success trials) ->
@@ -345,11 +308,11 @@ update msg model =
         UserDragsLetter dndmsg ->
             let
                 ( dnd, items ) =
-                    system.update dndmsg model.dnd currentScrabbleState.scrambledLetter
+                    system.update dndmsg model.dnd currentScrabbleState.scrambledLetters
             in
             ( { model
                 | dnd = dnd
-                , spelling2 = Activity.update { currentScrabbleState | scrambledLetter = items, userAnswer = String.concat (List.map Tuple.second items) } model.spelling2
+                , spelling2 = Activity.update { currentScrabbleState | scrambledLetters = items, userAnswer = String.concat (List.map Tuple.second items) } model.spelling2
               }
             , system.commands dnd
             )
@@ -372,7 +335,7 @@ update msg model =
                                 timestamp
                                 { currentScrabbleState
                                     | userAnswer = nextTrial.writtenWord
-                                    , scrambledLetter = toItems nextTrial.writtenWord
+                                    , scrambledLetters = toItems nextTrial.writtenWord
                                     , remainingListenings = 3
                                     , step = ListeningFirstTime
                                 }
@@ -398,13 +361,53 @@ update msg model =
         UserClickedStartMainloop trials ->
             case trials of
                 [] ->
-                    ( { model | spelling2 = Activity.Err "You gave no trial to start the main loop. Please report this error message." }, Cmd.none )
+                    ( { model
+                        | spelling2 =
+                            Activity.Err "You gave no trial to start the main loop. Please report this error message."
+                      }
+                    , Cmd.none
+                    )
 
                 x :: _ ->
-                    ( { model | spelling2 = Activity.startMain model.spelling2 { currentScrabbleState | userAnswer = x.writtenWord, scrambledLetter = toItems x.writtenWord, remainingListenings = 3, step = ListeningFirstTime } }, Cmd.none )
+                    ( { model
+                        | spelling2 =
+                            Activity.startMain
+                                model.spelling2
+                                { currentScrabbleState
+                                    | userAnswer = x.writtenWord
+                                    , scrambledLetters = toItems x.writtenWord
+                                    , remainingListenings = 3
+                                    , step = ListeningFirstTime
+                                }
+                      }
+                    , Cmd.none
+                    )
 
-        UserClickedStartTraining ->
-            ( { model | spelling2 = Activity.startTraining model.spelling2 }, Cmd.none )
+        UserClickedStartTraining trials ->
+            case trials of
+                [] ->
+                    ( { model
+                        | spelling2 =
+                            Activity.Err "You gave no trial to start the training loop. Please report this error message."
+                      }
+                    , Cmd.none
+                    )
+
+                x :: _ ->
+                    ( { model
+                        | spelling2 =
+                            model.spelling2
+                                |> Activity.startTraining
+                                |> Activity.update
+                                    { currentScrabbleState
+                                        | userAnswer = x.writtenWord
+                                        , scrambledLetters = toItems x.writtenWord
+                                        , remainingListenings = 3
+                                        , step = ListeningFirstTime
+                                    }
+                      }
+                    , Cmd.none
+                    )
 
         UserClickedStartAudio url ->
             ( { model | spelling2 = Activity.update { currentScrabbleState | remainingListenings = currentScrabbleState.remainingListenings - 1 } model.spelling2 }, Ports.playAudio url )

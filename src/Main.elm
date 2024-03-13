@@ -294,13 +294,13 @@ body model =
             Route.Session2 _ activity ->
                 case activity of
                     Route.TopSession2 ->
-                        viewSessionInstructions model.sessions "session2" "translation"
+                        viewSessionInstructions model.sessions "session2" "session2/meaning"
 
                     Route.Meaning2 ->
                         [ Html.Styled.map Meaning2 (Meaning2.view model) ]
 
                     Route.Spelling2 ->
-                        [ Html.Styled.map Spelling2 (Spelling2.viewScrabbleActivity model) ]
+                        [ Html.Styled.map Spelling2 (Spelling2.view model) ]
 
                     Route.Context2 ->
                         [ Html.Styled.map Context2 (Context2.view model) ]
