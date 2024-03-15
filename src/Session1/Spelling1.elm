@@ -90,7 +90,7 @@ init group model =
 viewActivity : Activity.Data Trial State -> Trial -> List Int -> Html Msg
 viewActivity data currentTrial optionsOrder =
     div
-        [ class "multiple-choice-question" ]
+        [ class "question" ]
         [ div [] [ viewAudioButton data.state.remainingListenings currentTrial.audio.url ]
         , div
             [ class "spelling1 center-items justify-center", disabled data.feedback ]

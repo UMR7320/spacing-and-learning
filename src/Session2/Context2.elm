@@ -3,9 +3,9 @@ module Session2.Context2 exposing (..)
 import Activity exposing (Activity)
 import ActivityInfo exposing (ActivityInfo, Session(..))
 import Data
-import Delay
-import Html.Styled as Html exposing (Html, div, text)
-import Html.Styled.Attributes exposing (class)
+import Html.Styled as Html exposing (Html, div, input, label, p, text)
+import Html.Styled.Attributes exposing (class, classList, value)
+import Html.Styled.Events exposing (onInput)
 import Http
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (..)
@@ -36,17 +36,11 @@ type alias Ntimes =
 
 type alias Trial =
     { uid : String
-    , writtenWord : String
-    , audioSentence : Data.AudioFile
-
-    -- , context : String
     , target : String
-    , distractor1 : String
-    , distractor2 : String
-    , distractor3 : String
+    , writtenWord : String -- can be different from target (go <-> went)
+    , audioSentence : Data.AudioFile
+    , textToComplete : String
     , feedback : String
-    , speakerName : String
-    , responseType : ResponseType
     , isTraining : Bool
     }
 
@@ -58,7 +52,7 @@ type ResponseType
 
 type alias State =
     { userAnswer : String
-    , step : Step
+    , remainingListens : Int
     }
 
 
@@ -70,29 +64,23 @@ type alias Model superModel =
     { superModel
         | context2 : Context2
         , user : Maybe String
-        , optionsOrder : List Int
     }
 
 
 initState : State
 initState =
-    State "" (Listening 3)
+    State "" 3
 
 
 defaultTrial : Trial
 defaultTrial =
     Trial
-        "defaultTrial"
-        "defaultTrial"
+        "defaultTrialUuuid"
+        "defaultTrialTarget"
+        "defaultTrialWrittenWord"
         (Data.AudioFile "" "")
-        -- "defautcontext"
-        "defaulttarget"
-        "defautdis1"
-        "defaultdis2"
-        "defaultdis3"
-        "defaultfeedback"
-        "defaultName"
-        Speech
+        "defaultTextToComplete"
+        "defaultFeedback"
         False
 
 
@@ -135,80 +123,59 @@ view model =
             div [] [ View.instructions data.infos UserClickedStartTraining ]
 
         Activity.Running Activity.Training data ->
-            viewTrialOrEnd model.optionsOrder data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
+            viewTrialOrEnd data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
         Activity.Running Activity.Main data ->
-            viewTrialOrEnd model.optionsOrder data (View.end data.infos.end UserClickedSaveData (Just "../post-tests/cw?session=S2"))
+            viewTrialOrEnd data (View.end data.infos.end UserClickedSaveData (Just "../post-tests/cw?session=S2"))
 
 
-viewTrialOrEnd : List Int -> Activity.Data Trial State -> Html Msg -> Html Msg
-viewTrialOrEnd optionsOrder data endView =
+viewTrialOrEnd : Activity.Data Trial State -> Html Msg -> Html Msg
+viewTrialOrEnd data endView =
     case data.current of
         Just trial ->
-            viewTrial optionsOrder data trial
+            viewTrial data trial
 
         Nothing ->
             endView
 
 
-viewTrial : List Int -> Activity.Data Trial State -> Trial -> Html Msg
-viewTrial optionsOrder { state, feedback } trial =
-    case state.step of
-        Listening nTimes ->
-            div []
-                [ div [ class "context-understanding-2" ]
-                    -- [ div [ class "p-4 bg-gray-200 rounded-lg context" ] [ View.fromMarkdown trial.context ]
-                    [ div [ class "with-thought-bubble" ]
-                        [ div [ class "avatar-with-name" ]
-                            [ if trial.responseType == Speech then
-                                div [ class "text-4xl" ] [ text "😐" ]
+viewTrial : Activity.Data Trial State -> Trial -> Html Msg
+viewTrial { state, feedback } trial =
+    div [ class "context2" ]
+        [ div []
+            [ div [ class "audio-button" ]
+                [ if state.remainingListens == 3 then
+                    View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
 
-                              else
-                                div [ class "text-4xl" ] [ text "🤔" ]
-                            , text (trial.speakerName ++ " ")
-                            ]
-                        , if trial.responseType == Speech then
-                            div [ class "speech-bubble" ] []
+                  else if state.remainingListens == 2 then
+                    View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
 
-                          else
-                            div [ class "thought-bubble" ] []
-                        ]
-                    , div []
-                        [ if nTimes == 3 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen"
+                  else if state.remainingListens == 1 then
+                    View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
 
-                          else if nTimes == 2 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen again?"
-
-                          else if nTimes == 1 then
-                            View.audioButton UserClickedAudio trial.audioSentence.url "Listen for the last time?"
-
-                          else
-                            text ""
-                        ]
+                  else
+                    text ""
+                ]
+            , div [] [ fillInTheBlanks trial.textToComplete trial.target state.userAnswer ]
+            , div
+                [ class "context2-input" ]
+                [ label [] [ text "Your answer" ]
+                , input
+                    [ onInput UserAnswerChanged
+                    , value state.userAnswer
                     ]
-                , View.button
-                    { isDisabled =
-                        nTimes == 3
-                    , message = UserClickedStartAnswering
-                    , txt = "Now choose the best description"
-                    }
-                ]
-
-        Answering ->
-            div [ class "flex flex-col items-center" ]
-                [ div
                     []
-                    [ View.shuffledOptions state feedback UserClickedRadioButton trial optionsOrder ]
-                , View.genericSingleChoiceFeedback
-                    { isVisible = feedback
-                    , userAnswer = state.userAnswer
-                    , target = trial.target
-                    , feedback_Correct = ( trial.feedback, [] )
-                    , feedback_Incorrect = ( trial.feedback, [] )
-                    , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
-                    }
                 ]
+            ]
+        , View.genericSingleChoiceFeedback
+            { isVisible = feedback
+            , userAnswer = state.userAnswer
+            , target = trial.target
+            , feedback_Correct = ( trial.feedback, [] )
+            , feedback_Incorrect = ( trial.feedback, [] )
+            , button = View.navigationButton UserClickedToggleFeedback UserClickedNextTrial feedback state.userAnswer
+            }
+        ]
 
 
 audioButton : Trial -> Int -> Html Msg
@@ -228,6 +195,52 @@ audioButton trial nTimes =
         ]
 
 
+fillInTheBlanks : String -> String -> String -> Html Msg
+fillInTheBlanks textWithBlank target answer =
+    let
+        ( pre, post ) =
+            case String.split "/" textWithBlank of
+                x :: y :: _ ->
+                    ( x, y )
+
+                [ x ] ->
+                    ( x, "" )
+
+                [] ->
+                    ( "", "" )
+
+        options =
+            [ "", "a" ++ target, answer ] -- ++ "a" is to add some padding
+
+        viewOption option =
+            div
+                [ classList
+                    [ ( "visible", option == answer )
+                    , ( "empty", String.isEmpty option )
+                    ]
+                ]
+                [ text option ]
+    in
+    p
+        [ class "bg-gray-200 rounded-sm py-4 px-6 fill-in-the-blanks" ]
+        [ div [] [ text pre ]
+        , div
+            [ class "blanks"
+            , classList
+                [ ( "right-aligned"
+                  , post
+                        |> String.toList
+                        |> List.head
+                        |> Maybe.map ((/=) ' ')
+                        |> Maybe.withDefault False
+                  )
+                ]
+            ]
+            ([ "", "???" ] ++ options |> List.map viewOption)
+        , div [] [ text post ]
+        ]
+
+
 
 -- UPDATE
 
@@ -238,13 +251,11 @@ type Msg
     | UserClickedNextTrial
     | NextTrial Time.Posix
     | UserClickedToggleFeedback
-    | UserClickedRadioButton String
+    | UserAnswerChanged String
     | UserClickedStartMain (List Trial) ActivityInfo
     | UserClickedSaveData
     | UserClickedAudio String
-    | RuntimeShuffledOptionsOrder (List Int)
     | UserClickedStartTraining
-    | UserClickedStartAnswering
     | HistoryWasSaved (Result Http.Error String)
 
 
@@ -284,16 +295,13 @@ update msg model =
                     { model | context2 = Activity.next timestamp initState model.context2 }
             in
             ( newModel
-            , Cmd.batch
-                [ Random.generate RuntimeShuffledOptionsOrder (Random.List.shuffle model.optionsOrder)
-                , saveData newModel
-                ]
+            , saveData newModel
             )
 
         UserClickedToggleFeedback ->
             ( { model | context2 = Activity.toggle model.context2 }, Cmd.none )
 
-        UserClickedRadioButton newChoice ->
+        UserAnswerChanged newChoice ->
             ( { model | context2 = Activity.update { prevState | userAnswer = newChoice } model.context2 }, Cmd.none )
 
         UserClickedStartMain _ _ ->
@@ -307,22 +315,16 @@ update msg model =
             ( model, Cmd.none )
 
         UserClickedAudio url ->
-            ( { model | context2 = Activity.update { prevState | step = decrement prevState.step } model.context2 }
-            , if prevState.step /= Listening 0 then
+            ( { model | context2 = Activity.update { prevState | remainingListens = prevState.remainingListens - 1 } model.context2 }
+            , if prevState.remainingListens /= 0 then
                 Ports.playAudio url
 
               else
-                Delay.after 0 UserClickedStartAnswering
+                Cmd.none
             )
-
-        RuntimeShuffledOptionsOrder ls ->
-            ( { model | optionsOrder = ls }, Cmd.none )
 
         UserClickedStartTraining ->
             ( { model | context2 = Activity.startTraining model.context2 }, Cmd.none )
-
-        UserClickedStartAnswering ->
-            ( { model | context2 = Activity.update { prevState | step = Answering } model.context2 }, Cmd.none )
 
 
 decrement : Step -> Step
@@ -358,26 +360,11 @@ decodeTrials =
         decoder =
             Decode.succeed Trial
                 |> required "UID" string
-                |> required "Word_Text" string
-                |> optional "Audio_Understanding" Data.decodeAudioFiles (Data.AudioFile "" "")
-                -- |> required "CU_Lvl1_Context" string
                 |> required "CU_Lvl2_target" string
-                |> required "CU_Lvl2_Distractor_1" string
-                |> required "CU_Lvl2_Distractor_2" string
-                |> required "CU_Lvl2_Distractor_3" string
+                |> required "Word_Text" string
+                |> required "Audio_Understanding" Data.decodeAudioFiles
+                |> required "Text_To_Complete_2" string
                 |> required "Feedback_CU_Lvl2" string
-                |> required "SpeakerName" string
-                |> custom
-                    (Decode.field "ResponseType" string
-                        |> Decode.andThen
-                            (\response ->
-                                if response == "Speech" then
-                                    Decode.succeed Speech
-
-                                else
-                                    Decode.succeed Thought
-                            )
-                    )
                 |> optional "isTraining" Decode.bool False
     in
     Data.decodeRecords decoder

@@ -222,18 +222,23 @@ input {
   }
 }
 
-.multiple-choice-question {
+.instructions {
+  min-width: 40ch;
+}
+
+.question {
   display: grid;
   grid-template-areas: "heading"
                        "question"
                        "feedback";
 
-  grid-template-rows: 5rem auto 10rem;
+  grid-template-rows: auto auto 10rem;
   justify-items: center;
 }
 
-.multiple-choice-question > :first-child{
-  align-self: top;
+.question > :first-child{
+  align-self: start;
+  margin-bottom: 2rem;
 }
 
 @media (min-width: 70ch) {
@@ -296,6 +301,45 @@ input {
 }
 .blanks > .empty {
   border-bottom: 1.5px solid;
+}
+
+.context2 {
+  display: grid;
+  grid-template-rows: auto 10rem;
+  justify-items: center;
+}
+
+.question > :first-child{
+  align-self: start;
+  margin-bottom: 2rem;
+}
+
+.context2 > :first-child {
+  display: grid;
+  justify-content: center;
+}
+
+.context2 .audio-button {
+  justify-self: center;
+  margin-bottom: 2rem;
+}
+
+.context2-input {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.context2-input label {
+  font-weight: bold;
+}
+
+.context2-input input {
+  margin-top: 0;
+  flex-grow: 1;
 }
 
 .endInfo > div {
@@ -453,28 +497,6 @@ input {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-top: 8px solid white;
-}
-
-@media (min-width: 40ch) {
-  .context-understanding-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 2rem 4rem;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-}
-
-@media (max-width: 39ch) {
-  .context-understanding-2 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-.context-understanding-2 .context {
-  grid-column: 1 / 3;
 }
 
 @media (min-width: 40ch) {

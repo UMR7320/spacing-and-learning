@@ -122,7 +122,7 @@ view model =
 viewActivity : Model a -> Trial -> Activity.Data Trial State -> Html Msg
 viewActivity model trial data =
     div
-        [ class "multiple-choice-question" ]
+        [ class "question" ]
         [ div [] [ paragraphWithInput trial data.state.userAnswer ]
         , View.shuffledOptions data.state data.feedback UserClickedRadioButton trial model.optionsOrder
         , View.genericSingleChoiceFeedback

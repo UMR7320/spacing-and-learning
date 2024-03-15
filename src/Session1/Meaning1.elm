@@ -117,7 +117,7 @@ view model =
 viewTrial : Model a -> Trial -> Activity.Data Trial State -> Html Msg
 viewTrial model trial data =
     div
-        [ class "multiple-choice-question" ]
+        [ class "question" ]
         [ div [ class "text-3xl font-bold italic" ] [ text ("to " ++ trial.writtenWord) ]
         , View.shuffledOptions
                 data.state

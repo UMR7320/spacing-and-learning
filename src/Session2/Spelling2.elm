@@ -144,7 +144,7 @@ viewTrial model trial data =
                 |> List.indexedMap (itemView model.dnd)
                 |> Keyed.node "div" (containerStyles (List.length scrambledLetters))
     in
-    div [ class "spelling2 multiple-choice-question" ] -- this is not a MCQ but the layout still works...
+    div [ class "spelling2 question" ]
         [ div [] [ viewAudioButton data.state.remainingListenings trial.audioWord.url ]
         , if data.state.step == ListeningFirstTime then
             div [] []
