@@ -126,7 +126,7 @@ view model =
             viewTrialOrEnd data (View.introToMain (UserClickedStartMain data.mainTrials data.infos))
 
         Activity.Running Activity.Main data ->
-            viewTrialOrEnd data (View.end data.infos.end UserClickedSaveData (Just "../post-tests/cw?session=S2"))
+            viewTrialOrEnd data (View.end data.infos.end UserClickedSaveData (Just "wordcloud"))
 
 
 viewTrialOrEnd : Activity.Data Trial State -> Html Msg -> Html Msg
@@ -416,10 +416,11 @@ historyEncoder _ history =
 
 
 historyItemEncoder : ( Trial, State, Time.Posix ) -> Encode.Value
-historyItemEncoder ( { uid, writtenWord }, { userAnswer }, timestamp ) =
+historyItemEncoder ( { uid, writtenWord, target }, { userAnswer }, timestamp ) =
     Encode.object
         [ ( "trialUid", Encode.string uid )
         , ( "writtenWord", Encode.string writtenWord )
+        , ( "target", Encode.string target )
         , ( "answer", Encode.string userAnswer )
         , ( "answeredAt", Encode.int (Time.posixToMillis timestamp) )
         ]

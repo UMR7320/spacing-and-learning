@@ -1,3 +1,20 @@
 {
-	"siteId": "cc6153f9-cb7a-4694-ab79-902ae76b3ca4"
+	"siteId": "cc6153f9-cb7a-4694-ab79-902ae76b3ca4",
+	"geolocation": {
+		"data": {
+			"city": "Marseille",
+			"country": {
+				"code": "FR",
+				"name": "France"
+			},
+			"subdivision": {
+				"code": "PAC",
+				"name": "Provence-Alpes-Côte d'Azur"
+			},
+			"timezone": "Europe/Paris",
+			"latitude": 43.2951,
+			"longitude": 5.3861
+		},
+		"timestamp": 1710519435530
+	}
 }
