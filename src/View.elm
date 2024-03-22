@@ -195,29 +195,18 @@ viewFeedback ( feedback, args ) =
 genericNeutralFeedback : { isVisible : Bool, feedback_Correct : ( String, List String ), button : Html msg } -> Html msg
 genericNeutralFeedback ({ feedback_Correct } as data) =
     div
-        [ class
-            ("w-full rounded-md "
-                ++ (if data.isVisible then
-                        "bg-indigo-800"
-
-                    else if data.isVisible == False then
-                        ""
-
-                    else
-                        ""
-                   )
-            )
-        ]
+        []
         [ if data.isVisible then
-            p
-                [ class
-                    "font-medium p-4 w-full text-white"
+            div
+                [ class "rounded-sm px-6 py-4 mt-2 mb-4 bg-indigo-200" ]
+                [ p
+                    []
+                    [ fromMarkdown (String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct)) ]
                 ]
-                [ fromMarkdown (String.Interpolate.interpolate (Tuple.first feedback_Correct) (Tuple.second feedback_Correct)) ]
 
           else
-            div [] []
-        , div [ class "p-4" ] [ data.button ]
+            text ""
+        , data.button
         ]
 
 
