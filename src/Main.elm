@@ -311,7 +311,7 @@ body model =
             Route.Session3 _ activity ->
                 case activity of
                     Route.TopSession3 ->
-                        viewSessionInstructions model.sessions "session3" "synonym"
+                        viewSessionInstructions model.sessions "session3" "session3/meaning"
 
                     Route.Meaning3 ->
                         List.map (Html.Styled.map Meaning3) <| Meaning3.viewActivity model.meaning3
@@ -359,7 +359,7 @@ body model =
                                         []
 
                                     Route.VKS page ->
-                                        List.map (Html.Styled.map VKS) (VKS.view model.vks page)
+                                        List.map (Html.Styled.map VKS) (VKS.view model page)
 
                                     Route.Acceptability _ ->
                                         List.map (Html.Styled.map Acceptability) (Acceptability.view model.acceptability)
@@ -612,10 +612,13 @@ changeRouteTo route model =
         Route.NotFound ->
             ( newModel, Cmd.none )
 
-        Route.Pretest userId pretestRoute _ ->
+        Route.Pretest userId pretestRoute version ->
             let
                 updatedModel =
-                    { newModel | user = Just userId }
+                    { newModel
+                        | user = Just userId
+                        , version = version
+                    }
             in
             case ( pretestRoute, updatedModel.userCanParticipate ) of
                 ( _, RemoteData.NotAsked ) ->

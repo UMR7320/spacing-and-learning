@@ -12,15 +12,13 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode
 import Ports
 import Random
-import Random.List
+import Random.List exposing (shuffle)
+import RemoteData exposing (RemoteData)
 import Route exposing (Session3Activity(..))
 import Task
 import Time
-import View
 import Url.Builder
-import RemoteData
-import RemoteData exposing (RemoteData)
-import Random.List exposing (shuffle)
+import View
 
 
 
@@ -121,7 +119,7 @@ view : Model a -> Html Msg
 view model =
     case model.context3 of
         Activity.NotStarted ->
-            div [] [ text "Activity is not started yet." ]
+            View.loading
 
         Activity.Loading _ _ ->
             View.loading
@@ -170,12 +168,9 @@ view model =
 viewStep : String -> Int -> Trial -> Bool -> State -> Html Msg
 viewStep context nTimes trial feedback state =
     div [ class "flex flex-col items-center context-understanding-3 flow" ]
-        [ div [ class "first-row" ]
-            [ div
-                [ class "p-4 bg-gray-200 rounded-lg context" ]
-                [ View.fromMarkdown context ]
-            , div [] [ viewLimitedTimesAudioButton nTimes trial ]
-            ]
+        [ div
+            [ class "first-row" ]
+            [ div [] [ viewLimitedTimesAudioButton nTimes trial ] ]
         , div
             []
             [ div [ class "context-understanding-3--grid" ]
@@ -365,6 +360,7 @@ decrement step =
 
 -- HTTP
 
+
 getRecords : String -> Cmd Msg
 getRecords group =
     Http.get
@@ -376,7 +372,6 @@ getRecords group =
                 ]
         , expect = Http.expectJson (RemoteData.fromResult >> GotTrials) decodeTrials
         }
-
 
 
 decodeTrials : Decoder (List Trial)

@@ -45,14 +45,14 @@ viewPretest activity model =
 
         PostTest ->
             div
-                [ class "progress-bar", attribute "style" "--count: 7" ]
+                [ class "progress-bar", attribute "style" "--count: 5" ]
                 [ div [] [ text "Meaning" ]
                 , div [] [ text "Spelling" ]
                 , div [] [ text "Context" ]
                 , div [] [ text "How was it?" ]
-                , viewItem "LexLearn verbs" (isVKS activity) model.vks True
-                , viewItem "Reading test" SPR model.spr activity
-                , viewItem "Listening test" (isAcceptability activity) model.acceptability True
+                , viewItem "Quizz" (isVKS activity) model.vks True
+                -- , viewItem "Reading test" SPR model.spr activity
+                -- , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
 
         PostTestDiff ->
@@ -100,14 +100,12 @@ viewSession2 activity model =
 
 viewSession3 activity model =
     div
-        [ class "progress-bar", attribute "style" "--count: 7" ]
+        [ class "progress-bar", attribute "style" "--count: 5" ]
         [ viewItem "Meaning" Meaning3 model.meaning3 activity
         , viewItem "Spelling" Spelling3 model.spelling3 activity
         , viewItem "Context" Context3 model.context3 activity
         , div [ classList [ ( "active", activity == WordCloud3 ) ] ] [ text "How was it?" ]
-        , div [] [ text "LexLearn verbs" ]
-        , div [] [ text "Reading test" ]
-        , div [] [ text "Listening test" ]
+        , div [] [ text "Quizz" ]
         ]
 
 

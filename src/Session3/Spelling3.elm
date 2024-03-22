@@ -97,7 +97,7 @@ view : Activity Trial State -> Html Msg
 view exp =
     case exp of
         Activity.NotStarted ->
-            div [] [ text "experiment did not start yet" ]
+            View.loading
 
         Activity.Running Activity.Instructions data ->
             div [] [ View.instructions data.infos UserClickedStartTraining ]

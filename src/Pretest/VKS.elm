@@ -11,15 +11,15 @@ import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
-import Pretest.Version exposing (Version(..))
+import Pretest.Version as Version exposing (Version(..))
 import Random
 import Random.List exposing (shuffle)
 import RemoteData exposing (RemoteData)
 import Route exposing (VKSRoute(..))
 import Task
 import Time
-import View
 import Url.Builder
+import View
 
 
 
@@ -65,7 +65,7 @@ type alias VKS =
 toActivity : List ActivityInfo -> List Trial -> Version -> Activity Trial Answer
 toActivity infos trials version =
     Activity.startIntro
-        (ActivityInfo.activityInfo infos (Pretest.Version.toSession version) "LexLearn verbs")
+        (ActivityInfo.activityInfo infos (Version.toSession version) "LexLearn verbs")
         []
         trials
         emptyAnswer
@@ -93,11 +93,11 @@ infoLoaded infos =
 -- VIEW
 
 
-view : VKS -> VKSRoute -> List (Html Msg)
-view vks page =
+view : Model a -> VKSRoute -> List (Html Msg)
+view model page =
     case page of
         VKSActivity ->
-            viewActivity vks
+            viewActivity model.vks model.version
 
         VKSVideo ->
             [ div
@@ -122,7 +122,7 @@ view vks page =
                 [ div []
                     [ div [ class "pb-8" ] [ text "Commençons par quelques exemples" ]
                     , a
-                        [ href "../vks"
+                        [ href ("../vks?version=" ++ Version.toString model.version)
                         , class "button"
                         ]
                         [ text "Continue" ]
@@ -131,8 +131,8 @@ view vks page =
             ]
 
 
-viewActivity : VKS -> List (Html Msg)
-viewActivity activity =
+viewActivity : VKS -> Version -> List (Html Msg)
+viewActivity activity version =
     case activity of
         Activity.Running Activity.Training data ->
             data.current
@@ -151,10 +151,10 @@ viewActivity activity =
             [ View.loading ]
 
         Activity.NotStarted ->
-            [ text "C'est tout bon!" ]
+            [ View.loading ]
 
         Activity.Running Activity.Instructions data ->
-            [ View.unsafeInstructionsWithLink data.infos "vks/video" ]
+            [ View.unsafeInstructionsWithLink data.infos ("vks/video?version=" ++ Version.toString version) ]
 
 
 viewTrial : Activity.Data Trial Answer -> Trial -> List (Html Msg)
@@ -327,7 +327,7 @@ update msg model =
 
         UserClickedStartMain ->
             ( { model | vks = Activity.startMain model.vks emptyAnswer }
-            , pushUrl model.key "../vks"
+            , pushUrl model.key ( "../vks?version=" ++ Version.toString model.version)
             )
 
         UserUpdatedField fieldId new ->

@@ -122,7 +122,7 @@ viewActivity experiment =
             ]
 
         Activity.NotStarted ->
-            [ text "I'm not started yet." ]
+            [ View.loading ]
 
         Activity.Loading _ _ ->
             [ View.loading ]

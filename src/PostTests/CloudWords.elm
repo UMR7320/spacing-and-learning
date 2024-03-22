@@ -3,7 +3,7 @@ module PostTests.CloudWords exposing (..)
 import Browser.Navigation
 import Data
 import Dict exposing (Dict)
-import Html.Styled exposing (code, div, h1, p, pre, span, text, wbr)
+import Html.Styled exposing (code, div, h1, p, pre, span, text)
 import Html.Styled.Attributes exposing (class)
 import Html.Styled.Events
 import Http
@@ -13,6 +13,7 @@ import Ports
 import Session exposing (Session(..))
 import Url.Builder
 import View
+import Browser.Navigation exposing (pushUrl)
 
 
 
@@ -228,7 +229,7 @@ update msg model =
         ServerRespondedWithUpdatedUser session _ ->
             if session == "S3" then
                 ( model
-                , Browser.Navigation.load "../pretest/vks?version=post"
+                , pushUrl model.key "../pretest/vks?version=post"
                 )
 
             else
