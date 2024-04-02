@@ -11,7 +11,7 @@ module Route exposing
     , fromUrl
     )
 
-import Pretest.Version exposing (Version)
+import Pretest.Version exposing (Version(..))
 import Url
 import Url.Parser as Parser
     exposing
@@ -111,6 +111,15 @@ parser =
         , map TermsAndConditions (s "terms-and-conditions")
         , map CalendarUpdated (s "calendar-updated")
         , map Pretest (s "user" </> string </> s "pretest" </> pretestRouteParser)
+        , map (\userId ->\route -> Pretest userId route PostTestDiff)
+            (s "user"
+                </> string
+                </> s "post-test-diff"
+                </> oneOf
+                        [ map TopPretest top
+                        , map VKS vksParser
+                        ]
+            )
         , map Session1
             (s "user"
                 </> string
@@ -157,6 +166,16 @@ parser =
         ]
 
 
+vksParser : Parser (VKSRoute -> a) a
+vksParser =
+    s "vks"
+        </> oneOf
+                [ map VKSActivity top
+                , map VKSVideo (s "video")
+                , map VKSTrainingInstructions (s "instructions")
+                ]
+
+
 pretestRouteParser : Parser (PretestRoute -> Version -> b) b
 pretestRouteParser =
     oneOf
@@ -165,14 +184,7 @@ pretestRouteParser =
         , map GeneralInfos (s "informations")
         , map EmailSent (s "email-sent")
         , map SentenceCompletion (s "sentence-completion")
-        , map VKS
-            (s "vks"
-                </> oneOf
-                        [ map VKSActivity top
-                        , map VKSVideo (s "video")
-                        , map VKSTrainingInstructions (s "instructions")
-                        ]
-            )
+        , map VKS vksParser
         , map YesNo
             (s "yes-no"
                 </> oneOf

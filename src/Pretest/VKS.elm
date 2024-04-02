@@ -80,11 +80,19 @@ emptyAnswer =
     }
 
 
-infoLoaded : List ActivityInfo -> VKS -> VKS
-infoLoaded infos =
+infoLoaded : List ActivityInfo -> Version -> VKS -> VKS
+infoLoaded infos version =
+    let
+        activityName =
+          if version == PostTestDiff then
+            -- this name is hardcoded in Airtable
+            "VKS post diff"
+          else
+            "VKS"
+    in
     Activity.infoLoaded
         Pretest
-        "VKS"
+        activityName
         infos
         emptyAnswer
 

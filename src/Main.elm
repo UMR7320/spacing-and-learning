@@ -325,7 +325,7 @@ body model =
                     Route.WordCloud3 ->
                         List.map (Html.Styled.map WordCloud) (CloudWords.view "S3" model)
 
-            Route.Pretest _ subPage _ ->
+            Route.Pretest _ subPage version ->
                 case model.userCanParticipate of
                     RemoteData.NotAsked ->
                         [ View.loading ]
@@ -344,7 +344,16 @@ body model =
                             Yes _ ->
                                 case subPage of
                                     Route.TopPretest ->
-                                        viewSessionInstructions model.sessions "pretest" "pretest/yes-no"
+                                        let
+                                            ( sessionName, firstActivityLink ) =
+                                                if version == PostTestDiff then
+                                                    -- this name is hardcoded in Airtable
+                                                    ( "Post-test-diff", "post-test-diff/vks" )
+
+                                                else
+                                                    ( "pretest", "pretest/yes-no" )
+                                        in
+                                        viewSessionInstructions model.sessions sessionName firstActivityLink
 
                                     Route.EmailSent ->
                                         [ text "Un email a été envoyé. Veuillez cliquer sur le lien pour continuer l'expérience." ]
@@ -946,7 +955,7 @@ update msg model =
                 , spr = SPR.infoLoaded infos model.version model.spr
                 , sentenceCompletion = SentenceCompletion.infoLoaded infos model.version model.sentenceCompletion
                 , yesNo = YesNo.infoLoaded infos model.yesNo
-                , vks = VKS.infoLoaded infos model.vks
+                , vks = VKS.infoLoaded infos model.version model.vks
               }
             , Cmd.none
             )
