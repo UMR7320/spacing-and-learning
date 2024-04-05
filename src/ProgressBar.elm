@@ -57,11 +57,8 @@ viewPretest activity model =
 
         PostTestDiff ->
             div
-                [ class "progress-bar", attribute "style" "--count: 4" ]
+                [ class "progress-bar", attribute "style" "--count: 1" ]
                 [ viewItem "LexLearn verbs" (isVKS activity) model.vks True
-                , viewItem "Reading test" SPR model.spr activity
-                , viewItem "Writing test" SentenceCompletion model.sentenceCompletion activity
-                , viewItem "Listening test" (isAcceptability activity) model.acceptability True
                 ]
 
         Surprise ->
