@@ -10,6 +10,12 @@ exports.handler = async event => {
     const users = await base("users").select({
       filterByFormula: `{Connection_Code} = "${code}"`
     }).firstPage();
+    const calendarRecords = await base("calendar").select().all()
+    const calendar = calendarRecords.map(({ fields }) => ({
+      group: fields.Group_Name[0],
+      session: fields.Session_Name[0].toLowerCase(),
+      date: fields.Date,
+    }));
 
     if (users.length === 0) {
       return {
@@ -24,16 +30,15 @@ exports.handler = async event => {
       }
     }
     const user = users[0];
-    const group = user.fields.Group;
+    const group = user.fields.Group_Name[0];
     let now = DateTime.now().setZone("Europe/Paris");
     // let users override the current date for testing
     const date = event.queryStringParameters.date;
     if (date) {
       now = DateTime.fromISO(date).setZone("Europe/Paris");
     }
-    console.log(now);
 
-    const session = selectSession(now, group);
+    const session = selectSession(calendar, now, group);
     if (!session) {
       return {
         statusCode: 200,
@@ -69,44 +74,12 @@ exports.handler = async event => {
   }
 };
 
-const calendar = {
-  "A-3": [
-    { date: "2024-02-23", session: "pretest" },
-    { date: "2024-03-18", session: "session1" },
-    { date: "2024-03-21", session: "session2" },
-    { date: "2024-03-25", session: "session3" },
-    { date: "2024-04-08", session: "post-test-diff" },
-  ],
-  "A-7": [
-    { date: "2024-02-23", session: "pretest" },
-    { date: "2024-03-11", session: "session1" },
-    { date: "2024-03-18", session: "session2" },
-    { date: "2024-03-25", session: "session3" },
-    { date: "2024-04-08", session: "post-test-diff" },
-  ],
-  "B-3": [
-    { date: "2024-02-19", session: "pretest" },
-    { date: "2024-03-18", session: "session1" },
-    { date: "2024-03-21", session: "session2" },
-    { date: "2024-03-25", session: "session3" },
-    { date: "2024-04-08", session: "post-test-diff" },
-  ],
-  "B-7": [
-    { date: "2024-02-19", session: "pretest" },
-    { date: "2024-03-11", session: "session1" },
-    { date: "2024-03-18", session: "session2" },
-    { date: "2024-03-25", session: "session3" },
-    { date: "2024-04-08", session: "post-test-diff" },
-  ],
-}
-
-const selectSession = (now, group) => {
-  match = calendar[group].find(session => {
+const selectSession = (calendar, now, group) => {
+  match = calendar.find(session => {
+    console.log(session, group);
     const date = DateTime.fromISO(session.date, { zone: "Europe/Paris" });
-    console.log(date);
-    return now.hasSame(date, 'day');
+    return now.hasSame(date, 'day') && session.group === group;
   });
-
 
   return match ? match.session : null;
 }

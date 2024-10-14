@@ -61,7 +61,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         userCanParticipate: true,
-        group: currentUser.get("Group").slice(0, 1) // transform A-3 into A
+        group: currentUser.get("Group_Name")[0].slice(0, 1) // transform A-3 into A
       }),
       headers: {
         "Content-Type": "application/json"
